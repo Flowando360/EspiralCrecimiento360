@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import type { RolUsuario } from '@/types/colaborador';
@@ -125,8 +126,8 @@ export function Sidebar({ rol, esSuperadmin }: { rol: RolUsuario; esSuperadmin?:
     <aside className="w-64 shrink-0 h-screen sticky top-0 bg-secundario flex flex-col">
       <div className="px-5 py-5 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-crecimiento flex items-center justify-center text-white font-display text-sm font-bold">
-            CC
+          <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center overflow-hidden shrink-0">
+            <Image src="/marca/EspiralIsotipo.png" alt="" width={32} height={32} className="h-7 w-7 object-contain" />
           </div>
           <div>
             <p className="font-display text-sm font-semibold leading-tight text-white">

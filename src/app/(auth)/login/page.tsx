@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Image from 'next/image';
 import { iniciarSesion } from './actions';
 
 export default function LoginPage() {
@@ -22,13 +23,15 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-marmol-50 px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-crecimiento text-white font-display text-xl font-bold mb-3">
-            CC
-          </div>
-          <h1 className="font-display text-xl font-semibold text-secundario">
-            Espiral de Crecimiento 360°
-          </h1>
-          <p className="text-sm text-marmol-500 mt-1">Flow, Nexus y Visión · by FlowAndo</p>
+          <Image
+            src="/marca/EspiralLogoCompleto.png"
+            alt="Espiral de Crecimiento 360°"
+            width={340}
+            height={143}
+            className="mx-auto h-auto w-full max-w-[280px]"
+            priority
+          />
+          <p className="text-sm text-marmol-500 mt-2">Flow, Nexus y Visión · by FlowAndo</p>
         </div>
 
         <form onSubmit={handleSubmit} className="card p-6 space-y-4">
