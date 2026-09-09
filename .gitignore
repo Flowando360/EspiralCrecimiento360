@@ -1,0 +1,58 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env
+.env*.local
+Claves.txt
+
+# proyecto no relacionado que quedó anidado por accidente
+/FormularioPedidos/
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# supabase
+supabase/.temp/
+
+# Guías del Flow reales de colaboradores — documento íntimo, nunca al repo
+# (público). Se usan una vez para cargar puntajes/notas y se descartan.
+docs/GuiaDelFlow_*.pdf
+
+# Capturas de referencia de apps de OTRAS empresas (con datos reales de sus
+# empleados) — solo insumo visual para diseño, nunca al repo público.
+docs/Captura de pantalla*.png
+
+.vercel
+.env*
+
+# Token personal de Supabase (nunca subir)
+.supabase-token
+
+# Captura suelta de otro proyecto, no subir
+Captura de pantalla*.png

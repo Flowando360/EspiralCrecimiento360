@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git fetch *)",
+      "Bash(npx tsc --noEmit *)",
+      "Bash(vercel ls *)",
+      "Bash(npm run typecheck *)",
+      "Bash(tasklist *)"
+    ]
+  }
+}

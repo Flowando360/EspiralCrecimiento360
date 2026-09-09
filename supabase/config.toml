@@ -1,0 +1,26 @@
+# Configuración local de Supabase CLI (para `supabase start` / desarrollo local)
+project_id = "espiral-crecimiento-360"
+
+[api]
+enabled = true
+port = 54321
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 3600
+enable_signup = false
+# Signup deshabilitado a propósito: los usuarios se crean por invitación de
+# Talento Humano (panel de Administración), no por auto-registro.
+
+[storage]
+enabled = true
+file_size_limit = "10MiB"

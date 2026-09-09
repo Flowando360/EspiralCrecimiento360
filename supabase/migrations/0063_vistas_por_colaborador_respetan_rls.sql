@@ -1,0 +1,51 @@
+-- ============================================================================
+-- 0063_vistas_por_colaborador_respetan_rls.sql
+--
+-- Hallazgo (revisando qué puede ver "gerencia" en /circulo-crecimiento/
+-- dimensiones): las vistas creadas con CREATE VIEW normal corren, por
+-- defecto, con los privilegios del DUEÑO de la vista (el rol de las
+-- migraciones), no del usuario que consulta. Como ese dueño es también
+-- dueño de las tablas base y las tablas NO tienen FORCE ROW LEVEL SECURITY,
+-- el dueño queda exento de sus propias policies — así que cualquier vista
+-- que envuelve una tabla con RLS "por colaborador" (sin agregar) termina
+-- devolviendo TODAS las filas a CUALQUIER usuario autenticado, sin importar
+-- su rol ni su equipo. Esto ya se había detectado una vez para Clima
+-- Organizacional (ver 0048) pero no se había revisado el resto de vistas.
+--
+-- Confirmado con una cuenta de prueba real (rol gerencia, creada y borrada
+-- en la misma verificación):
+--   - v_ser_promedio: devolvía el promedio de Ser de LOS 12 colaboradores
+--     con datos, a pesar de que ser_puntajes/guia_del_flow NO tienen
+--     ninguna policy para gerencia (0 filas si se consulta la tabla
+--     directamente) y de que el diseño de privacidad de Ser (0051) es
+--     explícito: gerencia no debe ver ni el detalle ni el promedio.
+--   - v_alertas_proximas: no tiene NINGÚN filtro de equipo/rol en su
+--     definición ni en las pantallas que la usan (dashboard de inicio) —
+--     confía por completo en RLS de "alertas". Con esta fuga, cualquier
+--     colaborador o líder ve las alertas (vencimientos de SG-SST,
+--     contratos, etc.) de TODA la empresa en su propio inicio, no solo las
+--     suyas o las de su equipo.
+--   - v_saber_cumplimiento: hoy no filtra nada porque verificaciones_saber
+--     está vacía (0 filas en toda la base), pero tiene la misma fuga
+--     latente en cuanto se empiece a usar.
+--   - v_alineacion_talento_rol: mismo patrón (por colaborador, sin
+--     agregar); hoy solo se usa dentro de v_indicadores_empresa, pero
+--     PostgREST la expone igual como endpoint propio.
+--
+-- Se corrige con `security_invoker = on` (Postgres 15+): la vista pasa a
+-- evaluar los permisos con el rol real que consulta, así que hereda la
+-- policy correcta de la tabla base en cada caso.
+--
+-- Lo que NO se toca a propósito, porque el bypass es una decisión de
+-- diseño ya documentada, no un descuido: v_indicadores_empresa,
+-- v_indicadores_equipo, v_clima_ronda_resumen, v_clima_equipo_resumen y
+-- v_360_detalle_evaluador. Todas esas agregan (nunca exponen una fila por
+-- colaborador identificable) y necesitan leer más filas de las que RLS le
+-- daría a gerencia/líder directamente para poder calcular el agregado —
+-- exactamente el mismo razonamiento que ya se dejó por escrito en 0048.
+-- ============================================================================
+
+alter view v_ser_promedio set (security_invoker = on);
+alter view v_saber_cumplimiento set (security_invoker = on);
+alter view v_alertas_proximas set (security_invoker = on);
+alter view v_alineacion_talento_rol set (security_invoker = on);

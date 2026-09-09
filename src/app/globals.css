@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Sora', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  @apply bg-marmol-50 text-marmol-900 font-body antialiased;
+}
+
+.card {
+  @apply bg-white border border-marmol-200 rounded-xl shadow-sm;
+}
+
+.badge-alto { @apply bg-green-100 text-alto border border-green-200; }
+.badge-medio { @apply bg-amber-100 text-medio border border-amber-200; }
+.badge-bajo { @apply bg-red-100 text-bajo border border-red-200; }
+
+/* Colores parametrizables de columnas de tablero (etapas_proceso.color) */
+.badge-flow { @apply bg-flow-50 text-flow-700 border border-flow-200; }
+.badge-saber { @apply bg-teal-50 text-saber border border-teal-200; }
+.badge-hacer { @apply bg-orange-50 text-hacer border border-orange-200; }
+.badge-deber { @apply bg-blue-50 text-deber border border-blue-200; }
+.badge-marmol { @apply bg-marmol-100 text-marmol-600 border border-marmol-200; }
