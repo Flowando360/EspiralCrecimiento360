@@ -130,10 +130,10 @@ export function Sidebar({ rol, esSuperadmin }: { rol: RolUsuario; esSuperadmin?:
             <Image src="/marca/EspiralIsotipo.png" alt="" width={32} height={32} className="h-7 w-7 object-contain" />
           </div>
           <div>
-            <p className="font-display text-sm font-semibold leading-tight text-white">
+            <p className="font-display text-sm font-semibold leading-tight text-acento">
               Espiral de Crecimiento
             </p>
-            <p className="text-xs text-white/50 leading-tight">Flow, Nexus y Visión</p>
+            <p className="text-xs text-acento/70 leading-tight">Flow, Nexus y Visión</p>
           </div>
         </div>
       </div>
@@ -145,7 +145,7 @@ export function Sidebar({ rol, esSuperadmin }: { rol: RolUsuario; esSuperadmin?:
           return (
             <div key={gi}>
               {grupo.titulo && (
-                <p className="px-2 mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-white/40">
+                <p className="px-2 mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-acento/60">
                   {grupo.titulo}
                 </p>
               )}
@@ -160,8 +160,8 @@ export function Sidebar({ rol, esSuperadmin }: { rol: RolUsuario; esSuperadmin?:
                       className={cn(
                         'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition',
                         activo
-                          ? 'bg-flow-500/25 text-white font-medium'
-                          : 'text-white/70 hover:bg-white/10 hover:text-white'
+                          ? 'bg-flow-500/25 text-acento font-medium'
+                          : 'text-acento/70 hover:bg-white/10 hover:text-acento'
                       )}
                     >
                       <Icon size={16} strokeWidth={2} />
@@ -176,7 +176,7 @@ export function Sidebar({ rol, esSuperadmin }: { rol: RolUsuario; esSuperadmin?:
 
         {esSuperadmin && (
           <div>
-            <p className="px-2 mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-white/40">
+            <p className="px-2 mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-acento/60">
               Alianza (interno)
             </p>
             <div className="space-y-0.5">
@@ -185,8 +185,8 @@ export function Sidebar({ rol, esSuperadmin }: { rol: RolUsuario; esSuperadmin?:
                 className={cn(
                   'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition',
                   pathname.startsWith('/meta-admin')
-                    ? 'bg-flow-500/25 text-white font-medium'
-                    : 'text-white/70 hover:bg-white/10 hover:text-white'
+                    ? 'bg-flow-500/25 text-acento font-medium'
+                    : 'text-acento/70 hover:bg-white/10 hover:text-acento'
                 )}
               >
                 <Building2 size={16} strokeWidth={2} />
