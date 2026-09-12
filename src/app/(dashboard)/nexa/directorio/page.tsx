@@ -2,15 +2,8 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FormularioCrearAliado } from '@/components/espiral-crecimiento/formulario-crear-aliado';
-import { BotonEliminarAliado } from '@/components/espiral-crecimiento/boton-eliminar-aliado';
+import { FilaAliado } from '@/components/espiral-crecimiento/fila-aliado';
 import { Handshake } from 'lucide-react';
-
-const ETIQUETA_TIPO: Record<string, string> = {
-  arl: 'ARL',
-  asesor_sst: 'Asesor SST',
-  proveedor_formacion: 'Proveedor de formación',
-  otro: 'Otro',
-};
 
 export default async function NexaDirectorioPage() {
   const perfil = await getPerfilActual();
@@ -53,17 +46,7 @@ export default async function NexaDirectorioPage() {
             </thead>
             <tbody>
               {aliados.map((a) => (
-                <tr key={a.id} className="border-b border-marmol-100 last:border-0">
-                  <td className="px-4 py-3 font-medium text-marmol-900">{a.nombre}</td>
-                  <td className="px-4 py-3 text-marmol-600">{ETIQUETA_TIPO[a.tipo as string] ?? a.tipo}</td>
-                  <td className="px-4 py-3 text-marmol-600">{a.contacto ?? '—'}</td>
-                  <td className="px-4 py-3 text-marmol-500">{a.notas ?? '—'}</td>
-                  {esAdminTh && (
-                    <td className="px-4 py-3">
-                      <BotonEliminarAliado id={a.id} />
-                    </td>
-                  )}
-                </tr>
+                <FilaAliado key={a.id} aliado={a} esAdminTh={esAdminTh} />
               ))}
             </tbody>
           </table>

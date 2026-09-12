@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { PanelParticipantesSimulacro } from '@/components/espiral-crecimiento/panel-participantes-simulacro';
+import { EditarSimulacro } from '@/components/espiral-crecimiento/editar-simulacro';
 import { formatearFecha } from '@/lib/utils';
 
 export default async function DetalleSimulacroPage({ params }: { params: { id: string } }) {
@@ -41,6 +42,17 @@ export default async function DetalleSimulacroPage({ params }: { params: { id: s
         <h1 className="font-display text-2xl font-semibold text-secundario">{simulacro.titulo}</h1>
         {simulacro.fecha && <p className="text-sm text-marmol-500 mt-1">{formatearFecha(simulacro.fecha)}</p>}
         {simulacro.descripcion && <p className="text-sm text-marmol-600 mt-2">{simulacro.descripcion}</p>}
+        {esAdminTh && (
+          <EditarSimulacro
+            simulacroId={simulacro.id}
+            datosIniciales={{
+              titulo: simulacro.titulo,
+              descripcion: simulacro.descripcion ?? '',
+              fecha: simulacro.fecha ?? '',
+              participantesEsperados: simulacro.participantes_esperados != null ? String(simulacro.participantes_esperados) : '',
+            }}
+          />
+        )}
       </div>
 
       {esAdminTh ? (

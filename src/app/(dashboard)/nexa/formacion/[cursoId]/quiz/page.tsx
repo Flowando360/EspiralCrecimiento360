@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { QuizEditor } from '@/components/espiral-crecimiento/quiz-editor';
+import { EditarCurso } from '@/components/espiral-crecimiento/editar-curso';
 
 export default async function QuizCursoPage({ params }: { params: { cursoId: string } }) {
   const perfil = await getPerfilActual();
@@ -14,7 +15,7 @@ export default async function QuizCursoPage({ params }: { params: { cursoId: str
 
   const { data: curso } = await supabase
     .from('nexa_cursos')
-    .select('id, titulo, quiz_umbral_aprobacion')
+    .select('id, titulo, descripcion, categoria, duracion_minutos, puntos_otorgados, quiz_umbral_aprobacion')
     .eq('id', params.cursoId)
     .eq('empresa_id', perfil.empresa_id)
     .maybeSingle();
@@ -43,6 +44,18 @@ export default async function QuizCursoPage({ params }: { params: { cursoId: str
         </Link>
         <h1 className="font-display text-2xl font-semibold text-secundario">Quiz de verificación</h1>
         <p className="text-sm text-marmol-500 mt-1">{curso.titulo}</p>
+        <div className="mt-2">
+          <EditarCurso
+            cursoId={curso.id}
+            datosIniciales={{
+              titulo: curso.titulo,
+              descripcion: curso.descripcion ?? '',
+              categoria: curso.categoria ?? 'otro',
+              duracionMinutos: curso.duracion_minutos != null ? String(curso.duracion_minutos) : '',
+              puntosOtorgados: String(curso.puntos_otorgados),
+            }}
+          />
+        </div>
       </div>
 
       <QuizEditor

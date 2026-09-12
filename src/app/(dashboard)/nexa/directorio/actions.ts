@@ -36,6 +36,39 @@ export async function crearAliado(input: z.infer<typeof AliadoSchema>) {
   return { ok: true as const };
 }
 
+const EditarAliadoSchema = z.object({
+  id: z.string().uuid(),
+  nombre: z.string().trim().min(1, 'El nombre es requerido'),
+  tipo: z.enum(TIPOS),
+  contacto: z.string().trim().optional(),
+  notas: z.string().trim().optional(),
+});
+
+/** Edita un aliado ya registrado en el directorio (admin_th, misma regla que RLS). */
+export async function actualizarAliado(input: z.infer<typeof EditarAliadoSchema>) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = EditarAliadoSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('nexa_directorio_aliados')
+    .update({
+      nombre: parsed.data.nombre,
+      tipo: parsed.data.tipo,
+      contacto: parsed.data.contacto || null,
+      notas: parsed.data.notas || null,
+    })
+    .eq('id', parsed.data.id)
+    .eq('empresa_id', perfil.empresa_id);
+
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath('/nexa/directorio');
+  return { ok: true as const };
+}
+
 /** Elimina un aliado del directorio (admin_th, misma regla que RLS). */
 export async function eliminarAliado(id: string) {
   const perfil = await getPerfilActual();

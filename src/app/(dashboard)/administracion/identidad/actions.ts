@@ -46,6 +46,18 @@ export async function agregarElementoIdentidad(tipo: 'principio' | 'valor', nomb
   return { ok: true };
 }
 
+export async function actualizarElementoIdentidad(id: string, nombre: string, descripcion: string) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+  if (!nombre.trim()) return { ok: false, error: 'El nombre es requerido' };
+
+  const supabase = createClient();
+  const { error } = await supabase.from('empresa_identidad_elementos').update({ nombre, descripcion }).eq('id', id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath('/administracion/identidad');
+  return { ok: true };
+}
+
 export async function eliminarElementoIdentidad(id: string) {
   const perfil = await getPerfilActual();
   if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
