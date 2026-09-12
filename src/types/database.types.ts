@@ -1647,8 +1647,86 @@ export type Database = {
           },
         ]
       }
+      dotacion_catalogo_articulos: {
+        Row: {
+          activo: boolean
+          categoria: string
+          created_at: string
+          empresa_id: string
+          id: string
+          nombre: string
+          requiere_talla: boolean
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          categoria: string
+          created_at?: string
+          empresa_id: string
+          id?: string
+          nombre: string
+          requiere_talla?: boolean
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          categoria?: string
+          created_at?: string
+          empresa_id?: string
+          id?: string
+          nombre?: string
+          requiere_talla?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dotacion_catalogo_articulos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dotacion_catalogo_tallas: {
+        Row: {
+          articulo_id: string
+          id: string
+          stock_disponible: number
+          stock_minimo: number
+          talla: string
+          updated_at: string
+        }
+        Insert: {
+          articulo_id: string
+          id?: string
+          stock_disponible?: number
+          stock_minimo?: number
+          talla?: string
+          updated_at?: string
+        }
+        Update: {
+          articulo_id?: string
+          id?: string
+          stock_disponible?: number
+          stock_minimo?: number
+          talla?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dotacion_catalogo_tallas_articulo_id_fkey"
+            columns: ["articulo_id"]
+            isOneToOne: false
+            referencedRelation: "dotacion_catalogo_articulos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dotacion_entregas: {
         Row: {
+          acta_firmada_url: string | null
+          articulo_talla_id: string | null
           cantidad: number
           categoria: Database["public"]["Enums"]["categoria_dotacion"]
           colaborador_id: string
@@ -1668,6 +1746,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          acta_firmada_url?: string | null
+          articulo_talla_id?: string | null
           cantidad?: number
           categoria: Database["public"]["Enums"]["categoria_dotacion"]
           colaborador_id: string
@@ -1687,6 +1767,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          acta_firmada_url?: string | null
+          articulo_talla_id?: string | null
           cantidad?: number
           categoria?: Database["public"]["Enums"]["categoria_dotacion"]
           colaborador_id?: string
@@ -1706,6 +1788,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "dotacion_entregas_articulo_talla_id_fkey"
+            columns: ["articulo_talla_id"]
+            isOneToOne: false
+            referencedRelation: "dotacion_catalogo_tallas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dotacion_entregas_colaborador_id_fkey"
             columns: ["colaborador_id"]
@@ -5539,6 +5628,8 @@ export type Database = {
           fecha_apertura: string
           fecha_cierre: string | null
           id: string
+          lider_solicitante_id: string | null
+          presupuesto_salarial: number | null
           titulo: string
         }
         Insert: {
@@ -5551,6 +5642,8 @@ export type Database = {
           fecha_apertura?: string
           fecha_cierre?: string | null
           id?: string
+          lider_solicitante_id?: string | null
+          presupuesto_salarial?: number | null
           titulo: string
         }
         Update: {
@@ -5563,6 +5656,8 @@ export type Database = {
           fecha_apertura?: string
           fecha_cierre?: string | null
           id?: string
+          lider_solicitante_id?: string | null
+          presupuesto_salarial?: number | null
           titulo?: string
         }
         Relationships: [
@@ -5586,6 +5681,62 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "empresas"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacantes_lider_solicitante_id_fkey"
+            columns: ["lider_solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacantes_lider_solicitante_id_fkey"
+            columns: ["lider_solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "vacantes_lider_solicitante_id_fkey"
+            columns: ["lider_solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "vacantes_lider_solicitante_id_fkey"
+            columns: ["lider_solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "vacantes_lider_solicitante_id_fkey"
+            columns: ["lider_solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "vacantes_lider_solicitante_id_fkey"
+            columns: ["lider_solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "vacantes_lider_solicitante_id_fkey"
+            columns: ["lider_solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "vacantes_lider_solicitante_id_fkey"
+            columns: ["lider_solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
           },
         ]
       }
@@ -6244,6 +6395,17 @@ export type Database = {
         Args: { p_colaborador_id: string }
         Returns: boolean
       }
+      fn_entregar_desde_catalogo: {
+        Args: {
+          p_articulo_talla_id: string
+          p_cantidad: number
+          p_categoria: Database["public"]["Enums"]["categoria_dotacion"]
+          p_colaborador_id: string
+          p_fecha_entrega: string
+          p_fecha_vencimiento?: string
+        }
+        Returns: string
+      }
       fn_es_mi_equipo: { Args: { p_colaborador_id: string }; Returns: boolean }
       fn_generar_pdi_y_formacion_por_dimension: {
         Args: {
@@ -6265,6 +6427,10 @@ export type Database = {
       }
       fn_recalcular_resultados_evaluacion: {
         Args: { p_evaluacion_id: string }
+        Returns: undefined
+      }
+      fn_recibir_en_catalogo: {
+        Args: { p_articulo_talla_id: string; p_cantidad: number }
         Returns: undefined
       }
       fn_soy_evaluador_de: {
@@ -6335,10 +6501,16 @@ export type Database = {
       estado_entrevista: "programada" | "realizada" | "cancelada"
       estado_pdi: "pendiente" | "en_curso" | "cumplido" | "vencido"
       estado_ronda_clima: "abierta" | "cerrada"
-      estado_vacante: "abierta" | "pausada" | "cerrada"
+      estado_vacante:
+        | "abierta"
+        | "pausada"
+        | "cerrada"
+        | "cancelada"
+        | "cubierta"
       estado_verificacion: "cumple" | "cumple_parcial" | "no_cumple_pendiente"
       etapa_postulacion:
         | "recibido"
+        | "preseleccionado"
         | "entrevista"
         | "prueba"
         | "oferta"
@@ -6587,10 +6759,17 @@ export const Constants = {
       estado_entrevista: ["programada", "realizada", "cancelada"],
       estado_pdi: ["pendiente", "en_curso", "cumplido", "vencido"],
       estado_ronda_clima: ["abierta", "cerrada"],
-      estado_vacante: ["abierta", "pausada", "cerrada"],
+      estado_vacante: [
+        "abierta",
+        "pausada",
+        "cerrada",
+        "cancelada",
+        "cubierta",
+      ],
       estado_verificacion: ["cumple", "cumple_parcial", "no_cumple_pendiente"],
       etapa_postulacion: [
         "recibido",
+        "preseleccionado",
         "entrevista",
         "prueba",
         "oferta",

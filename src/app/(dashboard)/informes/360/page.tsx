@@ -132,7 +132,16 @@ export default async function Informe360Page({
               <p className="text-xs font-medium text-marmol-500 mb-2 flex items-center gap-1.5">
                 <Sparkles size={14} className="text-ser" /> SER
               </p>
-              <p className="text-sm text-marmol-700">{informe.ser ? 'Guía del Flow completada' : 'Pendiente'}</p>
+              {informe.ser?.promedio_ser != null ? (
+                <>
+                  <p className="text-2xl font-display font-semibold text-secundario">{informe.ser.promedio_ser} / 5</p>
+                  <p className="text-xs text-marmol-400">
+                    promedio de {informe.ser.total_aspectos_calificados} aspecto{informe.ser.total_aspectos_calificados === 1 ? '' : 's'}
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-marmol-700">{informe.ser ? 'Guía del Flow completada, cargando puntajes…' : 'Pendiente'}</p>
+              )}
             </div>
             <div className="card p-4">
               <p className="text-xs font-medium text-marmol-500 mb-2 flex items-center gap-1.5">
@@ -215,20 +224,14 @@ export default async function Informe360Page({
           {informe.ser && (
             <div className="card p-5">
               <h3 className="font-display font-semibold text-secundario mb-3">Ser — Guía del Flow</h3>
-              <dl className="space-y-2 text-sm">
-                {informe.ser.proposito && (
-                  <div>
-                    <dt className="text-marmol-500 text-xs">Propósito</dt>
-                    <dd className="text-marmol-800">{informe.ser.proposito}</dd>
-                  </div>
-                )}
-                {informe.ser.talentos_naturales && (
-                  <div>
-                    <dt className="text-marmol-500 text-xs">Talentos naturales</dt>
-                    <dd className="text-marmol-800">{informe.ser.talentos_naturales}</dd>
-                  </div>
-                )}
-              </dl>
+              {informe.ser.narrativa ? (
+                <p className="text-sm text-marmol-700 whitespace-pre-wrap">{informe.ser.narrativa}</p>
+              ) : (
+                <p className="text-sm text-marmol-400">
+                  Aún no se ha generado el informe de Ser de esta persona — se genera solo o desde su ficha, en
+                  Guía del Flow.
+                </p>
+              )}
             </div>
           )}
         </>

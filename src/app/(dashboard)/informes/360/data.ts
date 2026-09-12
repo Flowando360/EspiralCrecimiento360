@@ -35,12 +35,10 @@ export interface Informe360 {
     items_pendiente: number;
   } | null;
   ser: {
-    talentos_naturales: string | null;
-    proposito: string | null;
-    etapa_evolucion_personal: string | null;
-    temperamento: string | null;
-    motivaciones_profundas: string | null;
-    manejo_emocional: string | null;
+    promedio_ser: number | null;
+    total_aspectos_calificados: number;
+    /** informe_lider para quien gestiona (admin_th/líder), informe_colaborador para el propio colaborador — nunca los 30 aspectos en crudo ni el PDF (ver 0051_ser_privacidad_organizacional.sql). */
+    narrativa: string | null;
     fecha_aplicacion: string;
   } | null;
 }
@@ -91,12 +89,17 @@ export async function obtenerInforme360(colaboradorId: string) {
     supabase.from('v_saber_cumplimiento').select('*').eq('colaborador_id', colaboradorId).maybeSingle(),
     supabase
       .from('guia_del_flow')
-      .select('*')
+      .select('fecha_aplicacion, informe_lider, informe_colaborador')
       .eq('colaborador_id', colaboradorId)
       .order('fecha_aplicacion', { ascending: false })
       .limit(1)
       .maybeSingle(),
   ]);
+
+  const serPromedio =
+    ser != null
+      ? (await supabase.from('v_ser_promedio').select('promedio_ser, total_aspectos_calificados').eq('colaborador_id', colaboradorId).maybeSingle()).data
+      : null;
 
   // La más reciente con resultado calculado (no necesariamente la primera del arreglo).
   const evalConResultado = ((evaluacion ?? []) as any[])
@@ -136,7 +139,14 @@ export async function obtenerInforme360(colaboradorId: string) {
           items_pendiente: saber.items_pendiente ?? 0,
         }
       : null,
-    ser: ser ?? null,
+    ser: ser
+      ? {
+          promedio_ser: serPromedio?.promedio_ser ?? null,
+          total_aspectos_calificados: serPromedio?.total_aspectos_calificados ?? 0,
+          narrativa: (perfil.rol === 'colaborador' ? ser.informe_colaborador : ser.informe_lider) ?? null,
+          fecha_aplicacion: ser.fecha_aplicacion,
+        }
+      : null,
   };
 
   return { perfil, informe };

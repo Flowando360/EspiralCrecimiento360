@@ -3,10 +3,12 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { Briefcase, Plus, Users } from 'lucide-react';
 
-const ESTADO_LABEL: Record<string, string> = { abierta: 'Abierta', pausada: 'Pausada', cerrada: 'Cerrada' };
+const ESTADO_LABEL: Record<string, string> = { abierta: 'Abierta', pausada: 'En pausa', cancelada: 'Cancelada', cubierta: 'Cubierto', cerrada: 'Cerrada' };
 const ESTADO_CLASE: Record<string, string> = {
   abierta: 'bg-alto/10 text-alto',
   pausada: 'bg-medio/10 text-medio',
+  cancelada: 'bg-bajo/10 text-bajo',
+  cubierta: 'bg-flow-50 text-flow-700',
   cerrada: 'bg-marmol-200 text-marmol-500',
 };
 
@@ -18,7 +20,9 @@ export default async function ReclutamientoPage() {
   const supabase = createClient();
   const { data: vacantes } = await supabase
     .from('vacantes')
-    .select('id, titulo, estado, fecha_apertura, fecha_cierre, cargo:cargos(nombre), postulaciones(count)')
+    .select(
+      'id, titulo, estado, fecha_apertura, fecha_cierre, cargo:cargos(nombre), lider_solicitante:lider_solicitante_id(nombre_completo), postulaciones(count)'
+    )
     .eq('empresa_id', perfil.empresa_id)
     .order('created_at', { ascending: false });
 
@@ -68,7 +72,8 @@ export default async function ReclutamientoPage() {
               <div>
                 <p className="font-medium text-marmol-800">{v.titulo}</p>
                 <p className="text-xs text-marmol-400 mt-0.5">
-                  {v.cargo?.nombre ?? 'Sin cargo'} · Abierta el {v.fecha_apertura}
+                  {v.cargo?.nombre ?? 'Sin cargo'}
+                  {v.lider_solicitante?.nombre_completo ? ` · Solicita: ${v.lider_solicitante.nombre_completo}` : ''} · Abierta el {v.fecha_apertura}
                   {v.fecha_cierre ? ` · Cerrada el ${v.fecha_cierre}` : ''}
                 </p>
               </div>

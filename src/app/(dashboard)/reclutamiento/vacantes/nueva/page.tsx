@@ -11,11 +11,15 @@ export default async function NuevaVacantePage() {
   if (perfil.rol !== 'admin_th') redirect('/reclutamiento');
 
   const supabase = createClient();
-  const { data: cargos } = await supabase
-    .from('cargos')
-    .select('id, nombre, proceso_area')
-    .eq('empresa_id', perfil.empresa_id)
-    .order('proceso_area');
+  const [{ data: cargos }, { data: lideres }] = await Promise.all([
+    supabase.from('cargos').select('id, nombre, proceso_area').eq('empresa_id', perfil.empresa_id).order('proceso_area'),
+    supabase
+      .from('colaboradores')
+      .select('id, nombre_completo')
+      .eq('empresa_id', perfil.empresa_id)
+      .in('estado', ['activo', 'periodo_prueba'])
+      .order('nombre_completo'),
+  ]);
 
   return (
     <div className="space-y-6 max-w-xl">
@@ -38,7 +42,7 @@ export default async function NuevaVacantePage() {
           abrir una vacante.
         </div>
       ) : (
-        <FormularioVacante cargos={cargos} />
+        <FormularioVacante cargos={cargos} lideres={lideres ?? []} />
       )}
     </div>
   );

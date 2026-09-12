@@ -3,6 +3,10 @@
     {
       "path": "/api/alertas/check",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/guia-flow/generar-informes-pendientes",
+      "schedule": "0 9 * * *"
     }
   ]
 }

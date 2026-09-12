@@ -16,9 +16,10 @@ import {
   crearChecklistItem,
   eliminarChecklistItem,
   actualizarEstadoChecklist,
+  actualizarChecklistItem,
 } from '@/app/(dashboard)/procesos-gestion/actions';
 import { createClient } from '@/lib/supabase/client';
-import { Trash2, Plus, Paperclip } from 'lucide-react';
+import { Trash2, Plus, Paperclip, Pencil, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type MarcoNormativo = 'iso_9001' | 'sarlaft_sagrilaft' | 'ptee';
@@ -144,6 +145,16 @@ export function ChecklistKanban({
     });
   }
 
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+
+  function guardarEdicion(id: string, marco: MarcoNormativo, texto: string) {
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, marco_normativo: marco, item: texto } : i)));
+    setEditandoId(null);
+    startTransition(async () => {
+      await actualizarChecklistItem({ id, marcoNormativo: marco, item: texto });
+    });
+  }
+
   return (
     <div className="card p-5">
       <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
@@ -176,11 +187,14 @@ export function ChecklistKanban({
               items={itemsFiltrados.filter((i) => i.estado === columna.valor)}
               puedeEditar={puedeEditar}
               onEliminar={eliminar}
+              editandoId={editandoId}
+              onIniciarEdicion={setEditandoId}
+              onGuardarEdicion={guardarEdicion}
             />
           ))}
         </div>
 
-        <DragOverlay>{activeItem && <TarjetaChecklist item={activeItem} puedeEditar={false} onEliminar={() => {}} />}</DragOverlay>
+        <DragOverlay>{activeItem && <TarjetaChecklist item={activeItem} puedeEditar={false} onEliminar={() => {}} editando={false} onIniciarEdicion={() => {}} onGuardarEdicion={() => {}} />}</DragOverlay>
       </DndContext>
 
       {puedeEditar && (
@@ -228,11 +242,17 @@ function Columna({
   items,
   puedeEditar,
   onEliminar,
+  editandoId,
+  onIniciarEdicion,
+  onGuardarEdicion,
 }: {
   columna: { valor: EstadoChecklist; etiqueta: string; clase: string };
   items: ChecklistItem[];
   puedeEditar: boolean;
   onEliminar: (id: string) => void;
+  editandoId: string | null;
+  onIniciarEdicion: (id: string | null) => void;
+  onGuardarEdicion: (id: string, marco: MarcoNormativo, texto: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: columna.valor });
 
@@ -250,7 +270,15 @@ function Columna({
         )}
       >
         {items.map((i) => (
-          <TarjetaArrastrable key={i.id} item={i} puedeEditar={puedeEditar} onEliminar={onEliminar} />
+          <TarjetaArrastrable
+            key={i.id}
+            item={i}
+            puedeEditar={puedeEditar}
+            onEliminar={onEliminar}
+            editando={editandoId === i.id}
+            onIniciarEdicion={onIniciarEdicion}
+            onGuardarEdicion={onGuardarEdicion}
+          />
         ))}
         {items.length === 0 && <p className="text-xs text-marmol-400 text-center py-4">Sin ítems</p>}
       </div>
@@ -262,14 +290,20 @@ function TarjetaArrastrable({
   item,
   puedeEditar,
   onEliminar,
+  editando,
+  onIniciarEdicion,
+  onGuardarEdicion,
 }: {
   item: ChecklistItem;
   puedeEditar: boolean;
   onEliminar: (id: string) => void;
+  editando: boolean;
+  onIniciarEdicion: (id: string | null) => void;
+  onGuardarEdicion: (id: string, marco: MarcoNormativo, texto: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: item.id,
-    disabled: !puedeEditar,
+    disabled: !puedeEditar || editando,
   });
   const style = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, opacity: isDragging ? 0.4 : 1, zIndex: isDragging ? 10 : undefined }
@@ -279,10 +313,17 @@ function TarjetaArrastrable({
     <div
       ref={setNodeRef}
       style={style}
-      className={puedeEditar ? 'cursor-grab active:cursor-grabbing' : undefined}
-      {...(puedeEditar ? { ...attributes, ...listeners } : {})}
+      className={puedeEditar && !editando ? 'cursor-grab active:cursor-grabbing' : undefined}
+      {...(puedeEditar && !editando ? { ...attributes, ...listeners } : {})}
     >
-      <TarjetaChecklist item={item} puedeEditar={puedeEditar} onEliminar={onEliminar} />
+      <TarjetaChecklist
+        item={item}
+        puedeEditar={puedeEditar}
+        onEliminar={onEliminar}
+        editando={editando}
+        onIniciarEdicion={onIniciarEdicion}
+        onGuardarEdicion={onGuardarEdicion}
+      />
     </div>
   );
 }
@@ -291,11 +332,46 @@ function TarjetaChecklist({
   item,
   puedeEditar,
   onEliminar,
+  editando,
+  onIniciarEdicion,
+  onGuardarEdicion,
 }: {
   item: ChecklistItem;
   puedeEditar: boolean;
   onEliminar: (id: string) => void;
+  editando: boolean;
+  onIniciarEdicion: (id: string | null) => void;
+  onGuardarEdicion: (id: string, marco: MarcoNormativo, texto: string) => void;
 }) {
+  const [marco, setMarco] = useState<MarcoNormativo>(item.marco_normativo);
+  const [texto, setTexto] = useState(item.item);
+
+  if (editando) {
+    return (
+      <div className="card p-3 space-y-1.5" onPointerDown={(e) => e.stopPropagation()}>
+        <select value={marco} onChange={(e) => setMarco(e.target.value as MarcoNormativo)} className="w-full rounded-lg border border-marmol-200 px-1.5 py-1 text-xs">
+          {Object.entries(ETIQUETA_MARCO).map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
+        </select>
+        <textarea value={texto} onChange={(e) => setTexto(e.target.value)} rows={2} className="w-full rounded-lg border border-marmol-200 px-1.5 py-1 text-xs" />
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => texto.trim() && onGuardarEdicion(item.id, marco, texto)}
+            className="inline-flex items-center gap-1 rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-[11px] font-medium px-2 py-1"
+          >
+            <Check size={11} /> Guardar
+          </button>
+          <button onClick={() => onIniciarEdicion(null)} className="inline-flex items-center gap-1 rounded-lg border border-marmol-200 text-marmol-600 hover:bg-marmol-100 text-[11px] font-medium px-2 py-1">
+            <X size={11} /> Cancelar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="card p-3 group">
       <div className="flex items-start justify-between gap-1.5">
@@ -313,12 +389,14 @@ function TarjetaChecklist({
           <p className="text-sm font-medium text-marmol-800 mt-1 break-words">{item.item}</p>
         </div>
         {puedeEditar && (
-          <button
-            onClick={() => onEliminar(item.id)}
-            className="shrink-0 text-marmol-300 hover:text-bajo opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <Trash2 size={13} />
-          </button>
+          <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onClick={() => onIniciarEdicion(item.id)} onPointerDown={(e) => e.stopPropagation()} className="text-marmol-300 hover:text-flow-600">
+              <Pencil size={12} />
+            </button>
+            <button onClick={() => onEliminar(item.id)} onPointerDown={(e) => e.stopPropagation()} className="text-marmol-300 hover:text-bajo">
+              <Trash2 size={13} />
+            </button>
+          </div>
         )}
       </div>
     </div>

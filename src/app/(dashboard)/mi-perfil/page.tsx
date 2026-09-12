@@ -53,7 +53,7 @@ export default async function MiPerfilPage() {
       .maybeSingle(),
     supabase
       .from('guia_del_flow')
-      .select('*')
+      .select('fecha_aplicacion, informe_colaborador')
       .eq('colaborador_id', perfil.colaborador_id)
       .order('fecha_aplicacion', { ascending: false })
       .limit(1)
@@ -70,6 +70,10 @@ export default async function MiPerfilPage() {
       .eq('colaborador_id', perfil.colaborador_id)
       .order('fecha'),
   ]);
+
+  const { data: serPromedio } = ser
+    ? await supabase.from('v_ser_promedio').select('promedio_ser, total_aspectos_calificados').eq('colaborador_id', perfil.colaborador_id).maybeSingle()
+    : { data: null };
 
   const { data: incapacidadesRaw } = await supabase
     .from('incapacidades_colaborador')
@@ -111,7 +115,11 @@ export default async function MiPerfilPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="card p-4">
           <p className="text-xs text-marmol-500 mb-1">SER</p>
-          <p className="text-sm text-marmol-700">{ser ? 'Completada' : 'Pendiente'}</p>
+          {serPromedio?.promedio_ser != null ? (
+            <p className="text-lg font-display font-semibold">{serPromedio.promedio_ser} / 5</p>
+          ) : (
+            <p className="text-sm text-marmol-700">{ser ? 'Completada' : 'Pendiente'}</p>
+          )}
         </div>
         <div className="card p-4">
           <p className="text-xs text-marmol-500 mb-1">SABER</p>
@@ -147,20 +155,15 @@ export default async function MiPerfilPage() {
       {ser && (
         <div className="card p-5">
           <h3 className="font-display font-semibold text-secundario mb-2">Mi Guía del Flow</h3>
-          <div className="grid sm:grid-cols-2 gap-3 text-sm text-marmol-700">
-            {ser.talentos_naturales && (
-              <div>
-                <p className="text-xs text-marmol-400 mb-0.5">Talentos naturales</p>
-                <p>{ser.talentos_naturales}</p>
-              </div>
-            )}
-            {ser.proposito && (
-              <div>
-                <p className="text-xs text-marmol-400 mb-0.5">Propósito</p>
-                <p>{ser.proposito}</p>
-              </div>
-            )}
-          </div>
+          {ser.informe_colaborador ? (
+            <p className="text-sm text-marmol-700 whitespace-pre-wrap">{ser.informe_colaborador}</p>
+          ) : (
+            <p className="text-sm text-marmol-400">
+              Ya completaste tu Guía del Flow — tu informe de desarrollo se está generando, revisa de nuevo en un
+              rato. Tu Guía del Flow completa (el regalo íntimo de autoconocimiento) te llegó aparte, fuera de este
+              sistema.
+            </p>
+          )}
         </div>
       )}
 

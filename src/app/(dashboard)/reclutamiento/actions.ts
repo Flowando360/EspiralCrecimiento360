@@ -18,6 +18,8 @@ const VacanteSchema = z.object({
   cargoId: z.string().uuid('Selecciona un cargo'),
   titulo: z.string().trim().min(1, 'El título es requerido'),
   descripcion: z.string().trim().optional(),
+  liderSolicitanteId: z.string().uuid().optional().or(z.literal('')),
+  presupuestoSalarial: z.string().optional(),
 });
 
 export async function crearVacante(input: z.infer<typeof VacanteSchema>) {
@@ -27,6 +29,11 @@ export async function crearVacante(input: z.infer<typeof VacanteSchema>) {
   const parsed = VacanteSchema.safeParse(input);
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
 
+  const presupuesto = parsed.data.presupuestoSalarial?.trim() ? Number(parsed.data.presupuestoSalarial) : null;
+  if (parsed.data.presupuestoSalarial?.trim() && (presupuesto === null || Number.isNaN(presupuesto))) {
+    return { ok: false as const, error: 'El presupuesto salarial debe ser un número' };
+  }
+
   const supabase = createClient();
   const { data, error } = await supabase
     .from('vacantes')
@@ -35,6 +42,8 @@ export async function crearVacante(input: z.infer<typeof VacanteSchema>) {
       cargo_id: parsed.data.cargoId,
       titulo: parsed.data.titulo,
       descripcion: parsed.data.descripcion || null,
+      lider_solicitante_id: parsed.data.liderSolicitanteId || null,
+      presupuesto_salarial: presupuesto,
       creado_por: perfil.usuario_id,
     })
     .select('id')
@@ -45,20 +54,64 @@ export async function crearVacante(input: z.infer<typeof VacanteSchema>) {
   return { ok: true as const, id: data.id as string };
 }
 
-export async function actualizarEstadoVacante(id: string, estado: 'abierta' | 'pausada' | 'cerrada') {
+const ESTADOS_VACANTE = ['abierta', 'pausada', 'cancelada', 'cubierta'] as const;
+
+export async function actualizarEstadoVacante(id: string, estado: (typeof ESTADOS_VACANTE)[number]) {
   const perfil = await requerirAdminTh();
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
+  const seCierra = estado === 'cancelada' || estado === 'cubierta';
   const supabase = createClient();
   const { error } = await supabase
     .from('vacantes')
-    .update({ estado, fecha_cierre: estado === 'cerrada' ? new Date().toISOString().slice(0, 10) : null })
+    .update({ estado, fecha_cierre: seCierra ? new Date().toISOString().slice(0, 10) : null })
     .eq('id', id)
     .eq('empresa_id', perfil.empresa_id);
 
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(RUTA);
   revalidatePath(`${RUTA}/vacantes/${id}`);
+  return { ok: true as const };
+}
+
+const EditarVacanteSchema = z.object({
+  vacanteId: z.string().uuid(),
+  cargoId: z.string().uuid('Selecciona un cargo'),
+  titulo: z.string().trim().min(1, 'El título es requerido'),
+  descripcion: z.string().trim().optional(),
+  liderSolicitanteId: z.string().uuid().optional().or(z.literal('')),
+  presupuestoSalarial: z.string().optional(),
+});
+
+/** Edita título, descripción, cargo, líder solicitante y presupuesto de una vacante ya creada (admin_th). */
+export async function actualizarVacante(input: z.infer<typeof EditarVacanteSchema>) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = EditarVacanteSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+
+  const presupuesto = parsed.data.presupuestoSalarial?.trim() ? Number(parsed.data.presupuestoSalarial) : null;
+  if (parsed.data.presupuestoSalarial?.trim() && (presupuesto === null || Number.isNaN(presupuesto))) {
+    return { ok: false as const, error: 'El presupuesto salarial debe ser un número' };
+  }
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('vacantes')
+    .update({
+      cargo_id: parsed.data.cargoId,
+      titulo: parsed.data.titulo,
+      descripcion: parsed.data.descripcion || null,
+      lider_solicitante_id: parsed.data.liderSolicitanteId || null,
+      presupuesto_salarial: presupuesto,
+    })
+    .eq('id', parsed.data.vacanteId)
+    .eq('empresa_id', perfil.empresa_id);
+
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(RUTA);
+  revalidatePath(`${RUTA}/vacantes/${parsed.data.vacanteId}`);
   return { ok: true as const };
 }
 
@@ -127,7 +180,7 @@ export async function postularCandidatoExistente(candidatoId: string, vacanteId:
 }
 
 // ── Postulaciones (pipeline de selección) ──────────────────────────────
-const ETAPAS_POSTULACION = ['recibido', 'entrevista', 'prueba', 'oferta', 'contratado', 'descartado'] as const;
+const ETAPAS_POSTULACION = ['recibido', 'preseleccionado', 'entrevista', 'prueba', 'oferta', 'contratado', 'descartado'] as const;
 type EtapaPostulacion = (typeof ETAPAS_POSTULACION)[number];
 
 export async function actualizarEtapaPostulacion(id: string, etapa: EtapaPostulacion, vacanteId: string, motivo?: string) {
@@ -141,6 +194,27 @@ export async function actualizarEtapaPostulacion(id: string, etapa: EtapaPostula
     .eq('id', id);
 
   if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`${RUTA}/vacantes/${vacanteId}`);
+  return { ok: true as const };
+}
+
+/**
+ * Mueve una postulación al soltarla en el tablero Kanban: cambia su etapa y
+ * reordena las tarjetas de la columna destino según cómo quedaron en
+ * pantalla (mismo patrón que moverCaso en procesos-gestion/tablero).
+ */
+export async function moverPostulacion(vacanteId: string, etapaDestino: EtapaPostulacion, idsEnOrdenDestino: string[]) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const actualizaciones = idsEnOrdenDestino.map((id, orden) =>
+    supabase.from('postulaciones').update({ etapa: etapaDestino, orden }).eq('id', id).eq('vacante_id', vacanteId)
+  );
+  const resultados = await Promise.all(actualizaciones);
+  const error = resultados.find((r) => r.error)?.error;
+  if (error) return { ok: false as const, error: error.message };
+
   revalidatePath(`${RUTA}/vacantes/${vacanteId}`);
   return { ok: true as const };
 }
@@ -239,6 +313,70 @@ export async function crearReferencia(input: z.infer<typeof ReferenciaSchema>) {
 
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(`${RUTA}/candidatos/${parsed.data.candidatoId}`);
+  return { ok: true as const };
+}
+
+/** Sube (o reemplaza) la hoja de vida de un candidato ya existente en el banco (admin_th) — para cuando se agregó a mano, sin pasar por la postulación pública. */
+export async function subirHojaVidaCandidato(formData: FormData) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const candidatoId = formData.get('candidatoId') as string;
+  const archivo = formData.get('archivo') as File | null;
+  if (!archivo || archivo.size === 0) return { ok: false as const, error: 'Selecciona un archivo' };
+  if (archivo.size > 8 * 1024 * 1024) return { ok: false as const, error: 'La hoja de vida no puede pesar más de 8 MB.' };
+
+  const supabase = createClient();
+  const { data: candidato } = await supabase.from('candidatos').select('empresa_id').eq('id', candidatoId).maybeSingle();
+  if (!candidato || candidato.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'Candidato no encontrado' };
+
+  const extension = archivo.name.split('.').pop() || 'pdf';
+  const ruta = `${perfil.empresa_id}/${crypto.randomUUID()}.${extension}`;
+  const { error: errorSubida } = await supabase.storage
+    .from('hojas-vida-candidatos')
+    .upload(ruta, archivo, { contentType: archivo.type || undefined });
+  if (errorSubida) return { ok: false as const, error: 'No se pudo subir la hoja de vida: ' + errorSubida.message };
+
+  const { error } = await supabase.from('candidatos').update({ hoja_vida_url: ruta }).eq('id', candidatoId);
+  if (error) return { ok: false as const, error: error.message };
+
+  revalidatePath(`${RUTA}/candidatos/${candidatoId}`);
+  return { ok: true as const };
+}
+
+/** Edita nombre de contacto/LinkedIn/notas del candidato (admin_th) — la ficha técnica completa. */
+const EditarCandidatoSchema = z.object({
+  candidatoId: z.string().uuid(),
+  nombreCompleto: z.string().trim().min(1, 'El nombre es requerido'),
+  correo: z.string().trim().optional(),
+  telefono: z.string().trim().optional(),
+  linkedinUrl: z.string().trim().optional(),
+  notas: z.string().trim().optional(),
+});
+
+export async function actualizarCandidato(input: z.infer<typeof EditarCandidatoSchema>) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = EditarCandidatoSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('candidatos')
+    .update({
+      nombre_completo: parsed.data.nombreCompleto,
+      correo: parsed.data.correo || null,
+      telefono: parsed.data.telefono || null,
+      linkedin_url: parsed.data.linkedinUrl || null,
+      notas: parsed.data.notas || null,
+    })
+    .eq('id', parsed.data.candidatoId)
+    .eq('empresa_id', perfil.empresa_id);
+
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`${RUTA}/candidatos/${parsed.data.candidatoId}`);
+  revalidatePath(`${RUTA}/candidatos`);
   return { ok: true as const };
 }
 

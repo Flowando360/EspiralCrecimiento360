@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { redirect, notFound } from 'next/navigation';
 import { formatearFecha, cn } from '@/lib/utils';
-import { ArrowLeft, ClipboardCheck } from 'lucide-react';
+import { ArrowLeft, ClipboardCheck, Pencil } from 'lucide-react';
 import { PlanInduccionCargo } from '@/components/espiral-crecimiento/plan-induccion-cargo';
 
 const ETIQUETA_MOMENTO: Record<string, string> = {
@@ -83,12 +83,20 @@ export default async function DetalleCargoPage({ params }: { params: { id: strin
               {cargo.fecha_documento && ` · ${formatearFecha(cargo.fecha_documento)}`}
             </p>
           </div>
-          <Link
-            href={`/administracion/cargos/${params.id}/items-evaluacion`}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:border-flow-300 text-marmol-600 text-xs font-medium px-3 py-2 transition shrink-0"
-          >
-            <ClipboardCheck size={14} /> Ítems a evaluar
-          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href={`/administracion/cargos/${params.id}/editar`}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-xs font-medium px-3 py-2 transition"
+            >
+              <Pencil size={14} /> Editar
+            </Link>
+            <Link
+              href={`/administracion/cargos/${params.id}/items-evaluacion`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:border-flow-300 text-marmol-600 text-xs font-medium px-3 py-2 transition"
+            >
+              <ClipboardCheck size={14} /> Ítems a evaluar
+            </Link>
+          </div>
         </div>
       </div>
 

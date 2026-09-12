@@ -1,8 +1,8 @@
 'use client';
 
-import { useTransition } from 'react';
-import { confirmarFirmaDotacion, actualizarEstadoDotacion } from '@/app/(dashboard)/dotacion/actions';
-import { CheckCircle2, Clock, ShieldCheck } from 'lucide-react';
+import { useRef, useState, useTransition } from 'react';
+import { confirmarFirmaDotacion, actualizarEstadoDotacion, subirActaFirmada } from '@/app/(dashboard)/dotacion/actions';
+import { CheckCircle2, Clock, ShieldCheck, Camera, FileImage } from 'lucide-react';
 import type { RolUsuario } from '@/types/colaborador';
 
 type Entrega = {
@@ -16,6 +16,7 @@ type Entrega = {
   estado: 'entregado' | 'devuelto' | 'perdido' | 'danado';
   firma_confirmada: boolean;
   firmado_en: string | null;
+  acta_firmada_url: string | null;
   colaborador: { id: string; nombre_completo: string };
 };
 
@@ -45,7 +46,25 @@ export function ListaDotacion({ entregas, rol, miColaboradorId }: { entregas: En
 
 function FilaEntrega({ entrega, puedeAdministrar, esPropia }: { entrega: Entrega; puedeAdministrar: boolean; esPropia: boolean }) {
   const [pending, startTransition] = useTransition();
+  const [subiendoActa, setSubiendoActa] = useState(false);
+  const [actaUrl, setActaUrl] = useState(entrega.acta_firmada_url);
+  const inputRef = useRef<HTMLInputElement>(null);
   const vencidaProximo = entrega.fecha_vencimiento && new Date(entrega.fecha_vencimiento) < new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+  const puedeAdjuntarActa = puedeAdministrar || esPropia;
+
+  function archivoActaSeleccionado(file: File | undefined) {
+    if (!file) return;
+    setSubiendoActa(true);
+    const formData = new FormData();
+    formData.append('entregaId', entrega.id);
+    formData.append('archivo', file);
+    startTransition(async () => {
+      const res = await subirActaFirmada(formData);
+      setSubiendoActa(false);
+      if (res.ok) setActaUrl('subido'); // el link real se ve al recargar la lista (revalidatePath); esto solo confirma en pantalla
+      if (inputRef.current) inputRef.current.value = '';
+    });
+  }
 
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3 flex-wrap">
@@ -80,6 +99,14 @@ function FilaEntrega({ entrega, puedeAdministrar, esPropia }: { entrega: Entrega
           <span className="inline-flex items-center gap-1 text-xs text-marmol-400">
             <Clock size={13} /> Sin firmar
           </span>
+        )}
+
+        {puedeAdjuntarActa && (
+          <label className="inline-flex items-center gap-1 text-xs text-marmol-400 hover:text-flow-600 cursor-pointer" title="Adjuntar foto del acta firmada en papel">
+            {actaUrl ? <FileImage size={13} className="text-flow-600" /> : <Camera size={13} />}
+            {subiendoActa ? 'Subiendo…' : actaUrl ? 'Acta adjunta' : 'Adjuntar acta'}
+            <input ref={inputRef} type="file" accept="image/*,.pdf" disabled={subiendoActa} onChange={(e) => archivoActaSeleccionado(e.target.files?.[0])} className="hidden" />
+          </label>
         )}
 
         {puedeAdministrar ? (

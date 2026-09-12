@@ -46,3 +46,42 @@ export async function crearCiclo(input: z.infer<typeof CrearCicloSchema>) {
   revalidatePath('/espiral-crecimiento/ciclos');
   return { ok: true as const, cicloId: data.id as string };
 }
+
+const EditarCicloSchema = z.object({
+  cicloId: z.string().uuid(),
+  nombre: z.string().trim().min(1, 'El nombre es requerido'),
+  fechaApertura: z.string().min(1, 'La fecha de apertura es requerida'),
+  fechaCierreRespuestas: z.string().min(1, 'La fecha de cierre es requerida'),
+});
+
+/** Edita nombre y fechas de un ciclo ya creado (admin_th) — por ejemplo, para extender el plazo de respuestas. */
+export async function actualizarCiclo(input: z.infer<typeof EditarCicloSchema>) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = EditarCicloSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+
+  if (parsed.data.fechaCierreRespuestas <= parsed.data.fechaApertura) {
+    return { ok: false as const, error: 'La fecha de cierre debe ser posterior a la de apertura' };
+  }
+
+  const supabase = createClient();
+  const { data: ciclo } = await supabase.from('ciclos_evaluacion').select('empresa_id').eq('id', parsed.data.cicloId).maybeSingle();
+  if (!ciclo || ciclo.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'Ciclo no encontrado' };
+
+  const { error } = await supabase
+    .from('ciclos_evaluacion')
+    .update({
+      nombre: parsed.data.nombre,
+      fecha_apertura: parsed.data.fechaApertura,
+      fecha_cierre_respuestas: parsed.data.fechaCierreRespuestas,
+    })
+    .eq('id', parsed.data.cicloId);
+
+  if (error) return { ok: false as const, error: error.message };
+
+  revalidatePath('/espiral-crecimiento/ciclos');
+  revalidatePath(`/espiral-crecimiento/ciclos/${parsed.data.cicloId}`);
+  return { ok: true as const };
+}

@@ -45,6 +45,39 @@ export async function crearProceso(input: z.infer<typeof ProcesoSchema>) {
   return { ok: true as const, id: data.id as string };
 }
 
+const EditarProcesoSchema = z.object({
+  id: z.string().uuid(),
+  areaProceso: z.string().trim().min(1, 'El área/proceso es requerido'),
+  nombre: z.string().trim().min(1, 'El nombre es requerido'),
+  descripcion: z.string().trim().optional(),
+  version: z.string().trim().optional(),
+});
+
+export async function actualizarProceso(input: z.infer<typeof EditarProcesoSchema>) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = EditarProcesoSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('procesos_gestion')
+    .update({
+      area_proceso: parsed.data.areaProceso,
+      nombre: parsed.data.nombre,
+      descripcion: parsed.data.descripcion || null,
+      version: parsed.data.version || null,
+      fecha_actualizacion: new Date().toISOString().slice(0, 10),
+    })
+    .eq('id', parsed.data.id)
+    .eq('empresa_id', perfil.empresa_id);
+
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(RUTA);
+  return { ok: true as const };
+}
+
 export async function eliminarProceso(id: string) {
   const perfil = await requerirAdminTh();
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
@@ -90,6 +123,42 @@ export async function crearRiesgo(input: z.infer<typeof RiesgoSchema>) {
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(RUTA);
   return { ok: true as const, id: data.id as string };
+}
+
+const EditarRiesgoSchema = z.object({
+  id: z.string().uuid(),
+  marcoNormativo: z.enum(['iso_9001', 'sarlaft_sagrilaft', 'ptee', 'interno']),
+  riesgo: z.string().trim().min(1, 'El riesgo es requerido'),
+  categoriaRiesgo: z.string().trim().optional(),
+  probabilidad: z.enum(['baja', 'media', 'alta']).optional().or(z.literal('')),
+  impacto: z.enum(['bajo', 'medio', 'alto']).optional().or(z.literal('')),
+  control: z.string().trim().optional(),
+});
+
+export async function actualizarRiesgo(input: z.infer<typeof EditarRiesgoSchema>) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = EditarRiesgoSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('matriz_riesgos_controles')
+    .update({
+      marco_normativo: parsed.data.marcoNormativo,
+      riesgo: parsed.data.riesgo,
+      categoria_riesgo: parsed.data.categoriaRiesgo || null,
+      probabilidad: parsed.data.probabilidad || null,
+      impacto: parsed.data.impacto || null,
+      control: parsed.data.control || null,
+    })
+    .eq('id', parsed.data.id)
+    .eq('empresa_id', perfil.empresa_id);
+
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(RUTA);
+  return { ok: true as const };
 }
 
 export async function eliminarRiesgo(id: string) {
@@ -148,6 +217,39 @@ export async function actualizarEstadoChecklist(id: string, estado: 'cumple' | '
     .from('checklist_cumplimiento')
     .update({ estado, fecha_verificacion: new Date().toISOString().slice(0, 10) })
     .eq('id', id)
+    .eq('empresa_id', perfil.empresa_id);
+
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(RUTA);
+  return { ok: true as const };
+}
+
+const EditarChecklistSchema = z.object({
+  id: z.string().uuid(),
+  marcoNormativo: z.enum(['iso_9001', 'sarlaft_sagrilaft', 'ptee']),
+  item: z.string().trim().min(1, 'El ítem es requerido'),
+  descripcion: z.string().trim().optional(),
+  observaciones: z.string().trim().optional(),
+});
+
+/** Edita el texto del ítem (no el estado — eso ya lo maneja actualizarEstadoChecklist). admin_th. */
+export async function actualizarChecklistItem(input: z.infer<typeof EditarChecklistSchema>) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = EditarChecklistSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('checklist_cumplimiento')
+    .update({
+      marco_normativo: parsed.data.marcoNormativo,
+      item: parsed.data.item,
+      descripcion: parsed.data.descripcion || null,
+      observaciones: parsed.data.observaciones || null,
+    })
+    .eq('id', parsed.data.id)
     .eq('empresa_id', perfil.empresa_id);
 
   if (error) return { ok: false as const, error: error.message };

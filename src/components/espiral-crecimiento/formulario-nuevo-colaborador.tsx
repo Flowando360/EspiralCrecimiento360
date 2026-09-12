@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { crearColaborador } from '@/app/(dashboard)/espiral-crecimiento/colaboradores/nuevo/actions';
+import { CargaHojaVidaIA } from '@/components/espiral-crecimiento/carga-hoja-vida-ia';
 import type { EstadoColaborador, TipoContrato } from '@/types/colaborador';
 
 const TIPOS_CONTRATO: { value: TipoContrato; label: string }[] = [
@@ -120,6 +121,14 @@ export function FormularioNuevoColaborador({
 
       <section className="space-y-4">
         <h2 className="font-display font-semibold text-secundario text-sm">Datos personales</h2>
+        <CargaHojaVidaIA
+          onDatos={(datos) => {
+            if (datos.nombre_completo) setNombreCompleto(datos.nombre_completo);
+            if (datos.numero_documento) setNumeroDocumento(datos.numero_documento);
+            if (datos.email) setEmail(datos.email);
+            if (datos.telefono) setTelefono(datos.telefono);
+          }}
+        />
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2">
             <label className={label}>Nombre completo *</label>

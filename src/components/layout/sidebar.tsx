@@ -70,11 +70,12 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    titulo: 'Reclutamiento y Dotación',
-    items: [
-      { href: '/reclutamiento', label: 'Reclutamiento y Selección', icon: UserSearch, roles: ['admin_th', 'lider'] },
-      { href: '/dotacion', label: 'Gestión de Dotaciones', icon: Shirt, roles: ['admin_th', 'lider', 'colaborador'] },
-    ],
+    titulo: 'Reclutamiento',
+    items: [{ href: '/reclutamiento', label: 'Reclutamiento y Selección', icon: UserSearch, roles: ['admin_th', 'lider'] }],
+  },
+  {
+    titulo: 'Dotación',
+    items: [{ href: '/dotacion', label: 'Gestión de Dotaciones', icon: Shirt, roles: ['admin_th', 'lider', 'colaborador'] }],
   },
   {
     titulo: 'Nexa · Cultura y Formación',

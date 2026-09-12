@@ -4,7 +4,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { formatearFecha } from '@/lib/utils';
 import { notFound } from 'next/navigation';
-import { GraduationCap, Briefcase, Sparkles, ShieldCheck, Target, Clock, History, FolderLock, CalendarHeart, HeartPulse, Shirt } from 'lucide-react';
+import { GraduationCap, Briefcase, Sparkles, ShieldCheck, Target, Clock, History, FolderLock, CalendarHeart, HeartPulse, Shirt, Pencil } from 'lucide-react';
 
 export default async function FichaColaboradorPage({ params }: { params: { id: string } }) {
   const perfil = await getPerfilActual();
@@ -62,7 +62,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
     (perfil.rol === 'lider' && colaborador.lider_id === perfil.colaborador_id) ||
     (perfil.rol === 'colaborador' && perfil.colaborador_id === colaborador.id);
 
-  const [{ data: ultimoResultado }, { data: saber }, { data: ser }, { data: pdi }, { data: hojaVida }, { data: induccionItems }] =
+  const [{ data: ultimoResultado }, { data: saber }, { data: ser }, { data: serPromedio }, { data: pdi }, { data: hojaVida }, { data: induccionItems }] =
     await Promise.all([
       supabase
         .from('resultados_evaluacion')
@@ -74,11 +74,12 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
       supabase.from('v_saber_cumplimiento').select('*').eq('colaborador_id', params.id).maybeSingle(),
       supabase
         .from('guia_del_flow')
-        .select('*')
+        .select('id')
         .eq('colaborador_id', params.id)
         .order('fecha_aplicacion', { ascending: false })
         .limit(1)
         .maybeSingle(),
+      supabase.from('v_ser_promedio').select('promedio_ser, total_aspectos_calificados').eq('colaborador_id', params.id).maybeSingle(),
       supabase
         .from('planes_desarrollo')
         .select('*')
@@ -122,9 +123,19 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
             </p>
           </div>
         </div>
-        <span className="inline-flex items-center rounded-full bg-marmol-100 px-3 py-1 text-xs font-medium text-marmol-600 capitalize">
-          {colaborador.estado.replace(/_/g, ' ')}
-        </span>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="inline-flex items-center rounded-full bg-marmol-100 px-3 py-1 text-xs font-medium text-marmol-600 capitalize">
+            {colaborador.estado.replace(/_/g, ' ')}
+          </span>
+          {perfil.rol === 'admin_th' && (
+            <Link
+              href={`/espiral-crecimiento/colaboradores/${params.id}/editar`}
+              className="inline-flex items-center gap-1 rounded-lg border border-marmol-200 hover:border-flow-300 text-marmol-600 hover:text-flow-600 text-xs font-medium px-2.5 py-1.5 transition"
+            >
+              <Pencil size={12} /> Editar
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Las cuatro dimensiones, de un vistazo */}
@@ -133,9 +144,16 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
           <p className="text-xs font-medium text-marmol-500 mb-2 flex items-center gap-1.5">
             <Sparkles size={14} className="text-ser" /> SER
           </p>
-          <p className="text-sm text-marmol-700">
-            {ser ? 'Guía del Flow completada' : 'Pendiente por completar'}
-          </p>
+          {serPromedio?.promedio_ser != null ? (
+            <>
+              <p className="text-2xl font-display font-semibold text-secundario">{serPromedio.promedio_ser} / 5</p>
+              <p className="text-xs text-marmol-400">
+                promedio de {serPromedio.total_aspectos_calificados} aspecto{serPromedio.total_aspectos_calificados === 1 ? '' : 's'}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-marmol-700">{ser ? 'Guía del Flow completada, cargando puntajes…' : 'Pendiente por completar'}</p>
+          )}
         </Link>
         <Link href={`/espiral-crecimiento/colaboradores/${params.id}/saber`} className="card p-4 hover:border-flow-300 transition">
           <p className="text-xs font-medium text-marmol-500 mb-2 flex items-center gap-1.5">

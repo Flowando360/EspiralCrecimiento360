@@ -22,11 +22,17 @@ export default async function NuevoColaboradorPage({
       .select('id, nombre, proceso_area')
       .eq('empresa_id', perfil.empresa_id)
       .order('proceso_area'),
+    // Líderes posibles: activos o en período de prueba (alguien puede ser
+    // jefe de área desde el día uno, antes de que su período de prueba
+    // termine) — antes solo se ofrecía 'activo' y por eso un líder recién
+    // ingresado no aparecía aquí para asignarle su equipo. Se excluyen
+    // inactivo/en_proceso_salida porque no tiene sentido asignar como líder
+    // nuevo a alguien que ya se está yendo.
     supabase
       .from('colaboradores')
       .select('id, nombre_completo')
       .eq('empresa_id', perfil.empresa_id)
-      .eq('estado', 'activo')
+      .in('estado', ['activo', 'periodo_prueba'])
       .order('nombre_completo'),
     supabase
       .from('perfiles_usuario')

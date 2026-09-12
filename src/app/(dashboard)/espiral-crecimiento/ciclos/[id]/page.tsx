@@ -3,9 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { GenerarEvaluacionesPanel } from '@/components/espiral-crecimiento/generar-evaluaciones-panel';
+import { EditarCiclo } from '@/components/espiral-crecimiento/editar-ciclo';
 import { notFound } from 'next/navigation';
 import { FileText, HandshakeIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatearFecha } from '@/lib/utils';
 
 // Etapa de cada evaluación dentro del ciclo, derivada de datos que ya
 // existen (porcentaje_avance, si tiene brief guardado, si está publicada)
@@ -81,10 +82,25 @@ export default async function CicloDetallePage({ params }: { params: { id: strin
       <div>
         <h1 className="font-display text-2xl font-semibold text-secundario">{ciclo.nombre}</h1>
         <p className="text-sm text-marmol-500 mt-1">
+          {formatearFecha(ciclo.fecha_apertura)} — cierre de respuestas: {formatearFecha(ciclo.fecha_cierre_respuestas)}
+        </p>
+        <p className="text-sm text-marmol-500 mt-1">
           Ponderación vigente: Líder {ciclo.peso_lider_con_equipo * 100}% / Pares{' '}
           {ciclo.peso_pares_con_equipo * 100}% / Colaboradores a cargo{' '}
           {ciclo.peso_colaboradores_con_equipo * 100}% (cargos con equipo)
         </p>
+        {perfil?.rol === 'admin_th' && (
+          <div className="mt-2">
+            <EditarCiclo
+              cicloId={ciclo.id}
+              datosIniciales={{
+                nombre: ciclo.nombre,
+                fechaApertura: ciclo.fecha_apertura,
+                fechaCierreRespuestas: ciclo.fecha_cierre_respuestas,
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {perfil?.rol === 'admin_th' && (

@@ -3,7 +3,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Users, Plus } from 'lucide-react';
-import { formatearFecha } from '@/lib/utils';
+import { FilaColaborador } from '@/components/espiral-crecimiento/fila-colaborador';
 
 export default async function ColaboradoresPage() {
   const perfil = await getPerfilActual();
@@ -25,6 +25,7 @@ export default async function ColaboradoresPage() {
   }
 
   const { data: colaboradores } = await query;
+  const puedeEliminar = perfil.rol === 'admin_th';
 
   return (
     <div className="space-y-6">
@@ -51,7 +52,7 @@ export default async function ColaboradoresPage() {
         <EmptyState
           icon={Users}
           titulo="Aún no hay colaboradores cargados"
-          descripcion="Carga el organigrama desde Administración o corre el seed inicial de Flow, Nexus y Visión."
+          descripcion="Carga el organigrama desde Administración o corre el seed inicial de Mármoles y Servicios."
         />
       ) : (
         <div className="card overflow-hidden">
@@ -63,32 +64,22 @@ export default async function ColaboradoresPage() {
                 <th className="px-4 py-3 font-medium">Área</th>
                 <th className="px-4 py-3 font-medium">Ingreso</th>
                 <th className="px-4 py-3 font-medium">Estado</th>
+                {puedeEliminar && <th className="px-4 py-3 font-medium">Acciones</th>}
               </tr>
             </thead>
             <tbody>
               {colaboradores.map((c) => (
-                <tr key={c.id as string} className="border-b border-marmol-100 last:border-0 hover:bg-marmol-50">
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/espiral-crecimiento/colaboradores/${c.id}`}
-                      className="font-medium text-marmol-900 hover:text-flow-600"
-                    >
-                      {c.nombre_completo as string}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-marmol-600">
-                    {(c.cargo as { nombre: string } | null)?.nombre ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-marmol-600">
-                    {(c.cargo as { proceso_area: string } | null)?.proceso_area ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-marmol-500">{formatearFecha(c.fecha_ingreso as string)}</td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex items-center rounded-full bg-marmol-100 px-2 py-0.5 text-xs text-marmol-600 capitalize">
-                      {(c.estado as string).replace(/_/g, ' ')}
-                    </span>
-                  </td>
-                </tr>
+                <FilaColaborador
+                  key={c.id as string}
+                  colaborador={{
+                    id: c.id as string,
+                    nombre_completo: c.nombre_completo as string,
+                    estado: c.estado as string,
+                    fecha_ingreso: c.fecha_ingreso as string,
+                    cargo: c.cargo as { nombre: string; proceso_area: string | null } | null,
+                  }}
+                  puedeEliminar={puedeEliminar}
+                />
               ))}
             </tbody>
           </table>

@@ -4,18 +4,26 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { crearVacante } from '@/app/(dashboard)/reclutamiento/actions';
 
-export function FormularioVacante({ cargos }: { cargos: { id: string; nombre: string; proceso_area: string | null }[] }) {
+export function FormularioVacante({
+  cargos,
+  lideres,
+}: {
+  cargos: { id: string; nombre: string; proceso_area: string | null }[];
+  lideres: { id: string; nombre_completo: string }[];
+}) {
   const router = useRouter();
   const [cargoId, setCargoId] = useState('');
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
+  const [liderSolicitanteId, setLiderSolicitanteId] = useState('');
+  const [presupuestoSalarial, setPresupuestoSalarial] = useState('');
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   function crear() {
     setError(null);
     startTransition(async () => {
-      const res = await crearVacante({ cargoId, titulo, descripcion });
+      const res = await crearVacante({ cargoId, titulo, descripcion, liderSolicitanteId, presupuestoSalarial });
       if (res.ok) router.push(`/reclutamiento/vacantes/${res.id}`);
       else setError(res.error);
     });
@@ -46,8 +54,32 @@ export function FormularioVacante({ cargos }: { cargos: { id: string; nombre: st
           placeholder="Ej. Auxiliar de logística — turno mañana"
         />
       </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={label}>Líder solicitante</label>
+          <select className={campo} value={liderSolicitanteId} onChange={(e) => setLiderSolicitanteId(e.target.value)}>
+            <option value="">Sin especificar</option>
+            {lideres.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.nombre_completo}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className={label}>Presupuesto salarial (opcional)</label>
+          <input
+            className={campo}
+            type="number"
+            inputMode="numeric"
+            value={presupuestoSalarial}
+            onChange={(e) => setPresupuestoSalarial(e.target.value)}
+            placeholder="ej: 1600000"
+          />
+        </div>
+      </div>
       <div>
-        <label className={label}>Descripción (opcional)</label>
+        <label className={label}>Descripción del perfil (opcional)</label>
         <textarea
           className={campo}
           rows={4}

@@ -39,7 +39,13 @@ export function Informe360Document({ informe }: { informe: Informe360 }) {
           <Text style={styles.seccionTitulo}>Resumen por dimensión</Text>
           <View style={styles.filaKpi}>
             <Text style={styles.label}>Ser</Text>
-            <Text style={styles.valor}>{informe.ser ? 'Guía del Flow completada' : 'Pendiente'}</Text>
+            <Text style={styles.valor}>
+              {informe.ser?.promedio_ser != null
+                ? `${informe.ser.promedio_ser} / 5 (${informe.ser.total_aspectos_calificados} aspectos)`
+                : informe.ser
+                  ? 'Guía del Flow completada, cargando puntajes'
+                  : 'Pendiente'}
+            </Text>
           </View>
           <View style={styles.filaKpi}>
             <Text style={styles.label}>Saber</Text>
@@ -89,13 +95,10 @@ export function Informe360Document({ informe }: { informe: Informe360 }) {
           )}
         </View>
 
-        {informe.ser && (informe.ser.proposito || informe.ser.talentos_naturales) && (
+        {informe.ser?.narrativa && (
           <View style={styles.seccion}>
             <Text style={styles.seccionTitulo}>Ser — Guía del Flow</Text>
-            {informe.ser.proposito && <Text style={styles.parrafo}>Propósito: {informe.ser.proposito}</Text>}
-            {informe.ser.talentos_naturales && (
-              <Text style={styles.parrafo}>Talentos naturales: {informe.ser.talentos_naturales}</Text>
-            )}
+            <Text style={styles.parrafo}>{informe.ser.narrativa}</Text>
           </View>
         )}
       </Page>

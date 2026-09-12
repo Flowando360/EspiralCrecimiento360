@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "db:types": "supabase gen types typescript --project-id zmpggzrmsuudxyjtobzy --schema public > src/types/database.types.ts"
+    "db:types": "supabase gen types typescript --project-id dsunoydgabtfdypmnana --schema public > src/types/database.types.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

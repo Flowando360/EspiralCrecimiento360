@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
   }
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Espiral de Crecimiento';
+  workbook.creator = 'Círculo de Crecimiento';
   workbook.created = new Date();
 
   const resumen = workbook.addWorksheet('Resumen');
@@ -33,7 +33,15 @@ export async function GET(req: NextRequest) {
     { header: 'Resultado', key: 'resultado', width: 24 },
   ];
   resumen.getRow(1).font = { bold: true };
-  resumen.addRow({ dimension: 'Ser', resultado: informe.ser ? 'Guía del Flow completada' : 'Pendiente' });
+  resumen.addRow({
+    dimension: 'Ser',
+    resultado:
+      informe.ser?.promedio_ser != null
+        ? `${informe.ser.promedio_ser} / 5 (${informe.ser.total_aspectos_calificados} aspectos)`
+        : informe.ser
+          ? 'Guía del Flow completada, cargando puntajes'
+          : 'Pendiente',
+  });
   resumen.addRow({
     dimension: 'Saber',
     resultado: informe.saber?.porcentaje_cumplimiento != null ? `${informe.saber.porcentaje_cumplimiento}%` : '—',

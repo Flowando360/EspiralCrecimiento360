@@ -14,8 +14,9 @@ export function SelectorEstadoVacante({ vacanteId, estadoActual }: { vacanteId: 
       onChange={(e) => startTransition(() => { actualizarEstadoVacante(vacanteId, e.target.value as any); })}
     >
       <option value="abierta">Abierta</option>
-      <option value="pausada">Pausada</option>
-      <option value="cerrada">Cerrada</option>
+      <option value="pausada">En pausa</option>
+      <option value="cancelada">Cancelada</option>
+      <option value="cubierta">Cubierto</option>
     </select>
   );
 }

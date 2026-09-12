@@ -4,10 +4,13 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { obtenerUrlFirmadaHojaVidaCandidato } from '@/lib/supabase/storage';
 import { notFound } from 'next/navigation';
 import { PanelReferencias } from '@/components/reclutamiento/panel-referencias';
+import { EditarCandidato, SubirHojaVidaCandidato } from '@/components/reclutamiento/editar-candidato';
+import { CalificacionEstrellas } from '@/components/reclutamiento/calificacion-estrellas';
 import { ArrowLeft, User, FileText, Briefcase } from 'lucide-react';
 
 const ETAPA_LABEL: Record<string, string> = {
   recibido: 'Recibido',
+  preseleccionado: 'Preseleccionado',
   entrevista: 'Entrevista',
   prueba: 'Prueba',
   oferta: 'Oferta',
@@ -59,15 +62,16 @@ export default async function FichaCandidatoPage({ params }: { params: { id: str
 
       <div className="card p-5 space-y-2">
         <h2 className="font-display font-semibold text-secundario mb-1 flex items-center gap-1.5">
-          <FileText size={16} /> Hoja de vida
+          <FileText size={16} /> Hoja de vida y datos de contacto
         </h2>
         {urlHojaVida ? (
-          <a href={urlHojaVida} target="_blank" rel="noopener noreferrer" className="text-sm text-flow-600 hover:underline">
+          <a href={urlHojaVida} target="_blank" rel="noopener noreferrer" className="text-sm text-flow-600 hover:underline block">
             Ver / descargar hoja de vida
           </a>
         ) : (
           <p className="text-sm text-marmol-400">Sin hoja de vida cargada.</p>
         )}
+        {perfil.rol === 'admin_th' && <SubirHojaVidaCandidato candidatoId={candidato.id} />}
         {candidato.linkedin_url && (
           <p className="text-sm">
             <a href={candidato.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-flow-600 hover:underline">
@@ -75,7 +79,22 @@ export default async function FichaCandidatoPage({ params }: { params: { id: str
             </a>
           </p>
         )}
-        {candidato.notas && <p className="text-sm text-marmol-600 mt-2">{candidato.notas}</p>}
+        {candidato.notas && <p className="text-sm text-marmol-600 mt-2 whitespace-pre-wrap">{candidato.notas}</p>}
+
+        {perfil.rol === 'admin_th' && (
+          <div className="pt-2 border-t border-marmol-100 mt-2">
+            <EditarCandidato
+              candidatoId={candidato.id}
+              datosIniciales={{
+                nombreCompleto: candidato.nombre_completo,
+                correo: candidato.correo ?? '',
+                telefono: candidato.telefono ?? '',
+                linkedinUrl: candidato.linkedin_url ?? '',
+                notas: candidato.notas ?? '',
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <div className="card p-5">
@@ -90,8 +109,9 @@ export default async function FichaCandidatoPage({ params }: { params: { id: str
               <li key={p.id}>
                 <Link href={`/reclutamiento/vacantes/${p.vacante.id}`} className="flex items-center justify-between text-sm hover:text-flow-600">
                   <span>{p.vacante.titulo}</span>
-                  <span className="text-xs text-marmol-400">
-                    {ETAPA_LABEL[p.etapa]} {p.calificacion != null ? `· ${p.calificacion}/10` : ''}
+                  <span className="flex items-center gap-2 text-xs text-marmol-400">
+                    {ETAPA_LABEL[p.etapa]}
+                    {p.calificacion != null && <CalificacionEstrellas valor={p.calificacion} soloLectura tamano={12} />}
                   </span>
                 </Link>
               </li>
