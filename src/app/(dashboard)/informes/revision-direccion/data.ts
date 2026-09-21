@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { calcularValoracionInherente, calcularValoracionResidual, evaluarNivel, type TipoRiesgo } from '@/lib/calculos/matriz-riesgos';
 
 const ROLES_PERMITIDOS = ['admin_th', 'gerencia'] as const;
 
@@ -39,7 +40,7 @@ export async function obtenerRevisionDireccion(periodoInicio: string, periodoFin
     { data: guardado },
   ] = await Promise.all([
     supabase.from('auditorias_internas').select('id, estado, fecha_ejecutada').eq('empresa_id', perfil.empresa_id),
-    supabase.from('matriz_riesgos_controles').select('tipo, riesgo_residual, frecuencia_revision, fecha_ultima_revision').eq('empresa_id', perfil.empresa_id),
+    supabase.from('matriz_riesgos_controles').select('tipo, grado_impacto, grado_probabilidad, grado_efectividad_control, frecuencia_revision, fecha_ultima_revision').eq('empresa_id', perfil.empresa_id),
     supabase.from('acpm').select('estado, eficaz, fecha_registro, fecha_cierre, fecha_compromiso').eq('empresa_id', perfil.empresa_id),
     supabase.from('indicadores_proceso').select('id, nombre, meta, sentido, unidad, proceso:proceso_id(nombre)').eq('activo', true),
     supabase
@@ -152,7 +153,12 @@ export async function obtenerRevisionDireccion(periodoInicio: string, periodoFin
         total: riesgos.filter((r) => r.tipo === 'riesgo').length,
         oportunidades: riesgos.filter((r) => r.tipo === 'oportunidad').length,
         vencidos,
-        residualAlto: riesgos.filter((r) => r.riesgo_residual === 'alto').length,
+        residualAlto: riesgos.filter((r) => {
+          const tipo = r.tipo as TipoRiesgo;
+          const inherente = calcularValoracionInherente(r.grado_impacto, r.grado_probabilidad);
+          const residual = tipo === 'riesgo' ? calcularValoracionResidual(inherente, r.grado_efectividad_control) : inherente;
+          return evaluarNivel(residual, tipo) === 'alto';
+        }).length,
       },
       acpm: {
         registradasEnPeriodo: acpm.filter((a) => a.fecha_registro >= periodoInicio && a.fecha_registro <= periodoFin).length,

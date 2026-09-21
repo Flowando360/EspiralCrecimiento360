@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { obtenerEvidenciaAuditoria, type TipoPaqueteAuditoria, type EvidenciaAuditoria } from '@/app/(dashboard)/informes/evidencia-auditoria/data';
 import { EvidenciaAuditoriaDocument } from '@/app/(dashboard)/informes/evidencia-auditoria/pdf-document';
 import { formatearFecha } from '@/lib/utils';
+import { calcularValoracionInherente, calcularValoracionResidual, evaluarNivel, ETIQUETA_EVALUACION, ETIQUETA_CATEGORIA, type CategoriaRiesgo, type TipoRiesgo } from '@/lib/calculos/matriz-riesgos';
 
 async function construirExcel(evidencia: EvidenciaAuditoria) {
   const workbook = new ExcelJS.Workbook();
@@ -51,22 +52,27 @@ async function construirExcel(evidencia: EvidenciaAuditoria) {
     hoja.columns = [
       { header: 'Marco normativo', key: 'marco', width: 20 },
       { header: 'Tipo', key: 'tipo', width: 12 },
+      { header: 'Categoría', key: 'categoria', width: 14 },
       { header: 'Riesgo / oportunidad', key: 'riesgo', width: 40 },
-      { header: 'Impacto', key: 'impacto', width: 12 },
-      { header: 'Residual', key: 'residual', width: 12 },
+      { header: 'Inherente', key: 'inherente', width: 12 },
       { header: 'Control', key: 'control', width: 32 },
+      { header: 'Residual', key: 'residual', width: 12 },
       { header: 'Frecuencia revisión', key: 'frecuencia', width: 16 },
       { header: 'Última revisión', key: 'ultimaRevision', width: 14 },
     ];
     hoja.getRow(1).font = { bold: true };
     for (const r of evidencia.riesgos) {
+      const tipo = r.tipo as TipoRiesgo;
+      const inherente = calcularValoracionInherente(r.grado_impacto, r.grado_probabilidad);
+      const residual = tipo === 'riesgo' ? calcularValoracionResidual(inherente, r.grado_efectividad_control) : inherente;
       hoja.addRow({
         marco: r.marco_normativo,
-        tipo: r.tipo === 'oportunidad' ? 'Oportunidad' : 'Riesgo',
+        tipo: tipo === 'oportunidad' ? 'Oportunidad' : 'Riesgo',
+        categoria: ETIQUETA_CATEGORIA[r.categoria as CategoriaRiesgo] ?? r.categoria,
         riesgo: r.riesgo,
-        impacto: r.impacto ?? '',
-        residual: r.riesgo_residual ?? '',
+        inherente: `${ETIQUETA_EVALUACION[evaluarNivel(inherente, tipo)]} (${inherente})`,
         control: r.control ?? '',
+        residual: `${ETIQUETA_EVALUACION[evaluarNivel(residual, tipo)]} (${residual})`,
         frecuencia: r.frecuencia_revision ?? '',
         ultimaRevision: r.fecha_ultima_revision ? formatearFecha(r.fecha_ultima_revision) : '',
       });

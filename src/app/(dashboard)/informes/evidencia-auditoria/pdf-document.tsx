@@ -1,5 +1,6 @@
 import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
 import { formatearFecha } from '@/lib/utils';
+import { calcularValoracionInherente, calcularValoracionResidual, evaluarNivel, ETIQUETA_EVALUACION, ETIQUETA_CATEGORIA, type CategoriaRiesgo, type TipoRiesgo } from '@/lib/calculos/matriz-riesgos';
 import type { EvidenciaAuditoria, TipoPaqueteAuditoria } from './data';
 
 const styles = StyleSheet.create({
@@ -81,16 +82,21 @@ export function EvidenciaAuditoriaDocument({ evidencia, tipo }: { evidencia: Evi
               <Text style={styles.celda3}>Residual</Text>
               <Text style={styles.celda4}>Última revisión</Text>
             </View>
-            {evidencia.riesgos.map((r, i) => (
-              <View key={i} style={styles.fila} wrap={false}>
-                <Text style={styles.celda1}>{r.marco_normativo}</Text>
-                <Text style={styles.celda2}>
-                  [{r.tipo === 'oportunidad' ? 'Oportunidad' : 'Riesgo'}] {r.riesgo}
-                </Text>
-                <Text style={styles.celda3}>{r.riesgo_residual ?? r.impacto ?? '—'}</Text>
-                <Text style={styles.celda4}>{r.fecha_ultima_revision ? formatearFecha(r.fecha_ultima_revision) : '—'}</Text>
-              </View>
-            ))}
+            {evidencia.riesgos.map((r, i) => {
+              const tipo = r.tipo as TipoRiesgo;
+              const inherente = calcularValoracionInherente(r.grado_impacto, r.grado_probabilidad);
+              const residual = tipo === 'riesgo' ? calcularValoracionResidual(inherente, r.grado_efectividad_control) : inherente;
+              return (
+                <View key={i} style={styles.fila} wrap={false}>
+                  <Text style={styles.celda1}>{r.marco_normativo}</Text>
+                  <Text style={styles.celda2}>
+                    [{tipo === 'oportunidad' ? 'Oportunidad' : 'Riesgo'}] {r.riesgo} — {ETIQUETA_CATEGORIA[r.categoria as CategoriaRiesgo] ?? r.categoria}
+                  </Text>
+                  <Text style={styles.celda3}>{ETIQUETA_EVALUACION[evaluarNivel(residual, tipo)]}</Text>
+                  <Text style={styles.celda4}>{r.fecha_ultima_revision ? formatearFecha(r.fecha_ultima_revision) : '—'}</Text>
+                </View>
+              );
+            })}
           </View>
         )}
 

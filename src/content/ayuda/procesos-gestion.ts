@@ -4,7 +4,7 @@ export const moduloProcesosGestion: ModuloAyuda = {
   slug: 'procesos-gestion',
   titulo: 'Procesos y Sistemas de Gestión',
   descripcion:
-    'Mapa de procesos, caracterización, gestión documental, matriz de riesgos y oportunidades con ciclo de revisión, auditorías internas con hallazgos, ACPM, gestión de cambio y diagnóstico ISO 9001:2015 — el ciclo PHVA completo del sistema de gestión, base del paquete de Evidencia de auditoría.',
+    'Mapa de procesos, caracterización, gestión documental, matriz de riesgos y oportunidades cuantitativa, auditorías internas con hallazgos, ACPM, gestión de cambio, matriz de requisitos legales y diagnóstico ISO 9001:2015 — el ciclo PHVA completo del sistema de gestión, base del paquete de Evidencia de auditoría.',
   paginas: [
     {
       slug: 'indice',
@@ -39,11 +39,11 @@ export const moduloProcesosGestion: ModuloAyuda = {
         {
           nombre: 'Matriz de riesgos y oportunidades',
           explicacion:
-            'Cada fila es un riesgo o una oportunidad (ISO 9001 numeral 6.1 exige gestionar ambos), con su marco normativo, probabilidad, impacto, control, riesgo residual (el nivel que queda después del control) y, si se le define una frecuencia de revisión (trimestral/semestral/anual), una etiqueta roja "Revisión vencida" cuando ya pasó esa frecuencia desde la última vez que se confirmó. Registrar uno con un control definido suma 10 puntos al ranking de Nexa.',
+            'Metodología cuantitativa real (no una versión genérica): cada fila es un riesgo o una oportunidad (ISO 9001 numeral 6.1 exige gestionar ambos), con marco normativo, categoría (Estratégico/Operativo/Financiero/Legal/Reputacional), descripción, consecuencia, impacto y probabilidad en escala 1-3. El nivel "Inherente" se calcula solo (impacto × probabilidad = 1 a 9, Bajo/Medio/Alto para riesgos, Bajo/Alto/Clave para oportunidades). Si hay control, su efectividad se califica 0-5 (0=No existe control … 5=Eficaz) y el nivel "Residual" se recalcula solo, reduciendo el inherente según esa efectividad — nunca se elige a mano. Con frecuencia de revisión definida (trimestral/semestral/anual), aparece una etiqueta roja "Revisión vencida" cuando ya pasó ese tiempo desde la última confirmación. Registrar uno con control definido suma 10 puntos al ranking de Nexa.',
         },
         {
           nombre: 'Marcar revisado (admin_th)',
-          explicacion: 'Ícono de refrescar junto a un riesgo con frecuencia de revisión definida: confirma que se revisó hoy sin necesidad de abrir el formulario completo de edición. Suma 5 puntos al ranking de Nexa.',
+          explicacion: 'Ícono de refrescar junto a un riesgo con frecuencia de revisión definida: confirma que sigue vigente hoy sin necesidad de abrir el formulario completo de edición (para volver a calificarlo, usa "Editar"). Suma 5 puntos al ranking de Nexa.',
         },
         {
           nombre: 'Crear ACPM desde un riesgo (admin_th)',
@@ -239,6 +239,20 @@ export const moduloProcesosGestion: ModuloAyuda = {
       notas: ['Pueden ver esta pantalla: admin_th, líder y gerencia. Solicitar: admin_th y líder. Evaluar, aprobar/rechazar y marcar implementado: exclusivo de admin_th.'],
     },
     {
+      slug: 'matriz-legal',
+      ruta: '/procesos-gestion/legal',
+      titulo: 'Matriz de requisitos legales',
+      resumen:
+        'Normas, leyes y reglamentos aplicables por proceso (GC-MT-001), con su artículo, si se cumple, el soporte de cumplimiento y las acciones a seguir cuando no se cumple — distinta de la matriz de riesgos (que gestiona riesgos/oportunidades) y del checklist de cumplimiento (que es por marco normativo genérico, no por norma puntual).',
+      camposYBotones: [
+        { nombre: 'Nuevo requisito legal (admin_th)', explicacion: 'Norma/ley/reglamento, año, entidad emisora, asunto, artículo específico y a qué proceso aplica.' },
+        { nombre: 'Cumple / No cumple / Sin evaluar (admin_th)', explicacion: 'Al marcar "No cumple" aparece un campo para las acciones a seguir. El soporte de cumplimiento queda como texto libre (referencia al documento que lo demuestra).' },
+        { nombre: 'Marcar revisado (admin_th)', explicacion: 'Confirma que se revisó hoy sin cambiar la calificación — para eso está "Editar".' },
+        { nombre: 'Contadores del encabezado', explicacion: 'Cuántos requisitos cumplen, no cumplen o siguen sin evaluar, de un vistazo.' },
+      ],
+      notas: ['Pueden ver esta pantalla: admin_th, líder y gerencia. Crear, editar y evaluar requisitos es exclusivo de admin_th.'],
+    },
+    {
       slug: 'diagnostico-iso9001',
       ruta: '/procesos-gestion/diagnostico-iso9001',
       titulo: 'Diagnóstico ISO 9001:2015',
@@ -250,7 +264,7 @@ export const moduloProcesosGestion: ModuloAyuda = {
       ],
       notas: [
         'Pueden ver esta pantalla: admin_th, líder y gerencia. Crear un diagnóstico es exclusivo de admin_th.',
-        'Estructura estándar de la norma (no depende de ningún Excel externo): 28 numerales de las cláusulas 4 a 10, las auditables — 1 a 3 son alcance/referencias/términos, no se evalúan.',
+        'Estructura y ponderación real de Diana (no es una versión genérica): 28 numerales de las cláusulas 4 a 10 — 1 a 3 son alcance/referencias/términos, no se evalúan. El numeral 8 (Operación) pesa el doble que la mayoría (25% del puntaje general) por ser "el corazón del SGC"; el detalle completo de pesos está en la pantalla de cada diagnóstico.',
       ],
     },
     {
@@ -258,12 +272,16 @@ export const moduloProcesosGestion: ModuloAyuda = {
       ruta: '/procesos-gestion/diagnostico-iso9001/*',
       titulo: 'Detalle de un diagnóstico ISO 9001',
       resumen:
-        'El formulario y los resultados en una sola pantalla: cada numeral se responde con la misma escala de 4 niveles del checklist de cumplimiento (No cumple / Cumple parcial / Cumple / No aplica), y el puntaje se recalcula solo.',
+        'El formulario y los resultados en una sola pantalla: cada numeral se responde con la escala real de 5 niveles (No cumple / Cumple mínimamente / En desarrollo / Cumple parcialmente / Cumple completamente / No aplica), y el puntaje se recalcula solo, ponderado por cláusula.',
       camposYBotones: [
-        { nombre: 'Puntaje general y por cláusula', explicacion: 'Promedio 0-100% — "No aplica" no cuenta ni a favor ni en contra; un numeral sin responder tampoco entra al promedio todavía, pero sí se cuenta como pendiente.' },
-        { nombre: 'Nivel de cada numeral (admin_th)', explicacion: 'Clic en una de las 4 opciones para calificar — clic de nuevo sobre la misma la deja sin responder. Se guarda solo, sin botón de enviar.' },
+        {
+          nombre: 'Puntaje general y por cláusula',
+          explicacion:
+            'Dentro de una cláusula es el promedio simple de sus numerales (0-100%); el puntaje general es la suma de cada cláusula multiplicada por su peso (junto al nombre de cada cláusula aparece su % de peso). "No aplica" no cuenta ni a favor ni en contra; un numeral sin responder tampoco entra al promedio todavía, pero sí se cuenta como pendiente — y mientras el diagnóstico esté a medio llenar, el puntaje se re-normaliza contra el peso de las cláusulas que sí tienen datos, para no verse artificialmente bajo.',
+        },
+        { nombre: 'Nivel de cada numeral (admin_th)', explicacion: 'Clic en una de las 5 opciones para calificar — clic de nuevo sobre la misma la deja sin responder. Se guarda solo, sin botón de enviar.' },
         { nombre: 'Observación / evidencia (admin_th)', explicacion: 'Texto libre opcional por numeral, se guarda al salir del campo.' },
-        { nombre: 'Crear ACPM para esta brecha (admin_th)', explicacion: 'Aparece en los numerales calificados "No cumple" o "Cumple parcial": abre el tablero de ACPM con el numeral ya referenciado como origen — no hay que volver a explicar de dónde salió.' },
+        { nombre: 'Crear ACPM para esta brecha (admin_th)', explicacion: 'Aparece en los numerales calificados "No cumple", "Cumple mínimamente" o "En desarrollo": abre el tablero de ACPM con el numeral ya referenciado como origen — no hay que volver a explicar de dónde salió.' },
         { nombre: 'Marcar como completado (admin_th)', explicacion: 'Cambia el estado de la corrida a "Completado" (se puede volver a "En progreso" si hace falta seguir ajustando).' },
       ],
       notas: ['Pueden ver este detalle: admin_th, líder y gerencia. Responder, agregar observaciones y marcar completado es exclusivo de admin_th.'],

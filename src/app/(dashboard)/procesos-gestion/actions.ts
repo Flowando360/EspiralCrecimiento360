@@ -94,10 +94,13 @@ const RiesgoSchema = z.object({
   marcoNormativo: z.enum(['iso_9001', 'sst', 'sarlaft_sagrilaft', 'ptee', 'interno']),
   tipo: z.enum(['riesgo', 'oportunidad']).default('riesgo'),
   riesgo: z.string().trim().min(1, 'El riesgo es requerido'),
-  categoriaRiesgo: z.string().trim().optional(),
-  probabilidad: z.enum(['baja', 'media', 'alta']).optional(),
-  impacto: z.enum(['bajo', 'medio', 'alto']).optional(),
+  consecuencia: z.string().trim().optional(),
+  categoria: z.enum(['estrategico', 'operativo', 'financiero', 'legal', 'reputacional']),
+  gradoImpacto: z.number().int().min(1).max(3),
+  gradoProbabilidad: z.number().int().min(1).max(3),
   control: z.string().trim().optional(),
+  gradoEfectividadControl: z.number().int().min(0).max(5).optional(),
+  accionesARealizar: z.string().trim().optional(),
   procesoId: z.string().uuid().optional(),
   frecuenciaRevision: z.enum(['trimestral', 'semestral', 'anual']).optional(),
 });
@@ -110,17 +113,23 @@ export async function crearRiesgo(input: z.infer<typeof RiesgoSchema>) {
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
 
   const supabase = createClient();
-  const { data, error } = await supabase
+  // TODO: quitar el `as any` cuando se corra `supabase db push` + `npm run
+  // db:types` para la migración 0091 (columnas nuevas de riesgos todavía no
+  // están en database.types.ts).
+  const { data, error } = await (supabase as any)
     .from('matriz_riesgos_controles')
     .insert({
       empresa_id: perfil.empresa_id,
       marco_normativo: parsed.data.marcoNormativo,
       tipo: parsed.data.tipo,
       riesgo: parsed.data.riesgo,
-      categoria_riesgo: parsed.data.categoriaRiesgo || null,
-      probabilidad: parsed.data.probabilidad || null,
-      impacto: parsed.data.impacto || null,
+      consecuencia: parsed.data.consecuencia || null,
+      categoria: parsed.data.categoria,
+      grado_impacto: parsed.data.gradoImpacto,
+      grado_probabilidad: parsed.data.gradoProbabilidad,
       control: parsed.data.control || null,
+      grado_efectividad_control: parsed.data.tipo === 'riesgo' ? (parsed.data.gradoEfectividadControl ?? 0) : null,
+      acciones_a_realizar: parsed.data.accionesARealizar || null,
       proceso_id: parsed.data.procesoId || null,
       frecuencia_revision: parsed.data.frecuenciaRevision || null,
       fecha_ultima_revision: new Date().toISOString().slice(0, 10),
@@ -136,19 +145,7 @@ export async function crearRiesgo(input: z.infer<typeof RiesgoSchema>) {
   return { ok: true as const, id: data.id as string };
 }
 
-const EditarRiesgoSchema = z.object({
-  id: z.string().uuid(),
-  marcoNormativo: z.enum(['iso_9001', 'sst', 'sarlaft_sagrilaft', 'ptee', 'interno']),
-  tipo: z.enum(['riesgo', 'oportunidad']).default('riesgo'),
-  riesgo: z.string().trim().min(1, 'El riesgo es requerido'),
-  categoriaRiesgo: z.string().trim().optional(),
-  probabilidad: z.enum(['baja', 'media', 'alta']).optional().or(z.literal('')),
-  impacto: z.enum(['bajo', 'medio', 'alto']).optional().or(z.literal('')),
-  control: z.string().trim().optional(),
-  procesoId: z.string().uuid().optional(),
-  frecuenciaRevision: z.enum(['trimestral', 'semestral', 'anual']).optional().or(z.literal('')),
-  riesgoResidual: z.enum(['bajo', 'medio', 'alto']).optional().or(z.literal('')),
-});
+const EditarRiesgoSchema = RiesgoSchema.extend({ id: z.string().uuid() });
 
 export async function actualizarRiesgo(input: z.infer<typeof EditarRiesgoSchema>) {
   const perfil = await requerirAdminTh();
@@ -158,19 +155,21 @@ export async function actualizarRiesgo(input: z.infer<typeof EditarRiesgoSchema>
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
 
   const supabase = createClient();
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('matriz_riesgos_controles')
     .update({
       marco_normativo: parsed.data.marcoNormativo,
       tipo: parsed.data.tipo,
       riesgo: parsed.data.riesgo,
-      categoria_riesgo: parsed.data.categoriaRiesgo || null,
-      probabilidad: parsed.data.probabilidad || null,
-      impacto: parsed.data.impacto || null,
+      consecuencia: parsed.data.consecuencia || null,
+      categoria: parsed.data.categoria,
+      grado_impacto: parsed.data.gradoImpacto,
+      grado_probabilidad: parsed.data.gradoProbabilidad,
       control: parsed.data.control || null,
+      grado_efectividad_control: parsed.data.tipo === 'riesgo' ? (parsed.data.gradoEfectividadControl ?? 0) : null,
+      acciones_a_realizar: parsed.data.accionesARealizar || null,
       proceso_id: parsed.data.procesoId || null,
       frecuencia_revision: parsed.data.frecuenciaRevision || null,
-      riesgo_residual: parsed.data.riesgoResidual || null,
     })
     .eq('id', parsed.data.id)
     .eq('empresa_id', perfil.empresa_id);
@@ -180,26 +179,16 @@ export async function actualizarRiesgo(input: z.infer<typeof EditarRiesgoSchema>
   return { ok: true as const };
 }
 
-/** Revisión periódica (flujo diferenciador 3 de Nexus): confirma/actualiza el riesgo y estampa fecha_ultima_revision = hoy, recalculando el riesgo residual. */
-export async function marcarRiesgoRevisado(input: {
-  id: string;
-  probabilidad: 'baja' | 'media' | 'alta';
-  impacto: 'bajo' | 'medio' | 'alto';
-  riesgoResidual: 'bajo' | 'medio' | 'alto';
-}) {
+/** Revisión periódica (flujo diferenciador 3 de Nexus): confirma que el riesgo/oportunidad sigue vigente hoy, sin volver a calificarlo (para eso está "Editar"). */
+export async function marcarRiesgoRevisado(id: string) {
   const perfil = await requerirAdminTh();
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
   const supabase = createClient();
   const { error } = await supabase
     .from('matriz_riesgos_controles')
-    .update({
-      probabilidad: input.probabilidad,
-      impacto: input.impacto,
-      riesgo_residual: input.riesgoResidual,
-      fecha_ultima_revision: new Date().toISOString().slice(0, 10),
-    })
-    .eq('id', input.id)
+    .update({ fecha_ultima_revision: new Date().toISOString().slice(0, 10) })
+    .eq('id', id)
     .eq('empresa_id', perfil.empresa_id);
 
   if (error) return { ok: false as const, error: error.message };

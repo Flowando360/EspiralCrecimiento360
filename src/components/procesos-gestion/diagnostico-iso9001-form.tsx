@@ -8,9 +8,11 @@ import { ListChecks, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const OPCIONES: { valor: NivelDiagnostico; etiqueta: string; clase: string }[] = [
-  { valor: 'no_cumple', etiqueta: 'No cumple', clase: 'badge-bajo' },
-  { valor: 'cumple_parcial', etiqueta: 'Cumple parcial', clase: 'badge-medio' },
-  { valor: 'cumple', etiqueta: 'Cumple', clase: 'badge-alto' },
+  { valor: 'no_cumple', etiqueta: 'No cumple', clase: 'bg-red-100 text-bajo border-red-200' },
+  { valor: 'cumple_minimamente', etiqueta: 'Cumple mínimamente', clase: 'bg-orange-100 text-orange-700 border-orange-200' },
+  { valor: 'en_desarrollo', etiqueta: 'En desarrollo', clase: 'badge-medio' },
+  { valor: 'cumple_parcialmente', etiqueta: 'Cumple parcialmente', clase: 'bg-lime-100 text-lime-700 border-lime-200' },
+  { valor: 'cumple_completamente', etiqueta: 'Cumple completamente', clase: 'badge-alto' },
   { valor: 'no_aplica', etiqueta: 'No aplica', clase: 'badge-marmol' },
 ];
 
@@ -114,7 +116,7 @@ export function DiagnosticoIso9001Form({
           {resultado.porClausula.map((c) => (
             <div key={c.clausula} className="rounded-lg border border-marmol-100 px-3 py-2">
               <p className="text-xs text-marmol-500 truncate">
-                {c.clausula}. {tituloClausula(c.clausula)}
+                {c.clausula}. {tituloClausula(c.clausula)} <span className="text-marmol-400">({Math.round(c.peso * 100)}%)</span>
               </p>
               <p className={cn('font-display text-lg font-semibold', colorPuntaje(c.puntaje))}>{c.puntaje !== null ? `${c.puntaje}%` : '—'}</p>
             </div>
@@ -132,7 +134,7 @@ export function DiagnosticoIso9001Form({
               .filter((i) => i.clausula === clausula)
               .map((item) => {
                 const r = respuestas.get(item.id) ?? { nivel: null, observacion: '' };
-                const esDebil = r.nivel === 'no_cumple' || r.nivel === 'cumple_parcial';
+                const esDebil = r.nivel === 'no_cumple' || r.nivel === 'cumple_minimamente' || r.nivel === 'en_desarrollo';
                 const descripcionAcpm = `Diagnóstico ISO 9001 — numeral ${item.numeral}: ${item.titulo}`;
                 return (
                   <div key={item.id} className="border-b border-marmol-100 last:border-0 pb-4 last:pb-0">

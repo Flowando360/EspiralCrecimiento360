@@ -26,7 +26,7 @@ export default async function ProcesosGestionPage() {
     supabase.from('interacciones_proceso').select('id, proceso_origen_id, proceso_destino_id, tipo, descripcion'),
     supabase
       .from('matriz_riesgos_controles')
-      .select('id, marco_normativo, tipo, riesgo, categoria_riesgo, probabilidad, impacto, control, proceso_id, frecuencia_revision, fecha_ultima_revision, riesgo_residual')
+      .select('id, marco_normativo, tipo, riesgo, consecuencia, categoria, grado_impacto, grado_probabilidad, control, grado_efectividad_control, acciones_a_realizar, proceso_id, frecuencia_revision, fecha_ultima_revision')
       .eq('empresa_id', perfil.empresa_id)
       .order('created_at', { ascending: false }),
     supabase

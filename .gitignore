@@ -48,6 +48,11 @@ docs/GuiaDelFlow_*.pdf
 # empleados) — solo insumo visual para diseño, nunca al repo público.
 docs/Captura de pantalla*.png
 
+# Metodologías y plantillas reales de consultoría de Diana, con datos de
+# clientes reales (Logatrans, Plásticos Correa S.A.S.) — insumo para
+# construir los módulos, nunca al repo (es de GitHub, no privado).
+Documentos/
+
 .vercel
 .env*
 

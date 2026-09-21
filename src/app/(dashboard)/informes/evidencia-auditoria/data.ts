@@ -22,9 +22,11 @@ export interface RiesgoEvidencia {
   marco_normativo: string;
   tipo: string;
   riesgo: string;
-  impacto: string | null;
-  riesgo_residual: string | null;
+  categoria: string;
+  grado_impacto: number;
+  grado_probabilidad: number;
   control: string | null;
+  grado_efectividad_control: number | null;
   frecuencia_revision: string | null;
   fecha_ultima_revision: string | null;
 }
@@ -167,7 +169,7 @@ export async function obtenerEvidenciaAuditoria(
         .in('marco_normativo', marcosChecklist),
       supabase
         .from('matriz_riesgos_controles')
-        .select('marco_normativo, tipo, riesgo, impacto, riesgo_residual, control, frecuencia_revision, fecha_ultima_revision')
+        .select('marco_normativo, tipo, riesgo, categoria, grado_impacto, grado_probabilidad, control, grado_efectividad_control, frecuencia_revision, fecha_ultima_revision')
         .eq('empresa_id', empresaId)
         .in('marco_normativo', marcosChecklist),
     ]);

@@ -5,6 +5,19 @@ import Link from 'next/link';
 import { crearRiesgo, eliminarRiesgo, actualizarRiesgo, marcarRiesgoRevisado } from '@/app/(dashboard)/procesos-gestion/actions';
 import { Trash2, Plus, Pencil, Check, X, RefreshCw, AlertTriangle, ListChecks } from 'lucide-react';
 import { cn, formatearFecha } from '@/lib/utils';
+import {
+  CATEGORIAS_RIESGO,
+  ETIQUETA_CATEGORIA,
+  ETIQUETA_EVALUACION,
+  ETIQUETA_EFECTIVIDAD_CONTROL,
+  etiquetaGradoImpacto,
+  etiquetaGradoProbabilidad,
+  calcularValoracionInherente,
+  calcularValoracionResidual,
+  evaluarNivel,
+  type CategoriaRiesgo,
+  type TipoRiesgo,
+} from '@/lib/calculos/matriz-riesgos';
 
 const ETIQUETA_MARCO: Record<string, string> = {
   iso_9001: 'ISO 9001',
@@ -14,8 +27,9 @@ const ETIQUETA_MARCO: Record<string, string> = {
   interno: 'Interno',
 };
 
-const CLASE_IMPACTO: Record<string, string> = {
+const CLASE_NIVEL: Record<string, string> = {
   alto: 'badge-bajo',
+  clave: 'badge-bajo',
   medio: 'badge-medio',
   bajo: 'badge-alto',
 };
@@ -29,16 +43,18 @@ const DIAS_FRECUENCIA: Record<string, number> = {
 interface Riesgo {
   id: string;
   marco_normativo: string;
-  tipo: string;
+  tipo: TipoRiesgo;
   riesgo: string;
-  categoria_riesgo: string | null;
-  probabilidad: string | null;
-  impacto: string | null;
+  consecuencia: string | null;
+  categoria: CategoriaRiesgo;
+  grado_impacto: number;
+  grado_probabilidad: number;
   control: string | null;
+  grado_efectividad_control: number | null;
+  acciones_a_realizar: string | null;
   proceso_id: string | null;
   frecuencia_revision: string | null;
   fecha_ultima_revision: string | null;
-  riesgo_residual: string | null;
 }
 
 interface ProcesoOpcion {
@@ -55,6 +71,30 @@ function estaVencido(r: Riesgo): boolean {
   return limite < new Date();
 }
 
+const campo = 'rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm';
+
+function SelectorGrado({
+  valor,
+  onChange,
+  opciones,
+  prefijo,
+}: {
+  valor: number;
+  onChange: (v: number) => void;
+  opciones: [number, string][];
+  prefijo: string;
+}) {
+  return (
+    <select value={valor} onChange={(e) => onChange(Number(e.target.value))} className={campo}>
+      {opciones.map(([v, l]) => (
+        <option key={v} value={v}>
+          {prefijo} {v} — {l}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export function ListaRiesgos({
   riesgosIniciales,
   procesos,
@@ -66,11 +106,15 @@ export function ListaRiesgos({
 }) {
   const [riesgos, setRiesgos] = useState(riesgosIniciales);
   const [marcoNormativo, setMarcoNormativo] = useState<'iso_9001' | 'sst' | 'sarlaft_sagrilaft' | 'ptee' | 'interno'>('iso_9001');
-  const [tipo, setTipo] = useState<'riesgo' | 'oportunidad'>('riesgo');
+  const [tipo, setTipo] = useState<TipoRiesgo>('riesgo');
+  const [categoria, setCategoria] = useState<CategoriaRiesgo>('operativo');
   const [riesgo, setRiesgo] = useState('');
-  const [probabilidad, setProbabilidad] = useState<'baja' | 'media' | 'alta'>('media');
-  const [impacto, setImpacto] = useState<'bajo' | 'medio' | 'alto'>('medio');
+  const [consecuencia, setConsecuencia] = useState('');
+  const [gradoImpacto, setGradoImpacto] = useState(2);
+  const [gradoProbabilidad, setGradoProbabilidad] = useState(2);
   const [control, setControl] = useState('');
+  const [gradoEfectividadControl, setGradoEfectividadControl] = useState(0);
+  const [accionesARealizar, setAccionesARealizar] = useState('');
   const [procesoId, setProcesoId] = useState('');
   const [frecuenciaRevision, setFrecuenciaRevision] = useState<'trimestral' | 'semestral' | 'anual' | ''>('');
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +129,20 @@ export function ListaRiesgos({
   function agregar() {
     setError(null);
     startTransition(async () => {
-      const res = await crearRiesgo({ marcoNormativo, tipo, riesgo, probabilidad, impacto, control, procesoId: procesoId || undefined, frecuenciaRevision: frecuenciaRevision || undefined });
+      const res = await crearRiesgo({
+        marcoNormativo,
+        tipo,
+        riesgo,
+        consecuencia: consecuencia || undefined,
+        categoria,
+        gradoImpacto,
+        gradoProbabilidad,
+        control,
+        gradoEfectividadControl: tipo === 'riesgo' ? gradoEfectividadControl : undefined,
+        accionesARealizar: accionesARealizar || undefined,
+        procesoId: procesoId || undefined,
+        frecuenciaRevision: frecuenciaRevision || undefined,
+      });
       if (res.ok) {
         setRiesgos((prev) => [
           ...prev,
@@ -94,18 +151,22 @@ export function ListaRiesgos({
             marco_normativo: marcoNormativo,
             tipo,
             riesgo,
-            categoria_riesgo: null,
-            probabilidad,
-            impacto,
+            consecuencia: consecuencia || null,
+            categoria,
+            grado_impacto: gradoImpacto,
+            grado_probabilidad: gradoProbabilidad,
             control: control || null,
+            grado_efectividad_control: tipo === 'riesgo' ? gradoEfectividadControl : null,
+            acciones_a_realizar: accionesARealizar || null,
             proceso_id: procesoId || null,
             frecuencia_revision: frecuenciaRevision || null,
             fecha_ultima_revision: new Date().toISOString().slice(0, 10),
-            riesgo_residual: null,
           },
         ]);
         setRiesgo('');
+        setConsecuencia('');
         setControl('');
+        setAccionesARealizar('');
         setProcesoId('');
         setFrecuenciaRevision('');
       } else {
@@ -121,40 +182,41 @@ export function ListaRiesgos({
     });
   }
 
-  function revisar(id: string, probabilidad: string, impacto: string, riesgoResidual: string) {
-    setRiesgos((prev) => prev.map((r) => (r.id === id ? { ...r, fecha_ultima_revision: new Date().toISOString().slice(0, 10), riesgo_residual: riesgoResidual } : r)));
+  function revisar(r: Riesgo) {
+    setRiesgos((prev) => prev.map((x) => (x.id === r.id ? { ...x, fecha_ultima_revision: new Date().toISOString().slice(0, 10) } : x)));
     startTransition(async () => {
-      await marcarRiesgoRevisado({
-        id,
-        probabilidad: probabilidad as 'baja' | 'media' | 'alta',
-        impacto: impacto as 'bajo' | 'medio' | 'alto',
-        riesgoResidual: riesgoResidual as 'bajo' | 'medio' | 'alto',
-      });
+      await marcarRiesgoRevisado(r.id);
     });
   }
 
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [edMarco, setEdMarco] = useState<typeof marcoNormativo>('iso_9001');
-  const [edTipo, setEdTipo] = useState<typeof tipo>('riesgo');
+  const [edTipo, setEdTipo] = useState<TipoRiesgo>('riesgo');
+  const [edCategoria, setEdCategoria] = useState<CategoriaRiesgo>('operativo');
   const [edRiesgo, setEdRiesgo] = useState('');
-  const [edProbabilidad, setEdProbabilidad] = useState<typeof probabilidad>('media');
-  const [edImpacto, setEdImpacto] = useState<typeof impacto>('medio');
+  const [edConsecuencia, setEdConsecuencia] = useState('');
+  const [edGradoImpacto, setEdGradoImpacto] = useState(2);
+  const [edGradoProbabilidad, setEdGradoProbabilidad] = useState(2);
   const [edControl, setEdControl] = useState('');
+  const [edGradoEfectividadControl, setEdGradoEfectividadControl] = useState(0);
+  const [edAccionesARealizar, setEdAccionesARealizar] = useState('');
   const [edProcesoId, setEdProcesoId] = useState('');
   const [edFrecuencia, setEdFrecuencia] = useState<typeof frecuenciaRevision>('');
-  const [edResidual, setEdResidual] = useState<'bajo' | 'medio' | 'alto' | ''>('');
 
   function iniciarEdicion(r: Riesgo) {
     setEditandoId(r.id);
     setEdMarco(r.marco_normativo as typeof edMarco);
-    setEdTipo((r.tipo as typeof edTipo) ?? 'riesgo');
+    setEdTipo(r.tipo);
+    setEdCategoria(r.categoria);
     setEdRiesgo(r.riesgo);
-    setEdProbabilidad((r.probabilidad as typeof edProbabilidad) ?? 'media');
-    setEdImpacto((r.impacto as typeof edImpacto) ?? 'medio');
+    setEdConsecuencia(r.consecuencia ?? '');
+    setEdGradoImpacto(r.grado_impacto);
+    setEdGradoProbabilidad(r.grado_probabilidad);
     setEdControl(r.control ?? '');
+    setEdGradoEfectividadControl(r.grado_efectividad_control ?? 0);
+    setEdAccionesARealizar(r.acciones_a_realizar ?? '');
     setEdProcesoId(r.proceso_id ?? '');
     setEdFrecuencia((r.frecuencia_revision as typeof edFrecuencia) ?? '');
-    setEdResidual((r.riesgo_residual as typeof edResidual) ?? '');
   }
 
   function guardarEdicion(id: string) {
@@ -165,12 +227,15 @@ export function ListaRiesgos({
         marcoNormativo: edMarco,
         tipo: edTipo,
         riesgo: edRiesgo,
-        probabilidad: edProbabilidad,
-        impacto: edImpacto,
+        consecuencia: edConsecuencia || undefined,
+        categoria: edCategoria,
+        gradoImpacto: edGradoImpacto,
+        gradoProbabilidad: edGradoProbabilidad,
         control: edControl,
+        gradoEfectividadControl: edTipo === 'riesgo' ? edGradoEfectividadControl : undefined,
+        accionesARealizar: edAccionesARealizar || undefined,
         procesoId: edProcesoId || undefined,
         frecuenciaRevision: edFrecuencia || undefined,
-        riesgoResidual: edResidual || undefined,
       });
       if (res.ok) {
         setRiesgos((prev) =>
@@ -180,13 +245,16 @@ export function ListaRiesgos({
                   ...r,
                   marco_normativo: edMarco,
                   tipo: edTipo,
+                  categoria: edCategoria,
                   riesgo: edRiesgo,
-                  probabilidad: edProbabilidad,
-                  impacto: edImpacto,
+                  consecuencia: edConsecuencia || null,
+                  grado_impacto: edGradoImpacto,
+                  grado_probabilidad: edGradoProbabilidad,
                   control: edControl || null,
+                  grado_efectividad_control: edTipo === 'riesgo' ? edGradoEfectividadControl : null,
+                  acciones_a_realizar: edAccionesARealizar || null,
                   proceso_id: edProcesoId || null,
                   frecuencia_revision: edFrecuencia || null,
-                  riesgo_residual: edResidual || null,
                 }
               : r
           )
@@ -200,62 +268,80 @@ export function ListaRiesgos({
 
   return (
     <div className="card p-5">
-      <h2 className="font-display font-semibold text-secundario mb-3">Matriz de riesgos y oportunidades</h2>
+      <h2 className="font-display font-semibold text-secundario mb-1">Matriz de riesgos y oportunidades</h2>
+      <p className="text-xs text-marmol-400 mb-3">Inherente = impacto × probabilidad. Residual = inherente reducido según qué tan efectivo es el control.</p>
 
       <div className="space-y-2 mb-4">
-        {riesgos.map((r) =>
-          editandoId === r.id ? (
+        {riesgos.map((r) => {
+          const inherente = calcularValoracionInherente(r.grado_impacto, r.grado_probabilidad);
+          const nivelInherente = evaluarNivel(inherente, r.tipo);
+          const residual = r.tipo === 'riesgo' ? calcularValoracionResidual(inherente, r.grado_efectividad_control) : inherente;
+          const nivelResidual = evaluarNivel(residual, r.tipo);
+
+          return editandoId === r.id ? (
             <div key={r.id} className="space-y-1.5 border-b border-marmol-100 pb-2 bg-flow-50/40 -mx-1 px-1 rounded">
               <div className="grid grid-cols-3 gap-2">
-                <select value={edMarco} onChange={(e) => setEdMarco(e.target.value as typeof edMarco)} className="rounded-lg border border-marmol-200 px-2 py-1 text-sm">
+                <select value={edMarco} onChange={(e) => setEdMarco(e.target.value as typeof edMarco)} className={campo}>
                   {Object.entries(ETIQUETA_MARCO).map(([v, l]) => (
                     <option key={v} value={v}>
                       {l}
                     </option>
                   ))}
                 </select>
-                <select value={edTipo} onChange={(e) => setEdTipo(e.target.value as typeof edTipo)} className="rounded-lg border border-marmol-200 px-2 py-1 text-sm">
+                <select value={edTipo} onChange={(e) => setEdTipo(e.target.value as TipoRiesgo)} className={campo}>
                   <option value="riesgo">Riesgo</option>
                   <option value="oportunidad">Oportunidad</option>
                 </select>
-                <select value={edProcesoId} onChange={(e) => setEdProcesoId(e.target.value)} className="rounded-lg border border-marmol-200 px-2 py-1 text-sm">
-                  <option value="">Sin proceso asociado</option>
-                  {procesos.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.codigo ? `${p.codigo} · ` : ''}
-                      {p.nombre}
+                <select value={edCategoria} onChange={(e) => setEdCategoria(e.target.value as CategoriaRiesgo)} className={campo}>
+                  {CATEGORIAS_RIESGO.map((c) => (
+                    <option key={c} value={c}>
+                      {ETIQUETA_CATEGORIA[c]}
                     </option>
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                <select value={edProbabilidad} onChange={(e) => setEdProbabilidad(e.target.value as typeof edProbabilidad)} className="rounded-lg border border-marmol-200 px-2 py-1 text-sm">
-                  <option value="baja">Prob. baja</option>
-                  <option value="media">Prob. media</option>
-                  <option value="alta">Prob. alta</option>
-                </select>
-                <select value={edImpacto} onChange={(e) => setEdImpacto(e.target.value as typeof edImpacto)} className="rounded-lg border border-marmol-200 px-2 py-1 text-sm">
-                  <option value="bajo">Impacto bajo</option>
-                  <option value="medio">Impacto medio</option>
-                  <option value="alto">Impacto alto</option>
-                </select>
-                <select value={edResidual} onChange={(e) => setEdResidual(e.target.value as typeof edResidual)} className="rounded-lg border border-marmol-200 px-2 py-1 text-sm">
-                  <option value="">Residual sin definir</option>
-                  <option value="bajo">Residual bajo</option>
-                  <option value="medio">Residual medio</option>
-                  <option value="alto">Residual alto</option>
-                </select>
-              </div>
-              <input value={edRiesgo} onChange={(e) => setEdRiesgo(e.target.value)} className="w-full rounded-lg border border-marmol-200 px-2 py-1 text-sm" />
+              <input value={edRiesgo} onChange={(e) => setEdRiesgo(e.target.value)} placeholder="Descripción" className={cn('w-full', campo)} />
+              <input value={edConsecuencia} onChange={(e) => setEdConsecuencia(e.target.value)} placeholder="Consecuencia (positiva/negativa)" className={cn('w-full', campo)} />
               <div className="grid grid-cols-2 gap-2">
-                <input value={edControl} onChange={(e) => setEdControl(e.target.value)} placeholder="Control" className="rounded-lg border border-marmol-200 px-2 py-1 text-sm" />
-                <select value={edFrecuencia} onChange={(e) => setEdFrecuencia(e.target.value as typeof edFrecuencia)} className="rounded-lg border border-marmol-200 px-2 py-1 text-sm">
-                  <option value="">Sin frecuencia de revisión</option>
-                  <option value="trimestral">Revisar trimestral</option>
-                  <option value="semestral">Revisar semestral</option>
-                  <option value="anual">Revisar anual</option>
-                </select>
+                <SelectorGrado
+                  valor={edGradoImpacto}
+                  onChange={setEdGradoImpacto}
+                  prefijo="Impacto"
+                  opciones={[1, 2, 3].map((g) => [g, etiquetaGradoImpacto(edTipo, g as 1 | 2 | 3)])}
+                />
+                <SelectorGrado
+                  valor={edGradoProbabilidad}
+                  onChange={setEdGradoProbabilidad}
+                  prefijo="Prob."
+                  opciones={[1, 2, 3].map((g) => [g, etiquetaGradoProbabilidad(edTipo, g as 1 | 2 | 3)])}
+                />
               </div>
+              <select value={edProcesoId} onChange={(e) => setEdProcesoId(e.target.value)} className={cn('w-full', campo)}>
+                <option value="">Sin proceso asociado</option>
+                {procesos.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.codigo ? `${p.codigo} · ` : ''}
+                    {p.nombre}
+                  </option>
+                ))}
+              </select>
+              <input value={edControl} onChange={(e) => setEdControl(e.target.value)} placeholder="Control (aplica para riesgos)" className={cn('w-full', campo)} />
+              {edTipo === 'riesgo' && (
+                <select value={edGradoEfectividadControl} onChange={(e) => setEdGradoEfectividadControl(Number(e.target.value))} className={cn('w-full', campo)}>
+                  {[0, 1, 2, 3, 4, 5].map((g) => (
+                    <option key={g} value={g}>
+                      Efectividad del control {g} — {ETIQUETA_EFECTIVIDAD_CONTROL[g]}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <input value={edAccionesARealizar} onChange={(e) => setEdAccionesARealizar(e.target.value)} placeholder="Acciones a realizar (opcional)" className={cn('w-full', campo)} />
+              <select value={edFrecuencia} onChange={(e) => setEdFrecuencia(e.target.value as typeof edFrecuencia)} className={cn('w-full', campo)}>
+                <option value="">Sin frecuencia de revisión</option>
+                <option value="trimestral">Revisar trimestral</option>
+                <option value="semestral">Revisar semestral</option>
+                <option value="anual">Revisar anual</option>
+              </select>
               <div className="flex items-center gap-2">
                 <button onClick={() => guardarEdicion(r.id)} disabled={pending || !edRiesgo.trim()} className="inline-flex items-center gap-1 rounded-lg bg-flow-500 hover:bg-flow-600 disabled:opacity-40 text-white text-xs font-medium px-2.5 py-1.5">
                   <Check size={12} /> Guardar
@@ -273,8 +359,13 @@ export function ListaRiesgos({
                   <span className={cn('text-xs rounded-full px-2 py-0.5 font-medium', r.tipo === 'oportunidad' ? 'badge-saber' : 'badge-marmol')}>
                     {r.tipo === 'oportunidad' ? 'Oportunidad' : 'Riesgo'}
                   </span>
-                  {r.impacto && <span className={cn('text-xs rounded-full px-2 py-0.5 font-medium', CLASE_IMPACTO[r.impacto])}>Impacto {r.impacto}</span>}
-                  {r.riesgo_residual && <span className={cn('text-xs rounded-full px-2 py-0.5 font-medium', CLASE_IMPACTO[r.riesgo_residual])}>Residual {r.riesgo_residual}</span>}
+                  <span className="text-xs rounded-full px-2 py-0.5 font-medium bg-marmol-100 text-marmol-600">{ETIQUETA_CATEGORIA[r.categoria]}</span>
+                  <span className={cn('text-xs rounded-full px-2 py-0.5 font-medium', CLASE_NIVEL[nivelInherente])} title={`Impacto ${r.grado_impacto} × Probabilidad ${r.grado_probabilidad} = ${inherente}`}>
+                    Inherente: {ETIQUETA_EVALUACION[nivelInherente]} ({inherente})
+                  </span>
+                  <span className={cn('text-xs rounded-full px-2 py-0.5 font-medium', CLASE_NIVEL[nivelResidual])} title={r.tipo === 'riesgo' ? `Reducido por efectividad del control (${ETIQUETA_EFECTIVIDAD_CONTROL[r.grado_efectividad_control ?? 0]})` : 'Igual al inherente (no aplica control)'}>
+                    Residual: {ETIQUETA_EVALUACION[nivelResidual]} ({residual})
+                  </span>
                   {estaVencido(r) && (
                     <span className="text-xs rounded-full px-2 py-0.5 font-medium badge-bajo inline-flex items-center gap-1">
                       <AlertTriangle size={11} /> Revisión vencida
@@ -282,7 +373,9 @@ export function ListaRiesgos({
                   )}
                 </div>
                 <p className="text-sm font-medium text-marmol-800 mt-1">{r.riesgo}</p>
+                {r.consecuencia && <p className="text-xs text-marmol-500">Consecuencia: {r.consecuencia}</p>}
                 {r.control && <p className="text-xs text-marmol-500">Control: {r.control}</p>}
+                {r.acciones_a_realizar && <p className="text-xs text-marmol-500">Acciones: {r.acciones_a_realizar}</p>}
                 <p className="text-xs text-marmol-400 mt-0.5">
                   {nombreProceso(r.proceso_id) && <>{nombreProceso(r.proceso_id)} · </>}
                   {r.frecuencia_revision ? `Revisión ${r.frecuencia_revision}` : 'Sin frecuencia de revisión'}
@@ -299,11 +392,7 @@ export function ListaRiesgos({
                     <ListChecks size={13} />
                   </Link>
                   {r.frecuencia_revision && (
-                    <button
-                      onClick={() => revisar(r.id, r.probabilidad ?? 'media', r.impacto ?? 'medio', r.riesgo_residual ?? r.impacto ?? 'medio')}
-                      title="Marcar revisado hoy"
-                      className="text-marmol-300 hover:text-alto"
-                    >
+                    <button onClick={() => revisar(r)} title="Marcar revisado hoy (sin cambiar la calificación)" className="text-marmol-300 hover:text-alto">
                       <RefreshCw size={13} />
                     </button>
                   )}
@@ -316,57 +405,65 @@ export function ListaRiesgos({
                 </div>
               )}
             </div>
-          )
-        )}
+          );
+        })}
         {riesgos.length === 0 && <p className="text-sm text-marmol-400">Sin riesgos u oportunidades registrados todavía.</p>}
       </div>
 
       {puedeEditar && (
         <div className="space-y-2 border-t border-marmol-100 pt-3">
           <div className="grid grid-cols-3 gap-2">
-            <select value={marcoNormativo} onChange={(e) => setMarcoNormativo(e.target.value as typeof marcoNormativo)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
+            <select value={marcoNormativo} onChange={(e) => setMarcoNormativo(e.target.value as typeof marcoNormativo)} className={campo}>
               {Object.entries(ETIQUETA_MARCO).map(([v, l]) => (
                 <option key={v} value={v}>
                   {l}
                 </option>
               ))}
             </select>
-            <select value={tipo} onChange={(e) => setTipo(e.target.value as typeof tipo)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
+            <select value={tipo} onChange={(e) => setTipo(e.target.value as TipoRiesgo)} className={campo}>
               <option value="riesgo">Riesgo</option>
               <option value="oportunidad">Oportunidad</option>
             </select>
-            <select value={procesoId} onChange={(e) => setProcesoId(e.target.value)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
-              <option value="">Sin proceso asociado</option>
-              {procesos.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.codigo ? `${p.codigo} · ` : ''}
-                  {p.nombre}
+            <select value={categoria} onChange={(e) => setCategoria(e.target.value as CategoriaRiesgo)} className={campo}>
+              {CATEGORIAS_RIESGO.map((c) => (
+                <option key={c} value={c}>
+                  {ETIQUETA_CATEGORIA[c]}
                 </option>
               ))}
             </select>
           </div>
+          <input value={riesgo} onChange={(e) => setRiesgo(e.target.value)} placeholder="Descripción del riesgo/oportunidad" className={cn('w-full', campo)} />
+          <input value={consecuencia} onChange={(e) => setConsecuencia(e.target.value)} placeholder="Consecuencia (positiva/negativa, opcional)" className={cn('w-full', campo)} />
           <div className="grid grid-cols-2 gap-2">
-            <select value={probabilidad} onChange={(e) => setProbabilidad(e.target.value as typeof probabilidad)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
-              <option value="baja">Prob. baja</option>
-              <option value="media">Prob. media</option>
-              <option value="alta">Prob. alta</option>
-            </select>
-            <select value={impacto} onChange={(e) => setImpacto(e.target.value as typeof impacto)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
-              <option value="bajo">Impacto bajo</option>
-              <option value="medio">Impacto medio</option>
-              <option value="alto">Impacto alto</option>
-            </select>
+            <SelectorGrado valor={gradoImpacto} onChange={setGradoImpacto} prefijo="Impacto" opciones={[1, 2, 3].map((g) => [g, etiquetaGradoImpacto(tipo, g as 1 | 2 | 3)])} />
+            <SelectorGrado valor={gradoProbabilidad} onChange={setGradoProbabilidad} prefijo="Prob." opciones={[1, 2, 3].map((g) => [g, etiquetaGradoProbabilidad(tipo, g as 1 | 2 | 3)])} />
           </div>
-          <input value={riesgo} onChange={(e) => setRiesgo(e.target.value)} placeholder="Descripción del riesgo/oportunidad" className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
-          <div className="grid grid-cols-2 gap-2">
-            <input value={control} onChange={(e) => setControl(e.target.value)} placeholder="Control asociado (opcional)" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
-            <select value={frecuenciaRevision} onChange={(e) => setFrecuenciaRevision(e.target.value as typeof frecuenciaRevision)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
-              <option value="">Sin frecuencia de revisión</option>
-              <option value="trimestral">Revisar trimestral</option>
-              <option value="semestral">Revisar semestral</option>
-              <option value="anual">Revisar anual</option>
+          <select value={procesoId} onChange={(e) => setProcesoId(e.target.value)} className={cn('w-full', campo)}>
+            <option value="">Sin proceso asociado</option>
+            {procesos.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.codigo ? `${p.codigo} · ` : ''}
+                {p.nombre}
+              </option>
+            ))}
+          </select>
+          <input value={control} onChange={(e) => setControl(e.target.value)} placeholder="Control asociado (aplica para riesgos, opcional)" className={cn('w-full', campo)} />
+          {tipo === 'riesgo' && (
+            <select value={gradoEfectividadControl} onChange={(e) => setGradoEfectividadControl(Number(e.target.value))} className={cn('w-full', campo)}>
+              {[0, 1, 2, 3, 4, 5].map((g) => (
+                <option key={g} value={g}>
+                  Efectividad del control {g} — {ETIQUETA_EFECTIVIDAD_CONTROL[g]}
+                </option>
+              ))}
             </select>
-          </div>
+          )}
+          <input value={accionesARealizar} onChange={(e) => setAccionesARealizar(e.target.value)} placeholder="Acciones a realizar (opcional)" className={cn('w-full', campo)} />
+          <select value={frecuenciaRevision} onChange={(e) => setFrecuenciaRevision(e.target.value as typeof frecuenciaRevision)} className={cn('w-full', campo)}>
+            <option value="">Sin frecuencia de revisión</option>
+            <option value="trimestral">Revisar trimestral</option>
+            <option value="semestral">Revisar semestral</option>
+            <option value="anual">Revisar anual</option>
+          </select>
           <button onClick={agregar} disabled={pending || !riesgo.trim()} className="inline-flex items-center gap-1 rounded-lg bg-flow-500 hover:bg-flow-600 disabled:opacity-40 text-white text-sm font-medium px-3 py-1.5">
             <Plus size={14} /> Agregar
           </button>

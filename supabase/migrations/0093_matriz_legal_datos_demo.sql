@@ -1,0 +1,13 @@
+-- ============================================================================
+-- 0093_matriz_legal_datos_demo.sql
+-- Datos ficticios para demostrar la Matriz de requisitos legales en la
+-- empresa piloto, igual criterio que 0077/0082/0085/0089 (a pedido del
+-- cliente, para mostrar el módulo funcionando).
+-- ============================================================================
+
+insert into requisitos_legales (id, empresa_id, proceso_id, norma, anio, entidad_emisora, asunto, articulo, nombre_articulo, descripcion_articulo, cumple, soporte_cumplimiento, acciones_a_seguir, fecha_ultima_revision) values
+('31000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000004', 'Ley 1581 de 2012', 2012, 'Congreso de la República', 'Protección de datos personales', 'Todo', 'Régimen general de protección de datos personales', 'Establece los principios y disposiciones generales para el tratamiento de datos personales de colaboradores y candidatos.', true, 'Política de tratamiento de datos personales publicada y autorización firmada por cada colaborador.', null, current_date - interval '2 months'),
+('31000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000003', 'Decreto 1072 de 2015', 2015, 'Ministerio del Trabajo', 'Sistema de Gestión de Seguridad y Salud en el Trabajo (SG-SST)', 'Libro 2, Parte 2, Título 4, Capítulo 6', 'Implementación del SG-SST', 'Obliga a todo empleador a implementar el Sistema de Gestión de Seguridad y Salud en el Trabajo.', true, 'SG-SST documentado, con matriz de riesgos SST y cronograma anual de actividades.', null, current_date - interval '1 month'),
+('31000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000004', 'Ley 2101 de 2021', 2021, 'Congreso de la República', 'Reducción de la jornada laboral', 'Art. 1', 'Jornada laboral máxima', 'Reduce gradualmente la jornada laboral máxima semanal de 48 a 42 horas.', false, null, 'Actualizar el reglamento interno de trabajo con la jornada vigente y ajustar los turnos programados.', current_date - interval '3 months'),
+('31000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', null, 'NTC ISO 9001:2015', 2015, 'ICONTEC', 'Requisitos del Sistema de Gestión de la Calidad', 'Numeral 7.5', 'Información documentada', 'Requiere control de la información documentada del sistema de gestión: creación, actualización, aprobación y disponibilidad.', true, 'Procedimiento de Gestión Documental (GC-PO-001) implementado en la plataforma.', null, current_date - interval '15 days')
+on conflict (id) do nothing;
