@@ -113,10 +113,7 @@ export async function crearRiesgo(input: z.infer<typeof RiesgoSchema>) {
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
 
   const supabase = createClient();
-  // TODO: quitar el `as any` cuando se corra `supabase db push` + `npm run
-  // db:types` para la migración 0091 (columnas nuevas de riesgos todavía no
-  // están en database.types.ts).
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('matriz_riesgos_controles')
     .insert({
       empresa_id: perfil.empresa_id,
@@ -155,7 +152,7 @@ export async function actualizarRiesgo(input: z.infer<typeof EditarRiesgoSchema>
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
 
   const supabase = createClient();
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('matriz_riesgos_controles')
     .update({
       marco_normativo: parsed.data.marcoNormativo,

@@ -37,8 +37,7 @@ export async function crearRequisitoLegal(input: z.infer<typeof RequisitoLegalSc
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
 
   const supabase = createClient();
-  // TODO: quitar el as any cuando se corra supabase db push + npm run db:types para la migracion 0092.
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('requisitos_legales')
     .insert({
       empresa_id: perfil.empresa_id,
@@ -75,8 +74,7 @@ export async function actualizarRequisitoLegal(input: z.infer<typeof EditarRequi
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
 
   const supabase = createClient();
-  // TODO: quitar el as any cuando se corra supabase db push + npm run db:types para la migracion 0092.
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('requisitos_legales')
     .update({
       norma: parsed.data.norma,
@@ -107,8 +105,7 @@ export async function marcarRequisitoLegalRevisado(id: string) {
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
   const supabase = createClient();
-  // TODO: quitar el as any cuando se corra supabase db push + npm run db:types para la migracion 0092.
-  const { error } = await (supabase as any).from('requisitos_legales').update({ fecha_ultima_revision: new Date().toISOString().slice(0, 10) }).eq('id', id).eq('empresa_id', perfil.empresa_id);
+  const { error } = await supabase.from('requisitos_legales').update({ fecha_ultima_revision: new Date().toISOString().slice(0, 10) }).eq('id', id).eq('empresa_id', perfil.empresa_id);
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(RUTA);
   return { ok: true as const };
@@ -119,8 +116,7 @@ export async function eliminarRequisitoLegal(id: string) {
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
   const supabase = createClient();
-  // TODO: quitar el as any cuando se corra supabase db push + npm run db:types para la migracion 0092.
-  const { error } = await (supabase as any).from('requisitos_legales').delete().eq('id', id).eq('empresa_id', perfil.empresa_id);
+  const { error } = await supabase.from('requisitos_legales').delete().eq('id', id).eq('empresa_id', perfil.empresa_id);
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(RUTA);
   return { ok: true as const };

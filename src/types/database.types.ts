@@ -4968,57 +4968,63 @@ export type Database = {
       }
       matriz_riesgos_controles: {
         Row: {
-          categoria_riesgo: string | null
+          acciones_a_realizar: string | null
+          categoria: string
+          consecuencia: string | null
           control: string | null
           created_at: string
           empresa_id: string
           estado: string
           fecha_ultima_revision: string | null
           frecuencia_revision: string | null
+          grado_efectividad_control: number | null
+          grado_impacto: number
+          grado_probabilidad: number
           id: string
-          impacto: string | null
           marco_normativo: string
-          probabilidad: string | null
           proceso_id: string | null
           responsable_id: string | null
           riesgo: string
-          riesgo_residual: string | null
           tipo: string
         }
         Insert: {
-          categoria_riesgo?: string | null
+          acciones_a_realizar?: string | null
+          categoria?: string
+          consecuencia?: string | null
           control?: string | null
           created_at?: string
           empresa_id: string
           estado?: string
           fecha_ultima_revision?: string | null
           frecuencia_revision?: string | null
+          grado_efectividad_control?: number | null
+          grado_impacto?: number
+          grado_probabilidad?: number
           id?: string
-          impacto?: string | null
           marco_normativo: string
-          probabilidad?: string | null
           proceso_id?: string | null
           responsable_id?: string | null
           riesgo: string
-          riesgo_residual?: string | null
           tipo?: string
         }
         Update: {
-          categoria_riesgo?: string | null
+          acciones_a_realizar?: string | null
+          categoria?: string
+          consecuencia?: string | null
           control?: string | null
           created_at?: string
           empresa_id?: string
           estado?: string
           fecha_ultima_revision?: string | null
           frecuencia_revision?: string | null
+          grado_efectividad_control?: number | null
+          grado_impacto?: number
+          grado_probabilidad?: number
           id?: string
-          impacto?: string | null
           marco_normativo?: string
-          probabilidad?: string | null
           proceso_id?: string | null
           responsable_id?: string | null
           riesgo?: string
-          riesgo_residual?: string | null
           tipo?: string
         }
         Relationships: [
@@ -6575,6 +6581,137 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "perfiles_usuario"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisitos_legales: {
+        Row: {
+          acciones_a_seguir: string | null
+          anio: number | null
+          articulo: string | null
+          asunto: string | null
+          created_at: string
+          cumple: boolean | null
+          descripcion_articulo: string | null
+          empresa_id: string
+          entidad_emisora: string | null
+          fecha_ultima_revision: string | null
+          id: string
+          nombre_articulo: string | null
+          norma: string
+          observaciones: string | null
+          proceso_id: string | null
+          responsable_id: string | null
+          soporte_cumplimiento: string | null
+        }
+        Insert: {
+          acciones_a_seguir?: string | null
+          anio?: number | null
+          articulo?: string | null
+          asunto?: string | null
+          created_at?: string
+          cumple?: boolean | null
+          descripcion_articulo?: string | null
+          empresa_id: string
+          entidad_emisora?: string | null
+          fecha_ultima_revision?: string | null
+          id?: string
+          nombre_articulo?: string | null
+          norma: string
+          observaciones?: string | null
+          proceso_id?: string | null
+          responsable_id?: string | null
+          soporte_cumplimiento?: string | null
+        }
+        Update: {
+          acciones_a_seguir?: string | null
+          anio?: number | null
+          articulo?: string | null
+          asunto?: string | null
+          created_at?: string
+          cumple?: boolean | null
+          descripcion_articulo?: string | null
+          empresa_id?: string
+          entidad_emisora?: string | null
+          fecha_ultima_revision?: string | null
+          id?: string
+          nombre_articulo?: string | null
+          norma?: string
+          observaciones?: string | null
+          proceso_id?: string | null
+          responsable_id?: string | null
+          soporte_cumplimiento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisitos_legales_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisitos_legales_proceso_id_fkey"
+            columns: ["proceso_id"]
+            isOneToOne: false
+            referencedRelation: "procesos_gestion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisitos_legales_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requisitos_legales_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "requisitos_legales_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "requisitos_legales_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "requisitos_legales_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "requisitos_legales_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "requisitos_legales_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "requisitos_legales_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
           },
         ]
       }

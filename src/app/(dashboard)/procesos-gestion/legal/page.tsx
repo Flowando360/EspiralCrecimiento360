@@ -13,7 +13,7 @@ export default async function MatrizLegalPage() {
   const supabase = createClient();
 
   const [{ data: requisitos }, { data: procesos }] = await Promise.all([
-    (supabase as any)
+    supabase
       .from('requisitos_legales')
       .select('id, norma, anio, entidad_emisora, asunto, articulo, nombre_articulo, descripcion_articulo, cumple, soporte_cumplimiento, acciones_a_seguir, observaciones, proceso_id, fecha_ultima_revision')
       .eq('empresa_id', perfil.empresa_id)
