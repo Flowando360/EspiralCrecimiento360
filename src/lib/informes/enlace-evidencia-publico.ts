@@ -18,7 +18,7 @@ export interface EnlacePublicoValido {
  */
 export async function validarEnlaceEvidenciaPublico(token: string): Promise<EnlacePublicoValido | null> {
   const admin = createAdminClient();
-  const { data: enlace } = await (admin as any)
+  const { data: enlace } = await admin
     .from('enlaces_evidencia_auditoria')
     .select('id, empresa_id, tipo_paquete, expira_en, activo, empresa:empresas(nombre)')
     .eq('token', token)
@@ -31,7 +31,7 @@ export async function validarEnlaceEvidenciaPublico(token: string): Promise<Enla
     id: enlace.id,
     empresaId: enlace.empresa_id,
     empresaNombre: enlace.empresa?.nombre ?? 'Espiral de Crecimiento',
-    tipoPaquete: enlace.tipo_paquete,
+    tipoPaquete: enlace.tipo_paquete as TipoPaqueteAuditoria,
     expiraEn: enlace.expira_en,
   };
 }
@@ -44,8 +44,8 @@ export async function validarEnlaceEvidenciaPublico(token: string): Promise<Enla
 export async function registrarConsultaEnlace(id: string) {
   try {
     const admin = createAdminClient();
-    const { data } = await (admin as any).from('enlaces_evidencia_auditoria').select('veces_consultado').eq('id', id).maybeSingle();
-    await (admin as any)
+    const { data } = await admin.from('enlaces_evidencia_auditoria').select('veces_consultado').eq('id', id).maybeSingle();
+    await admin
       .from('enlaces_evidencia_auditoria')
       .update({ veces_consultado: (data?.veces_consultado ?? 0) + 1, ultima_consulta_en: new Date().toISOString() })
       .eq('id', id);

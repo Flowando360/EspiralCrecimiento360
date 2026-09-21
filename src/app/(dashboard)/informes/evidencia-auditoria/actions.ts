@@ -31,7 +31,7 @@ export async function listarEnlacesEvidenciaAuditoria(): Promise<EnlaceEvidencia
   if (!perfil) return [];
 
   const supabase = createClient();
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from('enlaces_evidencia_auditoria')
     .select('id, token, tipo_paquete, nota, expira_en, activo, veces_consultado, ultima_consulta_en, created_at')
     .eq('empresa_id', perfil.empresa_id)
@@ -49,7 +49,7 @@ export async function generarEnlaceEvidenciaAuditoria(input: { tipo: TipoPaquete
   expiraEn.setDate(expiraEn.getDate() + dias);
 
   const supabase = createClient();
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('enlaces_evidencia_auditoria')
     .insert({
       empresa_id: perfil.empresa_id,
@@ -71,7 +71,7 @@ export async function revocarEnlaceEvidenciaAuditoria(id: string) {
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
   const supabase = createClient();
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('enlaces_evidencia_auditoria')
     .update({ activo: false })
     .eq('id', id)

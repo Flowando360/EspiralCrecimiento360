@@ -2619,6 +2619,112 @@ export type Database = {
         }
         Relationships: []
       }
+      enlaces_evidencia_auditoria: {
+        Row: {
+          activo: boolean
+          creado_por: string | null
+          created_at: string
+          empresa_id: string
+          expira_en: string
+          id: string
+          nota: string | null
+          tipo_paquete: string
+          token: string
+          ultima_consulta_en: string | null
+          veces_consultado: number
+        }
+        Insert: {
+          activo?: boolean
+          creado_por?: string | null
+          created_at?: string
+          empresa_id: string
+          expira_en: string
+          id?: string
+          nota?: string | null
+          tipo_paquete?: string
+          token?: string
+          ultima_consulta_en?: string | null
+          veces_consultado?: number
+        }
+        Update: {
+          activo?: boolean
+          creado_por?: string | null
+          created_at?: string
+          empresa_id?: string
+          expira_en?: string
+          id?: string
+          nota?: string | null
+          tipo_paquete?: string
+          token?: string
+          ultima_consulta_en?: string | null
+          veces_consultado?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enlaces_evidencia_auditoria_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enlaces_evidencia_auditoria_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "enlaces_evidencia_auditoria_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "enlaces_evidencia_auditoria_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "enlaces_evidencia_auditoria_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "enlaces_evidencia_auditoria_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "enlaces_evidencia_auditoria_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "enlaces_evidencia_auditoria_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
+          },
+          {
+            foreignKeyName: "enlaces_evidencia_auditoria_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entrevistas: {
         Row: {
           created_at: string
