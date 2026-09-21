@@ -5,7 +5,11 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { AcpmKanban, type Acpm } from '@/components/procesos-gestion/acpm-kanban';
 
-export default async function AcpmPage({ searchParams }: { searchParams: { origenHallazgo?: string; origenRiesgo?: string; proceso?: string } }) {
+export default async function AcpmPage({
+  searchParams,
+}: {
+  searchParams: { origenHallazgo?: string; origenRiesgo?: string; proceso?: string; origenDetalle?: string; descripcion?: string };
+}) {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
   if (!['admin_th', 'lider', 'gerencia'].includes(perfil.rol)) redirect('/inicio');
@@ -49,7 +53,13 @@ export default async function AcpmPage({ searchParams }: { searchParams: { orige
           origenRiesgoId: searchParams.origenRiesgo,
           procesoId: searchParams.proceso,
         }
-      : undefined;
+      : searchParams.origenDetalle
+        ? {
+            origenTipo: 'mejora_propia' as const,
+            origenDetalle: searchParams.origenDetalle,
+            descripcion: searchParams.descripcion,
+          }
+        : undefined;
 
   return (
     <div className="space-y-4">

@@ -40,6 +40,7 @@ import {
   ShieldQuestion,
   ListChecks,
   GitPullRequestArrow,
+  ClipboardList,
 } from 'lucide-react';
 
 interface NavItem {
@@ -102,6 +103,7 @@ const NAV: NavGroup[] = [
       { href: '/procesos-gestion/auditorias', label: 'Auditorías internas', icon: ShieldQuestion, roles: ['admin_th', 'lider', 'gerencia', 'auditor_externo'] },
       { href: '/procesos-gestion/acpm', label: 'ACPM', icon: ListChecks, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/procesos-gestion/cambios', label: 'Gestión de cambio', icon: GitPullRequestArrow, roles: ['admin_th', 'lider', 'gerencia'] },
+      { href: '/procesos-gestion/diagnostico-iso9001', label: 'Diagnóstico ISO 9001', icon: ClipboardList, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/informes/evidencia-auditoria', label: 'Evidencia de auditoría', icon: ShieldCheck, roles: ['admin_th', 'gerencia', 'auditor_externo'] },
     ],
   },

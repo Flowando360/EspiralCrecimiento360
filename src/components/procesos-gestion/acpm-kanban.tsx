@@ -79,10 +79,12 @@ const COLUMNAS: { valor: EstadoAcpm; etiqueta: string }[] = [
 ];
 
 export interface PrefillAcpm {
-  origenTipo: 'hallazgo_auditoria' | 'riesgo';
+  origenTipo: 'hallazgo_auditoria' | 'riesgo' | 'mejora_propia';
   origenHallazgoId?: string;
   origenRiesgoId?: string;
   procesoId?: string;
+  origenDetalle?: string;
+  descripcion?: string;
 }
 
 export function AcpmKanban({
@@ -273,9 +275,9 @@ function TarjetaAcpm({ item, proceso, responsable, onAbrir }: { item: Acpm; proc
 function FormularioAcpm({ procesos, prefill, onCreada }: { procesos: ProcesoOpcion[]; prefill?: PrefillAcpm; onCreada: (a: Acpm) => void }) {
   const [procesoId, setProcesoId] = useState(prefill?.procesoId ?? '');
   const [origenTipo, setOrigenTipo] = useState<OrigenTipo>(prefill?.origenTipo ?? 'mejora_propia');
-  const [origenDetalle, setOrigenDetalle] = useState('');
+  const [origenDetalle, setOrigenDetalle] = useState(prefill?.origenDetalle ?? '');
   const [tipoAccion, setTipoAccion] = useState<TipoAccion>('correctiva');
-  const [descripcion, setDescripcion] = useState('');
+  const [descripcion, setDescripcion] = useState(prefill?.descripcion ?? '');
   const [metodologiaCausa, setMetodologiaCausa] = useState<MetodologiaCausa | ''>('');
   const [fechaCompromiso, setFechaCompromiso] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -326,7 +328,8 @@ function FormularioAcpm({ procesos, prefill, onCreada }: { procesos: ProcesoOpci
     <div className="rounded-lg border border-marmol-200 p-3 mb-3 space-y-2">
       {prefill && (
         <p className="text-xs text-flow-700 bg-flow-50 rounded-lg px-2.5 py-1.5">
-          Origen: {ETIQUETA_ORIGEN[prefill.origenTipo]} — se vincula automáticamente al guardar.
+          Origen: {ETIQUETA_ORIGEN[prefill.origenTipo]}
+          {prefill.origenTipo !== 'mejora_propia' && ' — se vincula automáticamente al guardar.'}
         </p>
       )}
       <div className="grid grid-cols-2 gap-2">
@@ -364,7 +367,7 @@ function FormularioAcpm({ procesos, prefill, onCreada }: { procesos: ProcesoOpci
           <option value="libre">Libre</option>
         </select>
       </div>
-      {!prefill && origenTipo !== 'hallazgo_auditoria' && origenTipo !== 'riesgo' && (
+      {(!prefill || prefill.origenTipo === 'mejora_propia') && origenTipo !== 'hallazgo_auditoria' && origenTipo !== 'riesgo' && (
         <input value={origenDetalle} onChange={(e) => setOrigenDetalle(e.target.value)} placeholder="Detalle del origen (opcional)" className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
       )}
       <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Descripción de la ACPM" rows={2} className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />

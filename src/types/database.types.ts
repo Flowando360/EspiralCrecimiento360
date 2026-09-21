@@ -1995,6 +1995,169 @@ export type Database = {
           },
         ]
       }
+      diagnostico_iso9001_items: {
+        Row: {
+          clausula: number
+          guia: string | null
+          id: string
+          numeral: string
+          orden: number
+          titulo: string
+        }
+        Insert: {
+          clausula: number
+          guia?: string | null
+          id?: string
+          numeral: string
+          orden?: number
+          titulo: string
+        }
+        Update: {
+          clausula?: number
+          guia?: string | null
+          id?: string
+          numeral?: string
+          orden?: number
+          titulo?: string
+        }
+        Relationships: []
+      }
+      diagnostico_iso9001_respuestas: {
+        Row: {
+          diagnostico_id: string
+          id: string
+          item_id: string
+          nivel: string | null
+          observacion: string | null
+          updated_at: string
+        }
+        Insert: {
+          diagnostico_id: string
+          id?: string
+          item_id: string
+          nivel?: string | null
+          observacion?: string | null
+          updated_at?: string
+        }
+        Update: {
+          diagnostico_id?: string
+          id?: string
+          item_id?: string
+          nivel?: string | null
+          observacion?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnostico_iso9001_respuestas_diagnostico_id_fkey"
+            columns: ["diagnostico_id"]
+            isOneToOne: false
+            referencedRelation: "diagnosticos_iso9001"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnostico_iso9001_respuestas_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostico_iso9001_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diagnosticos_iso9001: {
+        Row: {
+          created_at: string
+          empresa_id: string
+          estado: string
+          fecha: string
+          id: string
+          realizado_por: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          empresa_id: string
+          estado?: string
+          fecha?: string
+          id?: string
+          realizado_por?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          empresa_id?: string
+          estado?: string
+          fecha?: string
+          id?: string
+          realizado_por?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnosticos_iso9001_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnosticos_iso9001_realizado_por_fkey"
+            columns: ["realizado_por"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnosticos_iso9001_realizado_por_fkey"
+            columns: ["realizado_por"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "diagnosticos_iso9001_realizado_por_fkey"
+            columns: ["realizado_por"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "diagnosticos_iso9001_realizado_por_fkey"
+            columns: ["realizado_por"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "diagnosticos_iso9001_realizado_por_fkey"
+            columns: ["realizado_por"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "diagnosticos_iso9001_realizado_por_fkey"
+            columns: ["realizado_por"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "diagnosticos_iso9001_realizado_por_fkey"
+            columns: ["realizado_por"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "diagnosticos_iso9001_realizado_por_fkey"
+            columns: ["realizado_por"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
+          },
+        ]
+      }
       dimension_cursos_recomendados: {
         Row: {
           created_at: string

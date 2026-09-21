@@ -4,7 +4,7 @@ export const moduloProcesosGestion: ModuloAyuda = {
   slug: 'procesos-gestion',
   titulo: 'Procesos y Sistemas de Gestión',
   descripcion:
-    'Mapa de procesos, caracterización, gestión documental, matriz de riesgos y oportunidades con ciclo de revisión, auditorías internas con hallazgos, ACPM y gestión de cambio — el ciclo PHVA completo del sistema de gestión, base del paquete de Evidencia de auditoría.',
+    'Mapa de procesos, caracterización, gestión documental, matriz de riesgos y oportunidades con ciclo de revisión, auditorías internas con hallazgos, ACPM, gestión de cambio y diagnóstico ISO 9001:2015 — el ciclo PHVA completo del sistema de gestión, base del paquete de Evidencia de auditoría.',
   paginas: [
     {
       slug: 'indice',
@@ -205,7 +205,7 @@ export const moduloProcesosGestion: ModuloAyuda = {
         },
         {
           nombre: 'Nueva ACPM (admin_th)',
-          explicacion: 'Origen (hallazgo de auditoría, riesgo, indicador, PQRS o mejora propia), tipo de acción (correctiva/preventiva/mejora), descripción, metodología de análisis de causa (5 porqués, Ishikawa o libre) y fecha compromiso. Si se llega desde el botón "Crear ACPM" de un hallazgo o un riesgo, el origen ya viene vinculado. Suma 10 puntos al ranking de Nexa, para el responsable de la ACPM (o para quien la crea, si no tiene responsable asignado).',
+          explicacion: 'Origen (hallazgo de auditoría, riesgo, indicador, PQRS o mejora propia), tipo de acción (correctiva/preventiva/mejora), descripción, metodología de análisis de causa (5 porqués, Ishikawa o libre) y fecha compromiso. Si se llega desde el botón "Crear ACPM" de un hallazgo, un riesgo o una brecha del Diagnóstico ISO 9001, el origen ya viene vinculado o la descripción ya viene sugerida. Suma 10 puntos al ranking de Nexa, para el responsable de la ACPM (o para quien la crea, si no tiene responsable asignado).',
         },
         { nombre: 'Tablero de 7 columnas', explicacion: 'Arrastra una tarjeta para avanzarla en el ciclo. Haz clic en una tarjeta para abrir su detalle.' },
         {
@@ -237,6 +237,36 @@ export const moduloProcesosGestion: ModuloAyuda = {
         },
       ],
       notas: ['Pueden ver esta pantalla: admin_th, líder y gerencia. Solicitar: admin_th y líder. Evaluar, aprobar/rechazar y marcar implementado: exclusivo de admin_th.'],
+    },
+    {
+      slug: 'diagnostico-iso9001',
+      ruta: '/procesos-gestion/diagnostico-iso9001',
+      titulo: 'Diagnóstico ISO 9001:2015',
+      resumen:
+        'Listado de las corridas del diagnóstico/autoevaluación frente a los 28 numerales auditables de la norma (cláusulas 4 a 10) — se puede repetir en el tiempo para comparar el avance.',
+      camposYBotones: [
+        { nombre: 'Nuevo diagnóstico (admin_th)', explicacion: 'Crea una corrida nueva y abre el formulario para empezar a responder.' },
+        { nombre: 'Tarjeta de diagnóstico', explicacion: 'Fecha, quién lo realizó, estado (En progreso / Completado) y el puntaje general — clic para abrir el detalle.' },
+      ],
+      notas: [
+        'Pueden ver esta pantalla: admin_th, líder y gerencia. Crear un diagnóstico es exclusivo de admin_th.',
+        'Estructura estándar de la norma (no depende de ningún Excel externo): 28 numerales de las cláusulas 4 a 10, las auditables — 1 a 3 son alcance/referencias/términos, no se evalúan.',
+      ],
+    },
+    {
+      slug: 'detalle-diagnostico-iso9001',
+      ruta: '/procesos-gestion/diagnostico-iso9001/*',
+      titulo: 'Detalle de un diagnóstico ISO 9001',
+      resumen:
+        'El formulario y los resultados en una sola pantalla: cada numeral se responde con la misma escala de 4 niveles del checklist de cumplimiento (No cumple / Cumple parcial / Cumple / No aplica), y el puntaje se recalcula solo.',
+      camposYBotones: [
+        { nombre: 'Puntaje general y por cláusula', explicacion: 'Promedio 0-100% — "No aplica" no cuenta ni a favor ni en contra; un numeral sin responder tampoco entra al promedio todavía, pero sí se cuenta como pendiente.' },
+        { nombre: 'Nivel de cada numeral (admin_th)', explicacion: 'Clic en una de las 4 opciones para calificar — clic de nuevo sobre la misma la deja sin responder. Se guarda solo, sin botón de enviar.' },
+        { nombre: 'Observación / evidencia (admin_th)', explicacion: 'Texto libre opcional por numeral, se guarda al salir del campo.' },
+        { nombre: 'Crear ACPM para esta brecha (admin_th)', explicacion: 'Aparece en los numerales calificados "No cumple" o "Cumple parcial": abre el tablero de ACPM con el numeral ya referenciado como origen — no hay que volver a explicar de dónde salió.' },
+        { nombre: 'Marcar como completado (admin_th)', explicacion: 'Cambia el estado de la corrida a "Completado" (se puede volver a "En progreso" si hace falta seguir ajustando).' },
+      ],
+      notas: ['Pueden ver este detalle: admin_th, líder y gerencia. Responder, agregar observaciones y marcar completado es exclusivo de admin_th.'],
     },
   ],
 };
