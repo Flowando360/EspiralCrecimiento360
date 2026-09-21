@@ -97,9 +97,14 @@ export const moduloInformes: ModuloAyuda = {
       camposYBotones: [
         { nombre: 'Paquete completo', explicacion: 'SST + ISO 9001 + SARLAFT/SAGRILAFT + PTEE, todo en un solo ZIP.' },
         { nombre: 'Paquetes por marco normativo', explicacion: 'SST, ISO 9001 o SARLAFT/SAGRILAFT por separado, cuando el auditor solo pide uno. Las auditorías internas se filtran por el marco de cada paquete; ACPM y Gestión de cambio se incluyen siempre, porque son evidencia de mejora continua que aplica a cualquier marco.' },
+        {
+          nombre: 'Compartir con un auditor externo (admin_th y gerencia)',
+          explicacion:
+            'Genera un enlace temporal (/auditoria/…) de solo lectura para un auditor puntual que no tiene cuenta en la plataforma — elige el paquete, la vigencia en días (máximo 90) y una nota opcional para identificarlo. El auditor entra sin iniciar sesión, ve el mismo resumen numérico de esta pantalla y descarga el ZIP. Cada enlace lleva cuántas veces se consultó y cuándo fue la última vez, y se puede revocar antes de que venza. Complementa al rol auditor_externo (pensado para auditores recurrentes con cuenta propia); no lo reemplaza.',
+        },
       ],
       notas: [
-        'Pensado para el rol auditor_externo (acceso de solo lectura), aunque admin_th, líder y gerencia también pueden entrar y descargarlo.',
+        'Pensado para el rol auditor_externo (acceso de solo lectura), aunque admin_th y gerencia también pueden entrar y descargarlo directamente.',
         'La información sale de Procesos y Sistemas de Gestión completo (mapa, riesgos, auditorías internas, ACPM, gestión de cambio, checklist) y del módulo SST — no duplica datos, solo los empaqueta.',
       ],
     },

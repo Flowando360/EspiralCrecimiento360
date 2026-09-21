@@ -18,6 +18,21 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       ],
     },
     {
+      slug: 'dimensiones',
+      ruta: '/espiral-crecimiento/dimensiones',
+      titulo: 'Dimensiones por colaborador',
+      resumen:
+        'Tabla comparativa con el estado vigente de Ser, Saber, Hacer y Deber de cada persona de un vistazo — siempre el dato más reciente disponible, sin importar de qué Ciclo de Crecimiento vino ni si ya cerró.',
+      camposYBotones: [
+        { nombre: 'Columnas Ser / Saber / Hacer / Deber', explicacion: 'Un semáforo (Alto/Medio/Bajo) por dimensión y por persona. Ser y Saber se derivan del mismo criterio que usa el Informe de brechas por dimensión; Hacer y Deber vienen del Encuentro de Crecimiento más reciente.' },
+        { nombre: 'Ver PDI', explicacion: 'Acceso directo al Plan de Desarrollo Individual de esa persona.' },
+      ],
+      notas: [
+        'Pueden ver esta pantalla: admin_th y gerencia (toda la empresa), líder (su equipo directo y él mismo). El colaborador no tiene acceso — consulta sus propias dimensiones desde su ficha.',
+        'A diferencia del listado de Colaboradores, esta vista es solo de lectura: no hay edición aquí, es un panorama comparativo para priorizar dónde intervenir.',
+      ],
+    },
+    {
       slug: 'ficha-colaborador',
       ruta: '/espiral-crecimiento/colaboradores/*',
       titulo: 'Ficha del colaborador',

@@ -8,6 +8,8 @@ import { moduloInformes } from './informes';
 import { moduloAdministracion } from './administracion';
 import { moduloProcesosGestion } from './procesos-gestion';
 import { moduloMetaAdmin } from './meta-admin';
+import { moduloReclutamiento } from './reclutamiento';
+import { moduloDotacion } from './dotacion';
 
 export { preguntasFrecuentes } from './faq';
 export { glosario } from './glosario';
@@ -16,6 +18,8 @@ export { planPruebas } from './plan-pruebas';
 export const MODULOS: ModuloAyuda[] = [
   moduloGeneral,
   moduloEspiralCrecimiento,
+  moduloReclutamiento,
+  moduloDotacion,
   moduloNexa,
   moduloAlertas,
   moduloComunicacion,

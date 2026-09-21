@@ -2,6 +2,8 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FormularioOtorgarReconocimiento } from '@/components/espiral-crecimiento/formulario-otorgar-reconocimiento';
+import { RankingTabs } from '@/components/espiral-crecimiento/ranking-tabs';
+import { calcularRankingCumplimiento } from '@/lib/nexa/ranking-cumplimiento';
 import { Award } from 'lucide-react';
 import { formatearFecha } from '@/lib/utils';
 
@@ -44,9 +46,8 @@ export default async function NexaReconocimientosPage() {
     ranking.set(r.colaborador_id, actual);
   });
   const rankingCompleto = [...ranking.entries()].map(([id, v]) => ({ id, ...v })).sort((a, b) => b.puntos - a.puntos);
-  const rankingOrdenado = rankingCompleto.slice(0, 10);
-  const miPosicion = perfil.colaborador_id ? rankingCompleto.findIndex((r) => r.id === perfil.colaborador_id) : -1;
-  const estoyFueraDelTop10 = miPosicion >= 10;
+
+  const rankingCumplimiento = await calcularRankingCumplimiento(perfil.empresa_id);
 
   return (
     <div className="space-y-6">
@@ -62,35 +63,7 @@ export default async function NexaReconocimientosPage() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="card p-5">
-          <h2 className="font-display font-semibold text-secundario mb-3">Ranking de puntos</h2>
-          {rankingOrdenado.length === 0 ? (
-            <p className="text-sm text-marmol-400">Sin reconocimientos otorgados aún.</p>
-          ) : (
-            <ol className="space-y-2">
-              {rankingOrdenado.map((r, i) => (
-                <li
-                  key={r.id}
-                  className={`flex items-center justify-between text-sm rounded-lg ${r.id === perfil.colaborador_id ? 'bg-acento/20 px-2 py-1 -mx-2' : ''}`}
-                >
-                  <span className="text-marmol-700">
-                    <span className="text-marmol-400 mr-2">{i + 1}.</span>
-                    {r.nombre}
-                  </span>
-                  <span className="rounded-full bg-crecimiento text-white text-xs font-medium px-2.5 py-0.5">
-                    {r.puntos} pts
-                  </span>
-                </li>
-              ))}
-            </ol>
-          )}
-          {estoyFueraDelTop10 && (
-            <p className="text-xs text-marmol-500 mt-3 pt-3 border-t border-marmol-100">
-              Tu posición: <span className="font-medium text-marmol-700">#{miPosicion + 1}</span> con{' '}
-              <span className="font-medium text-marmol-700">{rankingCompleto[miPosicion]?.puntos} pts</span>
-            </p>
-          )}
-        </div>
+        <RankingTabs rankingPuntos={rankingCompleto} miColaboradorId={perfil.colaborador_id} rankingCumplimiento={rankingCumplimiento} />
 
         <div className="card p-5">
           <h2 className="font-display font-semibold text-secundario mb-3">Últimos reconocimientos</h2>

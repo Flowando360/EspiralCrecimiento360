@@ -81,7 +81,16 @@ export const moduloNexa: ModuloAyuda = {
         'Ranking de puntos y muro de los últimos reconocimientos otorgados en la empresa. Desde que existe el módulo de Procesos, este mismo ranking también suma automáticamente los puntos que se ganan ahí.',
       camposYBotones: [
         { nombre: 'Otorgar reconocimiento', explicacion: 'admin_th y líder. Elige a la persona (el líder solo ve su propio equipo), escribe el motivo y los puntos.' },
-        { nombre: 'Ranking de puntos', explicacion: 'Suma de puntos por persona, de mayor a menor (top 10). Tu propia fila queda resaltada en verde si estás dentro del top 10; si no, aparece tu posición exacta debajo de la lista, para que siempre sepas dónde estás sin importar el puesto.' },
+        {
+          nombre: 'Pestaña "Por puntos"',
+          explicacion:
+            'Suma de puntos por persona, de mayor a menor (top 10). Tu propia fila queda resaltada en verde si estás dentro del top 10; si no, aparece tu posición exacta debajo de la lista, para que siempre sepas dónde estás sin importar el puesto.',
+        },
+        {
+          nombre: 'Pestaña "Por cumplimiento"',
+          explicacion:
+            'Ranking alternativo que no compara puntos brutos sino % de lo asignado que está al día — para que quien lidera un proceso de 1-2 personas no quede en desventaja frente a un equipo grande. Solo cuenta riesgos con frecuencia de revisión definida y ACPM ya cerradas o con fecha de compromiso vencida (lo que todavía está en curso y dentro de plazo no suma ni resta). Muestra "cumplidos/asignados" junto al porcentaje.',
+        },
         {
           nombre: 'Puntos automáticos del módulo de Procesos',
           explicacion:
@@ -89,7 +98,8 @@ export const moduloNexa: ModuloAyuda = {
         },
       ],
       notas: [
-        'Los puntos de riesgos y ACPM hoy solo los puede generar admin_th, porque esas pantallas son de edición exclusiva suya — el ranking reflejará más personas a medida que esos permisos se abran más adelante.',
+        'Los puntos de riesgos y ACPM hoy solo los puede generar admin_th, porque esas pantallas son de edición exclusiva suya — ambos rankings reflejarán más personas a medida que esos permisos se abran más adelante.',
+        'La pestaña "Por cumplimiento" solo lista a quien ya tiene algo asignado como responsable de un riesgo o una ACPM — quien no tiene nada asignado todavía no aparece ahí (no es que tenga 0%).',
       ],
     },
     {

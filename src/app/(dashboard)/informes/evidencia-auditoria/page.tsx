@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { FileArchive, ShieldCheck, ClipboardCheck, ScrollText, Layers } from 'lucide-react';
 import { obtenerEvidenciaAuditoria } from './data';
+import { listarEnlacesEvidenciaAuditoria } from './actions';
+import { EnlacesAuditoriaExterna } from '@/components/informes/enlaces-auditoria-externa';
 
 const PAQUETES = [
   { tipo: 'todos', titulo: 'Paquete completo', descripcion: 'SST + ISO 9001 + SARLAFT/SAGRILAFT + PTEE.', icon: Layers },
@@ -12,6 +14,9 @@ const PAQUETES = [
 export default async function EvidenciaAuditoriaPage() {
   const { perfil, evidencia } = await obtenerEvidenciaAuditoria('todos');
   if (!perfil || !evidencia) redirect('/informes');
+
+  const puedeCompartir = perfil.rol === 'admin_th' || perfil.rol === 'gerencia';
+  const enlaces = puedeCompartir ? await listarEnlacesEvidenciaAuditoria() : [];
 
   return (
     <div className="space-y-6">
@@ -56,6 +61,8 @@ export default async function EvidenciaAuditoriaPage() {
           </li>
         </ul>
       </div>
+
+      {puedeCompartir && <EnlacesAuditoriaExterna enlacesIniciales={enlaces} />}
     </div>
   );
 }

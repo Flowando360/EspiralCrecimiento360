@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 
 export type TipoPaqueteAuditoria = 'todos' | 'sst' | 'iso_9001' | 'sarlaft_sagrilaft' | 'ptee';
@@ -81,16 +81,30 @@ const ROLES_PERMITIDOS = ['admin_th', 'gerencia', 'auditor_externo'];
  * ciclo, auditorías internas, ACPM y gestión de cambio). Visible para
  * admin_th, gerencia y auditor_externo (solo lectura).
  */
-export async function obtenerEvidenciaAuditoria(tipo: TipoPaqueteAuditoria): Promise<{
+export async function obtenerEvidenciaAuditoria(
+  tipo: TipoPaqueteAuditoria,
+  /** Solo para el enlace público temporal (ver /auditoria/[token]): salta la sesión y usa el cliente admin, porque quien abre el enlace no tiene cuenta en la plataforma. */
+  opts?: { empresaId: string }
+): Promise<{
   perfil: Awaited<ReturnType<typeof getPerfilActual>>;
   evidencia: EvidenciaAuditoria | null;
 }> {
-  const perfil = await getPerfilActual();
-  if (!perfil || !ROLES_PERMITIDOS.includes(perfil.rol)) {
-    return { perfil: null, evidencia: null };
+  let perfil: Awaited<ReturnType<typeof getPerfilActual>> = null;
+  let empresaId: string;
+  let supabase;
+
+  if (opts?.empresaId) {
+    empresaId = opts.empresaId;
+    supabase = createAdminClient();
+  } else {
+    perfil = await getPerfilActual();
+    if (!perfil || !ROLES_PERMITIDOS.includes(perfil.rol)) {
+      return { perfil: null, evidencia: null };
+    }
+    empresaId = perfil.empresa_id;
+    supabase = createClient();
   }
 
-  const supabase = createClient();
   const incluyeSST = tipo === 'todos' || tipo === 'sst';
   const marcosChecklist = tipo === 'todos' ? ['iso_9001', 'sst', 'sarlaft_sagrilaft', 'ptee'] : [tipo];
 
@@ -98,22 +112,22 @@ export async function obtenerEvidenciaAuditoria(tipo: TipoPaqueteAuditoria): Pro
     supabase
       .from('colaboradores')
       .select('id, nombre_completo')
-      .eq('empresa_id', perfil.empresa_id)
+      .eq('empresa_id', empresaId)
       .eq('estado', 'activo'),
     supabase
       .from('procesos_gestion')
       .select('id, area_proceso, nombre, version')
-      .eq('empresa_id', perfil.empresa_id)
+      .eq('empresa_id', empresaId)
       .order('area_proceso'),
     supabase
       .from('auditorias_internas')
       .select('id, codigo, objetivo, marco_normativo, fecha_ejecutada, estado')
-      .eq('empresa_id', perfil.empresa_id)
+      .eq('empresa_id', empresaId)
       .order('created_at', { ascending: false }),
     supabase
       .from('acpm')
       .select('codigo, tipo_accion, descripcion, estado, eficaz, proceso_id')
-      .eq('empresa_id', perfil.empresa_id)
+      .eq('empresa_id', empresaId)
       .order('created_at', { ascending: false }),
     supabase
       .from('solicitudes_cambio')
@@ -149,12 +163,12 @@ export async function obtenerEvidenciaAuditoria(tipo: TipoPaqueteAuditoria): Pro
       supabase
         .from('checklist_cumplimiento')
         .select('marco_normativo, item, estado, evidencia_url')
-        .eq('empresa_id', perfil.empresa_id)
+        .eq('empresa_id', empresaId)
         .in('marco_normativo', marcosChecklist),
       supabase
         .from('matriz_riesgos_controles')
         .select('marco_normativo, tipo, riesgo, impacto, riesgo_residual, control, frecuencia_revision, fecha_ultima_revision')
-        .eq('empresa_id', perfil.empresa_id)
+        .eq('empresa_id', empresaId)
         .in('marco_normativo', marcosChecklist),
     ]);
     checklist = (checklistRaw ?? []) as any[];
@@ -193,7 +207,7 @@ export async function obtenerEvidenciaAuditoria(tipo: TipoPaqueteAuditoria): Pro
   const tasaEficaciaAcpm = resueltasAcpm.length > 0 ? Math.round((acpm.filter((a) => a.estado === 'cerrada_efectiva').length / resueltasAcpm.length) * 100) : null;
 
   const cambios: CambioEvidencia[] = ((cambiosRaw ?? []) as any[])
-    .filter((c) => c.proceso?.empresa_id === perfil.empresa_id)
+    .filter((c) => c.proceso?.empresa_id === empresaId)
     .map((c) => ({ codigo: c.codigo, titulo: c.titulo, tipo_cambio: c.tipo_cambio, estado: c.estado, impacto: c.impacto }));
 
   return { perfil, evidencia: { certificacionesSST, checklist, riesgos, procesos, auditorias, acpm, tasaEficaciaAcpm, cambios } };
