@@ -16,14 +16,18 @@
 -- actualizaciones de datos son UPDATE simples (idempotentes por naturaleza).
 -- ============================================================================
 
+-- Primero se quita el constraint viejo (4 niveles) — si no, el UPDATE de
+-- abajo choca contra él, porque los valores nuevos ("cumple_completamente",
+-- "cumple_parcialmente") todavía no son válidos hasta que se agregue el
+-- constraint nuevo más abajo.
+alter table diagnostico_iso9001_respuestas drop constraint if exists diagnostico_iso9001_respuestas_nivel_check;
+
 -- Migra las respuestas ya guardadas con la escala vieja (4 niveles) a la
--- nueva (5 niveles) antes de cambiar el constraint, para no dejar filas
--- inválidas: "cumple" -> "cumple_completamente", "cumple_parcial" ->
+-- nueva (5 niveles): "cumple" -> "cumple_completamente", "cumple_parcial" ->
 -- "cumple_parcialmente". "no_cumple" y "no_aplica" se llaman igual en ambas.
 update diagnostico_iso9001_respuestas set nivel = 'cumple_completamente' where nivel = 'cumple';
 update diagnostico_iso9001_respuestas set nivel = 'cumple_parcialmente' where nivel = 'cumple_parcial';
 
-alter table diagnostico_iso9001_respuestas drop constraint if exists diagnostico_iso9001_respuestas_nivel_check;
 alter table diagnostico_iso9001_respuestas add constraint diagnostico_iso9001_respuestas_nivel_check
   check (nivel in ('no_cumple', 'cumple_minimamente', 'en_desarrollo', 'cumple_parcialmente', 'cumple_completamente', 'no_aplica'));
 
