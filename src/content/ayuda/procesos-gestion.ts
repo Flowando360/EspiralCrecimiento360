@@ -4,7 +4,7 @@ export const moduloProcesosGestion: ModuloAyuda = {
   slug: 'procesos-gestion',
   titulo: 'Procesos y Sistemas de Gestión',
   descripcion:
-    'Mapa de procesos, caracterización, gestión documental, matriz de riesgos y checklist de cumplimiento normativo (ISO 9001, SST, SARLAFT/SAGRILAFT, PTEE) — la base del paquete de Evidencia de auditoría.',
+    'Mapa de procesos, caracterización, gestión documental, matriz de riesgos y oportunidades con ciclo de revisión, auditorías internas con hallazgos, ACPM y gestión de cambio — el ciclo PHVA completo del sistema de gestión, base del paquete de Evidencia de auditoría.',
   paginas: [
     {
       slug: 'indice',
@@ -37,8 +37,13 @@ export const moduloProcesosGestion: ModuloAyuda = {
           explicacion: 'Vigente / En definición / Obsoleto — editable directamente desde la tarjeta del mapa (admin_th). Un proceso obsoleto se muestra atenuado.',
         },
         {
-          nombre: 'Matriz de riesgos y controles',
-          explicacion: 'Cada riesgo con su marco normativo (ISO 9001, SST, SARLAFT/SAGRILAFT, PTEE o interno), probabilidad, impacto y el control asociado para mitigarlo.',
+          nombre: 'Matriz de riesgos y oportunidades',
+          explicacion:
+            'Cada fila es un riesgo o una oportunidad (ISO 9001 numeral 6.1 exige gestionar ambos), con su marco normativo, probabilidad, impacto, control, riesgo residual (el nivel que queda después del control) y, si se le define una frecuencia de revisión (trimestral/semestral/anual), una etiqueta roja "Revisión vencida" cuando ya pasó esa frecuencia desde la última vez que se confirmó.',
+        },
+        {
+          nombre: 'Marcar revisado (admin_th)',
+          explicacion: 'Ícono de refrescar junto a un riesgo con frecuencia de revisión definida: confirma que se revisó hoy sin necesidad de abrir el formulario completo de edición.',
         },
         {
           nombre: 'Tablero de checklist de cumplimiento',
@@ -100,7 +105,7 @@ export const moduloProcesosGestion: ModuloAyuda = {
         {
           nombre: 'Nueva solicitud (admin_th y líder)',
           explicacion:
-            'Elige el proceso y el tipo de solicitud (crear / actualizar / anular). Para "crear" se indica nombre y tipo de documento (procedimiento, política, formato o instructivo); para "actualizar" o "anular" se elige el documento existente. Se puede adjuntar el borrador del archivo.',
+            'Elige el proceso y el tipo de solicitud (crear / actualizar / anular). Para "crear" se indica nombre y tipo de documento (procedimiento, política, formato, instructivo o registro — un registro es el diligenciado/evidencia, distinto del formato que es la plantilla en blanco); para "actualizar" o "anular" se elige el documento existente. Se puede adjuntar el borrador del archivo.',
         },
         {
           nombre: 'Solicitudes pendientes (admin_th)',
@@ -126,6 +131,72 @@ export const moduloProcesosGestion: ModuloAyuda = {
         'Solo la versión vigente de un documento es visible para la empresa; las versiones obsoletas quedan en un repositorio que solo admin_th puede consultar.',
         'En esta primera versión, la confirmación de lectura llega a quienes ya tienen acceso al módulo (admin_th, líder, gerencia). Abrirla a todos los colaboradores a través del Feed de Nexa queda para una siguiente fase.',
       ],
+    },
+    {
+      slug: 'auditorias-internas',
+      ruta: '/procesos-gestion/auditorias',
+      titulo: 'Auditorías internas',
+      resumen:
+        'Planeación, ejecución y hallazgos de tus auditorías internas — distinto del informe Evidencia de auditoría, que empaqueta evidencia PARA el auditor externo. Aquí se audita, allá se entrega lo auditado.',
+      camposYBotones: [
+        {
+          nombre: 'Nueva auditoría (admin_th)',
+          explicacion:
+            'Objetivo, alcance, marco normativo, auditor (uno de la plataforma, o el nombre de un auditor externo en texto libre) y qué procesos cubre — una auditoría puede cubrir varios procesos a la vez.',
+        },
+        { nombre: 'Código automático', explicacion: 'Cada auditoría recibe un código (AI-001, AI-002…) al crearse.' },
+        {
+          nombre: 'Tablero de hallazgos',
+          explicacion:
+            'Dentro de cada auditoría: 5 columnas fijas (Abierto → Análisis de causa → Plan de acción → Seguimiento → Cerrado). Cada hallazgo es NC Mayor, NC Menor, Observación u Oportunidad de mejora, con el requisito/numeral incumplido y el proceso específico al que aplica.',
+        },
+      ],
+      notas: [
+        'Pueden ver esta pantalla: admin_th, líder, gerencia y auditor_externo (solo lectura). Crear auditorías, agregar hallazgos y arrastrar tarjetas es exclusivo de admin_th.',
+        'Un hallazgo puede dar origen a una ACPM — se relaciona al crear la ACPM desde la pantalla de ACPM, eligiendo "Hallazgo de auditoría" como origen.',
+      ],
+    },
+    {
+      slug: 'acpm',
+      ruta: '/procesos-gestion/acpm',
+      titulo: 'ACPM — Acciones Correctivas, Preventivas y de Mejora',
+      resumen:
+        'El ciclo completo de una ACPM, no solo "tareas completadas": Registro → Análisis de causa → Plan de acción → Seguimiento → Validación de eficacia → Cerrada efectiva (o Reabierta si la causa no se eliminó).',
+      camposYBotones: [
+        {
+          nombre: 'Nueva ACPM (admin_th)',
+          explicacion: 'Origen (hallazgo de auditoría, riesgo, indicador, PQRS o mejora propia), tipo de acción (correctiva/preventiva/mejora), descripción, metodología de análisis de causa (5 porqués, Ishikawa o libre) y fecha compromiso.',
+        },
+        { nombre: 'Tablero de 7 columnas', explicacion: 'Arrastra una tarjeta para avanzarla en el ciclo. Haz clic en una tarjeta para abrir su detalle.' },
+        {
+          nombre: 'Plan de acción (dentro del detalle)',
+          explicacion: 'Lista de tareas con casilla de completado — el contador "X/Y tareas" se ve también en la tarjeta del tablero.',
+        },
+        {
+          nombre: 'Validar eficacia',
+          explicacion:
+            'Disponible cuando la ACPM está en la columna "Validación de eficacia": responde si la acción eliminó la causa raíz. "Sí" cierra la ACPM como efectiva; "No" la reabre — no basta con que las tareas estén marcadas completas para cerrarla.',
+        },
+      ],
+      notas: [
+        'Pueden ver esta pantalla: admin_th, líder y gerencia. Crear, editar, mover tarjetas, agregar tareas y validar eficacia es exclusivo de admin_th.',
+        'La tasa de eficacia (cuántas ACPM se cerraron como efectivas vs. reabiertas) es un dato que hoy pocas organizaciones tienen sistematizado — vale la pena revisarlo periódicamente en este tablero.',
+      ],
+    },
+    {
+      slug: 'gestion-cambio',
+      ruta: '/procesos-gestion/cambios',
+      titulo: 'Gestión de cambio',
+      resumen:
+        'Evalúa el impacto de un cambio a un proceso, documento, sistema o estructura antes de aprobarlo (ISO 9001 numeral 6.3) — distinto de Gestión documental, que versiona un documento puntual.',
+      camposYBotones: [
+        { nombre: 'Nueva solicitud (admin_th y líder)', explicacion: 'Proceso afectado, título, descripción, tipo de cambio (proceso/documento/sistema/estructura/otro) y motivo.' },
+        {
+          nombre: 'Evaluar y resolver (admin_th)',
+          explicacion: 'Registra la evaluación del impacto (bajo/medio/alto) y aprueba o rechaza. Una solicitud aprobada se puede marcar como "Implementada" cuando el cambio ya se hizo.',
+        },
+      ],
+      notas: ['Pueden ver esta pantalla: admin_th, líder y gerencia. Solicitar: admin_th y líder. Evaluar, aprobar/rechazar y marcar implementado: exclusivo de admin_th.'],
     },
   ],
 };

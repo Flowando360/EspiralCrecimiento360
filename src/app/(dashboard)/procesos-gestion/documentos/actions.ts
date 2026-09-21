@@ -31,6 +31,7 @@ const TIPO_DOC_PREFIJO: Record<string, string> = {
   politica: 'PL',
   formato: 'FO',
   instructivo: 'IN',
+  registro: 'RE',
 };
 
 async function generarCodigoDocumento(
@@ -59,7 +60,7 @@ const SolicitudSchema = z.object({
   documentoId: z.string().uuid().optional(),
   tipoSolicitud: z.enum(['crear', 'actualizar', 'anular']),
   nombreDocumento: z.string().trim().optional(),
-  tipoDocumento: z.enum(['procedimiento', 'politica', 'formato', 'instructivo']).optional(),
+  tipoDocumento: z.enum(['procedimiento', 'politica', 'formato', 'instructivo', 'registro']).optional(),
   archivoPropuestoUrl: z.string().trim().optional(),
   justificacion: z.string().trim().optional(),
 });

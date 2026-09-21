@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { cn, formatearFecha } from '@/lib/utils';
 import { Plus, Check, X, Paperclip, FileText } from 'lucide-react';
 
-type TipoDocumento = 'procedimiento' | 'politica' | 'formato' | 'instructivo';
+type TipoDocumento = 'procedimiento' | 'politica' | 'formato' | 'instructivo' | 'registro';
 type TipoSolicitud = 'crear' | 'actualizar' | 'anular';
 
 export interface Documento {
@@ -51,6 +51,7 @@ const ETIQUETA_TIPO_DOC: Record<TipoDocumento, string> = {
   politica: 'Política',
   formato: 'Formato',
   instructivo: 'Instructivo',
+  registro: 'Registro',
 };
 
 const ETIQUETA_TIPO_SOLICITUD: Record<TipoSolicitud, string> = {

@@ -2,7 +2,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { FileStack } from 'lucide-react';
+import { FileStack, ShieldCheck, GitPullRequestArrow, ListChecks } from 'lucide-react';
 import { MapaProcesos, type Proceso, type Interaccion, type MarcoNormativo } from '@/components/procesos-gestion/mapa-procesos';
 import { ListaRiesgos } from '@/components/procesos-gestion/lista-riesgos';
 import { ChecklistKanban } from '@/components/procesos-gestion/checklist-kanban';
@@ -25,7 +25,7 @@ export default async function ProcesosGestionPage() {
     supabase.from('interacciones_proceso').select('id, proceso_origen_id, proceso_destino_id, tipo, descripcion'),
     supabase
       .from('matriz_riesgos_controles')
-      .select('id, marco_normativo, riesgo, categoria_riesgo, probabilidad, impacto, control')
+      .select('id, marco_normativo, tipo, riesgo, categoria_riesgo, probabilidad, impacto, control, proceso_id, frecuencia_revision, fecha_ultima_revision, riesgo_residual')
       .eq('empresa_id', perfil.empresa_id)
       .order('created_at', { ascending: false }),
     supabase
@@ -58,12 +58,32 @@ export default async function ProcesosGestionPage() {
             SARLAFT/SAGRILAFT, PTEE) — aporte de V&E a la alianza. Base del paquete de evidencia de auditoría.
           </p>
         </div>
-        <Link
-          href="/procesos-gestion/documentos"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2 shrink-0"
-        >
-          <FileStack size={15} /> Gestión documental
-        </Link>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <Link
+            href="/procesos-gestion/documentos"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
+          >
+            <FileStack size={15} /> Gestión documental
+          </Link>
+          <Link
+            href="/procesos-gestion/auditorias"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
+          >
+            <ShieldCheck size={15} /> Auditorías internas
+          </Link>
+          <Link
+            href="/procesos-gestion/acpm"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
+          >
+            <ListChecks size={15} /> ACPM
+          </Link>
+          <Link
+            href="/procesos-gestion/cambios"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
+          >
+            <GitPullRequestArrow size={15} /> Gestión de cambio
+          </Link>
+        </div>
       </div>
 
       <MapaProcesos
@@ -72,7 +92,7 @@ export default async function ProcesosGestionPage() {
         colaboradores={(colaboradores ?? []) as any}
         puedeEditar={puedeEditar}
       />
-      <ListaRiesgos riesgosIniciales={(riesgos ?? []) as any} puedeEditar={puedeEditar} />
+      <ListaRiesgos riesgosIniciales={(riesgos ?? []) as any} procesos={(procesos ?? []) as any} puedeEditar={puedeEditar} />
       <ChecklistKanban itemsIniciales={(checklist ?? []) as any} puedeEditar={puedeEditar} empresaId={perfil.empresa_id} />
     </div>
   );

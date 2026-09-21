@@ -90,12 +90,15 @@ export async function eliminarProceso(id: string) {
 }
 
 const RiesgoSchema = z.object({
-  marcoNormativo: z.enum(['iso_9001', 'sarlaft_sagrilaft', 'ptee', 'interno']),
+  marcoNormativo: z.enum(['iso_9001', 'sst', 'sarlaft_sagrilaft', 'ptee', 'interno']),
+  tipo: z.enum(['riesgo', 'oportunidad']).default('riesgo'),
   riesgo: z.string().trim().min(1, 'El riesgo es requerido'),
   categoriaRiesgo: z.string().trim().optional(),
   probabilidad: z.enum(['baja', 'media', 'alta']).optional(),
   impacto: z.enum(['bajo', 'medio', 'alto']).optional(),
   control: z.string().trim().optional(),
+  procesoId: z.string().uuid().optional(),
+  frecuenciaRevision: z.enum(['trimestral', 'semestral', 'anual']).optional(),
 });
 
 export async function crearRiesgo(input: z.infer<typeof RiesgoSchema>) {
@@ -111,11 +114,15 @@ export async function crearRiesgo(input: z.infer<typeof RiesgoSchema>) {
     .insert({
       empresa_id: perfil.empresa_id,
       marco_normativo: parsed.data.marcoNormativo,
+      tipo: parsed.data.tipo,
       riesgo: parsed.data.riesgo,
       categoria_riesgo: parsed.data.categoriaRiesgo || null,
       probabilidad: parsed.data.probabilidad || null,
       impacto: parsed.data.impacto || null,
       control: parsed.data.control || null,
+      proceso_id: parsed.data.procesoId || null,
+      frecuencia_revision: parsed.data.frecuenciaRevision || null,
+      fecha_ultima_revision: new Date().toISOString().slice(0, 10),
     })
     .select('id')
     .single();
@@ -127,12 +134,16 @@ export async function crearRiesgo(input: z.infer<typeof RiesgoSchema>) {
 
 const EditarRiesgoSchema = z.object({
   id: z.string().uuid(),
-  marcoNormativo: z.enum(['iso_9001', 'sarlaft_sagrilaft', 'ptee', 'interno']),
+  marcoNormativo: z.enum(['iso_9001', 'sst', 'sarlaft_sagrilaft', 'ptee', 'interno']),
+  tipo: z.enum(['riesgo', 'oportunidad']).default('riesgo'),
   riesgo: z.string().trim().min(1, 'El riesgo es requerido'),
   categoriaRiesgo: z.string().trim().optional(),
   probabilidad: z.enum(['baja', 'media', 'alta']).optional().or(z.literal('')),
   impacto: z.enum(['bajo', 'medio', 'alto']).optional().or(z.literal('')),
   control: z.string().trim().optional(),
+  procesoId: z.string().uuid().optional(),
+  frecuenciaRevision: z.enum(['trimestral', 'semestral', 'anual']).optional().or(z.literal('')),
+  riesgoResidual: z.enum(['bajo', 'medio', 'alto']).optional().or(z.literal('')),
 });
 
 export async function actualizarRiesgo(input: z.infer<typeof EditarRiesgoSchema>) {
@@ -147,13 +158,44 @@ export async function actualizarRiesgo(input: z.infer<typeof EditarRiesgoSchema>
     .from('matriz_riesgos_controles')
     .update({
       marco_normativo: parsed.data.marcoNormativo,
+      tipo: parsed.data.tipo,
       riesgo: parsed.data.riesgo,
       categoria_riesgo: parsed.data.categoriaRiesgo || null,
       probabilidad: parsed.data.probabilidad || null,
       impacto: parsed.data.impacto || null,
       control: parsed.data.control || null,
+      proceso_id: parsed.data.procesoId || null,
+      frecuencia_revision: parsed.data.frecuenciaRevision || null,
+      riesgo_residual: parsed.data.riesgoResidual || null,
     })
     .eq('id', parsed.data.id)
+    .eq('empresa_id', perfil.empresa_id);
+
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(RUTA);
+  return { ok: true as const };
+}
+
+/** Revisión periódica (flujo diferenciador 3 de Nexus): confirma/actualiza el riesgo y estampa fecha_ultima_revision = hoy, recalculando el riesgo residual. */
+export async function marcarRiesgoRevisado(input: {
+  id: string;
+  probabilidad: 'baja' | 'media' | 'alta';
+  impacto: 'bajo' | 'medio' | 'alto';
+  riesgoResidual: 'bajo' | 'medio' | 'alto';
+}) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('matriz_riesgos_controles')
+    .update({
+      probabilidad: input.probabilidad,
+      impacto: input.impacto,
+      riesgo_residual: input.riesgoResidual,
+      fecha_ultima_revision: new Date().toISOString().slice(0, 10),
+    })
+    .eq('id', input.id)
     .eq('empresa_id', perfil.empresa_id);
 
   if (error) return { ok: false as const, error: error.message };
@@ -173,7 +215,7 @@ export async function eliminarRiesgo(id: string) {
 }
 
 const ChecklistSchema = z.object({
-  marcoNormativo: z.enum(['iso_9001', 'sarlaft_sagrilaft', 'ptee']),
+  marcoNormativo: z.enum(['iso_9001', 'sst', 'sarlaft_sagrilaft', 'ptee']),
   item: z.string().trim().min(1, 'El ítem es requerido'),
   descripcion: z.string().trim().optional(),
   estado: z.enum(['cumple', 'cumple_parcial', 'no_cumple', 'no_aplica']),
@@ -226,7 +268,7 @@ export async function actualizarEstadoChecklist(id: string, estado: 'cumple' | '
 
 const EditarChecklistSchema = z.object({
   id: z.string().uuid(),
-  marcoNormativo: z.enum(['iso_9001', 'sarlaft_sagrilaft', 'ptee']),
+  marcoNormativo: z.enum(['iso_9001', 'sst', 'sarlaft_sagrilaft', 'ptee']),
   item: z.string().trim().min(1, 'El ítem es requerido'),
   descripcion: z.string().trim().optional(),
   observaciones: z.string().trim().optional(),

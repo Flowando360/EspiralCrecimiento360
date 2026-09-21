@@ -22,11 +22,12 @@ import { createClient } from '@/lib/supabase/client';
 import { Trash2, Plus, Paperclip, Pencil, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type MarcoNormativo = 'iso_9001' | 'sarlaft_sagrilaft' | 'ptee';
+type MarcoNormativo = 'iso_9001' | 'sst' | 'sarlaft_sagrilaft' | 'ptee';
 type EstadoChecklist = 'cumple' | 'cumple_parcial' | 'no_cumple' | 'no_aplica';
 
 const ETIQUETA_MARCO: Record<MarcoNormativo, string> = {
   iso_9001: 'ISO 9001',
+  sst: 'SST',
   sarlaft_sagrilaft: 'SARLAFT/SAGRILAFT',
   ptee: 'PTEE',
 };

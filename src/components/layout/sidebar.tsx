@@ -37,6 +37,9 @@ import {
   UserSearch,
   Shirt,
   FileStack,
+  ShieldQuestion,
+  ListChecks,
+  GitPullRequestArrow,
 } from 'lucide-react';
 
 interface NavItem {
@@ -96,6 +99,9 @@ const NAV: NavGroup[] = [
     items: [
       { href: '/procesos-gestion', label: 'Procesos y sistemas de gestión', icon: ClipboardCheck, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/procesos-gestion/documentos', label: 'Gestión documental', icon: FileStack, roles: ['admin_th', 'lider', 'gerencia'] },
+      { href: '/procesos-gestion/auditorias', label: 'Auditorías internas', icon: ShieldQuestion, roles: ['admin_th', 'lider', 'gerencia', 'auditor_externo'] },
+      { href: '/procesos-gestion/acpm', label: 'ACPM', icon: ListChecks, roles: ['admin_th', 'lider', 'gerencia'] },
+      { href: '/procesos-gestion/cambios', label: 'Gestión de cambio', icon: GitPullRequestArrow, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/informes/evidencia-auditoria', label: 'Evidencia de auditoría', icon: ShieldCheck, roles: ['admin_th', 'gerencia', 'auditor_externo'] },
     ],
   },
