@@ -4,12 +4,20 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { otorgarPuntos, PUNTOS_PROCESOS } from '@/lib/nexa/gamificacion';
 
 const RUTA = '/procesos-gestion/documentos';
 
 async function requerirPerfil() {
   const perfil = await getPerfilActual();
   if (!perfil || !['admin_th', 'lider', 'gerencia'].includes(perfil.rol)) return null;
+  return perfil;
+}
+
+/** Confirmar lectura: abierto a cualquier colaborador de la empresa (punto 3.2), no solo a quien ya tiene acceso al módulo. */
+async function requerirAccesoConfirmacion() {
+  const perfil = await getPerfilActual();
+  if (!perfil || !['admin_th', 'lider', 'gerencia', 'colaborador'].includes(perfil.rol)) return null;
   return perfil;
 }
 
@@ -115,30 +123,36 @@ export async function aprobarSolicitud(id: string, comentarios?: string) {
   if (errSolicitud || !solicitud) return { ok: false as const, error: 'Solicitud no encontrada' };
   if (solicitud.estado !== 'pendiente') return { ok: false as const, error: 'Esta solicitud ya fue resuelta' };
 
+  const { data: proceso } = await supabase.from('procesos_gestion').select('nombre, codigo').eq('id', solicitud.proceso_id).maybeSingle();
+
+  // Documento publicado/actualizado en este ciclo de aprobación — si requiere confirmación, se
+  // anuncia en el Feed al final con un link a la pantalla angosta de confirmación (punto 3.2).
+  let documentoParaFeed: { id: string; nombre: string; requiereConfirmacion: boolean; esNuevo: boolean } | null = null;
+
   if (solicitud.tipo_solicitud === 'crear') {
-    const { data: proceso } = await supabase
-      .from('procesos_gestion')
-      .select('codigo')
-      .eq('id', solicitud.proceso_id)
-      .maybeSingle();
-
     const codigo = await generarCodigoDocumento(supabase, solicitud.proceso_id as string, (proceso?.codigo as string) ?? null, solicitud.tipo_documento as string);
+    const requiereConfirmacion = solicitud.tipo_documento === 'procedimiento' || solicitud.tipo_documento === 'politica';
 
-    const { error: errCrear } = await supabase.from('documentos_proceso').insert({
-      proceso_id: solicitud.proceso_id,
-      codigo,
-      nombre: solicitud.nombre_documento as string,
-      tipo_documento: solicitud.tipo_documento as string,
-      version_vigente: 'v001',
-      estado: 'vigente',
-      archivo_url: solicitud.archivo_propuesto_url,
-      requiere_confirmacion: solicitud.tipo_documento === 'procedimiento' || solicitud.tipo_documento === 'politica',
-    });
+    const { data: creado, error: errCrear } = await supabase
+      .from('documentos_proceso')
+      .insert({
+        proceso_id: solicitud.proceso_id,
+        codigo,
+        nombre: solicitud.nombre_documento as string,
+        tipo_documento: solicitud.tipo_documento as string,
+        version_vigente: 'v001',
+        estado: 'vigente',
+        archivo_url: solicitud.archivo_propuesto_url,
+        requiere_confirmacion: requiereConfirmacion,
+      })
+      .select('id')
+      .single();
     if (errCrear) return { ok: false as const, error: errCrear.message };
+    documentoParaFeed = { id: creado.id as string, nombre: solicitud.nombre_documento as string, requiereConfirmacion, esNuevo: true };
   } else if (solicitud.tipo_solicitud === 'actualizar') {
     const { data: documento } = await supabase
       .from('documentos_proceso')
-      .select('id, version_vigente, archivo_url')
+      .select('id, nombre, version_vigente, archivo_url, requiere_confirmacion')
       .eq('id', solicitud.documento_id as string)
       .maybeSingle();
     if (!documento) return { ok: false as const, error: 'El documento ya no existe' };
@@ -161,6 +175,7 @@ export async function aprobarSolicitud(id: string, comentarios?: string) {
 
     // Nueva versión = nuevo ciclo de difusión: las confirmaciones de la versión anterior ya no aplican.
     await supabase.from('confirmaciones_lectura').delete().eq('documento_id', documento.id);
+    documentoParaFeed = { id: documento.id, nombre: documento.nombre, requiereConfirmacion: documento.requiere_confirmacion, esNuevo: false };
   } else {
     const { error: errAnular } = await supabase
       .from('documentos_proceso')
@@ -175,7 +190,22 @@ export async function aprobarSolicitud(id: string, comentarios?: string) {
     .eq('id', id);
   if (errResolver) return { ok: false as const, error: errResolver.message };
 
+  if (documentoParaFeed?.requiereConfirmacion) {
+    await supabase.from('nexa_feed_publicaciones').insert({
+      empresa_id: perfil.empresa_id,
+      autor_id: perfil.usuario_id,
+      tipo: 'anuncio',
+      titulo: documentoParaFeed.esNuevo ? `Nuevo documento publicado: ${documentoParaFeed.nombre}` : `Documento actualizado: ${documentoParaFeed.nombre}`,
+      contenido: `${proceso?.nombre ?? 'Un proceso'} publicó ${documentoParaFeed.esNuevo ? 'un nuevo documento' : 'una nueva versión'}. Confirma que lo leíste.`,
+      tipo_adjunto: 'link',
+      link_url: `/procesos-gestion/documentos/${documentoParaFeed.id}/confirmar`,
+      link_preview_titulo: documentoParaFeed.nombre,
+      link_preview_descripcion: 'Confirmar lectura',
+    });
+  }
+
   revalidatePath(RUTA);
+  revalidatePath('/nexa/feed');
   return { ok: true as const };
 }
 
@@ -195,7 +225,7 @@ export async function rechazarSolicitud(id: string, comentarios?: string) {
 }
 
 export async function confirmarLectura(documentoId: string, comentario?: string) {
-  const perfil = await requerirPerfil();
+  const perfil = await requerirAccesoConfirmacion();
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
   if (!perfil.colaborador_id) return { ok: false as const, error: 'Tu usuario no tiene una ficha de colaborador vinculada' };
 
@@ -207,6 +237,9 @@ export async function confirmarLectura(documentoId: string, comentario?: string)
       { onConflict: 'documento_id,colaborador_id' }
     );
   if (error) return { ok: false as const, error: error.message };
+  await otorgarPuntos(perfil.colaborador_id, PUNTOS_PROCESOS.confirmarLecturaDocumento, 'Confirmó lectura de un documento del SGC', perfil.usuario_id);
   revalidatePath(RUTA);
+  revalidatePath(`${RUTA}/${documentoId}`);
+  revalidatePath(`${RUTA}/${documentoId}/confirmar`);
   return { ok: true as const };
 }

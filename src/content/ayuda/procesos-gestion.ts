@@ -39,11 +39,11 @@ export const moduloProcesosGestion: ModuloAyuda = {
         {
           nombre: 'Matriz de riesgos y oportunidades',
           explicacion:
-            'Cada fila es un riesgo o una oportunidad (ISO 9001 numeral 6.1 exige gestionar ambos), con su marco normativo, probabilidad, impacto, control, riesgo residual (el nivel que queda después del control) y, si se le define una frecuencia de revisión (trimestral/semestral/anual), una etiqueta roja "Revisión vencida" cuando ya pasó esa frecuencia desde la última vez que se confirmó.',
+            'Cada fila es un riesgo o una oportunidad (ISO 9001 numeral 6.1 exige gestionar ambos), con su marco normativo, probabilidad, impacto, control, riesgo residual (el nivel que queda después del control) y, si se le define una frecuencia de revisión (trimestral/semestral/anual), una etiqueta roja "Revisión vencida" cuando ya pasó esa frecuencia desde la última vez que se confirmó. Registrar uno con un control definido suma 10 puntos al ranking de Nexa.',
         },
         {
           nombre: 'Marcar revisado (admin_th)',
-          explicacion: 'Ícono de refrescar junto a un riesgo con frecuencia de revisión definida: confirma que se revisó hoy sin necesidad de abrir el formulario completo de edición.',
+          explicacion: 'Ícono de refrescar junto a un riesgo con frecuencia de revisión definida: confirma que se revisó hoy sin necesidad de abrir el formulario completo de edición. Suma 5 puntos al ranking de Nexa.',
         },
         {
           nombre: 'Crear ACPM desde un riesgo (admin_th)',
@@ -135,6 +135,11 @@ export const moduloProcesosGestion: ModuloAyuda = {
             'Dentro de la ficha de un documento que la requiere (procedimientos y políticas, por defecto), cualquier persona con acceso al módulo puede confirmar que lo leyó, con un comentario opcional. La barra de progreso compara contra el umbral de "difusión completa" configurable (Administración → Configuración).',
         },
         {
+          nombre: 'Difusión automática al Feed',
+          explicacion:
+            'Al aprobar una solicitud de "crear" o "actualizar" cuyo documento requiere confirmación, se publica sola un anuncio en el Feed corporativo con un link directo a la confirmación — sin que nadie tenga que redactarlo ni recordar avisar. Confirmar lectura ahora suma 5 puntos al ranking de Nexa (Reconocimientos).',
+        },
+        {
           nombre: 'Exportar acta de difusión',
           explicacion: 'Genera un PDF con el resumen de confirmaciones (quién, cuándo, comentarios) y la línea de tiempo de versiones del documento — listo para entregar en auditoría (ISO 9001 numeral 7.5.3).',
         },
@@ -143,7 +148,21 @@ export const moduloProcesosGestion: ModuloAyuda = {
       notas: [
         'Pueden ver esta pantalla: admin_th, líder y gerencia. Solicitar documentos: admin_th y líder. Aprobar o rechazar solicitudes: exclusivo de admin_th.',
         'Solo la versión vigente de un documento es visible para la empresa; las versiones obsoletas quedan en un repositorio que solo admin_th puede consultar.',
-        'En esta primera versión, la confirmación de lectura llega a quienes ya tienen acceso al módulo (admin_th, líder, gerencia). Abrirla a todos los colaboradores a través del Feed de Nexa queda para una siguiente fase.',
+        'Confirmar lectura ya está abierto a cualquier colaborador (no solo a quien tiene acceso a este módulo) — ver la página "Confirmar lectura de un documento".',
+      ],
+    },
+    {
+      slug: 'confirmar-lectura-documento',
+      ruta: '/procesos-gestion/documentos/*/confirmar',
+      titulo: 'Confirmar lectura de un documento',
+      resumen:
+        'Pantalla angosta y de un solo propósito, abierta a cualquier colaborador de la empresa — no requiere acceso al módulo de Procesos. Se llega principalmente haciendo clic en el anuncio que aparece solo en el Feed cuando se publica o actualiza un documento.',
+      camposYBotones: [
+        { nombre: 'Ver documento', explicacion: 'Abre el archivo vigente en una pestaña nueva.' },
+        { nombre: 'Confirmar que lo leí', explicacion: 'Registra la confirmación (con comentario opcional) y suma 5 puntos al ranking de Nexa (Reconocimientos). Si el documento no requiere confirmación, esta sección no aparece.' },
+      ],
+      notas: [
+        'Visible para cualquier rol autenticado de la empresa (admin_th, líder, colaborador, gerencia) — a propósito no se abrió todo el módulo de Procesos, solo esta pantalla puntual.',
       ],
     },
     {
@@ -186,17 +205,17 @@ export const moduloProcesosGestion: ModuloAyuda = {
         },
         {
           nombre: 'Nueva ACPM (admin_th)',
-          explicacion: 'Origen (hallazgo de auditoría, riesgo, indicador, PQRS o mejora propia), tipo de acción (correctiva/preventiva/mejora), descripción, metodología de análisis de causa (5 porqués, Ishikawa o libre) y fecha compromiso. Si se llega desde el botón "Crear ACPM" de un hallazgo o un riesgo, el origen ya viene vinculado.',
+          explicacion: 'Origen (hallazgo de auditoría, riesgo, indicador, PQRS o mejora propia), tipo de acción (correctiva/preventiva/mejora), descripción, metodología de análisis de causa (5 porqués, Ishikawa o libre) y fecha compromiso. Si se llega desde el botón "Crear ACPM" de un hallazgo o un riesgo, el origen ya viene vinculado. Suma 10 puntos al ranking de Nexa, para el responsable de la ACPM (o para quien la crea, si no tiene responsable asignado).',
         },
         { nombre: 'Tablero de 7 columnas', explicacion: 'Arrastra una tarjeta para avanzarla en el ciclo. Haz clic en una tarjeta para abrir su detalle.' },
         {
           nombre: 'Plan de acción (dentro del detalle)',
-          explicacion: 'Lista de tareas con casilla de completado — el contador "X/Y tareas" se ve también en la tarjeta del tablero.',
+          explicacion: 'Lista de tareas con casilla de completado — el contador "X/Y tareas" se ve también en la tarjeta del tablero. Completar la última tarea pendiente suma 20 puntos al ranking de Nexa.',
         },
         {
           nombre: 'Validar eficacia',
           explicacion:
-            'Disponible cuando la ACPM está en la columna "Validación de eficacia": responde si la acción eliminó la causa raíz. "Sí" cierra la ACPM como efectiva; "No" la reabre — no basta con que las tareas estén marcadas completas para cerrarla.',
+            'Disponible cuando la ACPM está en la columna "Validación de eficacia": responde si la acción eliminó la causa raíz. "Sí" cierra la ACPM como efectiva (suma 60 puntos — el máximo del módulo) y "No" la reabre sin restar puntos, para no castigar la honestidad en la validación — no basta con que las tareas estén marcadas completas para cerrarla.',
         },
       ],
       notas: [

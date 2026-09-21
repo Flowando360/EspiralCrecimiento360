@@ -12,9 +12,9 @@ export default async function NexaReconocimientosPage() {
   const supabase = createClient();
   const { data: reconocimientos } = await supabase
     .from('nexa_reconocimientos')
-    .select('id, puntos, motivo, otorgado_en, colaborador:colaborador_id(nombre_completo), insignia:insignia_id(nombre, icono)')
+    .select('id, colaborador_id, puntos, motivo, otorgado_en, colaborador:colaborador_id(nombre_completo), insignia:insignia_id(nombre, icono)')
     .order('otorgado_en', { ascending: false })
-    .limit(50);
+    .limit(200);
 
   const puedeOtorgar = perfil.rol === 'admin_th' || perfil.rol === 'lider';
   let colaboradores: { id: string; nombre_completo: string }[] = [];
@@ -34,15 +34,19 @@ export default async function NexaReconocimientosPage() {
     colaboradores = data ?? [];
   }
 
-  // Ranking simple: suma de puntos por colaborador
+  // Ranking simple: suma de puntos por colaborador (incluye los puntos automáticos
+  // que ahora otorga el módulo de Procesos — confirmar lectura, riesgos, ACPM).
   const ranking = new Map<string, { nombre: string; puntos: number }>();
   (reconocimientos ?? []).forEach((r: any) => {
     const nombre = r.colaborador?.nombre_completo ?? 'Desconocido';
-    const actual = ranking.get(nombre) ?? { nombre, puntos: 0 };
+    const actual = ranking.get(r.colaborador_id) ?? { nombre, puntos: 0 };
     actual.puntos += r.puntos ?? 0;
-    ranking.set(nombre, actual);
+    ranking.set(r.colaborador_id, actual);
   });
-  const rankingOrdenado = [...ranking.values()].sort((a, b) => b.puntos - a.puntos).slice(0, 10);
+  const rankingCompleto = [...ranking.entries()].map(([id, v]) => ({ id, ...v })).sort((a, b) => b.puntos - a.puntos);
+  const rankingOrdenado = rankingCompleto.slice(0, 10);
+  const miPosicion = perfil.colaborador_id ? rankingCompleto.findIndex((r) => r.id === perfil.colaborador_id) : -1;
+  const estoyFueraDelTop10 = miPosicion >= 10;
 
   return (
     <div className="space-y-6">
@@ -65,7 +69,10 @@ export default async function NexaReconocimientosPage() {
           ) : (
             <ol className="space-y-2">
               {rankingOrdenado.map((r, i) => (
-                <li key={r.nombre} className="flex items-center justify-between text-sm">
+                <li
+                  key={r.id}
+                  className={`flex items-center justify-between text-sm rounded-lg ${r.id === perfil.colaborador_id ? 'bg-acento/20 px-2 py-1 -mx-2' : ''}`}
+                >
                   <span className="text-marmol-700">
                     <span className="text-marmol-400 mr-2">{i + 1}.</span>
                     {r.nombre}
@@ -76,6 +83,12 @@ export default async function NexaReconocimientosPage() {
                 </li>
               ))}
             </ol>
+          )}
+          {estoyFueraDelTop10 && (
+            <p className="text-xs text-marmol-500 mt-3 pt-3 border-t border-marmol-100">
+              Tu posición: <span className="font-medium text-marmol-700">#{miPosicion + 1}</span> con{' '}
+              <span className="font-medium text-marmol-700">{rankingCompleto[miPosicion]?.puntos} pts</span>
+            </p>
           )}
         </div>
 

@@ -25,7 +25,10 @@ export const moduloNexa: ModuloAyuda = {
         'Si quieres adjuntar algo, elige Documento, Link o Video/imagen y complétalo.',
         'Publica — aparece de inmediato para toda la empresa.',
       ],
-      notas: ['Solo una publicación puede combinarse con un solo tipo de adjunto a la vez (no varios adjuntos juntos).'],
+      notas: [
+        'Solo una publicación puede combinarse con un solo tipo de adjunto a la vez (no varios adjuntos juntos).',
+        'El módulo de Procesos también publica aquí automáticamente: al aprobar la creación o actualización de un documento que requiere confirmación de lectura, aparece un anuncio con un link directo a la confirmación — nadie tiene que redactarlo.',
+      ],
     },
     {
       slug: 'formacion',
@@ -74,10 +77,19 @@ export const moduloNexa: ModuloAyuda = {
       slug: 'reconocimientos',
       ruta: '/nexa/reconocimientos',
       titulo: 'Reconocimientos',
-      resumen: 'Ranking de puntos y muro de los últimos reconocimientos otorgados en la empresa.',
+      resumen:
+        'Ranking de puntos y muro de los últimos reconocimientos otorgados en la empresa. Desde que existe el módulo de Procesos, este mismo ranking también suma automáticamente los puntos que se ganan ahí.',
       camposYBotones: [
         { nombre: 'Otorgar reconocimiento', explicacion: 'admin_th y líder. Elige a la persona (el líder solo ve su propio equipo), escribe el motivo y los puntos.' },
-        { nombre: 'Ranking de puntos', explicacion: 'Suma de puntos por persona, de mayor a menor.' },
+        { nombre: 'Ranking de puntos', explicacion: 'Suma de puntos por persona, de mayor a menor (top 10). Tu propia fila queda resaltada en verde si estás dentro del top 10; si no, aparece tu posición exacta debajo de la lista, para que siempre sepas dónde estás sin importar el puesto.' },
+        {
+          nombre: 'Puntos automáticos del módulo de Procesos',
+          explicacion:
+            'Confirmar lectura de un documento: 5 pts. Marcar un riesgo revisado a tiempo: 5 pts. Registrar un riesgo/oportunidad con control definido: 10 pts. Registrar una ACPM: 10 pts. Completar todo el plan de acción de una ACPM: 20 pts. Cerrar una ACPM validada como eficaz: 60 pts (el máximo — cerrarla como "no eficaz" no resta puntos, para no castigar la honestidad en la validación).',
+        },
+      ],
+      notas: [
+        'Los puntos de riesgos y ACPM hoy solo los puede generar admin_th, porque esas pantallas son de edición exclusiva suya — el ranking reflejará más personas a medida que esos permisos se abran más adelante.',
       ],
     },
     {

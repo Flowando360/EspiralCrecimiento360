@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { otorgarPuntos, PUNTOS_PROCESOS } from '@/lib/nexa/gamificacion';
 
 const RUTA = '/procesos-gestion';
 
@@ -128,6 +129,9 @@ export async function crearRiesgo(input: z.infer<typeof RiesgoSchema>) {
     .single();
 
   if (error) return { ok: false as const, error: error.message };
+  if (parsed.data.control?.trim()) {
+    await otorgarPuntos(perfil.colaborador_id, PUNTOS_PROCESOS.registrarRiesgoConControl, `Registró ${parsed.data.tipo === 'oportunidad' ? 'una oportunidad' : 'un riesgo'} con control definido`, perfil.usuario_id);
+  }
   revalidatePath(RUTA);
   return { ok: true as const, id: data.id as string };
 }
@@ -199,6 +203,7 @@ export async function marcarRiesgoRevisado(input: {
     .eq('empresa_id', perfil.empresa_id);
 
   if (error) return { ok: false as const, error: error.message };
+  await otorgarPuntos(perfil.colaborador_id, PUNTOS_PROCESOS.marcarRiesgoRevisado, 'Revisó un riesgo/oportunidad a tiempo', perfil.usuario_id);
   revalidatePath(RUTA);
   return { ok: true as const };
 }

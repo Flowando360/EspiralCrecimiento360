@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { otorgarPuntos, PUNTOS_PROCESOS } from '@/lib/nexa/gamificacion';
 
 const RUTA = '/procesos-gestion/acpm';
 
@@ -62,6 +63,7 @@ export async function crearAcpm(input: z.infer<typeof AcpmSchema>) {
     .single();
 
   if (error) return { ok: false as const, error: error.message };
+  await otorgarPuntos(d.responsableId || perfil.colaborador_id, PUNTOS_PROCESOS.registrarAcpm, 'Registró una ACPM', perfil.usuario_id);
   revalidatePath(RUTA);
   return { ok: true as const, id: data.id as string, codigo };
 }
@@ -131,6 +133,8 @@ export async function cerrarAcpm(input: z.infer<typeof CerrarAcpmSchema>) {
   const d = parsed.data;
 
   const supabase = createClient();
+  const { data: acpmActual } = await supabase.from('acpm').select('responsable_id').eq('id', d.id).maybeSingle();
+
   const { error } = await supabase
     .from('acpm')
     .update({
@@ -142,6 +146,11 @@ export async function cerrarAcpm(input: z.infer<typeof CerrarAcpmSchema>) {
     .eq('id', d.id)
     .eq('empresa_id', perfil.empresa_id);
   if (error) return { ok: false as const, error: error.message };
+
+  // Cerrar como "no eficaz" no resta puntos — castigar la honestidad en la validación sería contraproducente.
+  if (d.eficaz) {
+    await otorgarPuntos(acpmActual?.responsable_id ?? perfil.colaborador_id, PUNTOS_PROCESOS.cerrarAcpmEficaz, 'Cerró una ACPM validada como eficaz', perfil.usuario_id);
+  }
   revalidatePath(RUTA);
   return { ok: true as const };
 }
@@ -197,8 +206,21 @@ export async function actualizarTarea(id: string, completada: boolean) {
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
   const supabase = createClient();
+  const { data: tareaAntes } = await supabase.from('tareas_acpm').select('acpm_id, completada').eq('id', id).maybeSingle();
+
   const { error } = await supabase.from('tareas_acpm').update({ completada }).eq('id', id);
   if (error) return { ok: false as const, error: error.message };
+
+  // Bono por completar el plan de acción entero — solo la vez que esta tarea es la que lo cierra.
+  if (completada && tareaAntes && !tareaAntes.completada) {
+    const { data: todas } = await supabase.from('tareas_acpm').select('completada').eq('acpm_id', tareaAntes.acpm_id);
+    const planCompleto = (todas ?? []).length > 0 && (todas ?? []).every((t) => t.completada);
+    if (planCompleto) {
+      const { data: acpmActual } = await supabase.from('acpm').select('responsable_id').eq('id', tareaAntes.acpm_id).maybeSingle();
+      await otorgarPuntos(acpmActual?.responsable_id ?? perfil.colaborador_id, PUNTOS_PROCESOS.completarPlanDeAccionAcpm, 'Completó el plan de acción de una ACPM', perfil.usuario_id);
+    }
+  }
+
   revalidatePath(RUTA);
   return { ok: true as const };
 }

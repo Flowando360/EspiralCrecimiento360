@@ -53,3 +53,21 @@ export async function obtenerUrlFirmadaHojaVidaCandidato(path: string | null): P
   if (error || !data) return null;
   return data.signedUrl;
 }
+
+/**
+ * Documento del módulo de Procesos (bucket privado "documentos-procesos").
+ * Cualquier colaborador de la empresa puede leer la carpeta "vigentes"
+ * (ver 0076) — se usa tanto en la ficha administrativa del documento como en
+ * la pantalla angosta de confirmación de lectura abierta a todos los roles.
+ */
+export async function obtenerUrlFirmadaDocumentoProceso(path: string | null): Promise<string | null> {
+  if (!path) return null;
+
+  const supabase = createClient();
+  const { data, error } = await supabase.storage
+    .from('documentos-procesos')
+    .createSignedUrl(path, UNA_HORA_EN_SEGUNDOS);
+
+  if (error || !data) return null;
+  return data.signedUrl;
+}
