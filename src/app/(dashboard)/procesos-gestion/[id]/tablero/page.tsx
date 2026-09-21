@@ -41,10 +41,10 @@ export default async function TableroProcesoPage({ params }: { params: { id: str
     <div className="space-y-4">
       <div>
         <Link
-          href="/procesos-gestion"
+          href={`/procesos-gestion/${proceso.id}`}
           className="inline-flex items-center gap-1 text-sm text-marmol-500 hover:text-flow-600 mb-2"
         >
-          <ChevronLeft size={14} /> Procesos y Sistemas de Gestión
+          <ChevronLeft size={14} /> {proceso.nombre}
         </Link>
         <h1 className="font-display text-2xl font-semibold text-secundario">{proceso.nombre}</h1>
         <p className="text-sm text-marmol-500 mt-1">{proceso.area_proceso} · Tablero del proceso</p>

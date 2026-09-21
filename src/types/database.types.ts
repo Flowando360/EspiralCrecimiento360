@@ -1608,6 +1608,94 @@ export type Database = {
           },
         ]
       }
+      confirmaciones_lectura: {
+        Row: {
+          colaborador_id: string
+          comentario: string | null
+          confirmado_at: string
+          documento_id: string
+          id: string
+        }
+        Insert: {
+          colaborador_id: string
+          comentario?: string | null
+          confirmado_at?: string
+          documento_id: string
+          id?: string
+        }
+        Update: {
+          colaborador_id?: string
+          comentario?: string | null
+          confirmado_at?: string
+          documento_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "confirmaciones_lectura_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "confirmaciones_lectura_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "confirmaciones_lectura_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "confirmaciones_lectura_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "confirmaciones_lectura_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "confirmaciones_lectura_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "confirmaciones_lectura_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "confirmaciones_lectura_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
+          },
+          {
+            foreignKeyName: "confirmaciones_lectura_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "documentos_proceso"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dimension_cursos_recomendados: {
         Row: {
           created_at: string
@@ -1643,6 +1731,150 @@ export type Database = {
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documentos_historial_version: {
+        Row: {
+          archivo_url: string
+          documento_id: string
+          fecha: string
+          id: string
+          responsable_id: string | null
+          resumen_cambio: string | null
+          version: string
+        }
+        Insert: {
+          archivo_url: string
+          documento_id: string
+          fecha?: string
+          id?: string
+          responsable_id?: string | null
+          resumen_cambio?: string | null
+          version: string
+        }
+        Update: {
+          archivo_url?: string
+          documento_id?: string
+          fecha?: string
+          id?: string
+          responsable_id?: string | null
+          resumen_cambio?: string | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentos_historial_version_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "documentos_proceso"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentos_historial_version_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentos_historial_version_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "documentos_historial_version_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "documentos_historial_version_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "documentos_historial_version_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "documentos_historial_version_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "documentos_historial_version_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "documentos_historial_version_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
+          },
+        ]
+      }
+      documentos_proceso: {
+        Row: {
+          archivo_url: string | null
+          codigo: string
+          created_at: string
+          estado: string
+          id: string
+          nombre: string
+          proceso_id: string
+          requiere_confirmacion: boolean
+          tipo_documento: string
+          updated_at: string
+          version_vigente: string
+        }
+        Insert: {
+          archivo_url?: string | null
+          codigo: string
+          created_at?: string
+          estado?: string
+          id?: string
+          nombre: string
+          proceso_id: string
+          requiere_confirmacion?: boolean
+          tipo_documento: string
+          updated_at?: string
+          version_vigente?: string
+        }
+        Update: {
+          archivo_url?: string | null
+          codigo?: string
+          created_at?: string
+          estado?: string
+          id?: string
+          nombre?: string
+          proceso_id?: string
+          requiere_confirmacion?: boolean
+          tipo_documento?: string
+          updated_at?: string
+          version_vigente?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentos_proceso_proceso_id_fkey"
+            columns: ["proceso_id"]
+            isOneToOne: false
+            referencedRelation: "procesos_gestion"
             referencedColumns: ["id"]
           },
         ]
@@ -1867,6 +2099,51 @@ export type Database = {
           },
         ]
       }
+      elementos_proceso: {
+        Row: {
+          created_at: string
+          descripcion: string
+          id: string
+          orden: number
+          proceso_id: string
+          proceso_relacionado_id: string | null
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          descripcion: string
+          id?: string
+          orden?: number
+          proceso_id: string
+          proceso_relacionado_id?: string | null
+          tipo: string
+        }
+        Update: {
+          created_at?: string
+          descripcion?: string
+          id?: string
+          orden?: number
+          proceso_id?: string
+          proceso_relacionado_id?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "elementos_proceso_proceso_id_fkey"
+            columns: ["proceso_id"]
+            isOneToOne: false
+            referencedRelation: "procesos_gestion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "elementos_proceso_proceso_relacionado_id_fkey"
+            columns: ["proceso_relacionado_id"]
+            isOneToOne: false
+            referencedRelation: "procesos_gestion"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresa_identidad: {
         Row: {
           declaracion_creencias: string | null
@@ -1961,6 +2238,7 @@ export type Database = {
           color_marca: string | null
           created_at: string
           direccion: string | null
+          documental_umbral_difusion_pct: number
           estado_facturacion: string
           fecha_fundacion: string | null
           fecha_proximo_pago: string | null
@@ -1992,6 +2270,7 @@ export type Database = {
           color_marca?: string | null
           created_at?: string
           direccion?: string | null
+          documental_umbral_difusion_pct?: number
           estado_facturacion?: string
           fecha_fundacion?: string | null
           fecha_proximo_pago?: string | null
@@ -2023,6 +2302,7 @@ export type Database = {
           color_marca?: string | null
           created_at?: string
           direccion?: string | null
+          documental_umbral_difusion_pct?: number
           estado_facturacion?: string
           fecha_fundacion?: string | null
           fecha_proximo_pago?: string | null
@@ -3813,6 +4093,48 @@ export type Database = {
           },
         ]
       }
+      interacciones_proceso: {
+        Row: {
+          created_at: string
+          descripcion: string | null
+          id: string
+          proceso_destino_id: string
+          proceso_origen_id: string
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          proceso_destino_id: string
+          proceso_origen_id: string
+          tipo?: string
+        }
+        Update: {
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          proceso_destino_id?: string
+          proceso_origen_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interacciones_proceso_proceso_destino_id_fkey"
+            columns: ["proceso_destino_id"]
+            isOneToOne: false
+            referencedRelation: "procesos_gestion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interacciones_proceso_proceso_origen_id_fkey"
+            columns: ["proceso_origen_id"]
+            isOneToOne: false
+            referencedRelation: "procesos_gestion"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matriz_riesgos_controles: {
         Row: {
           categoria_riesgo: string | null
@@ -5177,41 +5499,82 @@ export type Database = {
           },
         ]
       }
+      proceso_marcos_normativos: {
+        Row: {
+          created_at: string
+          id: string
+          marco_normativo: string
+          proceso_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          marco_normativo: string
+          proceso_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          marco_normativo?: string
+          proceso_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proceso_marcos_normativos_proceso_id_fkey"
+            columns: ["proceso_id"]
+            isOneToOne: false
+            referencedRelation: "procesos_gestion"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       procesos_gestion: {
         Row: {
           area_proceso: string
+          codigo: string | null
           created_at: string
           descripcion: string | null
           empresa_id: string
+          estado: string
           fecha_actualizacion: string
           flujograma_url: string | null
           id: string
           nombre: string
+          objetivo: string | null
           responsable_id: string | null
+          tipo: string | null
           version: string | null
         }
         Insert: {
           area_proceso: string
+          codigo?: string | null
           created_at?: string
           descripcion?: string | null
           empresa_id: string
+          estado?: string
           fecha_actualizacion?: string
           flujograma_url?: string | null
           id?: string
           nombre: string
+          objetivo?: string | null
           responsable_id?: string | null
+          tipo?: string | null
           version?: string | null
         }
         Update: {
           area_proceso?: string
+          codigo?: string | null
           created_at?: string
           descripcion?: string | null
           empresa_id?: string
+          estado?: string
           fecha_actualizacion?: string
           flujograma_url?: string | null
           id?: string
           nombre?: string
+          objetivo?: string | null
           responsable_id?: string | null
+          tipo?: string | null
           version?: string | null
         }
         Relationships: [
@@ -5614,6 +5977,184 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "guia_del_flow"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      solicitudes_documento: {
+        Row: {
+          aprobador_id: string | null
+          archivo_propuesto_url: string | null
+          comentarios_aprobador: string | null
+          documento_id: string | null
+          estado: string
+          fecha_resolucion: string | null
+          fecha_solicitud: string
+          id: string
+          justificacion: string | null
+          nombre_documento: string | null
+          proceso_id: string
+          solicitante_id: string | null
+          tipo_documento: string | null
+          tipo_solicitud: string
+        }
+        Insert: {
+          aprobador_id?: string | null
+          archivo_propuesto_url?: string | null
+          comentarios_aprobador?: string | null
+          documento_id?: string | null
+          estado?: string
+          fecha_resolucion?: string | null
+          fecha_solicitud?: string
+          id?: string
+          justificacion?: string | null
+          nombre_documento?: string | null
+          proceso_id: string
+          solicitante_id?: string | null
+          tipo_documento?: string | null
+          tipo_solicitud: string
+        }
+        Update: {
+          aprobador_id?: string | null
+          archivo_propuesto_url?: string | null
+          comentarios_aprobador?: string | null
+          documento_id?: string | null
+          estado?: string
+          fecha_resolucion?: string | null
+          fecha_solicitud?: string
+          id?: string
+          justificacion?: string | null
+          nombre_documento?: string | null
+          proceso_id?: string
+          solicitante_id?: string | null
+          tipo_documento?: string | null
+          tipo_solicitud?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitudes_documento_aprobador_id_fkey"
+            columns: ["aprobador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_aprobador_id_fkey"
+            columns: ["aprobador_id"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_aprobador_id_fkey"
+            columns: ["aprobador_id"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_aprobador_id_fkey"
+            columns: ["aprobador_id"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_aprobador_id_fkey"
+            columns: ["aprobador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_aprobador_id_fkey"
+            columns: ["aprobador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_aprobador_id_fkey"
+            columns: ["aprobador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_aprobador_id_fkey"
+            columns: ["aprobador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "documentos_proceso"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_proceso_id_fkey"
+            columns: ["proceso_id"]
+            isOneToOne: false
+            referencedRelation: "procesos_gestion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "solicitudes_documento_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
           },
         ]
       }

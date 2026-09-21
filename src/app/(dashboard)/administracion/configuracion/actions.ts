@@ -214,6 +214,35 @@ export async function guardarUmbralClima(input: z.infer<typeof UmbralClimaSchema
   return { ok: true };
 }
 
+const UmbralDifusionSchema = z.object({
+  porcentaje: z.number().int().min(1).max(100),
+});
+
+/**
+ * Guarda el % de confirmaciones de lectura para considerar "completa" la
+ * difusión de un documento del módulo de Procesos (Gestión documental).
+ * Por defecto 100%, pero el cliente pidió que fuera configurable.
+ */
+export async function guardarUmbralDifusion(input: z.infer<typeof UmbralDifusionSchema>) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+
+  const parsed = UmbralDifusionSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('empresas')
+    .update({ documental_umbral_difusion_pct: parsed.data.porcentaje })
+    .eq('id', perfil.empresa_id);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath('/administracion/configuracion');
+  revalidatePath('/procesos-gestion/documentos');
+  return { ok: true };
+}
+
 export async function eliminarCursoRecomendado(id: string) {
   const perfil = await getPerfilActual();
   if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };

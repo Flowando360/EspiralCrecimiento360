@@ -6,6 +6,7 @@ import { FormularioPonderaciones } from '@/components/administracion/formulario-
 import { FormularioDatosEmpresa } from '@/components/administracion/formulario-datos-empresa';
 import { FormularioPreguntasClima } from '@/components/administracion/formulario-preguntas-clima';
 import { FormularioUmbralClima } from '@/components/administracion/formulario-umbral-clima';
+import { FormularioUmbralDifusion } from '@/components/administracion/formulario-umbral-difusion';
 import { ListaCursosRecomendados } from '@/components/administracion/lista-cursos-recomendados';
 import { SlidersHorizontal } from 'lucide-react';
 
@@ -19,7 +20,7 @@ export default async function AdminConfiguracionPage() {
   const { data: empresa } = await supabase
     .from('empresas')
     .select(
-      'nit, direccion, telefono, ciudad, firmante_nombre, firmante_cargo, siglas, clima_pregunta_enps, clima_pregunta_reconocimiento, clima_pregunta_liderazgo, clima_pregunta_desarrollo, clima_pregunta_comunicacion, clima_pregunta_condiciones, clima_pregunta_pertenencia, clima_umbral_tipo, clima_umbral_cantidad, clima_umbral_porcentaje'
+      'nit, direccion, telefono, ciudad, firmante_nombre, firmante_cargo, siglas, clima_pregunta_enps, clima_pregunta_reconocimiento, clima_pregunta_liderazgo, clima_pregunta_desarrollo, clima_pregunta_comunicacion, clima_pregunta_condiciones, clima_pregunta_pertenencia, clima_umbral_tipo, clima_umbral_cantidad, clima_umbral_porcentaje, documental_umbral_difusion_pct'
     )
     .eq('id', perfil.empresa_id)
     .maybeSingle();
@@ -91,6 +92,8 @@ export default async function AdminConfiguracionPage() {
           porcentaje: empresa?.clima_umbral_porcentaje ?? null,
         }}
       />
+
+      <FormularioUmbralDifusion inicial={empresa?.documental_umbral_difusion_pct ?? 100} />
 
       {ciclo ? (
         <FormularioPonderaciones

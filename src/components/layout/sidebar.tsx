@@ -36,6 +36,7 @@ import {
   LayoutGrid,
   UserSearch,
   Shirt,
+  FileStack,
 } from 'lucide-react';
 
 interface NavItem {
@@ -94,6 +95,7 @@ const NAV: NavGroup[] = [
     titulo: 'Procesos y Cumplimiento',
     items: [
       { href: '/procesos-gestion', label: 'Procesos y sistemas de gestión', icon: ClipboardCheck, roles: ['admin_th', 'lider', 'gerencia'] },
+      { href: '/procesos-gestion/documentos', label: 'Gestión documental', icon: FileStack, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/informes/evidencia-auditoria', label: 'Evidencia de auditoría', icon: ShieldCheck, roles: ['admin_th', 'gerencia', 'auditor_externo'] },
     ],
   },

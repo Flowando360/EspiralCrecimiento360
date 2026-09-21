@@ -1,7 +1,9 @@
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ListaProcesos } from '@/components/procesos-gestion/lista-procesos';
+import Link from 'next/link';
+import { FileStack } from 'lucide-react';
+import { MapaProcesos, type Proceso, type Interaccion, type MarcoNormativo } from '@/components/procesos-gestion/mapa-procesos';
 import { ListaRiesgos } from '@/components/procesos-gestion/lista-riesgos';
 import { ChecklistKanban } from '@/components/procesos-gestion/checklist-kanban';
 
@@ -13,12 +15,14 @@ export default async function ProcesosGestionPage() {
   const supabase = createClient();
   const puedeEditar = perfil.rol === 'admin_th';
 
-  const [{ data: procesos }, { data: riesgos }, { data: checklist }] = await Promise.all([
+  const [{ data: procesos }, { data: marcos }, { data: interacciones }, { data: riesgos }, { data: checklist }, { data: colaboradores }] = await Promise.all([
     supabase
       .from('procesos_gestion')
-      .select('id, area_proceso, nombre, descripcion, version, fecha_actualizacion')
+      .select('id, area_proceso, nombre, descripcion, tipo, codigo, objetivo, estado, responsable_id, version, fecha_actualizacion')
       .eq('empresa_id', perfil.empresa_id)
-      .order('area_proceso'),
+      .order('codigo', { ascending: true, nullsFirst: false }),
+    supabase.from('proceso_marcos_normativos').select('proceso_id, marco_normativo'),
+    supabase.from('interacciones_proceso').select('id, proceso_origen_id, proceso_destino_id, tipo, descripcion'),
     supabase
       .from('matriz_riesgos_controles')
       .select('id, marco_normativo, riesgo, categoria_riesgo, probabilidad, impacto, control')
@@ -29,19 +33,45 @@ export default async function ProcesosGestionPage() {
       .select('id, marco_normativo, item, descripcion, estado, evidencia_url')
       .eq('empresa_id', perfil.empresa_id)
       .order('marco_normativo'),
+    supabase.from('colaboradores').select('id, nombre_completo').eq('empresa_id', perfil.empresa_id).eq('estado', 'activo').order('nombre_completo'),
   ]);
+
+  const marcosPorProceso = new Map<string, MarcoNormativo[]>();
+  for (const m of marcos ?? []) {
+    const lista = marcosPorProceso.get(m.proceso_id as string) ?? [];
+    lista.push(m.marco_normativo as MarcoNormativo);
+    marcosPorProceso.set(m.proceso_id as string, lista);
+  }
+
+  const procesosConMarcos: Proceso[] = (procesos ?? []).map((p: any) => ({
+    ...p,
+    marcos: marcosPorProceso.get(p.id) ?? [],
+  }));
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-semibold text-secundario">Procesos y Sistemas de Gestión</h1>
-        <p className="text-sm text-marmol-500 mt-1">
-          Procesos documentados, matriz de riesgos y checklist de cumplimiento (ISO 9001, SARLAFT/SAGRILAFT,
-          PTEE) — aporte de V&E a la alianza. Base del paquete de evidencia de auditoría.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-secundario">Procesos y Sistemas de Gestión</h1>
+          <p className="text-sm text-marmol-500 mt-1">
+            Mapa de procesos, caracterización, matriz de riesgos y checklist de cumplimiento (ISO 9001, SST,
+            SARLAFT/SAGRILAFT, PTEE) — aporte de V&E a la alianza. Base del paquete de evidencia de auditoría.
+          </p>
+        </div>
+        <Link
+          href="/procesos-gestion/documentos"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2 shrink-0"
+        >
+          <FileStack size={15} /> Gestión documental
+        </Link>
       </div>
 
-      <ListaProcesos procesosIniciales={(procesos ?? []) as any} puedeEditar={puedeEditar} />
+      <MapaProcesos
+        procesosIniciales={procesosConMarcos}
+        interaccionesIniciales={(interacciones ?? []) as Interaccion[]}
+        colaboradores={(colaboradores ?? []) as any}
+        puedeEditar={puedeEditar}
+      />
       <ListaRiesgos riesgosIniciales={(riesgos ?? []) as any} puedeEditar={puedeEditar} />
       <ChecklistKanban itemsIniciales={(checklist ?? []) as any} puedeEditar={puedeEditar} empresaId={perfil.empresa_id} />
     </div>

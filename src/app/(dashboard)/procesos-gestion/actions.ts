@@ -267,3 +267,217 @@ export async function eliminarChecklistItem(id: string) {
   revalidatePath(RUTA);
   return { ok: true as const };
 }
+
+// ============================================================================
+// Bloque 1 — Mapa de procesos: tipo, código, objetivo, marcos normativos e
+// interacciones (de las que la pantalla de mapa genera las flechas solas).
+// ============================================================================
+
+const TIPO_PROCESO = ['estrategico', 'misional', 'apoyo', 'evaluacion'] as const;
+const PREFIJO_TIPO: Record<(typeof TIPO_PROCESO)[number], string> = {
+  estrategico: 'PE',
+  misional: 'PM',
+  apoyo: 'PA',
+  evaluacion: 'EV',
+};
+const MARCO_NORMATIVO = ['iso_9001', 'sst', 'sarlaft_sagrilaft', 'ptee', 'interno'] as const;
+
+async function generarCodigoProceso(supabase: ReturnType<typeof createClient>, empresaId: string, tipo: (typeof TIPO_PROCESO)[number]) {
+  const { count } = await supabase
+    .from('procesos_gestion')
+    .select('id', { count: 'exact', head: true })
+    .eq('empresa_id', empresaId)
+    .eq('tipo', tipo);
+  return `${PREFIJO_TIPO[tipo]}-${(count ?? 0) + 1}`;
+}
+
+const InteraccionInputSchema = z.object({
+  procesoId: z.string().uuid(),
+  descripcion: z.string().trim().optional(),
+  tipo: z.enum(['entrada', 'apoyo']),
+  direccion: z.enum(['entra', 'sale']), // 'entra': procesoId me entrega a mí. 'sale': yo le entrego a procesoId.
+});
+
+const ProcesoCompletoSchema = z.object({
+  areaProceso: z.string().trim().min(1, 'El área/proceso es requerida'),
+  nombre: z.string().trim().min(1, 'El nombre es requerido'),
+  tipo: z.enum(TIPO_PROCESO),
+  responsableId: z.string().uuid().optional(),
+  objetivo: z.string().trim().optional(),
+  descripcion: z.string().trim().optional(),
+  version: z.string().trim().optional(),
+  marcosNormativos: z.array(z.enum(MARCO_NORMATIVO)),
+  interacciones: z.array(InteraccionInputSchema),
+});
+
+export async function crearProcesoCompleto(input: z.infer<typeof ProcesoCompletoSchema>) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = ProcesoCompletoSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+  const d = parsed.data;
+
+  const supabase = createClient();
+  const codigo = await generarCodigoProceso(supabase, perfil.empresa_id, d.tipo);
+
+  const { data: proceso, error } = await supabase
+    .from('procesos_gestion')
+    .insert({
+      empresa_id: perfil.empresa_id,
+      area_proceso: d.areaProceso,
+      nombre: d.nombre,
+      tipo: d.tipo,
+      codigo,
+      responsable_id: d.responsableId || null,
+      objetivo: d.objetivo || null,
+      descripcion: d.descripcion || null,
+      version: d.version || null,
+    })
+    .select('id')
+    .single();
+
+  if (error) return { ok: false as const, error: error.message };
+  const procesoId = proceso.id as string;
+
+  if (d.marcosNormativos.length > 0) {
+    await supabase
+      .from('proceso_marcos_normativos')
+      .insert(d.marcosNormativos.map((marco_normativo) => ({ proceso_id: procesoId, marco_normativo })));
+  }
+
+  if (d.interacciones.length > 0) {
+    await supabase.from('interacciones_proceso').insert(
+      d.interacciones.map((i) => ({
+        proceso_origen_id: i.direccion === 'entra' ? i.procesoId : procesoId,
+        proceso_destino_id: i.direccion === 'entra' ? procesoId : i.procesoId,
+        tipo: i.tipo,
+        descripcion: i.descripcion || null,
+      }))
+    );
+  }
+
+  revalidatePath(RUTA);
+  return { ok: true as const, id: procesoId, codigo };
+}
+
+const EditarProcesoCompletoSchema = ProcesoCompletoSchema.extend({ id: z.string().uuid() });
+
+/** Actualiza identidad + marcos + interacciones. Reemplaza marcos/interacciones en vez de diferenciar — más simple y el volumen por proceso es bajo. */
+export async function actualizarProcesoCompleto(input: z.infer<typeof EditarProcesoCompletoSchema>) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = EditarProcesoCompletoSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+  const d = parsed.data;
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('procesos_gestion')
+    .update({
+      area_proceso: d.areaProceso,
+      nombre: d.nombre,
+      tipo: d.tipo,
+      responsable_id: d.responsableId || null,
+      objetivo: d.objetivo || null,
+      descripcion: d.descripcion || null,
+      version: d.version || null,
+      fecha_actualizacion: new Date().toISOString().slice(0, 10),
+    })
+    .eq('id', d.id)
+    .eq('empresa_id', perfil.empresa_id);
+  if (error) return { ok: false as const, error: error.message };
+
+  await supabase.from('proceso_marcos_normativos').delete().eq('proceso_id', d.id);
+  if (d.marcosNormativos.length > 0) {
+    await supabase
+      .from('proceso_marcos_normativos')
+      .insert(d.marcosNormativos.map((marco_normativo) => ({ proceso_id: d.id, marco_normativo })));
+  }
+
+  await supabase.from('interacciones_proceso').delete().or(`proceso_origen_id.eq.${d.id},proceso_destino_id.eq.${d.id}`);
+  if (d.interacciones.length > 0) {
+    await supabase.from('interacciones_proceso').insert(
+      d.interacciones.map((i) => ({
+        proceso_origen_id: i.direccion === 'entra' ? i.procesoId : d.id,
+        proceso_destino_id: i.direccion === 'entra' ? d.id : i.procesoId,
+        tipo: i.tipo,
+        descripcion: i.descripcion || null,
+      }))
+    );
+  }
+
+  revalidatePath(RUTA);
+  revalidatePath(`${RUTA}/${d.id}`);
+  return { ok: true as const };
+}
+
+export async function cambiarEstadoProceso(id: string, estado: 'vigente' | 'en_definicion' | 'obsoleto') {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('procesos_gestion')
+    .update({ estado })
+    .eq('id', id)
+    .eq('empresa_id', perfil.empresa_id);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(RUTA);
+  return { ok: true as const };
+}
+
+// ============================================================================
+// Bloque 2 — Caracterización (ficha SIPOC): entradas, actividades y salidas.
+// ============================================================================
+
+const ElementoProcesoSchema = z.object({
+  procesoId: z.string().uuid(),
+  tipo: z.enum(['entrada', 'actividad', 'salida']),
+  descripcion: z.string().trim().min(1, 'La descripción es requerida'),
+  procesoRelacionadoId: z.string().uuid().optional(),
+});
+
+export async function agregarElementoProceso(input: z.infer<typeof ElementoProcesoSchema>) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = ElementoProcesoSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+  const d = parsed.data;
+
+  const supabase = createClient();
+  const { count } = await supabase
+    .from('elementos_proceso')
+    .select('id', { count: 'exact', head: true })
+    .eq('proceso_id', d.procesoId)
+    .eq('tipo', d.tipo);
+
+  const { data, error } = await supabase
+    .from('elementos_proceso')
+    .insert({
+      proceso_id: d.procesoId,
+      tipo: d.tipo,
+      descripcion: d.descripcion,
+      proceso_relacionado_id: d.procesoRelacionadoId || null,
+      orden: (count ?? 0) + 1,
+    })
+    .select('id')
+    .single();
+
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`${RUTA}/${d.procesoId}`);
+  return { ok: true as const, id: data.id as string };
+}
+
+export async function eliminarElementoProceso(procesoId: string, id: string) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { error } = await supabase.from('elementos_proceso').delete().eq('id', id);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`${RUTA}/${procesoId}`);
+  return { ok: true as const };
+}
