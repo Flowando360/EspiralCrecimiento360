@@ -56,13 +56,85 @@ async function construirExcel(evidencia: Awaited<ReturnType<typeof obtenerEviden
     const hoja = workbook.addWorksheet('Matriz de riesgos');
     hoja.columns = [
       { header: 'Marco normativo', key: 'marco', width: 20 },
-      { header: 'Riesgo', key: 'riesgo', width: 40 },
+      { header: 'Tipo', key: 'tipo', width: 12 },
+      { header: 'Riesgo / oportunidad', key: 'riesgo', width: 40 },
       { header: 'Impacto', key: 'impacto', width: 12 },
+      { header: 'Residual', key: 'residual', width: 12 },
       { header: 'Control', key: 'control', width: 32 },
+      { header: 'Frecuencia revisión', key: 'frecuencia', width: 16 },
+      { header: 'Última revisión', key: 'ultimaRevision', width: 14 },
     ];
     hoja.getRow(1).font = { bold: true };
     for (const r of evidencia!.riesgos) {
-      hoja.addRow({ marco: r.marco_normativo, riesgo: r.riesgo, impacto: r.impacto ?? '', control: r.control ?? '' });
+      hoja.addRow({
+        marco: r.marco_normativo,
+        tipo: r.tipo === 'oportunidad' ? 'Oportunidad' : 'Riesgo',
+        riesgo: r.riesgo,
+        impacto: r.impacto ?? '',
+        residual: r.riesgo_residual ?? '',
+        control: r.control ?? '',
+        frecuencia: r.frecuencia_revision ?? '',
+        ultimaRevision: r.fecha_ultima_revision ? formatearFecha(r.fecha_ultima_revision) : '',
+      });
+    }
+  }
+
+  if (evidencia!.auditorias.length > 0) {
+    const hoja = workbook.addWorksheet('Auditorías internas');
+    hoja.columns = [
+      { header: 'Código', key: 'codigo', width: 12 },
+      { header: 'Objetivo', key: 'objetivo', width: 40 },
+      { header: 'Marco normativo', key: 'marco', width: 18 },
+      { header: 'Estado', key: 'estado', width: 14 },
+      { header: 'Fecha ejecutada', key: 'fecha', width: 14 },
+      { header: 'Hallazgos abiertos', key: 'abiertos', width: 16 },
+      { header: 'Hallazgos cerrados', key: 'cerrados', width: 16 },
+    ];
+    hoja.getRow(1).font = { bold: true };
+    for (const a of evidencia!.auditorias) {
+      hoja.addRow({
+        codigo: a.codigo ?? '',
+        objetivo: a.objetivo ?? '',
+        marco: a.marco_normativo ?? '',
+        estado: a.estado,
+        fecha: a.fecha_ejecutada ? formatearFecha(a.fecha_ejecutada) : '',
+        abiertos: a.hallazgos_abiertos,
+        cerrados: a.hallazgos_cerrados,
+      });
+    }
+  }
+
+  if (evidencia!.acpm.length > 0) {
+    const hoja = workbook.addWorksheet('ACPM');
+    hoja.columns = [
+      { header: 'Código', key: 'codigo', width: 12 },
+      { header: 'Tipo de acción', key: 'tipo', width: 14 },
+      { header: 'Descripción', key: 'descripcion', width: 45 },
+      { header: 'Estado', key: 'estado', width: 18 },
+      { header: 'Eficaz', key: 'eficaz', width: 10 },
+    ];
+    hoja.getRow(1).font = { bold: true };
+    for (const a of evidencia!.acpm) {
+      hoja.addRow({ codigo: a.codigo ?? '', tipo: a.tipo_accion, descripcion: a.descripcion, estado: a.estado, eficaz: a.eficaz === null ? '' : a.eficaz ? 'Sí' : 'No' });
+    }
+    if (evidencia!.tasaEficaciaAcpm !== null) {
+      hoja.addRow({});
+      hoja.addRow({ codigo: 'Tasa de eficacia:', tipo: `${evidencia!.tasaEficaciaAcpm}%` });
+    }
+  }
+
+  if (evidencia!.cambios.length > 0) {
+    const hoja = workbook.addWorksheet('Gestión de cambio');
+    hoja.columns = [
+      { header: 'Código', key: 'codigo', width: 14 },
+      { header: 'Título', key: 'titulo', width: 40 },
+      { header: 'Tipo de cambio', key: 'tipo', width: 16 },
+      { header: 'Impacto', key: 'impacto', width: 12 },
+      { header: 'Estado', key: 'estado', width: 14 },
+    ];
+    hoja.getRow(1).font = { bold: true };
+    for (const c of evidencia!.cambios) {
+      hoja.addRow({ codigo: c.codigo ?? '', titulo: c.titulo, tipo: c.tipo_cambio, impacto: c.impacto ?? '', estado: c.estado });
     }
   }
 

@@ -93,14 +93,32 @@ export const moduloInformes: ModuloAyuda = {
       ruta: '/informes/evidencia-auditoria',
       titulo: 'Evidencia de auditoría',
       resumen:
-        'Descarga un paquete ZIP (PDF de portada + Excel de detalle + documentos adjuntos) listo para entregar a un auditor externo, con certificaciones SST, checklist de cumplimiento, riesgos y procesos documentados.',
+        'Descarga un paquete ZIP (PDF de portada + Excel de detalle + documentos adjuntos) listo para entregar a un auditor externo, con certificaciones SST, checklist, riesgos y oportunidades, auditorías internas, ACPM, gestión de cambio y procesos documentados.',
       camposYBotones: [
         { nombre: 'Paquete completo', explicacion: 'SST + ISO 9001 + SARLAFT/SAGRILAFT + PTEE, todo en un solo ZIP.' },
-        { nombre: 'Paquetes por marco normativo', explicacion: 'SST, ISO 9001 o SARLAFT/SAGRILAFT por separado, cuando el auditor solo pide uno.' },
+        { nombre: 'Paquetes por marco normativo', explicacion: 'SST, ISO 9001 o SARLAFT/SAGRILAFT por separado, cuando el auditor solo pide uno. Las auditorías internas se filtran por el marco de cada paquete; ACPM y Gestión de cambio se incluyen siempre, porque son evidencia de mejora continua que aplica a cualquier marco.' },
       ],
       notas: [
         'Pensado para el rol auditor_externo (acceso de solo lectura), aunque admin_th, líder y gerencia también pueden entrar y descargarlo.',
-        'La información sale de Procesos y Sistemas de Gestión (checklist, riesgos, procesos) y del módulo SST — no duplica datos, solo los empaqueta.',
+        'La información sale de Procesos y Sistemas de Gestión completo (mapa, riesgos, auditorías internas, ACPM, gestión de cambio, checklist) y del módulo SST — no duplica datos, solo los empaqueta.',
+      ],
+    },
+    {
+      slug: 'revision-direccion',
+      ruta: '/informes/revision-direccion',
+      titulo: 'Revisión por la Dirección',
+      resumen:
+        'El informe que antes tomaba días de consolidación manual, armado solo: auditorías, riesgos, ACPM, indicadores, documentos, gestión de cambio, y su cruce con Formación (Nexa) y PDI (Espiral de Crecimiento) — filtrable por período.',
+      camposYBotones: [
+        { nombre: 'Selector de período', explicacion: 'Desde/Hasta — por defecto, los últimos 90 días. Todas las estadísticas se recalculan en vivo, nunca se guarda una copia vieja.' },
+        {
+          nombre: 'Cambios de contexto y Decisiones (admin_th)',
+          explicacion: 'Las únicas dos secciones que requieren texto humano — el resto del informe se calcula solo. Se guardan ligadas al período exacto que se está viendo.',
+        },
+      ],
+      notas: [
+        'Visible para admin_th y gerencia.',
+        'La sección de indicadores "fuera de meta" compara la última medición registrada contra la meta, sin importar cuándo se hizo esa medición.',
       ],
     },
   ],

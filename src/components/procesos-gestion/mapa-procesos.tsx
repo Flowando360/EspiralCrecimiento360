@@ -24,6 +24,7 @@ export interface Proceso {
   version: string | null;
   fecha_actualizacion: string;
   marcos: MarcoNormativo[];
+  indice_madurez: number;
 }
 
 export interface Interaccion {
@@ -76,7 +77,7 @@ export function MapaProcesos({
   const [vista, setVista] = useState<'mapa' | 'cuadro' | 'interacciones'>('mapa');
   const [filtroMarco, setFiltroMarco] = useState<'todos' | MarcoNormativo>('todos');
   const [modal, setModal] = useState<{ proceso: Proceso | null } | null>(null);
-  const [ordenCol, setOrdenCol] = useState<'codigo' | 'nombre' | 'tipo' | 'estado' | 'actualizado'>('codigo');
+  const [ordenCol, setOrdenCol] = useState<'codigo' | 'nombre' | 'tipo' | 'estado' | 'actualizado' | 'madurez'>('codigo');
   const [ordenAsc, setOrdenAsc] = useState(true);
 
   const nombreColaborador = useMemo(() => {
@@ -115,6 +116,7 @@ export function MapaProcesos({
     { key: 'nombre', label: 'Nombre' },
     { key: 'tipo', label: 'Tipo' },
     { key: 'estado', label: 'Estado' },
+    { key: 'madurez', label: 'Madurez' },
     { key: 'actualizado', label: 'Actualizado' },
   ];
 
@@ -124,6 +126,7 @@ export function MapaProcesos({
       if (ordenCol === 'nombre') return p.nombre;
       if (ordenCol === 'tipo') return p.tipo ?? '';
       if (ordenCol === 'estado') return p.estado;
+      if (ordenCol === 'madurez') return String(p.indice_madurez).padStart(3, '0');
       return p.fecha_actualizacion;
     };
     const arr = [...procesosFiltrados].sort((a, b) => valor(a).localeCompare(valor(b)));
@@ -279,6 +282,9 @@ export function MapaProcesos({
                   <td className="px-2 py-2">
                     <span className={cn('text-[11px] rounded-full px-2 py-0.5 font-medium', ESTADO_INFO[p.estado].clase)}>{ESTADO_INFO[p.estado].etiqueta}</span>
                   </td>
+                  <td className="px-2 py-2">
+                    <IndicadorMadurez puntaje={p.indice_madurez} />
+                  </td>
                   <td className="px-2 py-2 text-marmol-500 text-xs">{formatearFecha(p.fecha_actualizacion)}</td>
                   <td className="px-2 py-2">
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity justify-end">
@@ -421,6 +427,9 @@ function TarjetaProceso({
               ))}
             </div>
           )}
+          <div className="mt-1.5">
+            <IndicadorMadurez puntaje={proceso.indice_madurez} />
+          </div>
         </div>
         {puedeEditar && (
           <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
@@ -433,6 +442,18 @@ function TarjetaProceso({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function IndicadorMadurez({ puntaje }: { puntaje: number }) {
+  const clase = puntaje >= 80 ? 'bg-alto' : puntaje >= 40 ? 'bg-medio' : 'bg-bajo';
+  return (
+    <div className="flex items-center gap-1.5" title={`Índice de madurez: ${puntaje}%`}>
+      <div className="w-14 h-1.5 rounded-full bg-marmol-100 overflow-hidden">
+        <div className={cn('h-full rounded-full', clase)} style={{ width: `${puntaje}%` }} />
+      </div>
+      <span className="text-[10px] text-marmol-400">{puntaje}%</span>
     </div>
   );
 }

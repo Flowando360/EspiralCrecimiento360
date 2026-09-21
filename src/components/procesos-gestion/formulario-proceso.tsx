@@ -142,6 +142,7 @@ export function FormularioProceso({
             version: version || null,
             fecha_actualizacion: new Date().toISOString().slice(0, 10),
             marcos,
+            indice_madurez: 0,
           },
           true
         );

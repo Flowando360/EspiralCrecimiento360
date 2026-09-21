@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { AcpmKanban, type Acpm } from '@/components/procesos-gestion/acpm-kanban';
 
-export default async function AcpmPage() {
+export default async function AcpmPage({ searchParams }: { searchParams: { origenHallazgo?: string; origenRiesgo?: string; proceso?: string } }) {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
   if (!['admin_th', 'lider', 'gerencia'].includes(perfil.rol)) redirect('/inicio');
@@ -36,6 +36,21 @@ export default async function AcpmPage() {
 
   const acpm: Acpm[] = (acpmRaw ?? []).map((a: any) => ({ ...a, tareas: tareasPorAcpm.get(a.id) ?? [] }));
 
+  const cerradasEfectivas = acpm.filter((a) => a.estado === 'cerrada_efectiva').length;
+  const reabiertas = acpm.filter((a) => a.estado === 'reabierta').length;
+  const resueltas = cerradasEfectivas + reabiertas;
+  const tasaEficacia = resueltas > 0 ? Math.round((cerradasEfectivas / resueltas) * 100) : null;
+
+  const prefill =
+    searchParams.origenHallazgo || searchParams.origenRiesgo
+      ? {
+          origenTipo: (searchParams.origenHallazgo ? 'hallazgo_auditoria' : 'riesgo') as 'hallazgo_auditoria' | 'riesgo',
+          origenHallazgoId: searchParams.origenHallazgo,
+          origenRiesgoId: searchParams.origenRiesgo,
+          procesoId: searchParams.proceso,
+        }
+      : undefined;
+
   return (
     <div className="space-y-4">
       <div>
@@ -50,8 +65,27 @@ export default async function AcpmPage() {
         </p>
       </div>
 
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="card p-3 text-center">
+          <p className="text-xl font-semibold text-secundario">{acpm.length}</p>
+          <p className="text-xs text-marmol-400">Total ACPM</p>
+        </div>
+        <div className="card p-3 text-center">
+          <p className="text-xl font-semibold text-alto">{cerradasEfectivas}</p>
+          <p className="text-xs text-marmol-400">Cerradas efectivas</p>
+        </div>
+        <div className="card p-3 text-center">
+          <p className="text-xl font-semibold text-bajo">{reabiertas}</p>
+          <p className="text-xs text-marmol-400">Reabiertas</p>
+        </div>
+        <div className="card p-3 text-center">
+          <p className="text-xl font-semibold text-secundario">{tasaEficacia !== null ? `${tasaEficacia}%` : '—'}</p>
+          <p className="text-xs text-marmol-400">Tasa de eficacia</p>
+        </div>
+      </div>
+
       <div className="card p-5">
-        <AcpmKanban acpmIniciales={acpm} procesos={(procesos ?? []) as any} colaboradores={(colaboradores ?? []) as any} puedeEditar={perfil.rol === 'admin_th'} />
+        <AcpmKanban acpmIniciales={acpm} procesos={(procesos ?? []) as any} colaboradores={(colaboradores ?? []) as any} puedeEditar={perfil.rol === 'admin_th'} prefill={prefill} />
       </div>
     </div>
   );

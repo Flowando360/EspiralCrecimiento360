@@ -20,9 +20,13 @@ export interface ChecklistEvidencia {
 
 export interface RiesgoEvidencia {
   marco_normativo: string;
+  tipo: string;
   riesgo: string;
   impacto: string | null;
+  riesgo_residual: string | null;
   control: string | null;
+  frecuencia_revision: string | null;
+  fecha_ultima_revision: string | null;
 }
 
 export interface ProcesoEvidencia {
@@ -31,21 +35,51 @@ export interface ProcesoEvidencia {
   version: string | null;
 }
 
+export interface AuditoriaEvidencia {
+  codigo: string | null;
+  objetivo: string | null;
+  marco_normativo: string | null;
+  fecha_ejecutada: string | null;
+  estado: string;
+  hallazgos_abiertos: number;
+  hallazgos_cerrados: number;
+}
+
+export interface AcpmEvidencia {
+  codigo: string | null;
+  tipo_accion: string;
+  descripcion: string;
+  estado: string;
+  eficaz: boolean | null;
+}
+
+export interface CambioEvidencia {
+  codigo: string | null;
+  titulo: string;
+  tipo_cambio: string;
+  estado: string;
+  impacto: string | null;
+}
+
 export interface EvidenciaAuditoria {
   certificacionesSST: CertificacionEvidencia[];
   checklist: ChecklistEvidencia[];
   riesgos: RiesgoEvidencia[];
   procesos: ProcesoEvidencia[];
+  auditorias: AuditoriaEvidencia[];
+  acpm: AcpmEvidencia[];
+  tasaEficaciaAcpm: number | null;
+  cambios: CambioEvidencia[];
 }
 
 const ROLES_PERMITIDOS = ['admin_th', 'gerencia', 'auditor_externo'];
 
 /**
  * Reúne los insumos del paquete de evidencia de auditoría (SST, ISO 9001,
- * SARLAFT/SAGRILAFT, PTEE) — generalización del punto 5 del plan pendiente
- * (antes solo SST) usando además el módulo de procesos y sistemas de
- * gestión (0026, aporte de V&E). Visible para admin_th, gerencia y
- * auditor_externo (solo lectura).
+ * SARLAFT/SAGRILAFT, PTEE) usando el módulo de procesos y sistemas de
+ * gestión completo (0026 + fase 1 + fase 2: mapa de procesos, riesgos con
+ * ciclo, auditorías internas, ACPM y gestión de cambio). Visible para
+ * admin_th, gerencia y auditor_externo (solo lectura).
  */
 export async function obtenerEvidenciaAuditoria(tipo: TipoPaqueteAuditoria): Promise<{
   perfil: Awaited<ReturnType<typeof getPerfilActual>>;
@@ -58,10 +92,9 @@ export async function obtenerEvidenciaAuditoria(tipo: TipoPaqueteAuditoria): Pro
 
   const supabase = createClient();
   const incluyeSST = tipo === 'todos' || tipo === 'sst';
-  const marcosChecklist =
-    tipo === 'todos' ? ['iso_9001', 'sarlaft_sagrilaft', 'ptee'] : tipo === 'sst' ? [] : [tipo];
+  const marcosChecklist = tipo === 'todos' ? ['iso_9001', 'sst', 'sarlaft_sagrilaft', 'ptee'] : [tipo];
 
-  const [{ data: colaboradoresRaw }, { data: procesosRaw }] = await Promise.all([
+  const [{ data: colaboradoresRaw }, { data: procesosRaw }, { data: auditoriasRaw }, { data: acpmRaw }, { data: cambiosRaw }] = await Promise.all([
     supabase
       .from('colaboradores')
       .select('id, nombre_completo')
@@ -69,9 +102,23 @@ export async function obtenerEvidenciaAuditoria(tipo: TipoPaqueteAuditoria): Pro
       .eq('estado', 'activo'),
     supabase
       .from('procesos_gestion')
-      .select('area_proceso, nombre, version')
+      .select('id, area_proceso, nombre, version')
       .eq('empresa_id', perfil.empresa_id)
       .order('area_proceso'),
+    supabase
+      .from('auditorias_internas')
+      .select('id, codigo, objetivo, marco_normativo, fecha_ejecutada, estado')
+      .eq('empresa_id', perfil.empresa_id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('acpm')
+      .select('codigo, tipo_accion, descripcion, estado, eficaz, proceso_id')
+      .eq('empresa_id', perfil.empresa_id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('solicitudes_cambio')
+      .select('codigo, titulo, tipo_cambio, estado, impacto, proceso:proceso_id(empresa_id)')
+      .order('fecha_solicitud', { ascending: false }),
   ]);
 
   const colaboradores = (colaboradoresRaw ?? []) as any[];
@@ -106,7 +153,7 @@ export async function obtenerEvidenciaAuditoria(tipo: TipoPaqueteAuditoria): Pro
         .in('marco_normativo', marcosChecklist),
       supabase
         .from('matriz_riesgos_controles')
-        .select('marco_normativo, riesgo, impacto, control')
+        .select('marco_normativo, tipo, riesgo, impacto, riesgo_residual, control, frecuencia_revision, fecha_ultima_revision')
         .eq('empresa_id', perfil.empresa_id)
         .in('marco_normativo', marcosChecklist),
     ]);
@@ -116,5 +163,38 @@ export async function obtenerEvidenciaAuditoria(tipo: TipoPaqueteAuditoria): Pro
 
   const procesos: ProcesoEvidencia[] = tipo !== 'sst' ? ((procesosRaw ?? []) as any[]) : [];
 
-  return { perfil, evidencia: { certificacionesSST, checklist, riesgos, procesos } };
+  const auditoriasFiltradas = ((auditoriasRaw ?? []) as any[]).filter((a) => tipo === 'todos' || a.marco_normativo === tipo);
+  const auditoriaIds = auditoriasFiltradas.map((a) => a.id);
+  const { data: hallazgosRaw } = auditoriaIds.length
+    ? await supabase.from('hallazgos_auditoria').select('auditoria_id, estado').in('auditoria_id', auditoriaIds)
+    : { data: [] };
+
+  const auditorias: AuditoriaEvidencia[] = auditoriasFiltradas.map((a) => {
+    const hallazgosDeEsta = ((hallazgosRaw ?? []) as any[]).filter((h) => h.auditoria_id === a.id);
+    return {
+      codigo: a.codigo,
+      objetivo: a.objetivo,
+      marco_normativo: a.marco_normativo,
+      fecha_ejecutada: a.fecha_ejecutada,
+      estado: a.estado,
+      hallazgos_abiertos: hallazgosDeEsta.filter((h) => h.estado !== 'cerrado').length,
+      hallazgos_cerrados: hallazgosDeEsta.filter((h) => h.estado === 'cerrado').length,
+    };
+  });
+
+  const acpm: AcpmEvidencia[] = ((acpmRaw ?? []) as any[]).map((a) => ({
+    codigo: a.codigo,
+    tipo_accion: a.tipo_accion,
+    descripcion: a.descripcion,
+    estado: a.estado,
+    eficaz: a.eficaz,
+  }));
+  const resueltasAcpm = acpm.filter((a) => a.estado === 'cerrada_efectiva' || a.estado === 'reabierta');
+  const tasaEficaciaAcpm = resueltasAcpm.length > 0 ? Math.round((acpm.filter((a) => a.estado === 'cerrada_efectiva').length / resueltasAcpm.length) * 100) : null;
+
+  const cambios: CambioEvidencia[] = ((cambiosRaw ?? []) as any[])
+    .filter((c) => c.proceso?.empresa_id === perfil.empresa_id)
+    .map((c) => ({ codigo: c.codigo, titulo: c.titulo, tipo_cambio: c.tipo_cambio, estado: c.estado, impacto: c.impacto }));
+
+  return { perfil, evidencia: { certificacionesSST, checklist, riesgos, procesos, auditorias, acpm, tasaEficaciaAcpm, cambios } };
 }

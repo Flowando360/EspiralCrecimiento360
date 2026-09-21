@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, KanbanSquare, FileStack } from 'lucide-react';
 import { FichaProceso } from '@/components/procesos-gestion/ficha-proceso';
+import { IndicadoresProceso } from '@/components/procesos-gestion/indicadores-proceso';
 import { formatearFecha } from '@/lib/utils';
 
 const ETIQUETA_TIPO: Record<string, string> = {
@@ -38,7 +39,7 @@ export default async function FichaProcesoPage({ params }: { params: { id: strin
 
   if (!proceso) notFound();
 
-  const [{ data: marcos }, { data: elementos }, { data: procesos }, { data: documentos }, { data: responsable }] = await Promise.all([
+  const [{ data: marcos }, { data: elementos }, { data: procesos }, { data: documentos }, { data: responsable }, { data: indicadoresRaw }] = await Promise.all([
     supabase.from('proceso_marcos_normativos').select('marco_normativo').eq('proceso_id', params.id),
     supabase.from('elementos_proceso').select('id, tipo, descripcion, proceso_relacionado_id, orden').eq('proceso_id', params.id),
     supabase.from('procesos_gestion').select('id, nombre, codigo').eq('empresa_id', perfil.empresa_id).neq('id', params.id).order('codigo'),
@@ -46,7 +47,21 @@ export default async function FichaProcesoPage({ params }: { params: { id: strin
     proceso.responsable_id
       ? supabase.from('colaboradores').select('nombre_completo').eq('id', proceso.responsable_id).maybeSingle()
       : Promise.resolve({ data: null } as any),
+    supabase.from('indicadores_proceso').select('id, nombre, formula, meta, unidad, sentido, frecuencia_medicion').eq('proceso_id', params.id).eq('activo', true).order('created_at'),
   ]);
+
+  const indicadorIds = (indicadoresRaw ?? []).map((i: any) => i.id);
+  const { data: medicionesRaw } = indicadorIds.length
+    ? await supabase.from('mediciones_indicador').select('id, indicador_id, periodo, valor, fecha_medicion, observaciones').in('indicador_id', indicadorIds).order('fecha_medicion', { ascending: false })
+    : { data: [] };
+
+  const medicionesPorIndicador = new Map<string, any[]>();
+  for (const m of medicionesRaw ?? []) {
+    const lista = medicionesPorIndicador.get((m as any).indicador_id) ?? [];
+    lista.push(m);
+    medicionesPorIndicador.set((m as any).indicador_id, lista);
+  }
+  const indicadores = (indicadoresRaw ?? []).map((i: any) => ({ ...i, mediciones: medicionesPorIndicador.get(i.id) ?? [] }));
 
   return (
     <div className="space-y-4">
@@ -87,6 +102,8 @@ export default async function FichaProcesoPage({ params }: { params: { id: strin
       </div>
 
       <FichaProceso procesoId={proceso.id} elementosIniciales={(elementos ?? []) as any} procesosDisponibles={(procesos ?? []) as any} puedeEditar={puedeEditar} />
+
+      <IndicadoresProceso procesoId={proceso.id} indicadoresIniciales={indicadores as any} puedeEditar={puedeEditar} />
 
       <div className="card p-5">
         <div className="flex items-center justify-between mb-3">

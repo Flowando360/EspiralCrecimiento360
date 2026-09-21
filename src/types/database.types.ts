@@ -4460,6 +4460,112 @@ export type Database = {
           },
         ]
       }
+      indicadores_proceso: {
+        Row: {
+          activo: boolean
+          created_at: string
+          formula: string | null
+          frecuencia_medicion: string | null
+          id: string
+          meta: number | null
+          nombre: string
+          proceso_id: string
+          responsable_id: string | null
+          sentido: string
+          unidad: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          formula?: string | null
+          frecuencia_medicion?: string | null
+          id?: string
+          meta?: number | null
+          nombre: string
+          proceso_id: string
+          responsable_id?: string | null
+          sentido?: string
+          unidad?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          formula?: string | null
+          frecuencia_medicion?: string | null
+          id?: string
+          meta?: number | null
+          nombre?: string
+          proceso_id?: string
+          responsable_id?: string | null
+          sentido?: string
+          unidad?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicadores_proceso_proceso_id_fkey"
+            columns: ["proceso_id"]
+            isOneToOne: false
+            referencedRelation: "procesos_gestion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicadores_proceso_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicadores_proceso_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "indicadores_proceso_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "indicadores_proceso_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "indicadores_proceso_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "indicadores_proceso_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "indicadores_proceso_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "indicadores_proceso_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
+          },
+        ]
+      }
       induccion_items: {
         Row: {
           activo: boolean
@@ -4504,6 +4610,44 @@ export type Database = {
           },
           {
             foreignKeyName: "induccion_items_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      informes_revision_direccion: {
+        Row: {
+          cambios_contexto: string | null
+          decisiones: string | null
+          empresa_id: string
+          id: string
+          periodo_fin: string
+          periodo_inicio: string
+          updated_at: string
+        }
+        Insert: {
+          cambios_contexto?: string | null
+          decisiones?: string | null
+          empresa_id: string
+          id?: string
+          periodo_fin: string
+          periodo_inicio: string
+          updated_at?: string
+        }
+        Update: {
+          cambios_contexto?: string | null
+          decisiones?: string | null
+          empresa_id?: string
+          id?: string
+          periodo_fin?: string
+          periodo_inicio?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "informes_revision_direccion_empresa_id_fkey"
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
@@ -4678,6 +4822,44 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_organigrama_pares"
             referencedColumns: ["par_id"]
+          },
+        ]
+      }
+      mediciones_indicador: {
+        Row: {
+          created_at: string
+          fecha_medicion: string
+          id: string
+          indicador_id: string
+          observaciones: string | null
+          periodo: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          fecha_medicion?: string
+          id?: string
+          indicador_id: string
+          observaciones?: string | null
+          periodo: string
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          fecha_medicion?: string
+          id?: string
+          indicador_id?: string
+          observaciones?: string | null
+          periodo?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mediciones_indicador_indicador_id_fkey"
+            columns: ["indicador_id"]
+            isOneToOne: false
+            referencedRelation: "indicadores_proceso"
+            referencedColumns: ["id"]
           },
         ]
       }

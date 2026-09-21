@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
-import { Target, Users2, ShieldCheck, BarChart3, GraduationCap, Heart, TrendingUp, FileArchive } from 'lucide-react';
+import { Target, Users2, ShieldCheck, BarChart3, GraduationCap, Heart, TrendingUp, FileArchive, Gavel } from 'lucide-react';
 import type { RolUsuario } from '@/types/colaborador';
 
 interface InformeDisponible {
@@ -76,6 +76,13 @@ const INFORMES: InformeDisponible[] = [
     descripcion: 'Paquete descargable de evidencia SST, ISO 9001 y SARLAFT/SAGRILAFT, con los documentos de soporte.',
     icon: FileArchive,
     roles: ['admin_th', 'gerencia', 'auditor_externo'],
+  },
+  {
+    href: '/informes/revision-direccion',
+    titulo: 'Revisión por la Dirección',
+    descripcion: 'Auditorías, riesgos, ACPM, indicadores, documentos, gestión de cambio y su cruce con Formación y PDI — casi todo auto-generado.',
+    icon: Gavel,
+    roles: ['admin_th', 'gerencia'],
   },
 ];
 

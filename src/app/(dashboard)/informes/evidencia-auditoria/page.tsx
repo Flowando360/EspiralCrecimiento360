@@ -44,10 +44,12 @@ export default async function EvidenciaAuditoriaPage() {
         <ul className="text-sm text-marmol-600 space-y-1.5 list-disc pl-5">
           <li>
             Un PDF de portada con el resumen: {evidencia.certificacionesSST.length} certificaciones SST,{' '}
-            {evidencia.checklist.length} ítems de checklist, {evidencia.riesgos.length} riesgos registrados y{' '}
-            {evidencia.procesos.length} procesos documentados.
+            {evidencia.checklist.length} ítems de checklist, {evidencia.riesgos.length} riesgos y oportunidades,{' '}
+            {evidencia.auditorias.length} auditorías internas, {evidencia.acpm.length} ACPM
+            {evidencia.tasaEficaciaAcpm !== null && ` (${evidencia.tasaEficaciaAcpm}% de eficacia)`}, {evidencia.cambios.length} solicitudes
+            de gestión de cambio y {evidencia.procesos.length} procesos documentados.
           </li>
-          <li>Un Excel con el detalle de cada tabla.</li>
+          <li>Un Excel con el detalle de cada tabla, en hojas separadas.</li>
           <li>
             Los archivos de evidencia adjuntos al checklist de cumplimiento (los de certificaciones SST se
             listan como referencia; su documento vive en un link externo, no en este servidor).

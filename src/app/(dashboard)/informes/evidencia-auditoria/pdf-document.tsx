@@ -74,19 +74,85 @@ export function EvidenciaAuditoriaDocument({ evidencia, tipo }: { evidencia: Evi
 
         {evidencia.riesgos.length > 0 && (
           <View style={styles.seccion}>
-            <Text style={styles.seccionTitulo}>Matriz de riesgos y controles</Text>
+            <Text style={styles.seccionTitulo}>Matriz de riesgos y oportunidades</Text>
             <View style={[styles.fila, styles.filaEncabezado]}>
               <Text style={styles.celda1}>Marco normativo</Text>
-              <Text style={styles.celda2}>Riesgo</Text>
-              <Text style={styles.celda3}>Impacto</Text>
-              <Text style={styles.celda4}>Control</Text>
+              <Text style={styles.celda2}>Riesgo / oportunidad</Text>
+              <Text style={styles.celda3}>Residual</Text>
+              <Text style={styles.celda4}>Última revisión</Text>
             </View>
             {evidencia.riesgos.map((r, i) => (
               <View key={i} style={styles.fila} wrap={false}>
                 <Text style={styles.celda1}>{r.marco_normativo}</Text>
-                <Text style={styles.celda2}>{r.riesgo}</Text>
-                <Text style={styles.celda3}>{r.impacto ?? '—'}</Text>
-                <Text style={styles.celda4}>{r.control ?? '—'}</Text>
+                <Text style={styles.celda2}>
+                  [{r.tipo === 'oportunidad' ? 'Oportunidad' : 'Riesgo'}] {r.riesgo}
+                </Text>
+                <Text style={styles.celda3}>{r.riesgo_residual ?? r.impacto ?? '—'}</Text>
+                <Text style={styles.celda4}>{r.fecha_ultima_revision ? formatearFecha(r.fecha_ultima_revision) : '—'}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {evidencia.auditorias.length > 0 && (
+          <View style={styles.seccion}>
+            <Text style={styles.seccionTitulo}>Auditorías internas</Text>
+            <View style={[styles.fila, styles.filaEncabezado]}>
+              <Text style={styles.celda1}>Código / objetivo</Text>
+              <Text style={styles.celda2}>Estado</Text>
+              <Text style={styles.celda3}>Hallazgos abiertos</Text>
+              <Text style={styles.celda4}>Hallazgos cerrados</Text>
+            </View>
+            {evidencia.auditorias.map((a, i) => (
+              <View key={i} style={styles.fila} wrap={false}>
+                <Text style={styles.celda1}>
+                  {a.codigo} {a.objetivo ? `— ${a.objetivo}` : ''}
+                </Text>
+                <Text style={styles.celda2}>{a.estado}</Text>
+                <Text style={styles.celda3}>{a.hallazgos_abiertos}</Text>
+                <Text style={styles.celda4}>{a.hallazgos_cerrados}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {evidencia.acpm.length > 0 && (
+          <View style={styles.seccion}>
+            <Text style={styles.seccionTitulo}>
+              ACPM — Acciones Correctivas, Preventivas y de Mejora {evidencia.tasaEficaciaAcpm !== null && `(tasa de eficacia: ${evidencia.tasaEficaciaAcpm}%)`}
+            </Text>
+            <View style={[styles.fila, styles.filaEncabezado]}>
+              <Text style={styles.celda1}>Código</Text>
+              <Text style={styles.celda2}>Descripción</Text>
+              <Text style={styles.celda3}>Estado</Text>
+              <Text style={styles.celda4}>Eficaz</Text>
+            </View>
+            {evidencia.acpm.map((a, i) => (
+              <View key={i} style={styles.fila} wrap={false}>
+                <Text style={styles.celda1}>{a.codigo}</Text>
+                <Text style={styles.celda2}>{a.descripcion}</Text>
+                <Text style={styles.celda3}>{a.estado}</Text>
+                <Text style={styles.celda4}>{a.eficaz === null ? '—' : a.eficaz ? 'Sí' : 'No'}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {evidencia.cambios.length > 0 && (
+          <View style={styles.seccion}>
+            <Text style={styles.seccionTitulo}>Gestión de cambio</Text>
+            <View style={[styles.fila, styles.filaEncabezado]}>
+              <Text style={styles.celda1}>Código</Text>
+              <Text style={styles.celda2}>Título</Text>
+              <Text style={styles.celda3}>Tipo</Text>
+              <Text style={styles.celda4}>Estado</Text>
+            </View>
+            {evidencia.cambios.map((c, i) => (
+              <View key={i} style={styles.fila} wrap={false}>
+                <Text style={styles.celda1}>{c.codigo}</Text>
+                <Text style={styles.celda2}>{c.titulo}</Text>
+                <Text style={styles.celda3}>{c.tipo_cambio}</Text>
+                <Text style={styles.celda4}>{c.estado}</Text>
               </View>
             ))}
           </View>
@@ -113,7 +179,10 @@ export function EvidenciaAuditoriaDocument({ evidencia, tipo }: { evidencia: Evi
         {evidencia.certificacionesSST.length === 0 &&
           evidencia.checklist.length === 0 &&
           evidencia.riesgos.length === 0 &&
-          evidencia.procesos.length === 0 && <Text style={styles.vacio}>Sin datos registrados para este paquete todavía.</Text>}
+          evidencia.procesos.length === 0 &&
+          evidencia.auditorias.length === 0 &&
+          evidencia.acpm.length === 0 &&
+          evidencia.cambios.length === 0 && <Text style={styles.vacio}>Sin datos registrados para este paquete todavía.</Text>}
       </Page>
     </Document>
   );

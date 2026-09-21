@@ -12,9 +12,10 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
+import Link from 'next/link';
 import { agregarHallazgo, actualizarEstadoHallazgo, eliminarHallazgo } from '@/app/(dashboard)/procesos-gestion/auditorias/actions';
 import { cn, formatearFecha } from '@/lib/utils';
-import { Plus, Trash2, User, Calendar } from 'lucide-react';
+import { Plus, Trash2, User, Calendar, ListChecks } from 'lucide-react';
 
 type TipoHallazgo = 'no_conformidad_mayor' | 'no_conformidad_menor' | 'observacion' | 'oportunidad_mejora';
 type EstadoHallazgo = 'abierto' | 'analisis_causa' | 'plan_accion' | 'seguimiento' | 'cerrado';
@@ -253,6 +254,15 @@ function TarjetaHallazgo({
               </span>
             )}
           </div>
+          {puedeEditar && hallazgo.tipo !== 'oportunidad_mejora' && (
+            <Link
+              href={`/procesos-gestion/acpm?origenHallazgo=${hallazgo.id}${hallazgo.proceso_id ? `&proceso=${hallazgo.proceso_id}` : ''}`}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-flow-600 hover:text-flow-700 font-medium"
+            >
+              <ListChecks size={10} /> Crear ACPM
+            </Link>
+          )}
         </div>
         {puedeEditar && (
           <button onClick={() => onEliminar(hallazgo.id)} onPointerDown={(e) => e.stopPropagation()} className="text-marmol-300 hover:text-bajo opacity-0 group-hover:opacity-100 shrink-0">

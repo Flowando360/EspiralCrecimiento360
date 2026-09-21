@@ -6,6 +6,7 @@ import { FileStack, ShieldCheck, GitPullRequestArrow, ListChecks } from 'lucide-
 import { MapaProcesos, type Proceso, type Interaccion, type MarcoNormativo } from '@/components/procesos-gestion/mapa-procesos';
 import { ListaRiesgos } from '@/components/procesos-gestion/lista-riesgos';
 import { ChecklistKanban } from '@/components/procesos-gestion/checklist-kanban';
+import { calcularIndiceMadurez, fechaDentroDeMeses } from '@/lib/calculos/indice-madurez';
 
 export default async function ProcesosGestionPage() {
   const perfil = await getPerfilActual();
@@ -36,6 +37,29 @@ export default async function ProcesosGestionPage() {
     supabase.from('colaboradores').select('id, nombre_completo').eq('empresa_id', perfil.empresa_id).eq('estado', 'activo').order('nombre_completo'),
   ]);
 
+  const procesoIds = (procesos ?? []).map((p: any) => p.id);
+  const [{ data: elementosRaw }, { data: documentosRaw }, { data: acpmRaw }, { data: indicadoresRaw }] = procesoIds.length
+    ? await Promise.all([
+        supabase.from('elementos_proceso').select('proceso_id, tipo').in('proceso_id', procesoIds),
+        supabase.from('documentos_proceso').select('proceso_id, estado').in('proceso_id', procesoIds),
+        supabase.from('acpm').select('proceso_id, estado, fecha_compromiso').in('proceso_id', procesoIds),
+        supabase.from('indicadores_proceso').select('id, proceso_id').in('proceso_id', procesoIds).eq('activo', true),
+      ])
+    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
+
+  const indicadorIds = (indicadoresRaw ?? []).map((i: any) => i.id);
+  const { data: medicionesRaw } = indicadorIds.length
+    ? await supabase.from('mediciones_indicador').select('indicador_id, fecha_medicion').in('indicador_id', indicadorIds)
+    : { data: [] };
+
+  const procesoPorIndicador = new Map<string, string>();
+  for (const i of indicadoresRaw ?? []) procesoPorIndicador.set((i as any).id, (i as any).proceso_id);
+  const medicionRecientePorProceso = new Set<string>();
+  for (const m of medicionesRaw ?? []) {
+    const procesoId = procesoPorIndicador.get((m as any).indicador_id);
+    if (procesoId && fechaDentroDeMeses((m as any).fecha_medicion, 6)) medicionRecientePorProceso.add(procesoId);
+  }
+
   const marcosPorProceso = new Map<string, MarcoNormativo[]>();
   for (const m of marcos ?? []) {
     const lista = marcosPorProceso.get(m.proceso_id as string) ?? [];
@@ -43,10 +67,26 @@ export default async function ProcesosGestionPage() {
     marcosPorProceso.set(m.proceso_id as string, lista);
   }
 
-  const procesosConMarcos: Proceso[] = (procesos ?? []).map((p: any) => ({
-    ...p,
-    marcos: marcosPorProceso.get(p.id) ?? [],
-  }));
+  const hoy = new Date().toISOString().slice(0, 10);
+  const procesosConMarcos: Proceso[] = (procesos ?? []).map((p: any) => {
+    const elementosDelProceso = (elementosRaw ?? []).filter((e: any) => e.proceso_id === p.id);
+    const tiposPresentes = new Set(elementosDelProceso.map((e: any) => e.tipo));
+    const documentosVigentes = (documentosRaw ?? []).filter((d: any) => d.proceso_id === p.id && d.estado === 'vigente').length;
+    const acpmVencidas = (acpmRaw ?? []).filter(
+      (a: any) => a.proceso_id === p.id && a.fecha_compromiso && a.fecha_compromiso < hoy && a.estado !== 'cerrada_efectiva'
+    ).length;
+    const riesgoActualizadoReciente = (riesgos ?? []).some((r: any) => r.proceso_id === p.id && fechaDentroDeMeses(r.fecha_ultima_revision, 6));
+
+    const { puntaje } = calcularIndiceMadurez({
+      caracterizacionCompleta: tiposPresentes.has('entrada') && tiposPresentes.has('actividad') && tiposPresentes.has('salida'),
+      indicadorConMedicionReciente: medicionRecientePorProceso.has(p.id),
+      riesgoActualizadoReciente,
+      documentosVigentes,
+      acpmVencidas,
+    });
+
+    return { ...p, marcos: marcosPorProceso.get(p.id) ?? [], indice_madurez: puntaje };
+  });
 
   return (
     <div className="space-y-6">

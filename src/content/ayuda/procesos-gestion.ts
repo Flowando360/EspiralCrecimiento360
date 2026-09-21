@@ -46,6 +46,15 @@ export const moduloProcesosGestion: ModuloAyuda = {
           explicacion: 'Ícono de refrescar junto a un riesgo con frecuencia de revisión definida: confirma que se revisó hoy sin necesidad de abrir el formulario completo de edición.',
         },
         {
+          nombre: 'Crear ACPM desde un riesgo (admin_th)',
+          explicacion: 'Ícono de lista junto a cada riesgo: abre el tablero de ACPM con una nueva tarjeta pre-vinculada a ese riesgo como origen.',
+        },
+        {
+          nombre: 'Índice de madurez',
+          explicacion:
+            'Barra de progreso en cada tarjeta y columna en la vista de cuadro: 0-100%, 20 puntos por cada uno de 5 criterios — caracterización completa, indicador con medición en los últimos 6 meses, riesgos actualizados (<6 meses), documentos vigentes, y sin ACPM vencidas. Da una priorización visual inmediata de qué proceso necesita atención, sin generar informes manuales.',
+        },
+        {
           nombre: 'Tablero de checklist de cumplimiento',
           explicacion: 'Columnas por estado (No cumple / Cumple parcial / Cumple / No aplica) para los ítems de cada marco normativo. Arrastra una tarjeta a otra columna para cambiar su estado. Un filtro arriba del tablero permite ver un solo marco normativo a la vez.',
         },
@@ -73,11 +82,16 @@ export const moduloProcesosGestion: ModuloAyuda = {
         },
         {
           nombre: 'Documentos vinculados',
-          explicacion: 'Lista de los documentos (procedimientos, políticas, formatos, instructivos) que pertenecen a este proceso, con acceso directo a su ficha en Gestión documental.',
+          explicacion: 'Lista de los documentos (procedimientos, políticas, formatos, instructivos, registros) que pertenecen a este proceso, con acceso directo a su ficha en Gestión documental.',
+        },
+        {
+          nombre: 'Indicadores',
+          explicacion:
+            'Matriz de indicadores del proceso: nombre, fórmula/fuente, meta, unidad, sentido (mayor es mejor / menor es mejor) e histórico de mediciones por período. Cada indicador muestra si la última medición "Cumple" o "No cumple" la meta.',
         },
         { nombre: 'Ver tablero', explicacion: 'Accede al pipeline visual del proceso (kanban de casos), igual que en la versión anterior del módulo.' },
       ],
-      notas: ['Pueden ver esta ficha: admin_th, líder y gerencia. Agregar o eliminar entradas/actividades/salidas es exclusivo de admin_th.'],
+      notas: ['Pueden ver esta ficha: admin_th, líder y gerencia. Agregar o eliminar entradas/actividades/salidas, indicadores y mediciones es exclusivo de admin_th.'],
     },
     {
       slug: 'tablero-proceso',
@@ -150,10 +164,13 @@ export const moduloProcesosGestion: ModuloAyuda = {
           explicacion:
             'Dentro de cada auditoría: 5 columnas fijas (Abierto → Análisis de causa → Plan de acción → Seguimiento → Cerrado). Cada hallazgo es NC Mayor, NC Menor, Observación u Oportunidad de mejora, con el requisito/numeral incumplido y el proceso específico al que aplica.',
         },
+        {
+          nombre: 'Crear ACPM (admin_th)',
+          explicacion: 'Enlace "Crear ACPM" en cada hallazgo (excepto oportunidades de mejora): abre el tablero de ACPM con una nueva tarjeta pre-vinculada a ese hallazgo como origen — no hay que volver a explicar de dónde viene.',
+        },
       ],
       notas: [
         'Pueden ver esta pantalla: admin_th, líder, gerencia y auditor_externo (solo lectura). Crear auditorías, agregar hallazgos y arrastrar tarjetas es exclusivo de admin_th.',
-        'Un hallazgo puede dar origen a una ACPM — se relaciona al crear la ACPM desde la pantalla de ACPM, eligiendo "Hallazgo de auditoría" como origen.',
       ],
     },
     {
@@ -164,8 +181,12 @@ export const moduloProcesosGestion: ModuloAyuda = {
         'El ciclo completo de una ACPM, no solo "tareas completadas": Registro → Análisis de causa → Plan de acción → Seguimiento → Validación de eficacia → Cerrada efectiva (o Reabierta si la causa no se eliminó).',
       camposYBotones: [
         {
+          nombre: 'Estadísticas del encabezado',
+          explicacion: 'Total de ACPM, cerradas efectivas, reabiertas y la tasa de eficacia global (% de las resueltas que se cerraron como efectivas) — el dato que hoy pocas organizaciones tienen sistematizado.',
+        },
+        {
           nombre: 'Nueva ACPM (admin_th)',
-          explicacion: 'Origen (hallazgo de auditoría, riesgo, indicador, PQRS o mejora propia), tipo de acción (correctiva/preventiva/mejora), descripción, metodología de análisis de causa (5 porqués, Ishikawa o libre) y fecha compromiso.',
+          explicacion: 'Origen (hallazgo de auditoría, riesgo, indicador, PQRS o mejora propia), tipo de acción (correctiva/preventiva/mejora), descripción, metodología de análisis de causa (5 porqués, Ishikawa o libre) y fecha compromiso. Si se llega desde el botón "Crear ACPM" de un hallazgo o un riesgo, el origen ya viene vinculado.',
         },
         { nombre: 'Tablero de 7 columnas', explicacion: 'Arrastra una tarjeta para avanzarla en el ciclo. Haz clic en una tarjeta para abrir su detalle.' },
         {

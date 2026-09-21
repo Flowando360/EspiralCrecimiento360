@@ -78,20 +78,29 @@ const COLUMNAS: { valor: EstadoAcpm; etiqueta: string }[] = [
   { valor: 'reabierta', etiqueta: 'Reabierta' },
 ];
 
+export interface PrefillAcpm {
+  origenTipo: 'hallazgo_auditoria' | 'riesgo';
+  origenHallazgoId?: string;
+  origenRiesgoId?: string;
+  procesoId?: string;
+}
+
 export function AcpmKanban({
   acpmIniciales,
   procesos,
   colaboradores,
   puedeEditar,
+  prefill,
 }: {
   acpmIniciales: Acpm[];
   procesos: ProcesoOpcion[];
   colaboradores: Colaborador[];
   puedeEditar: boolean;
+  prefill?: PrefillAcpm;
 }) {
   const [items, setItems] = useState(acpmIniciales);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [mostrarForm, setMostrarForm] = useState(false);
+  const [mostrarForm, setMostrarForm] = useState(!!prefill && puedeEditar);
   const [detalleId, setDetalleId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
@@ -152,6 +161,7 @@ export function AcpmKanban({
       {mostrarForm && (
         <FormularioAcpm
           procesos={procesos}
+          prefill={prefill}
           onCreada={(a) => {
             setItems((prev) => [...prev, a]);
             setMostrarForm(false);
@@ -260,9 +270,9 @@ function TarjetaAcpm({ item, proceso, responsable, onAbrir }: { item: Acpm; proc
   );
 }
 
-function FormularioAcpm({ procesos, onCreada }: { procesos: ProcesoOpcion[]; onCreada: (a: Acpm) => void }) {
-  const [procesoId, setProcesoId] = useState('');
-  const [origenTipo, setOrigenTipo] = useState<OrigenTipo>('mejora_propia');
+function FormularioAcpm({ procesos, prefill, onCreada }: { procesos: ProcesoOpcion[]; prefill?: PrefillAcpm; onCreada: (a: Acpm) => void }) {
+  const [procesoId, setProcesoId] = useState(prefill?.procesoId ?? '');
+  const [origenTipo, setOrigenTipo] = useState<OrigenTipo>(prefill?.origenTipo ?? 'mejora_propia');
   const [origenDetalle, setOrigenDetalle] = useState('');
   const [tipoAccion, setTipoAccion] = useState<TipoAccion>('correctiva');
   const [descripcion, setDescripcion] = useState('');
@@ -281,6 +291,8 @@ function FormularioAcpm({ procesos, onCreada }: { procesos: ProcesoOpcion[]; onC
       const res = await crearAcpm({
         procesoId: procesoId || undefined,
         origenTipo,
+        origenHallazgoId: prefill?.origenHallazgoId,
+        origenRiesgoId: prefill?.origenRiesgoId,
         origenDetalle: origenDetalle || undefined,
         tipoAccion,
         descripcion,
@@ -312,6 +324,11 @@ function FormularioAcpm({ procesos, onCreada }: { procesos: ProcesoOpcion[]; onC
 
   return (
     <div className="rounded-lg border border-marmol-200 p-3 mb-3 space-y-2">
+      {prefill && (
+        <p className="text-xs text-flow-700 bg-flow-50 rounded-lg px-2.5 py-1.5">
+          Origen: {ETIQUETA_ORIGEN[prefill.origenTipo]} — se vincula automáticamente al guardar.
+        </p>
+      )}
       <div className="grid grid-cols-2 gap-2">
         <select value={procesoId} onChange={(e) => setProcesoId(e.target.value)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
           <option value="">Proceso (opcional)</option>
@@ -331,21 +348,23 @@ function FormularioAcpm({ procesos, onCreada }: { procesos: ProcesoOpcion[]; onC
         </select>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <select value={origenTipo} onChange={(e) => setOrigenTipo(e.target.value as OrigenTipo)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
-          {(Object.entries(ETIQUETA_ORIGEN) as [OrigenTipo, string][]).map(([v, l]) => (
-            <option key={v} value={v}>
-              {l}
-            </option>
-          ))}
-        </select>
-        <select value={metodologiaCausa} onChange={(e) => setMetodologiaCausa(e.target.value as MetodologiaCausa)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
+        {!prefill && (
+          <select value={origenTipo} onChange={(e) => setOrigenTipo(e.target.value as OrigenTipo)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
+            {(Object.entries(ETIQUETA_ORIGEN) as [OrigenTipo, string][]).map(([v, l]) => (
+              <option key={v} value={v}>
+                {l}
+              </option>
+            ))}
+          </select>
+        )}
+        <select value={metodologiaCausa} onChange={(e) => setMetodologiaCausa(e.target.value as MetodologiaCausa)} className={cn('rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm', prefill && 'col-span-2')}>
           <option value="">Metodología de causa (opcional)</option>
           <option value="cinco_porques">5 porqués</option>
           <option value="ishikawa">Ishikawa</option>
           <option value="libre">Libre</option>
         </select>
       </div>
-      {origenTipo !== 'hallazgo_auditoria' && origenTipo !== 'riesgo' && (
+      {!prefill && origenTipo !== 'hallazgo_auditoria' && origenTipo !== 'riesgo' && (
         <input value={origenDetalle} onChange={(e) => setOrigenDetalle(e.target.value)} placeholder="Detalle del origen (opcional)" className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
       )}
       <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Descripción de la ACPM" rows={2} className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />

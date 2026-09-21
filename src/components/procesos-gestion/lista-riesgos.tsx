@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { crearRiesgo, eliminarRiesgo, actualizarRiesgo, marcarRiesgoRevisado } from '@/app/(dashboard)/procesos-gestion/actions';
-import { Trash2, Plus, Pencil, Check, X, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Trash2, Plus, Pencil, Check, X, RefreshCw, AlertTriangle, ListChecks } from 'lucide-react';
 import { cn, formatearFecha } from '@/lib/utils';
 
 const ETIQUETA_MARCO: Record<string, string> = {
@@ -290,6 +291,13 @@ export function ListaRiesgos({
               </div>
               {puedeEditar && (
                 <div className="flex items-center gap-2 shrink-0">
+                  <Link
+                    href={`/procesos-gestion/acpm?origenRiesgo=${r.id}${r.proceso_id ? `&proceso=${r.proceso_id}` : ''}`}
+                    title="Crear ACPM desde este riesgo"
+                    className="text-marmol-300 hover:text-flow-600"
+                  >
+                    <ListChecks size={13} />
+                  </Link>
                   {r.frecuencia_revision && (
                     <button
                       onClick={() => revisar(r.id, r.probabilidad ?? 'media', r.impacto ?? 'medio', r.riesgo_residual ?? r.impacto ?? 'medio')}
