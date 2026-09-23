@@ -11,7 +11,7 @@ export default async function AdminUsuariosPage() {
 
   const supabase = createClient();
 
-  const [{ data: usuarios }, { data: sinCuentaRaw }] = await Promise.all([
+  const [{ data: usuarios }, { data: sinCuentaRaw }, { data: vinculados }] = await Promise.all([
     supabase
       .from('perfiles_usuario')
       .select('id, nombre_completo, nombre_preferido, usuario, email, rol, activo')
@@ -24,7 +24,13 @@ export default async function AdminUsuariosPage() {
       .eq('estado', 'activo')
       .is('usuario_id', null)
       .order('nombre_completo'),
+    supabase
+      .from('colaboradores')
+      .select('id, nombre_completo, usuario_id')
+      .eq('empresa_id', perfil.empresa_id)
+      .not('usuario_id', 'is', null),
   ]);
+  const fichaPorUsuario = new Map((vinculados ?? []).map((c) => [c.usuario_id as string, { id: c.id, nombre_completo: c.nombre_completo }]));
 
   // Los 10 colaboradores de demostración (correo demo.*@ejemplo.com) no
   // necesitan cuenta real — se excluyen de la lista para invitar.
@@ -71,6 +77,8 @@ export default async function AdminUsuariosPage() {
                   activo: u.activo,
                 }}
                 esUsuarioActual={u.id === perfil.usuario_id}
+                ficha={fichaPorUsuario.get(u.id) ?? null}
+                fichasDisponibles={colaboradoresSinCuenta}
               />
             ))}
           </tbody>

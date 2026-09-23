@@ -30,6 +30,8 @@ const EditarUsuarioSchema = z.object({
   usuario: UsuarioSchema,
   email: z.string().trim().email('Correo inválido'),
   rol: z.enum(['admin_th', 'lider', 'colaborador', 'gerencia', 'auditor_externo']),
+  /** undefined = no tocar el vínculo; null = desvincular; uuid = vincular a esa ficha. */
+  colaboradorId: z.string().uuid().nullable().optional(),
 });
 
 /** Traduce la violación de la restricción UNIQUE de `usuario` a un mensaje entendible. */
@@ -103,7 +105,7 @@ export async function crearCuentaUsuario(input: z.infer<typeof CrearCuentaSchema
 }
 
 /**
- * Edita nombre, correo y rol de una cuenta existente (admin_th únicamente).
+ * Edita nombre, correo, rol y ficha de colaborador vinculada de una cuenta existente (admin_th únicamente).
  * Actualiza tanto perfiles_usuario como el correo en Supabase Auth, para
  * que el usuario pueda seguir iniciando sesión con el correo nuevo.
  */
@@ -149,7 +151,53 @@ export async function actualizarUsuario(input: z.infer<typeof EditarUsuarioSchem
 
   if (perfilError) return { ok: false as const, error: mensajeErrorUsuarioDuplicado(perfilError) };
 
+  if (parsed.data.colaboradorId !== undefined) {
+    const res = await vincularFichaColaborador(admin, perfil.empresa_id, parsed.data.usuarioId, parsed.data.colaboradorId);
+    if (!res.ok) return res;
+  }
+
   revalidatePath('/administracion/usuarios');
+  return { ok: true as const };
+}
+
+/**
+ * Vincula una cuenta ya existente a una ficha de colaborador (o la desvincula
+ * con null). Antes solo se podía vincular al crear la cuenta, así que un
+ * usuario creado sin ficha (ej. admin_th) no podía participar en lo que exige
+ * ficha: cazar en Makigami, recibir puntos, etc. Una cuenta queda con máximo
+ * una ficha, y no se roba la ficha que ya tenga otra cuenta.
+ */
+async function vincularFichaColaborador(
+  admin: ReturnType<typeof createAdminClient>,
+  empresaId: string,
+  usuarioId: string,
+  colaboradorId: string | null
+) {
+  if (colaboradorId) {
+    const { data: ficha } = await admin
+      .from('colaboradores')
+      .select('id, usuario_id')
+      .eq('id', colaboradorId)
+      .eq('empresa_id', empresaId)
+      .maybeSingle();
+    if (!ficha) return { ok: false as const, error: 'Ficha de colaborador no encontrada' };
+    if (ficha.usuario_id && ficha.usuario_id !== usuarioId) {
+      return { ok: false as const, error: 'Esa ficha ya está vinculada a otra cuenta.' };
+    }
+  }
+
+  const { error: errDesvincular } = await admin
+    .from('colaboradores')
+    .update({ usuario_id: null })
+    .eq('usuario_id', usuarioId)
+    .eq('empresa_id', empresaId)
+    .neq('id', colaboradorId ?? '00000000-0000-0000-0000-000000000000');
+  if (errDesvincular) return { ok: false as const, error: errDesvincular.message };
+
+  if (colaboradorId) {
+    const { error } = await admin.from('colaboradores').update({ usuario_id: usuarioId }).eq('id', colaboradorId).eq('empresa_id', empresaId);
+    if (error) return { ok: false as const, error: error.message };
+  }
   return { ok: true as const };
 }
 

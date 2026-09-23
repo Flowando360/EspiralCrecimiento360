@@ -23,13 +23,31 @@ export interface UsuarioFila {
   activo: boolean;
 }
 
-export function FilaUsuario({ usuario, esUsuarioActual }: { usuario: UsuarioFila; esUsuarioActual: boolean }) {
+interface FichaColaborador {
+  id: string;
+  nombre_completo: string;
+}
+
+export function FilaUsuario({
+  usuario,
+  esUsuarioActual,
+  ficha,
+  fichasDisponibles,
+}: {
+  usuario: UsuarioFila;
+  esUsuarioActual: boolean;
+  /** Ficha de colaborador vinculada a esta cuenta (null si no tiene). */
+  ficha: FichaColaborador | null;
+  /** Fichas activas que todavía no tienen cuenta, para poder vincular una. */
+  fichasDisponibles: FichaColaborador[];
+}) {
   const [editando, setEditando] = useState(false);
   const [nombreCompleto, setNombreCompleto] = useState(usuario.nombre_completo);
   const [nombrePreferido, setNombrePreferido] = useState(usuario.nombre_preferido ?? '');
   const [usuarioLogin, setUsuarioLogin] = useState(usuario.usuario);
   const [email, setEmail] = useState(usuario.email);
   const [rol, setRol] = useState<RolUsuario>(usuario.rol);
+  const [fichaId, setFichaId] = useState(ficha?.id ?? '');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -48,6 +66,7 @@ export function FilaUsuario({ usuario, esUsuarioActual }: { usuario: UsuarioFila
         usuario: usuarioLogin,
         email,
         rol,
+        colaboradorId: fichaId === (ficha?.id ?? '') ? undefined : fichaId || null,
       });
       if (res.ok) {
         setEditando(false);
@@ -63,6 +82,7 @@ export function FilaUsuario({ usuario, esUsuarioActual }: { usuario: UsuarioFila
     setUsuarioLogin(usuario.usuario);
     setEmail(usuario.email);
     setRol(usuario.rol);
+    setFichaId(ficha?.id ?? '');
     setError(null);
     setEditando(false);
   }
@@ -158,6 +178,20 @@ export function FilaUsuario({ usuario, esUsuarioActual }: { usuario: UsuarioFila
               </option>
             ))}
           </select>
+          <select
+            value={fichaId}
+            onChange={(e) => setFichaId(e.target.value)}
+            title="Ficha de colaborador vinculada: la necesita para participar en lo que exige ficha (cazar en Makigami, puntos, etc.)"
+            className="mt-1 block w-full rounded-lg border border-marmol-200 px-2 py-1 text-xs"
+          >
+            <option value="">Sin ficha de colaborador</option>
+            {ficha && <option value={ficha.id}>Ficha: {ficha.nombre_completo}</option>}
+            {fichasDisponibles.map((f) => (
+              <option key={f.id} value={f.id}>
+                Ficha: {f.nombre_completo}
+              </option>
+            ))}
+          </select>
         </td>
         <td className="px-4 py-2.5 text-marmol-500">{usuario.activo ? 'Activo' : 'Inactivo'}</td>
         <td className="px-4 py-2.5">
@@ -240,6 +274,7 @@ export function FilaUsuario({ usuario, esUsuarioActual }: { usuario: UsuarioFila
           {usuario.nombre_preferido && (
             <p className="text-xs text-marmol-400">se hace llamar "{usuario.nombre_preferido}"</p>
           )}
+          {!ficha && <p className="text-xs text-medio">Sin ficha de colaborador</p>}
         </td>
         <td className="px-4 py-3 text-marmol-600">{usuario.email}</td>
         <td className="px-4 py-3 text-marmol-500 font-mono text-xs">{usuario.usuario}</td>
