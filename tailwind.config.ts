@@ -61,6 +61,22 @@ const config: Config = {
       borderRadius: {
         xl: '0.875rem',
       },
+      // Micro-animaciones de gamificación (Cacería Makigami)
+      keyframes: {
+        pop: {
+          '0%': { transform: 'scale(0.6)' },
+          '60%': { transform: 'scale(1.3)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        entrar: {
+          '0%': { opacity: '0', transform: 'translateY(12px) scale(0.96)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+      },
+      animation: {
+        pop: 'pop 0.45s ease-out',
+        entrar: 'entrar 0.3s ease-out',
+      },
     },
   },
   plugins: [],

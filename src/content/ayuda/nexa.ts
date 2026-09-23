@@ -4,7 +4,7 @@ export const moduloNexa: ModuloAyuda = {
   slug: 'nexa',
   titulo: 'Nexa · Cultura y Formación',
   descripcion:
-    'Comunicación corporativa, formación gamificada, reconocimientos, simulacros de seguridad, directorio de aliados y el asistente de IA.',
+    'Comunicación corporativa, formación gamificada, Cacería Makigami (mejora de procesos Lean en equipo), reconocimientos, simulacros de seguridad, directorio de aliados y el asistente de IA.',
   paginas: [
     {
       slug: 'feed',
@@ -63,6 +63,58 @@ export const moduloNexa: ModuloAyuda = {
       ],
     },
     {
+      slug: 'makigami',
+      ruta: '/nexa/makigami',
+      titulo: 'Cacería Makigami',
+      resumen:
+        'Formación Lean en equipo: se dibuja un proceso administrativo real (quién hace qué, cuánto tarda, cuánto espera) y toda la empresa "caza" los desperdicios escondidos en él. Las mejores ideas se votan, se aprueban y pueden convertirse en ACPM de mejora. Cada reto pasa por 4 fases: Mapeo → Cacería → Rediseño → Resultados.',
+      camposYBotones: [
+        { nombre: 'Nuevo reto (admin_th y líder)', explicacion: 'Título, qué problema se quiere resolver, proceso del mapa de procesos (opcional), dónde empieza y termina el proceso, y fecha límite de la cacería. Quien lo crea queda como facilitador.' },
+        { nombre: 'Mis insignias', explicacion: '🎯 Cazador (10+ cazas), 🦅 Ojo de Halcón (primero en ver 3 desperdicios que el equipo luego validó), 🧠 Arquitecto del Proceso (una propuesta aprobada) y ⚡ Ahorrador de Tiempo (mejoras aprobadas que ahorran 1 día o más). Se calculan sumando todas las cacerías; las que aún no tienes se ven en gris.' },
+        { nombre: 'Mejores cazadores', explicacion: 'Top 5 de la empresa en todas las cacerías, ordenado primero por hallazgos validados como pionero y luego por cantidad de cazas.' },
+        { nombre: 'Aprende a cazar', explicacion: 'Los 8 desperdicios Lean traducidos a la oficina (esperas, traspasos, sobreprocesamiento, errores, búsqueda de información, trabajo acumulado, sobreproducción y talento no aprovechado), con ejemplos.' },
+      ],
+      notas: [
+        'Cualquier rol con ficha de colaborador puede cazar, proponer y votar. Crear retos es de admin_th y líder; un líder solo facilita los retos que él mismo creó (admin_th facilita todos).',
+      ],
+    },
+    {
+      slug: 'makigami-reto',
+      ruta: '/nexa/makigami/*',
+      titulo: 'Tablero de un reto Makigami',
+      resumen:
+        'El "rollo de papel" digital: cada fila (carril) es un rol o área, cada columna es un paso del proceso en orden. Las flechas punteadas en ámbar marcan los traspasos entre áreas. Debajo de los carriles están las filas de análisis (tiempo de trabajo y tiempo de espera de cada paso) y, arriba, la barra de eficiencia del proceso.',
+      camposYBotones: [
+        { nombre: 'Línea de fases', explicacion: 'Muestra en qué fase va el reto. El facilitador ve el botón para avanzar (con confirmación) y el de "Volver a" la fase anterior.' },
+        { nombre: 'Carriles (facilitador, fase Mapeo)', explicacion: 'En el panel derecho: agregar, renombrar, subir/bajar o eliminar carriles. Eliminar un carril borra sus pasos.' },
+        { nombre: '+ Paso aquí (facilitador, fase Mapeo)', explicacion: 'Columna al final de cada carril. Abre el formulario del paso: quién lo hace, qué hace, tiempo de trabajo, espera antes del siguiente paso (en minutos, horas o días calendario), documento o sistema que usa y clasificación Lean (AV agrega valor, NAV-N necesaria sin agregar valor, NAV desperdicio). El formulario queda abierto para seguir agregando pasos.' },
+        { nombre: 'Tocar un paso', explicacion: 'En Mapeo (facilitador) abre su edición, con flechas para moverlo antes o después y botón Eliminar. En las demás fases abre su detalle y los desperdicios cazados.' },
+        { nombre: 'Barra de eficiencia', explicacion: 'Tiempo total, tiempo que agrega valor, eficiencia (% del tiempo total que agrega valor), número de traspasos, desperdicios cazados y cazadores. La barra divide el tiempo en: agrega valor, necesario, trabajo que es desperdicio y esperas. Los pasos sin clasificar cuentan como necesarios.' },
+        { nombre: 'Botones de desperdicio (fase Cacería)', explicacion: 'Al tocar un paso aparecen los 8 desperdicios: toca uno para cazarlo y vuelve a tocarlo para retirar tu caza. Puedes dejar un comentario de por qué, que se guarda con tu próxima caza. El número indica cuántas personas lo cazaron; con 3 queda "validado por el equipo" (✓ en rojo).' },
+        { nombre: 'Mapa de calor', explicacion: 'Desde la Cacería, los pasos con más cazas brillan en naranja/rojo y muestran 🔥 con el total, para ver de un vistazo dónde se concentra el problema.' },
+        { nombre: 'Propón una mejora (fase Rediseño)', explicacion: 'Paso al que aplica (o todo el proceso), tipo de acción (eliminar, simplificar, automatizar, combinar u otra), descripción y ahorro de tiempo estimado.' },
+        { nombre: 'Votar (👍)', explicacion: 'Un voto por persona por propuesta; vuelve a tocar para quitarlo. No puedes votar tu propia propuesta.' },
+        { nombre: 'Simulador', explicacion: 'Marca "Simular" en las propuestas para ver en vivo cómo se encoge el proceso (tiempo de hoy → tiempo rediseñado y % de reducción). Los pasos que se eliminarían se atenúan en el tablero. El tiempo que agrega valor nunca se descuenta. Al cerrar el reto, el simulador queda fijo con las mejoras aprobadas.' },
+        { nombre: 'Aprobar / Descartar / Reabrir (facilitador)', explicacion: 'Resuelve cada propuesta. Una propuesta con ACPM ya creada no se puede reabrir ni descartar desde aquí.' },
+        { nombre: 'Crear ACPM de mejora (solo admin_th)', explicacion: 'En una propuesta aprobada, crea una ACPM tipo "mejora" en Procesos → ACPM, con el autor como responsable y el reto como origen. Luego muestra el código de la ACPM con un enlace.' },
+        { nombre: 'Cazadores de este reto', explicacion: 'Ranking del reto con puntos, cazas, veces como pionero validado e insignias ganadas.' },
+      ],
+      proceso: [
+        'Mapeo: el facilitador crea los carriles y dibuja los pasos tal como ocurren hoy (no como dice el manual), con sus tiempos.',
+        'Abrir la cacería: se publica automáticamente un anuncio en el Feed con el enlace al reto. El mapa ya no se puede editar salvo que el facilitador regrese a Mapeo.',
+        'Cacería: todos recorren el tablero y cazan desperdicios. El primero en ver un desperdicio es el "pionero".',
+        'Pasar a Rediseño: se cierran las cazas y se entregan los puntos de la cacería. Todos proponen y votan mejoras; el facilitador aprueba las que van.',
+        'Cerrar el reto: se entregan los puntos por proponer y, si hay mejoras aprobadas, se publica el logro en el Feed ("de X días a Y días").',
+      ],
+      notas: [
+        'Puntos (se suman al ranking de Reconocimientos): 3 por cada caza (máximo 12 cazas con puntos por persona y reto), 15 extra al pionero de cada hallazgo que llegue a 3 cazadores, 10 por cada propuesta no descartada y 40 cuando te aprueban una propuesta.',
+        'Los puntos de cazar y proponer se entregan en lote al cerrar cada fase (no al marcar), así marcar y desmarcar no suma puntos. Mientras la fase está abierta, el ranking del reto los muestra como "puntos en juego". La aprobación de una propuesta se paga una sola vez, aunque se reabra y se vuelva a aprobar.',
+        'Si el facilitador regresa de fase, los puntos ya entregados no se vuelven a entregar ni se retiran.',
+        'Los tiempos se asumen en secuencia: el tiempo total del proceso es la suma del trabajo y la espera de todos los pasos. Los días son de calendario (24 h).',
+        'Eliminar un reto borra su mapa, cazas y propuestas, pero conserva los puntos ya entregados.',
+      ],
+    },
+    {
       slug: 'notebook',
       ruta: '/nexa/notebook',
       titulo: 'Mi cuaderno',
@@ -95,6 +147,11 @@ export const moduloNexa: ModuloAyuda = {
           nombre: 'Puntos automáticos del módulo de Procesos',
           explicacion:
             'Confirmar lectura de un documento: 5 pts. Marcar un riesgo revisado a tiempo: 5 pts. Registrar un riesgo/oportunidad con control definido: 10 pts. Registrar una ACPM: 10 pts. Completar todo el plan de acción de una ACPM: 20 pts. Cerrar una ACPM validada como eficaz: 60 pts (el máximo — cerrarla como "no eficaz" no resta puntos, para no castigar la honestidad en la validación).',
+        },
+        {
+          nombre: 'Puntos de la Cacería Makigami',
+          explicacion:
+            'Cada reto de Nexa → Cacería Makigami suma aquí sus puntos al cerrar cada fase: 3 por caza (máx. 12 por persona y reto), 15 al pionero de un hallazgo validado, 10 por propuesta de mejora y 40 por propuesta aprobada. El motivo aparece como "Cacería Makigami «nombre del reto»: …".',
         },
       ],
       notas: [

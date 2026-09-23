@@ -5580,6 +5580,517 @@ export type Database = {
           },
         ]
       }
+      nexa_makigami_carriles: {
+        Row: {
+          created_at: string
+          id: string
+          nombre: string
+          orden: number
+          reto_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nombre: string
+          orden?: number
+          reto_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nombre?: string
+          orden?: number
+          reto_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nexa_makigami_carriles_reto_id_fkey"
+            columns: ["reto_id"]
+            isOneToOne: false
+            referencedRelation: "nexa_makigami_retos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nexa_makigami_cazas: {
+        Row: {
+          colaborador_id: string
+          comentario: string | null
+          created_at: string
+          id: string
+          paso_id: string
+          reto_id: string
+          tipo_desperdicio: string
+        }
+        Insert: {
+          colaborador_id: string
+          comentario?: string | null
+          created_at?: string
+          id?: string
+          paso_id: string
+          reto_id: string
+          tipo_desperdicio: string
+        }
+        Update: {
+          colaborador_id?: string
+          comentario?: string | null
+          created_at?: string
+          id?: string
+          paso_id?: string
+          reto_id?: string
+          tipo_desperdicio?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nexa_makigami_cazas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_cazas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_cazas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_cazas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_cazas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_cazas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_cazas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_cazas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_cazas_paso_id_fkey"
+            columns: ["paso_id"]
+            isOneToOne: false
+            referencedRelation: "nexa_makigami_pasos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_cazas_reto_id_fkey"
+            columns: ["reto_id"]
+            isOneToOne: false
+            referencedRelation: "nexa_makigami_retos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nexa_makigami_pasos: {
+        Row: {
+          carril_id: string
+          clasificacion: string | null
+          created_at: string
+          descripcion: string
+          documento_sistema: string | null
+          id: string
+          orden: number
+          reto_id: string
+          tiempo_espera_min: number
+          tiempo_trabajo_min: number
+        }
+        Insert: {
+          carril_id: string
+          clasificacion?: string | null
+          created_at?: string
+          descripcion: string
+          documento_sistema?: string | null
+          id?: string
+          orden?: number
+          reto_id: string
+          tiempo_espera_min?: number
+          tiempo_trabajo_min?: number
+        }
+        Update: {
+          carril_id?: string
+          clasificacion?: string | null
+          created_at?: string
+          descripcion?: string
+          documento_sistema?: string | null
+          id?: string
+          orden?: number
+          reto_id?: string
+          tiempo_espera_min?: number
+          tiempo_trabajo_min?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nexa_makigami_pasos_carril_id_fkey"
+            columns: ["carril_id"]
+            isOneToOne: false
+            referencedRelation: "nexa_makigami_carriles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_pasos_reto_id_fkey"
+            columns: ["reto_id"]
+            isOneToOne: false
+            referencedRelation: "nexa_makigami_retos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nexa_makigami_propuestas: {
+        Row: {
+          accion: string
+          acpm_id: string | null
+          ahorro_estimado_min: number
+          colaborador_id: string
+          created_at: string
+          descripcion: string
+          estado: string
+          id: string
+          paso_id: string | null
+          puntos_aprobacion_otorgados: boolean
+          reto_id: string
+        }
+        Insert: {
+          accion?: string
+          acpm_id?: string | null
+          ahorro_estimado_min?: number
+          colaborador_id: string
+          created_at?: string
+          descripcion: string
+          estado?: string
+          id?: string
+          paso_id?: string | null
+          puntos_aprobacion_otorgados?: boolean
+          reto_id: string
+        }
+        Update: {
+          accion?: string
+          acpm_id?: string | null
+          ahorro_estimado_min?: number
+          colaborador_id?: string
+          created_at?: string
+          descripcion?: string
+          estado?: string
+          id?: string
+          paso_id?: string | null
+          puntos_aprobacion_otorgados?: boolean
+          reto_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nexa_makigami_propuestas_acpm_id_fkey"
+            columns: ["acpm_id"]
+            isOneToOne: false
+            referencedRelation: "acpm"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_propuestas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_propuestas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_propuestas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_propuestas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_propuestas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_propuestas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_propuestas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_propuestas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_propuestas_paso_id_fkey"
+            columns: ["paso_id"]
+            isOneToOne: false
+            referencedRelation: "nexa_makigami_pasos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_propuestas_reto_id_fkey"
+            columns: ["reto_id"]
+            isOneToOne: false
+            referencedRelation: "nexa_makigami_retos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nexa_makigami_retos: {
+        Row: {
+          cerrado_en: string | null
+          creado_por: string | null
+          created_at: string
+          descripcion: string | null
+          empresa_id: string
+          estado: string
+          fecha_limite: string | null
+          fin_proceso: string | null
+          id: string
+          inicio_proceso: string | null
+          proceso_id: string | null
+          puntos_caceria_otorgados: boolean
+          puntos_rediseno_otorgados: boolean
+          titulo: string
+        }
+        Insert: {
+          cerrado_en?: string | null
+          creado_por?: string | null
+          created_at?: string
+          descripcion?: string | null
+          empresa_id: string
+          estado?: string
+          fecha_limite?: string | null
+          fin_proceso?: string | null
+          id?: string
+          inicio_proceso?: string | null
+          proceso_id?: string | null
+          puntos_caceria_otorgados?: boolean
+          puntos_rediseno_otorgados?: boolean
+          titulo: string
+        }
+        Update: {
+          cerrado_en?: string | null
+          creado_por?: string | null
+          created_at?: string
+          descripcion?: string | null
+          empresa_id?: string
+          estado?: string
+          fecha_limite?: string | null
+          fin_proceso?: string | null
+          id?: string
+          inicio_proceso?: string | null
+          proceso_id?: string | null
+          puntos_caceria_otorgados?: boolean
+          puntos_rediseno_otorgados?: boolean
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nexa_makigami_retos_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_retos_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_retos_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_retos_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_retos_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_retos_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_retos_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_retos_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_retos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_retos_proceso_id_fkey"
+            columns: ["proceso_id"]
+            isOneToOne: false
+            referencedRelation: "procesos_gestion"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nexa_makigami_votos: {
+        Row: {
+          colaborador_id: string
+          created_at: string
+          propuesta_id: string
+        }
+        Insert: {
+          colaborador_id: string
+          created_at?: string
+          propuesta_id: string
+        }
+        Update: {
+          colaborador_id?: string
+          created_at?: string
+          propuesta_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nexa_makigami_votos_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_votos_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_alineacion_talento_rol"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_votos_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_indicadores_equipo"
+            referencedColumns: ["lider_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_votos_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_lideres_de_linea_sin_lider_interno"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_votos_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_a_cargo_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_votos_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_colaboradores_a_cargo"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_votos_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["colaborador_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_votos_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "v_organigrama_pares"
+            referencedColumns: ["par_id"]
+          },
+          {
+            foreignKeyName: "nexa_makigami_votos_propuesta_id_fkey"
+            columns: ["propuesta_id"]
+            isOneToOne: false
+            referencedRelation: "nexa_makigami_propuestas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nexa_reconocimientos: {
         Row: {
           colaborador_id: string
@@ -8244,6 +8755,14 @@ export type Database = {
           p_semaforo: string
         }
         Returns: undefined
+      }
+      fn_makigami_puedo_facilitar: {
+        Args: { p_reto_id: string }
+        Returns: boolean
+      }
+      fn_makigami_reto_de_mi_empresa: {
+        Args: { p_reto_id: string }
+        Returns: boolean
       }
       fn_mi_colaborador_id: { Args: never; Returns: string }
       fn_mi_empresa_id: { Args: never; Returns: string }

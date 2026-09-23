@@ -11,6 +11,7 @@ import {
   Users,
   CalendarClock,
   Target,
+  Crosshair,
   Network,
   BarChart3,
   Rss,
@@ -88,6 +89,7 @@ const NAV: NavGroup[] = [
     items: [
       { href: '/nexa/feed', label: 'Feed corporativo', icon: Rss, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },
       { href: '/nexa/formacion', label: 'Formación y SST', icon: GraduationCap, roles: ['admin_th', 'lider', 'colaborador'] },
+      { href: '/nexa/makigami', label: 'Cacería Makigami', icon: Crosshair, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },
       { href: '/nexa/notebook', label: 'Mi cuaderno', icon: NotebookPen, roles: ['admin_th', 'lider', 'colaborador'] },
       { href: '/nexa/simulacros', label: 'Simulacros', icon: ShieldAlert, roles: ['admin_th', 'lider', 'colaborador'] },
       { href: '/nexa/reconocimientos', label: 'Reconocimientos', icon: Award, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },

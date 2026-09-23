@@ -36,3 +36,6 @@ export const PUNTOS_PROCESOS = {
   completarPlanDeAccionAcpm: 20,
   cerrarAcpmEficaz: 60,
 } as const;
+
+// Los puntos de la Cacería Makigami viven en src/lib/nexa/makigami.ts
+// (PUNTOS_MAKIGAMI): ese módulo es puro y lo usan también componentes cliente.
