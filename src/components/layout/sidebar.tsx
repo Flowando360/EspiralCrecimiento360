@@ -12,6 +12,7 @@ import {
   CalendarClock,
   Target,
   Crosshair,
+  X,
   Network,
   BarChart3,
   Rss,
@@ -134,11 +135,35 @@ const NAV: NavGroup[] = [
   },
 ];
 
-export function Sidebar({ rol, esSuperadmin }: { rol: RolUsuario; esSuperadmin?: boolean }) {
+export function Sidebar({
+  rol,
+  esSuperadmin,
+  abierto = false,
+  onCerrar,
+}: {
+  rol: RolUsuario;
+  esSuperadmin?: boolean;
+  /** Solo en celular/tablet: el menú deslizable está visible. */
+  abierto?: boolean;
+  onCerrar?: () => void;
+}) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 shrink-0 h-screen sticky top-0 bg-secundario flex flex-col">
+    <>
+      {/* Fondo oscuro detrás del menú en celular; tocarlo lo cierra. */}
+      <div
+        className={cn('fixed inset-0 z-40 bg-black/40 transition-opacity lg:hidden', abierto ? 'opacity-100' : 'pointer-events-none opacity-0')}
+        onClick={onCerrar}
+        aria-hidden
+      />
+    <aside
+      className={cn(
+        'w-64 shrink-0 h-screen bg-secundario flex flex-col',
+        'fixed inset-y-0 left-0 z-50 transition-transform duration-200 lg:sticky lg:top-0 lg:bottom-auto lg:z-auto lg:translate-x-0',
+        abierto ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+      )}
+    >
       <div className="px-5 py-5 border-b border-white/10">
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center overflow-hidden shrink-0">
@@ -150,6 +175,14 @@ export function Sidebar({ rol, esSuperadmin }: { rol: RolUsuario; esSuperadmin?:
             </p>
             <p className="text-xs text-acento/70 leading-tight">Flow, Nexus y Visión</p>
           </div>
+          <button
+            type="button"
+            onClick={onCerrar}
+            className="ml-auto rounded-lg p-1.5 text-acento/70 hover:bg-white/10 hover:text-acento lg:hidden"
+            aria-label="Cerrar menú"
+          >
+            <X size={18} />
+          </button>
         </div>
       </div>
 
@@ -212,5 +245,6 @@ export function Sidebar({ rol, esSuperadmin }: { rol: RolUsuario; esSuperadmin?:
         )}
       </nav>
     </aside>
+    </>
   );
 }

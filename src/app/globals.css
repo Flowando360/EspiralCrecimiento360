@@ -25,3 +25,17 @@ body {
 .badge-hacer { @apply bg-orange-50 text-hacer border border-orange-200; }
 .badge-deber { @apply bg-blue-50 text-deber border border-blue-200; }
 .badge-marmol { @apply bg-marmol-100 text-marmol-600 border border-marmol-200; }
+
+/*
+ * Tablas dentro de tarjetas: en pantallas angostas se desplazan de lado en
+ * vez de cortarse (la mayoría usa `card overflow-hidden` para redondear las
+ * esquinas, lo que en celular escondía las columnas de la derecha).
+ */
+.card:has(> table) {
+  overflow-x: auto;
+}
+@media (max-width: 767px) {
+  .card > table {
+    min-width: 640px;
+  }
+}

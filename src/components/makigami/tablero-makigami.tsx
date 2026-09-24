@@ -131,7 +131,7 @@ export function TableroMakigami({
           </div>
         </div>
 
-        <aside className="card p-4 lg:sticky lg:top-4">
+        <aside className="card p-4 lg:sticky lg:top-20">
           {editandoMapa ? (
             nuevoPaso || seleccionado ? (
               <FormularioPaso

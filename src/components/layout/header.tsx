@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { etiquetaRol } from '@/lib/utils';
-import { LogOut, Bell, Mail, MessageCircle } from 'lucide-react';
+import { LogOut, Bell, Mail, MessageCircle, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { CentroAyudaBoton } from '@/components/ayuda/centro-ayuda-boton';
 
@@ -13,12 +13,15 @@ export function Header({
   alertasPendientes = 0,
   notificacionesNoLeidas = 0,
   mensajesNoLeidos = 0,
+  onAbrirMenu,
 }: {
   nombre: string;
   rol: string;
   alertasPendientes?: number;
   notificacionesNoLeidas?: number;
   mensajesNoLeidos?: number;
+  /** Abre el menú lateral (solo visible en celular/tablet). */
+  onAbrirMenu?: () => void;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -30,9 +33,17 @@ export function Header({
   }
 
   return (
-    <header className="h-16 border-b border-marmol-200 bg-white flex items-center justify-between px-6 sticky top-0 z-10">
-      <div />
-      <div className="flex items-center gap-4">
+    <header className="h-14 sm:h-16 border-b border-marmol-200 bg-white flex items-center justify-between gap-2 px-3 sm:px-6 sticky top-0 z-30">
+      <button
+        type="button"
+        onClick={onAbrirMenu}
+        className="rounded-lg p-2 text-secundario hover:bg-marmol-100 transition lg:hidden"
+        aria-label="Abrir menú"
+      >
+        <Menu size={22} />
+      </button>
+      <div className="hidden lg:block" />
+      <div className="flex items-center gap-0.5 sm:gap-4 min-w-0">
         <CentroAyudaBoton />
         <Link
           href="/alertas"
@@ -70,7 +81,7 @@ export function Header({
             </span>
           )}
         </Link>
-        <div className="text-right leading-tight">
+        <div className="hidden sm:block text-right leading-tight">
           <p className="text-sm font-medium text-marmol-900">{nombre}</p>
           <p className="text-xs text-marmol-400">{etiquetaRol[rol] ?? rol}</p>
         </div>

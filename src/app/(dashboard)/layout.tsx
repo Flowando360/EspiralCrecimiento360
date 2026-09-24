@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AppShell } from '@/components/layout/app-shell';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const perfil = await getPerfilActual();
@@ -28,18 +27,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
   ]);
 
   return (
-    <div className="flex min-h-screen bg-marmol-50">
-      <Sidebar rol={perfil.rol} esSuperadmin={perfil.es_superadmin} />
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header
-          nombre={perfil.nombre_preferido?.trim() || perfil.nombre_completo}
-          rol={perfil.rol}
-          alertasPendientes={count ?? 0}
-          notificacionesNoLeidas={countNotificaciones ?? 0}
-          mensajesNoLeidos={countMensajes ?? 0}
-        />
-        <main className="flex-1 p-6 max-w-[1400px] w-full mx-auto">{children}</main>
-      </div>
-    </div>
+    <AppShell
+      rol={perfil.rol}
+      esSuperadmin={perfil.es_superadmin}
+      nombre={perfil.nombre_preferido?.trim() || perfil.nombre_completo}
+      alertasPendientes={count ?? 0}
+      notificacionesNoLeidas={countNotificaciones ?? 0}
+      mensajesNoLeidos={countMensajes ?? 0}
+    >
+      {children}
+    </AppShell>
   );
 }

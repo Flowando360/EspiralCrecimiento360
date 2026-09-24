@@ -107,7 +107,7 @@ export function FormularioEvaluacion({
   return (
     <div className="space-y-6">
       {/* ── Barra de avance y total ── */}
-      <div className="card p-4 sticky top-2 z-10 backdrop-blur bg-white/90 flex items-center justify-between flex-wrap gap-3">
+      <div className="card p-4 sticky top-16 sm:top-[4.5rem] z-10 backdrop-blur bg-white/90 flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-flow-50 flex items-center justify-center">
             <span className="font-display text-sm font-bold text-flow-700">{totalGeneral ?? '—'}</span>
