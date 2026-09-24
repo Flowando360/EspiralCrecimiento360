@@ -22,6 +22,16 @@ textarea {
   min-width: 0;
 }
 
+/*
+ * Mismo problema en rejillas: una "grid md:grid-cols-2" en celular queda con
+ * una sola columna automática que se estira al contenido más ancho. Con esto
+ * cada celda se ajusta al ancho de la pantalla (lo que no quepa, como tablas
+ * o el tablero Makigami, ya tiene su propio desplazamiento lateral).
+ */
+.grid > * {
+  min-width: 0;
+}
+
 .card {
   @apply bg-white border border-marmol-200 rounded-xl shadow-sm;
 }
