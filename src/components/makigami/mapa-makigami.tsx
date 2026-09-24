@@ -1,17 +1,32 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { CLASIFICACIONES, DESPERDICIOS, formatearDuracion, type TipoDesperdicio } from '@/lib/nexa/makigami';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 import type { CarrilVista, Hallazgo, PasoVista } from './tipos';
 
-// Geometría fija: permite calcular los conectores SVG sin medir el DOM.
-const LABEL_W = 148;
-const COL_W = 184;
+// Geometría fija: permite calcular los conectores SVG sin medir el DOM. En
+// celular se usa una versión compacta para que quepan carril + ~1.5 pasos.
+const GEOMETRIA = {
+  normal: { LABEL_W: 148, COL_W: 184, ROW_H: 138 },
+  compacta: { LABEL_W: 84, COL_W: 158, ROW_H: 128 },
+};
 const HEADER_H = 30;
-const ROW_H = 138;
 const PAD = 10;
 const FILA_ANALISIS_H = 30;
+
+function useEsCelular() {
+  const [celular, setCelular] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)');
+    const actualizar = () => setCelular(mq.matches);
+    actualizar();
+    mq.addEventListener('change', actualizar);
+    return () => mq.removeEventListener('change', actualizar);
+  }, []);
+  return celular;
+}
 
 const TONO_CLASIFICACION: Record<string, string> = {
   agrega_valor: 'bg-flow-100 text-flow-700',
@@ -53,6 +68,8 @@ export function MapaMakigami({
   /** Solo en fase de mapeo: muestra una columna extra con "+" por carril. */
   onAgregarPaso?: (carrilId: string) => void;
 }) {
+  const celular = useEsCelular();
+  const { LABEL_W, COL_W, ROW_H } = celular ? GEOMETRIA.compacta : GEOMETRIA.normal;
   const filaDeCarril = new Map(carriles.map((c, i) => [c.id, i]));
   const columnas = pasos.length + (onAgregarPaso ? 1 : 0);
   const ancho = LABEL_W + columnas * COL_W;
@@ -123,7 +140,7 @@ export function MapaMakigami({
           <div
             key={`l-${c.id}`}
             className={cn(
-              'sticky left-0 z-20 flex items-center px-3 border-r border-b border-marmol-200 text-sm font-semibold text-secundario',
+              'sticky left-0 z-20 flex items-center px-2 sm:px-3 border-r border-b border-marmol-200 text-xs sm:text-sm font-semibold text-secundario break-words',
               i % 2 === 0 ? 'bg-marmol-50' : 'bg-white'
             )}
             style={{ gridColumn: 1, gridRow: i + 2 }}
@@ -227,7 +244,7 @@ export function MapaMakigami({
         {(['Trabajo', 'Espera'] as const).map((etiqueta, f) => (
           <div
             key={etiqueta}
-            className="sticky left-0 z-20 flex items-center gap-1.5 px-3 bg-marmol-100 border-r border-b border-marmol-200 text-[11px] font-semibold uppercase tracking-wide text-marmol-500"
+            className="sticky left-0 z-20 flex items-center gap-1 px-2 sm:px-3 bg-marmol-100 border-r border-b border-marmol-200 text-[10px] sm:text-[11px] font-semibold uppercase sm:tracking-wide text-marmol-500"
             style={{ gridColumn: 1, gridRow: carriles.length + 2 + f }}
           >
             {etiqueta === 'Trabajo' ? '⚙️' : '⏳'} {etiqueta}
