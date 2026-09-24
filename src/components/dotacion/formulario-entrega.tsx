@@ -151,7 +151,7 @@ export function FormularioEntrega({
       </div>
 
       {modo === 'catalogo' ? (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="col-span-2">
             <label className={label}>Artículo</label>
             <select
@@ -185,10 +185,10 @@ export function FormularioEntrega({
             <label className={label}>Cantidad</label>
             <input className={campo} type="number" min={1} value={cantidad} onChange={(e) => setCantidad(e.target.value)} />
           </div>
-          {cantidadExcedeStock && <p className="col-span-4 text-xs text-bajo">No hay suficiente stock disponible ({tallaSeleccionada?.stock_disponible} en bodega).</p>}
+          {cantidadExcedeStock && <p className="col-span-full text-xs text-bajo">No hay suficiente stock disponible ({tallaSeleccionada?.stock_disponible} en bodega).</p>}
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="col-span-2">
             <label className={label}>Elemento</label>
             <input className={campo} value={nombreElemento} onChange={(e) => setNombreElemento(e.target.value)} placeholder="Ej. Botas de seguridad" />

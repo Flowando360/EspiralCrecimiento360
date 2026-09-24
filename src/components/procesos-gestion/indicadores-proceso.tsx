@@ -293,7 +293,7 @@ function FormularioIndicador({ procesoId, onCreado }: { procesoId: string; onCre
         <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre del indicador" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" autoFocus />
         <input value={formula} onChange={(e) => setFormula(e.target.value)} placeholder="Fórmula / fuente (opcional)" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
       </div>
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <input value={meta} onChange={(e) => setMeta(e.target.value)} placeholder="Meta" type="number" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
         <select value={unidad} onChange={(e) => setUnidad(e.target.value as Unidad)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
           <option value="porcentaje">%</option>
