@@ -29,7 +29,7 @@ export default async function ColaboradoresPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-display text-2xl font-semibold text-secundario">
             {perfil.rol === 'lider' ? 'Mi equipo' : 'Colaboradores'}

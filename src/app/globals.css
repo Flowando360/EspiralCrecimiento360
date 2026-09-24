@@ -11,6 +11,17 @@ body {
   @apply bg-marmol-50 text-marmol-900 font-body antialiased;
 }
 
+/*
+ * Los campos de formulario traen un ancho mínimo propio (~20 caracteres) que
+ * no los deja encogerse dentro de una fila flex: en celular, dos campos + un
+ * botón en la misma fila empujaban la pantalla hacia los lados.
+ */
+input,
+select,
+textarea {
+  min-width: 0;
+}
+
 .card {
   @apply bg-white border border-marmol-200 rounded-xl shadow-sm;
 }

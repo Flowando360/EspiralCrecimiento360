@@ -28,7 +28,7 @@ export default async function ReclutamientoPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-display text-2xl font-semibold text-secundario flex items-center gap-2">
             <Briefcase size={22} className="text-flow-600" /> Reclutamiento y Selección
@@ -38,7 +38,7 @@ export default async function ReclutamientoPage() {
             la contratación.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link
             href="/reclutamiento/candidatos"
             className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-700 text-sm font-medium px-3 py-2 transition"

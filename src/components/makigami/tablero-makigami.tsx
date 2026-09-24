@@ -191,7 +191,7 @@ export function TableroMakigami({
       </div>
 
       {(reto.estado === 'rediseno' || reto.estado === 'cerrado') && pasos.length > 0 ? (
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] items-start">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] items-start [&>*]:min-w-0">
           <Rediseno
             retoId={reto.id}
             estado={reto.estado}
