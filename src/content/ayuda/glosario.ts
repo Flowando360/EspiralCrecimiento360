@@ -1,6 +1,6 @@
 import type { TerminoGlosario } from '@/types/ayuda';
 
-export const glosario: TerminoGlosario[] = [
+const TERMINOS: TerminoGlosario[] = [
   { termino: 'Acompañante', definicion: 'Quien valora al colaborador en crecimiento en un ciclo: puede ser autoevaluación, el líder, un par (mismo líder), o un colaborador a cargo.' },
   { termino: 'Acuerdo de crecimiento', definicion: 'Los compromisos que quedan de la sesión de retroalimentación (del colaborador y de la empresa), firmados por ambas partes con casilla + fecha.' },
   { termino: 'Afiliaciones', definicion: 'EPS, ARL, AFP (fondo de pensiones) y caja de compensación de una persona, registradas en su ficha → Documentos. Mismo nivel de acceso que el contrato: solo Talento Humano y la propia persona.' },
@@ -55,4 +55,14 @@ export const glosario: TerminoGlosario[] = [
   { termino: 'Umbral de anonimato', definicion: 'En Clima Organizacional, el mínimo de respuestas que debe haber en un grupo (toda la empresa o un equipo) antes de mostrar cualquier resultado agregado — por debajo de eso, el resultado sale vacío ("—") para que nunca se pueda deducir la respuesta de una sola persona. Por defecto son 5 respuestas fijas, pero admin_th lo puede cambiar en Administración → Configuración, ya sea a otra cantidad fija o a un % de la planta activa de cada grupo.' },
   { termino: 'Usuario (de login)', definicion: 'Lo que se escribe en el login en vez del correo completo (ej. "juan.perez"). Es un dato propio de la cuenta, independiente del correo real — siempre primernombre.primerapellido, sugerido automáticamente al crear la cuenta pero editable por admin_th en Usuarios y roles.' },
   { termino: 'Verificación de Saber', definicion: 'El proceso de marcar, ítem por ítem, si una persona Cumple, Cumple Parcial o No cumple lo que exige su cargo en formación, habilidades, certificaciones y experiencia.' },
+  { termino: 'Carril (Makigami)', definicion: 'Cada fila del tablero Makigami: una persona o área que participa en el proceso (ej. Solicitante, Compras, Gerencia). Los pasos se ponen en el carril de quien los hace.' },
+  { termino: 'Desperdicio (Lean)', definicion: 'Todo lo que gasta tiempo o esfuerzo sin servirle a quien recibe el resultado. En la Cacería Makigami se cazan 8 tipos: esperas, traspasos innecesarios, sobreprocesamiento, errores y reprocesos, búsqueda de información, trabajo acumulado, sobreproducción y talento no aprovechado.' },
+  { termino: 'Eficiencia del proceso', definicion: 'En la Cacería Makigami, qué porcentaje del tiempo total de un proceso le agrega valor de verdad a quien recibe el resultado. En procesos de oficina suele ser bajísima (1-5%): el resto es espera o trabajo que sobra.' },
+  { termino: 'Facilitador (Makigami)', definicion: 'Quien crea y maneja un reto de la Cacería Makigami: dibuja el proceso, abre la cacería, aprueba propuestas y cierra el reto. Puede ser Talento Humano (cualquier reto) o el líder que lo creó.' },
+  { termino: 'Makigami', definicion: 'Técnica Lean japonesa ("rollo de papel") para dibujar un proceso administrativo paso a paso, con quién hace cada cosa y cuánto tarda, para encontrar el tiempo que se pierde. En la app vive como juego de equipo en Nexa → Cacería Makigami.' },
+  { termino: 'Pionero (Makigami)', definicion: 'La primera persona que caza un desperdicio en un paso. Si luego 2 personas más lo confirman (hallazgo validado), el pionero gana 15 puntos extra.' },
+  { termino: 'Traspaso', definicion: 'En el tablero Makigami, cuando el trabajo pasa de un área a otra (flecha naranja punteada). Cada traspaso suele traer espera, así que es un buen lugar para buscar desperdicios.' },
 ];
+
+/** Siempre en orden alfabético, sin importar dónde se agregue un término nuevo. */
+export const glosario: TerminoGlosario[] = [...TERMINOS].sort((a, b) => a.termino.localeCompare(b.termino, 'es'));

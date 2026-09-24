@@ -243,4 +243,19 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
     respuesta:
       'Sí. En Administración → Configuración, sección "Umbral de anonimato de Clima Organizacional", puedes dejarlo como una cantidad fija de respuestas (5 por defecto, pero editable a cualquier número) o cambiarlo a un porcentaje de la planta activa de cada grupo — así el mínimo escala solo según el tamaño de la empresa o del equipo, en vez de quedar fijo.',
   },
+  {
+    pregunta: '¿Qué es la Cacería Makigami y por qué está en Nexa?',
+    respuesta:
+      'Es un juego de equipo para mejorar procesos de oficina. Se dibuja un proceso real paso a paso (quién hace qué, cuánto tarda, cuánto espera), todos "cazan" lo que sobra (esperas, doble digitación, firmas innecesarias...), se proponen y votan mejoras, y las aprobadas se vuelven ACPM de mejora. Está en Nexa porque también es formación: enseña a ver desperdicios en el propio trabajo. Guía completa: Centro de Ayuda → Nexa → Cacería Makigami.',
+  },
+  {
+    pregunta: 'En la Cacería Makigami me sale "Tu usuario no tiene ficha de colaborador". ¿Qué hago?',
+    respuesta:
+      'Tu cuenta de acceso no está vinculada a tu ficha de colaborador, y sin ella no puedes cazar, proponer, votar ni ganar puntos. Pídele a Talento Humano que la vincule en Administración → Usuarios y roles → Editar → "Ficha de colaborador".',
+  },
+  {
+    pregunta: 'Cacé desperdicios en la Cacería Makigami pero no veo los puntos en Reconocimientos. ¿Por qué?',
+    respuesta:
+      'Es a propósito: los puntos de cazar y de proponer se entregan todos juntos cuando el facilitador cierra esa fase (al pasar a Rediseño y al cerrar el reto), para que nadie gane puntos marcando y desmarcando. Mientras tanto aparecen como "puntos en juego" en el ranking del reto. Los 40 puntos de una propuesta aprobada sí llegan al instante.',
+  },
 ];
