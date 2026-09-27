@@ -4,15 +4,19 @@ Juego breve de autoconocimiento inspirado en la charla TEDx de Emily Esfahani Sm
 ("Los cuatro pilares de una vida con significado") — solo el **marco conceptual**
 (Pertenencia, Propósito, Trascendencia, Narración) es de ella; el contenido del
 juego (escenas, preguntas) es propio, para no rayar en derechos de autor sobre
-su expresión concreta (ver sección 3). Pensado para que cualquier persona con
-un link pueda jugarlo, sin necesitar cuenta corporativa, y termine recibiendo
-un PDF personalizado y bonito por correo.
+su expresión concreta. Pensado para que cualquier persona con un link pueda
+jugarlo, sin necesitar cuenta corporativa, y termine recibiendo un PDF
+personalizado y bonito por correo.
 
 > **Estado: implementado y en producción** (`GuiaDelFlow`, main). Este
-> documento ya no es un plan — es el registro de cómo quedó construido,
-> actualizado después de dos rondas de ajuste post-implementación (preguntas
-> abiertas por pilar en vez de escala 1-5, y reemplazo de los ejemplos
-> literales de la charla por escenarios inventados).
+> documento ya no es un plan — es el registro de cómo quedó construido.
+> Pasó por tres rondas de ajuste después de la primera versión:
+> 1. Preguntas abiertas por pilar en vez de escala 1-5.
+> 2. Reemplazo de los ejemplos literales de la charla por escenarios inventados.
+> 3. **Rediseño completo del flujo** (esta versión) siguiendo
+>    `Especificacion_Juego_4_Pilares_FlowAndo.docx` (v1.0, 27/09/2026) — ese
+>    documento es ahora la fuente de verdad de la experiencia; este archivo
+>    documenta cómo quedó construida esa especificación en código.
 
 **Dónde vive:** dentro del proyecto `GuiaDelFlow` (`C:\mis_apps\GuiaDelFlow`),
 no dentro de `espiralcrecimiento360`. Razón: GuiaDelFlow ya tenía resuelto todo
@@ -34,261 +38,164 @@ webhook de GuiaDelFlow).
 
 ---
 
-## 1. Flujo de extremo a extremo
+## 1. Flujo de extremo a extremo (v2 — correo al final)
 
 1. Diana entra a `/panel/pilares` y crea **un link de campaña**, con una
-   etiqueta libre (ej. "Reto 4 Pilares — Encuentro Networking Sept"). A
-   diferencia de los links de Guía/Carta (uno por persona, de un solo uso),
-   este es **reutilizable**: la misma URL sirve para todos los que quiera
-   invitar.
-2. Comparte ese único link por el canal que quiera (WhatsApp, correo, redes).
-3. Quien lo abre ve una landing corta explicando el juego (3 líneas + una
-   imagen), y un formulario mínimo: **nombre** y **correo**. Sin contraseña,
-   sin registro corporativo.
-4. Juega las 3 partes (clasificación → preguntas de autoindagación por
-   pilar → narración), 8-10 minutos en total.
-5. Al terminar, un loader breve ("Flowi está tejiendo tu historia…") mientras
-   Claude redacta el contenido y Puppeteer arma el PDF.
-6. Ve el resultado en pantalla y lo puede descargar; una copia le llega
-   también por correo (mismo mecanismo que "La Carta").
-7. Diana ve en su panel quién jugó con su link, cuándo, y puede abrir el PDF
-   de cada quien.
+   etiqueta libre (ej. "Reto 4 Pilares — Encuentro Networking Sept"). Un
+   link, reutilizable por muchas personas.
+2. Comparte ese único link por el canal que quiera.
+3. Quien lo abre ve la landing (título + duración anunciada de 10-12 min) y
+   un formulario con **solo el nombre** — la sesión se crea en ese instante
+   (estado `jugando`), para que si alguien abandona a mitad de camino quede
+   registrado y se pueda medir en el panel.
+4. Introducción visual a los 4 pilares (arquitectura).
+5. **Ronda 1 — Explora**: 12 tarjetas de situaciones cotidianas, en un orden
+   aleatorio fijo por sesión (nunca agrupado por pilar), una por una, con 4
+   destinos táctiles. Feedback siempre educativo, nunca "correcto/incorrecto"
+   ni con colores de examen. Cada 3 tarjetas aparece un micro-reconocimiento
+   ("¿Y esto te pasa a ti?") solo para generar interacción, sin construir
+   ningún puntaje.
+6. Transición de Flowi.
+7. **Ronda 2 — Mírate**: una mini-experiencia POR PILAR (Pertenencia,
+   Propósito, Trascendencia — 3 preguntas abiertas cada una), con una
+   pantalla de "Pilar descubierto" entre cada una. Narración no repite este
+   ejercicio, tiene el suyo propio.
+8. Transición de Flowi.
+9. **Ronda 3 — Tu historia**: antes / hoy / título (puede ser sobre algo
+   difícil, inesperado o incluso feliz — nunca se asume cuál).
+10. **Integración**: se llama a Claude en este punto (con clasificación +
+    reflexiones + historia — el correo NO le hace falta para nada) y se
+    guarda el resultado completo.
+11. **Revelación**: "Lo que más se hizo visible en tus respuestas…" — un
+    pilar + una explicación corta, en lenguaje humano (nunca "tu pilar más
+    fuerte" ni "tu puntuación").
+12. **Correo**: se pide únicamente acá, justo antes de generar el documento
+    final.
+13. **Generación**: arma el PDF (ya con el `resultado` que Claude escribió en
+    el paso 10 — no se le vuelve a llamar) con Puppeteer, lo sube y lo envía
+    por correo. Loader con mensajes rotativos.
+14. Descarga + **experimento de 24h**: una sugerencia pequeña y realizable
+    (escrita por Claude) + campo opcional para anotar el propio compromiso.
+15. Diana ve en su panel quién jugó, en qué etapa se quedó cada quien (si no
+    terminó), y el pilar más visible de cada uno.
 
 ---
 
-## 2. Modelo de datos (implementado — `supabase/migrations/0010_flow_pilares.sql`)
+## 2. Modelo de datos (`supabase/migrations/0010_flow_pilares.sql` +
+`0011_flow_pilares_estados.sql` + `0012_flow_pilares_flujo_v2.sql`)
 
 - **`flow_pilares_links`** — el link de campaña reutilizable.
   `id`, `etiqueta`, `activo`, `creado_at`.
 - **`flow_pilares_sesiones`** — cada persona que juega.
-  `id`, `link_id` (FK, nullable si se juega sin link), `nombre`, `correo`,
-  `clasificacion` (jsonb — id de tarjeta → pilar elegido),
-  `reflexiones` (jsonb — id de pregunta → lo que escribió, ver sección 3.2),
-  `historia` (jsonb — las 3 respuestas de narración),
-  `resultado` (jsonb — salida completa de Claude, incluye `pilar_mas_vivo`),
-  `estado` (`generando` | `listo` | `error`), `storage_path`, `error_detalle`,
-  `correo_enviado_at`, `correo_error`, `creado_at`.
+  `id`, `link_id`, `nombre` (obligatorio desde el inicio), `correo`
+  (**nullable** — solo se llena al final), `clasificacion`, `reflexiones`,
+  `historia` (jsonb, se completan progresivamente ronda por ronda),
+  `resultado` (jsonb — salida completa de Claude, se llena en la
+  "Integración", ANTES de tener correo), `estado`, `storage_path`,
+  `error_detalle`, `correo_enviado_at`, `correo_error`, `compromiso_24h`
+  (texto opcional del experimento de 24h), `creado_at`.
+- `estado` — enum con 5 valores (los 2 primeros se agregaron en la v2):
+  - `jugando` — se creó al entrar a la landing, la persona está jugando.
+  - `esperando_correo` — terminó las 3 rondas, Claude ya escribió
+    `resultado`, se le mostró la revelación, falta que dé su correo.
+  - `generando` — ya dio el correo, se está armando/subiendo el PDF.
+  - `listo` / `error`.
 - Bucket de Storage privado `pilares-del-flow` (ruta: `<sesion_id>/pilares.pdf`).
 
-No se toca ninguna tabla de la Guía del Flow completa ni sus 12 aspectos
-sensibles — este juego es 100% autocontenido, cero cruce de datos. Tampoco
-hay cuenta de `auth.users`: el id de la sesión es el único "token" de acceso
-a su resultado (mismo modelo de confianza que un link de invitación).
-
-*(Nota: la primera versión de este diseño tenía una tabla `tendencia_pilares`
-calculada por promedio de una escala 1-5 — se descartó al cambiar el
-ejercicio 2 de escala a preguntas abiertas; ver sección 4.)*
+Sin cuenta de `auth.users`: el id de la sesión sigue siendo el único "token"
+de acceso a su resultado. Cero cruce con la Guía del Flow completa.
 
 ---
 
 ## 3. Contenido del juego
 
-### 3.0 Intro (landing, antes de empezar)
+### 3.0 Landing
 
-> **Los 4 Pilares**
-> Emily Esfahani Smith pasó cinco años estudiando qué hace que una vida se
-> sienta significativa — no feliz, *significativa*. Encontró cuatro
-> respuestas. Este juego te toma 8 minutos y termina en un PDF solo tuyo,
-> con lo que descubriste.
+> **¿Qué hace que una vida tenga significado?**
+> En unos 10-12 minutos vas a explorar cuatro formas de encontrar y
+> construir significado en tu vida. Al final recibirás una lectura personal
+> de lo que descubriste.
 >
-> [Nombre] [Correo] → **Empezar**
+> [Tu nombre] → **Empezar mi viaje**
 
-### 3.1 Ejercicio 1 — Clasificación (tocar para asignar)
+(El correo ya NO se pide acá — ver sección 1, paso 12.)
 
-Mecánica: 12 tarjetas, una por una, la persona las asigna a uno de los 4
-pilares. Feedback inmediato de una línea al acertar/fallar, para que sea
-instructivo, no solo un test.
+### 3.1 Ronda 1 — Clasificación (12 tarjetas, orden aleatorio por sesión)
 
-**Importante — por qué estas escenas son inventadas, no de la charla:**
-la primera versión de este ejercicio parafraseaba directamente las anécdotas
-de Emily (Jonathan y el vendedor de periódicos, Emika y su lesión jugando
-fútbol, la cirugía de su papá, el estudio de los eucaliptos, la cita a Dan
-McAdams). Diana pidió reemplazarlas (2026-09-27): "no quiero violar derechos
-de autor... ya la gente no compra periódico". El marco de los 4 pilares es
-una idea (no protegible); sus historias puntuales sí son su expresión
-concreta. Las 12 tarjetas de abajo son escenarios cotidianos originales que
-ilustran el mismo concepto, sin reproducir ninguna de sus anécdotas.
+Ver `src/lib/pilares/contenido.ts` (`TARJETAS`, `barajarTarjetas()`) para el
+texto exacto de las 12 escenas inventadas (3 por pilar) — no se repiten acá
+para no duplicar la fuente de verdad. Cada tarjeta tiene su `feedback`,
+mostrado siempre con un prefijo de aprendizaje, nunca de examen:
+"Sí. Aquí aparece con claridad:" si coincidió, o una variante de "Hay otra
+manera de mirarlo:" si no — nunca colores rojo/verde ni "correcto/incorrecto".
 
-**Pertenencia**
-1. *"Cada mañana antes de llegar a la oficina, Juan desayuna en el puesto de
-   arepas de la esquina. No es solo comprar algo rápido: se detiene a
-   preguntarle a doña Marta cómo amaneció, y ella ya sabe cómo le gusta el
-   tinto."*
-   → Feedback: "La pertenencia vive en esos momentos pequeños entre
-   personas — es una elección, no una casualidad."
-2. *"Contestar el chat de la oficina mientras tu pareja te está contando
-   algo importante, o saludar de pasada a alguien conocido sin mirarlo
-   realmente a los ojos."*
-   → Feedback: "Son rechazos pequeños que casi nadie nota — pero le quitan
-   valor al otro."
-3. *"Hay grupos de amigos que solo te aceptan de verdad si opinas igual que
-   ellos en todo. La pertenencia real nace de que te valoren siendo
-   distinto, no de estar siempre de acuerdo."*
-   → Feedback: "Vale la pena distinguir entre pertenecer y solo encajar."
+Cada 3 tarjetas (posiciones 3, 6, 9, 12) aparece un micro-reconocimiento:
+"¿Y esto te pasa a ti?" con 3 opciones (Mucho / A veces / Nunca lo había
+pensado) — puramente de interacción, no se persiste ni se le pasa a Claude.
 
-**Propósito**
-4. *"Una enfermera de turno de noche dice que su trabajo no es solo aplicar
-   medicamentos a tiempo, sino que cada paciente sienta que alguien de
-   verdad está pendiente de él."*
-   → Feedback: "El propósito no depende del cargo — depende de a quién
-   sirves con lo que haces."
-5. *"Muchas mamás y papás dicen: 'mi propósito ahora es sacar adelante a mis
-   hijos', aunque eso signifique turnos dobles y noches cortas."*
-   → Feedback: "El propósito tiene menos que ver con lo que quieres, y más
-   con lo que das."
-6. *"Cuando alguien lleva meses buscando trabajo sin conseguirlo, no solo le
-   hace falta el ingreso — también extraña sentirse útil para algo o para
-   alguien."*
-   → Feedback: "Sin algo valioso que hacer, las personas se desorientan."
+### 3.2 Ronda 2 — Autoindagación por pilar (mini-experiencia, no formulario largo)
 
-**Trascendencia**
-7. *"Un grupo de amigos sube a caminar a la montaña un domingo, y al llegar
-   arriba se quedan un rato en silencio mirando el paisaje, sintiendo que
-   sus problemas se ven más pequeños desde ahí."*
-   → Feedback: "Basta un instante en que tu ego se achica para que algo en
-   ti cambie."
-8. *"A Camila se le va el tiempo sin darse cuenta cuando pinta — empieza a
-   las tres de la tarde convencida de que lleva diez minutos, y de repente
-   ya oscureció."*
-   → Feedback: "La trascendencia no siempre es mística — a veces es solo
-   perderte en lo que haces."
-9. *"Para algunos la trascendencia llega bailando hasta perder la cuenta del
-   tiempo; para otros, en silencio, rezando con la abuela los domingos."*
-   → Feedback: "El lugar cambia de persona a persona; la sensación de
-   conectarse con algo más grande, no."
+3 preguntas abiertas por pilar, para Pertenencia, Propósito y Trascendencia
+(Narración tiene su propio ejercicio, 3.3) — ver `PREGUNTAS_PILARES` en
+`contenido.ts`. Cada pilar se muestra en SU PROPIA pantalla ("🫂 Descubre tu
+pertenencia", etc.), y al completarlo aparece una pantalla corta "Pilar
+descubierto" antes de pasar al siguiente — nunca las 9 preguntas juntas en
+una sola pantalla larga.
 
-**Narración**
-10. *"Andrés perdió su negocio en la pandemia. Por mucho tiempo se repetía:
-    'yo era alguien exitoso, y ahora no soy nadie'. Hoy dice: 'esa quiebra
-    me enseñó a valorar lo que de verdad importa, y desde ahí empecé de
-    nuevo siendo más honesto conmigo mismo'."*
-    → Feedback: "Los hechos no cambiaron. La historia que se contó a sí
-    mismo, sí."
-11. *"A la abuela de Valentina la operaron de urgencia. Lo último que
-    alcanzó a pensar antes de la anestesia fue el nombre de sus nietos —
-    eso, dijo después, fue lo que la hizo aferrarse a despertar."*
-    → Feedback: "En ese momento, esa fue su historia de para qué vivir."
-12. *"Las personas que sienten que su vida tiene sentido no son las que
-    nunca han sufrido — son las que aprendieron a contar lo malo como
-    parte de algo que las hizo crecer."*
-    → Feedback: "No se trata de que te hayan pasado cosas buenas — se
-    trata de cómo las cuentas."
+### 3.3 Ronda 3 — Tu historia (narración guiada)
 
-### 3.2 Ejercicio 2 — Preguntas de autoindagación (por escrito, no escala)
-
-**Cambio de diseño (2026-09-27):** la primera versión de este ejercicio era
-una escala 1-5 tipo Likert (3 afirmaciones por pilar, calificar
-"nunca…siempre"). Diana pidió reemplazarla: quería que cada pilar invitara a
-*escribir*, no solo a calificarse — "varias preguntas cortas, muy fáciles de
-comprender y de responder que inviten a la persona a cuestionarse y a revisar
-lo que tienen en su vida que le da verdadero significado". Quedó así: 3
-preguntas cortas de respuesta libre por pilar, para Pertenencia, Propósito y
-Trascendencia (Narración ya tenía su propio ejercicio de escritura, el 3.3,
-así que no se repite acá).
-
-**Pertenencia**
-- ¿Con quién sientes que puedes ser tú mismo/a, sin esforzarte?
-- ¿Cuándo fue la última vez que te sentiste realmente escuchado/a por
-  alguien?
-- ¿A qué familia, equipo o comunidad sientes que perteneces de verdad hoy?
-
-**Propósito**
-- ¿Para quién o para qué estás usando tus fortalezas en este momento de tu
-  vida?
-- Si dejaras de hacer lo que haces hoy, ¿qué se quedaría sin hacer?
-- ¿Qué necesitarías para sentir que tu día a día tiene un "para qué" más
-  claro?
-
-**Trascendencia**
-- ¿Cuándo fue la última vez que perdiste por completo la noción del tiempo
-  haciendo algo?
-- ¿Qué actividad, lugar o momento te hace sentir parte de algo más grande
-  que tú?
-- ¿Cuándo fue la última vez que de verdad bajaste el ritmo, aunque fuera un
-  momento?
-
-### 3.3 Ejercicio 3 — Tu historia (narración guiada)
-
-Tres cajas de texto cortas (1-2 líneas cada una), para que no sea una
-página en blanco intimidante:
-
-- S1. *"Piensa en un momento difícil de tu vida. ¿Cómo lo hubieras contado
-  justo después de que pasó?"*
-- S2. *"¿Cómo lo cuentas hoy? ¿Qué cambió en la forma en que lo
-  entiendes?"*
-- S3. *"Si esa historia tuviera un título, ¿cuál sería?"*
+- *"Piensa en una situación que te haya cambiado. Puede haber sido difícil,
+  inesperada, dolorosa, desafiante o incluso muy feliz. No tienes que
+  contar nada que no quieras compartir. ¿Cómo la contabas justo después de
+  que ocurrió?"*
+- *"¿Cómo la cuentas hoy? ¿Qué cambió en la forma en que la entiendes?"*
+- *"Si esta historia fuera un libro, ¿cómo se llamaría este capítulo?"*
 
 ---
 
-## 4. Pilar más vivo (reemplaza el cálculo de tendencia por escala)
+## 4. Pilar más visible (decidido por Claude, no calculado)
 
-La primera versión de este diseño promediaba una escala 1-5 en 3 categorías
-("en construcción / presente / fuerte") con una fórmula fija. Al pasar el
-ejercicio 2 a preguntas abiertas (sección 3.2) ya no hay nada que promediar
-— en su lugar, es **Claude quien decide** cuál de los 4 pilares parece más
-vivo hoy en la persona, leyendo todas sus respuestas escritas y su
-clasificación de tarjetas. Ese juicio queda en el campo `pilar_mas_vivo` de
-la salida estructurada (sección 5) — no aparece en el PDF de la persona, es
-solo para el panel de quien comparte el link (sección 8).
+No hay ninguna fórmula ni promedio: es Claude quien, leyendo la
+clasificación + las respuestas de los 3 pilares + la historia, decide cuál
+pilar se hizo más visible hoy en la persona (`pilar_mas_vivo`) y por qué
+(`explicacion_pilar_mas_visible`, 1-2 frases). Este juicio se calcula en la
+pantalla de "Integración" (antes de pedir el correo) y se muestra de
+inmediato en "Revelación". La interfaz nunca dice "tu pilar más fuerte",
+"tu puntuación", "tu nivel" ni "tú eres [pilar]" — solo describe qué se hizo
+visible, citando algo concreto de lo que la persona escribió.
 
 ---
 
-## 5. Esquema de salida para Claude (equivalente a `esquema.ts` de "La Carta")
-
-Mismo patrón que ya usa GuiaDelFlow: un *tool* de Anthropic con forma fija,
-para que la redacción sea siempre estructurable en la plantilla del PDF.
+## 5. Esquema de salida para Claude (`src/lib/pdf/pilares/esquema.ts`)
 
 ```
 ESQUEMA_PILARES = {
   frase_portada: string (≤140 caracteres),
   introduccion: { parrafo_1: string, parrafo_2: string },
   pilares: [
-    {
-      nombre_pilar: "Pertenencia" | "Propósito" | "Trascendencia" | "Narración",
-      frase_ancla: string (corta, memorable, personalizada),
-      reflexion: string (~100 palabras, segunda persona, cálido),
-    }
-    // 4 elementos, uno por pilar, en este orden fijo
+    { nombre_pilar, frase_ancla, reflexion }   // 4, orden fijo
   ],
-  historia_reescrita: {
-    titulo: string,
-    parrafo_1: string,
-    parrafo_2: string,
-    cierre: string,
-  },
-  invitacion_final: string (~60 palabras),
+  historia_reescrita: { titulo, parrafo_1, parrafo_2, cierre },
+  invitacion_final: string,
   pilar_mas_vivo: "Pertenencia" | "Propósito" | "Trascendencia" | "Narración",
+  explicacion_pilar_mas_visible: string,   // pantalla de Revelación
+  experimento_24h: string,                 // pantalla final + última página del PDF
 }
 ```
 
-### Prompt de sistema (como quedó implementado)
+Reglas del prompt (no negociables, calcadas de la especificación): no
+inventar datos, no diagnosticar, no lenguaje clínico, no rankings, no
+puntuaciones, no decir que a alguien "le falta" un pilar, no cambiar los
+hechos de la historia, no interpretar preguntas sin responder (se omiten
+del prompt en vez de mandarse como "sin responder"), tratar el dolor con
+sensibilidad sin asumir rol terapéutico. Ver `src/lib/pdf/pilares/prompt.ts`
+para el texto completo.
 
-> Eres Flowi, y acabas de acompañar a una persona a jugar "Los 4 Pilares",
-> un juego breve inspirado en la idea de que una vida con significado se
-> sostiene en 4 pilares: Pertenencia, Propósito, Trascendencia y Narración.
-> Vas a escribir su resultado personal para un PDF de 7 páginas.
->
-> Recibes: (1) qué tarjetas clasificó bien o mal en cada pilar (12
-> situaciones cotidianas del juego, no de ninguna charla), (2) lo que
-> escribió, pregunta por pregunta, en Pertenencia/Propósito/Trascendencia
-> — la reflexión de cada pilar debe citar o parafrasear específicamente lo
-> que escribió, nunca ser genérica, (3) sus 3 respuestas sobre un momento
-> difícil de su vida y cómo lo cuenta hoy.
->
-> Para cada uno de los 4 pilares, escribe en segunda persona, con calidez y
-> sin lenguaje clínico ni de autoayuda genérica — como si conocieras a esta
-> persona. Nunca inventes datos que no te dieron; si dejó una pregunta sin
-> responder, no la menciones ni la inventes, apóyate en las que sí
-> respondió.
->
-> Con sus 3 respuestas de historia, reescríbelas como una "historia
-> redentora" (lo malo, resignificado como parte de un crecimiento) — sin
-> inventar hechos que no dio, solo ayudándola a verla con la claridad con la
-> que ya la está empezando a contar ella misma en su segunda respuesta.
->
-> Cierra con una invitación breve y sin presión a seguir profundizando en
-> su autoconocimiento con la Guía del Flow completa, y decide cuál de los 4
-> pilares vive más fuerte hoy en esta persona (`pilar_mas_vivo`).
+**Cuándo se llama:** una sola vez, en la pantalla de "Integración" —
+inmediatamente después de terminar la Ronda 3, ANTES de pedir el correo
+(Claude nunca necesitó el correo para nada). La fase de "Generación" (tras
+el correo) ya no vuelve a llamar a Claude, solo arma el PDF con lo que ya
+está guardado en `resultado`.
 
 ---
 
@@ -300,11 +207,11 @@ ESQUEMA_PILARES = {
 4. **Propósito** — ídem.
 5. **Trascendencia** — ídem.
 6. **Narración** — ídem.
-7. **Tu historia + cierre** — `historia_reescrita` completa, maquetada como
-   una carta, seguida de `invitacion_final` y la firma de Flowi.
+7. **Tu historia + cierre + experimento 24h** — `historia_reescrita`
+   completa, `invitacion_final`, y el bloque de `experimento_24h` (destacado
+   en un recuadro), seguido de la firma de Flowi.
 
-### Mapeo de imágenes (reutilizando el banco ya existente en
-`public/images/flow-optimizado`, sin encargar arte nuevo para la v1)
+### Mapeo de imágenes (`public/images/flow-optimizado`)
 
 | Pilar | Imagen |
 |---|---|
@@ -316,58 +223,71 @@ ESQUEMA_PILARES = {
 
 ---
 
-## 7. El link de campaña (nuevo tipo de link, no el de "envío" de Guía/Carta)
+## 7. El link de campaña
 
-Los links de Guía/Carta son 1 link = 1 persona nombrada de antemano ("Juan
-Pérez"), pensados para invitar a alguien específico. Este juego necesita lo
-contrario: **1 link = muchas personas**, sin saber de antemano quiénes son.
-Por eso es una tabla y un formulario nuevos, no una extensión del existente:
+Igual que antes: 1 link = muchas personas (a diferencia de los links de
+Guía/Carta, que son 1 link = 1 persona). Formulario simple (solo etiqueta),
+activar/desactivar/eliminar desde `/panel/pilares`.
 
-- Formulario simple: solo **etiqueta de campaña** (para que Diana identifique
-  de dónde vino cada grupo de jugadores).
-- Sin límite de usos ni modo "acompañado" — el resultado siempre es directo
-  e inmediato (no tiene sentido revisarlo antes, es autoservicio).
-- El link resultante apunta a `/pilares/[token]`, que muestra la landing
-  del punto 3.0 y el formulario nombre + correo.
-- Se puede activar/desactivar o eliminar desde `/panel/pilares`.
+## 8. Panel de administración (`/panel/pilares`)
 
-## 8. Panel para quien envía el link
-
-`/panel/pilares`: formulario para crear el link de campaña, tabla de links
-creados (con activar/desactivar/eliminar), y tabla de quién ha jugado —
-nombre, correo, campaña, pilar más vivo, estado, y descarga del PDF.
+- Formulario para crear el link de campaña.
+- Tabla de links (etiqueta, estado, activar/desactivar/eliminar).
+- Tabla de sesiones: nombre, correo (puede estar vacío si no ha terminado),
+  campaña, **lo más visible** (antes decía "pilar dominante"), estado, y
+  descarga del PDF cuando está listo.
+- **Nuevo (v2):** resumen de conteos por estado arriba de la tabla
+  (jugando / esperando correo / listas / con error), para medir abandono
+  por etapa sin tener que contar filas a mano.
 
 ---
 
-## 9. Privacidad
+## 9. Experimento de 24 horas
 
-- Solo se pide nombre y correo — nada de datos de empresa, cargo, ni
-  ningún aspecto psicológico de los 12 sensibles de la Guía completa.
+Sugerencia pequeña y realizable, escrita por Claude (`experimento_24h`),
+relacionada con lo que la persona escribió (idealmente conectada al pilar
+más visible) — nunca una obligación ni un cambio de vida grande. Aparece en
+dos lugares: la última página del PDF, y una pantalla final del juego con un
+campo opcional para que la persona anote su propio compromiso
+(`compromiso_24h`, guardado si lo escribe).
+
+---
+
+## 10. Privacidad
+
+- Solo se pide nombre (al inicio) y correo (al final) — nada de datos de
+  empresa, cargo, ni ningún aspecto psicológico de los 12 sensibles de la
+  Guía completa.
 - Sin cuenta (`auth.users`): el id de la sesión es el único token de acceso
-  a su resultado, igual que un link de invitación.
+  a su resultado.
 - Cero cruce con `flow_resultados`, con la Guía del Flow completa, ni con
-  espiralcrecimiento360 (integración pendiente, ver nota al inicio).
-- El PDF y los datos de la sesión pertenecen a la persona que juega; el
-  panel de quien comparte el link solo ve lo agregable (nombre, correo,
-  pilar más vivo), igual de discreto que lo que ya se decidió para la Guía
-  del Flow completa.
+  espiralcrecimiento360.
+- Las respuestas individuales no se muestran públicamente; el panel de
+  quien comparte el link solo ve lo agregable (nombre, correo, pilar más
+  visible, estado).
 
 ---
 
-## 10. Implementación (completa)
+## 11. Implementación (completa)
 
-1. ✅ Migración `supabase/migrations/0010_flow_pilares.sql` — aplicada
-   (2026-09-27) en la base compartida de GuiaDelFlow.
+1. ✅ Migraciones `0010` (tablas base), `0011` (nuevos estados `jugando` /
+   `esperando_correo`), `0012` (correo nullable, `compromiso_24h`).
 2. ✅ `src/lib/pdf/pilares/` (tipos, esquema, prompt, css, plantilla,
-   generar) — calcado de `src/lib/pdf/carta/`.
-3. ✅ `src/lib/pilares/contenido.ts` — tarjetas, preguntas y prompts fijos
-   del juego.
-4. ✅ `src/lib/generacion/pilares.ts` — orquestación (genera, sube a
-   Storage, envía correo).
-5. ✅ Ruta pública `/pilares/[token]` (landing + los 3 ejercicios, tocar
-   para asignar en vez de arrastrar) y `/pilares/resultado/[sesionId]`.
-6. ✅ `/api/pilares/generar` y `/api/pilares/descargar/[sesionId]`.
-7. ✅ `/panel/pilares` — formulario de link de campaña + tabla de quién ha
-   jugado.
-8. ⏳ Integración con Espiral de Crecimiento (espiralcrecimiento360) —
+   generar) — con `pilar_mas_vivo`, `explicacion_pilar_mas_visible` y
+   `experimento_24h`.
+3. ✅ `src/lib/pilares/contenido.ts` — tarjetas, preguntas, `barajarTarjetas()`,
+   micro-reconocimiento, respaldo del experimento 24h.
+4. ✅ `src/lib/generacion/pilares.ts` — dividido en `analizarSesionPilares`
+   (Claude, antes del correo) y `generarPdfSesionPilares` (Puppeteer +
+   correo, después).
+5. ✅ Ruta pública `/pilares/[token]` — landing solo con nombre, intro a los
+   4 pilares, ronda 1 con micro-reconocimiento, ronda 2 dividida por pilar
+   con "pilar descubierto", ronda 3, integración, revelación y pantalla de
+   correo.
+6. ✅ `/api/pilares/analizar` (nuevo) y `/api/pilares/generar` (ajustado
+   para recibir el correo) y `/api/pilares/descargar/[sesionId]`.
+7. ✅ `/pilares/resultado/[sesionId]` — descarga + experimento de 24h con
+   compromiso opcional.
+8. ✅ `/panel/pilares` — con resumen de estados para medir abandono.
+9. ⏳ Integración con Espiral de Crecimiento (espiralcrecimiento360) —
    pendiente a propósito, ver nota al inicio del documento.
