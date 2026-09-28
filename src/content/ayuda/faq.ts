@@ -136,7 +136,7 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
   },
   {
     pregunta: '¿Cómo envío un mensaje directo a alguien?',
-    respuesta: 'Entra a Mensajes (ícono en el encabezado o el menú lateral) → "Nuevo mensaje", elige a la persona y escribe. Puedes escribirle a cualquiera de tu empresa, no solo a tu equipo.',
+    respuesta: 'Entra a Mensajes (ícono en la barra superior) → "Nuevo mensaje", elige a la persona y escribe. Puedes escribirle a cualquiera de tu empresa, no solo a tu equipo.',
   },
   {
     pregunta: '¿Qué diferencia hay entre el Feed corporativo y Mensajes?',

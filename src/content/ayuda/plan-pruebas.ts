@@ -10,7 +10,7 @@ export const planPruebas: SeccionPlanPruebas[] = [
         pasos: [
           { paso: 'Entra a la URL del aplicativo sin haber iniciado sesión.', resultadoEsperado: 'Redirige a la pantalla de login.' },
           { paso: 'Ingresa un identificador válido (usuario o correo) con la contraseña equivocada.', resultadoEsperado: 'Muestra "Correo o contraseña incorrectos. Verifica con Talento Humano si no tienes acceso." y te deja en la misma pantalla.' },
-          { paso: 'Ingresa tu usuario (ej. "juan.perez", sin @dominio) y tu contraseña correctos.', resultadoEsperado: 'Entra a Inicio, con el menú lateral acorde a tu rol — no hizo falta escribir el correo completo.' },
+          { paso: 'Ingresa tu usuario (ej. "juan.perez", sin @dominio) y tu contraseña correctos.', resultadoEsperado: 'Entra a Inicio, con el menú superior acorde a tu rol — no hizo falta escribir el correo completo.' },
           { paso: 'Cierra sesión y vuelve a entrar, esta vez con el correo completo (ej. "juan.perez@marmolesyservicios.com") y la misma contraseña.', resultadoEsperado: 'También entra correctamente — usuario y correo llevan al mismo lugar.' },
           { paso: 'Escribe un usuario que no existe, con cualquier contraseña.', resultadoEsperado: 'Muestra el mismo mensaje genérico de error — no revela si el usuario existe o no.' },
           { paso: 'Presiona el botón de cerrar sesión (ícono de salida, arriba a la derecha).', resultadoEsperado: 'Vuelve a la pantalla de login.' },
@@ -20,7 +20,7 @@ export const planPruebas: SeccionPlanPruebas[] = [
         titulo: 'El menú y las pantallas respetan el rol',
         rolNecesario: 'Un colaborador y, por separado, un líder',
         pasos: [
-          { paso: 'Inicia sesión como colaborador y revisa el menú lateral.', resultadoEsperado: 'No aparecen las secciones de Administración ni "Ciclos de Crecimiento".' },
+          { paso: 'Inicia sesión como colaborador y revisa el menú superior.', resultadoEsperado: 'No aparecen las secciones de Administración ni "Ciclos de Crecimiento".' },
           { paso: 'Intenta entrar directamente a una URL de administración (ej. /administracion/usuarios) escribiéndola en el navegador.', resultadoEsperado: 'Redirige a Inicio, no muestra la pantalla.' },
           { paso: 'Inicia sesión como líder y entra a Colaboradores.', resultadoEsperado: 'Solo ve a las personas que le reportan directamente, no a toda la empresa.' },
         ],
@@ -29,7 +29,7 @@ export const planPruebas: SeccionPlanPruebas[] = [
         titulo: 'El rol auditor_externo solo ve lo mínimo',
         rolNecesario: 'auditor_externo',
         pasos: [
-          { paso: 'Inicia sesión con una cuenta con rol auditor_externo.', resultadoEsperado: 'El menú lateral solo muestra Colaboradores (nombre/cargo) e Informes → Evidencia de auditoría.' },
+          { paso: 'Inicia sesión con una cuenta con rol auditor_externo.', resultadoEsperado: 'El menú superior solo muestra Colaboradores (nombre/cargo) e Informes → Evidencia de auditoría.' },
           { paso: 'Intenta entrar por URL a una pantalla fuera de su alcance (ej. /administracion/usuarios o /espiral-crecimiento/ciclos).', resultadoEsperado: 'Redirige a Inicio, no muestra datos.' },
           { paso: 'Entra a Colaboradores.', resultadoEsperado: 'Ve nombre y cargo de cada persona, sin datos sensibles (sin Hacer/Deber, sin salario, sin documentos).' },
         ],
