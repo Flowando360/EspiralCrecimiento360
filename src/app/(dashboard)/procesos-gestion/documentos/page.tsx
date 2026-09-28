@@ -12,7 +12,7 @@ export default async function GestionDocumentalPage() {
 
   const supabase = createClient();
 
-  const [{ data: documentosRaw }, { data: solicitudesRaw }, { data: procesos }, { data: confirmacionesRaw }] = await Promise.all([
+  const [{ data: documentosRaw }, { data: solicitudesRaw }, { data: procesos }, { data: confirmacionesRaw }, { data: colaboradores }] = await Promise.all([
     supabase
       .from('documentos_proceso')
       .select('id, proceso_id, codigo, nombre, tipo_documento, version_vigente, estado, requiere_confirmacion, proceso:proceso_id(nombre, codigo, empresa_id)')
@@ -20,11 +20,16 @@ export default async function GestionDocumentalPage() {
     supabase
       .from('solicitudes_documento')
       .select(
-        'id, proceso_id, documento_id, tipo_solicitud, nombre_documento, tipo_documento, justificacion, estado, fecha_solicitud, comentarios_aprobador, documento:documento_id(codigo, nombre), proceso:proceso_id(nombre, empresa_id)'
+        `id, proceso_id, documento_id, tipo_solicitud, nombre_documento, tipo_documento, justificacion, estado,
+         fecha_solicitud, comentarios_aprobador, solicitante_id, revisor_id, validador_id,
+         enviado_revision_at, revisado_at, comentarios_revisor, validado_at, comentarios_validador,
+         documento:documento_id(codigo, nombre), proceso:proceso_id(nombre, empresa_id),
+         solicitante:solicitante_id(nombre_completo), revisor:revisor_id(nombre_completo), validador:validador_id(nombre_completo)`
       )
       .order('fecha_solicitud', { ascending: false }),
     supabase.from('procesos_gestion').select('id, nombre, codigo').eq('empresa_id', perfil.empresa_id).order('codigo'),
     supabase.from('confirmaciones_lectura').select('documento_id'),
+    supabase.from('colaboradores').select('id, nombre_completo').eq('empresa_id', perfil.empresa_id).eq('estado', 'activo').order('nombre_completo'),
   ]);
 
   const conteoConfirmaciones = new Map<string, number>();
@@ -64,6 +69,17 @@ export default async function GestionDocumentalPage() {
       documento_codigo: s.documento?.codigo ?? null,
       documento_nombre: s.documento?.nombre ?? null,
       proceso_nombre: s.proceso?.nombre ?? '—',
+      solicitante_id: s.solicitante_id,
+      solicitante_nombre: s.solicitante?.nombre_completo ?? null,
+      revisor_id: s.revisor_id,
+      revisor_nombre: s.revisor?.nombre_completo ?? null,
+      validador_id: s.validador_id,
+      validador_nombre: s.validador?.nombre_completo ?? null,
+      enviado_revision_at: s.enviado_revision_at,
+      revisado_at: s.revisado_at,
+      comentarios_revisor: s.comentarios_revisor,
+      validado_at: s.validado_at,
+      comentarios_validador: s.comentarios_validador,
     }));
 
   return (
@@ -74,9 +90,10 @@ export default async function GestionDocumentalPage() {
         </Link>
         <h1 className="font-display text-2xl font-semibold text-secundario">Gestión documental</h1>
         <p className="text-sm text-marmol-500 mt-1">
-          El GC-PO-001 digitalizado: solicita crear, actualizar o anular un documento, un líder lo aprueba, y la
-          plataforma publica el código y la versión automáticamente. Difunde con confirmación de lectura para
-          dejar evidencia auditable (ISO 9001 numeral 7.5.3).
+          El GC-PO-001 digitalizado: Borrador → En revisión → En validación → Aprobado (Vigente) — con un
+          revisor y un validador opcionales para cada solicitud, y la plataforma publicando código y versión
+          automáticamente al final. Difunde con confirmación de lectura para dejar evidencia auditable (ISO
+          9001 numeral 7.5.3).
         </p>
       </div>
 
@@ -84,7 +101,10 @@ export default async function GestionDocumentalPage() {
         documentosIniciales={documentos}
         solicitudesIniciales={solicitudes}
         procesos={(procesos ?? []) as any}
+        colaboradores={(colaboradores ?? []) as any}
         empresaId={perfil.empresa_id}
+        miColaboradorId={perfil.colaborador_id}
+        esAdminTh={perfil.rol === 'admin_th'}
         puedeAprobar={perfil.rol === 'admin_th'}
         puedeSolicitar={['admin_th', 'lider'].includes(perfil.rol)}
       />

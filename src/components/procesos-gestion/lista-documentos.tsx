@@ -2,13 +2,21 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { solicitarDocumento, aprobarSolicitud, rechazarSolicitud } from '@/app/(dashboard)/procesos-gestion/documentos/actions';
+import {
+  solicitarDocumento,
+  enviarSolicitudARevision,
+  cancelarBorrador,
+  aprobarRevision,
+  aprobarValidacion,
+  rechazarSolicitud,
+} from '@/app/(dashboard)/procesos-gestion/documentos/actions';
 import { createClient } from '@/lib/supabase/client';
 import { cn, formatearFecha } from '@/lib/utils';
-import { Plus, Check, X, Paperclip, FileText } from 'lucide-react';
+import { Plus, Check, X, Paperclip, FileText, Send, Ban } from 'lucide-react';
 
 type TipoDocumento = 'procedimiento' | 'politica' | 'formato' | 'instructivo' | 'registro';
 type TipoSolicitud = 'crear' | 'actualizar' | 'anular';
+type EstadoSolicitud = 'borrador' | 'en_revision' | 'en_validacion' | 'aprobado' | 'rechazado' | 'cancelada';
 
 export interface Documento {
   id: string;
@@ -32,18 +40,34 @@ export interface Solicitud {
   nombre_documento: string | null;
   tipo_documento: TipoDocumento | null;
   justificacion: string | null;
-  estado: 'pendiente' | 'aprobado' | 'rechazado';
+  estado: EstadoSolicitud;
   fecha_solicitud: string;
   comentarios_aprobador: string | null;
   documento_codigo?: string | null;
   documento_nombre?: string | null;
   proceso_nombre: string;
+  solicitante_id: string | null;
+  solicitante_nombre: string | null;
+  revisor_id: string | null;
+  revisor_nombre: string | null;
+  validador_id: string | null;
+  validador_nombre: string | null;
+  enviado_revision_at: string | null;
+  revisado_at: string | null;
+  comentarios_revisor: string | null;
+  validado_at: string | null;
+  comentarios_validador: string | null;
 }
 
 interface ProcesoOpcion {
   id: string;
   nombre: string;
   codigo: string | null;
+}
+
+interface ColaboradorOpcion {
+  id: string;
+  nombre_completo: string;
 }
 
 const ETIQUETA_TIPO_DOC: Record<TipoDocumento, string> = {
@@ -60,18 +84,33 @@ const ETIQUETA_TIPO_SOLICITUD: Record<TipoSolicitud, string> = {
   anular: 'Anular',
 };
 
+const ETIQUETA_ESTADO: Record<EstadoSolicitud, { texto: string; clase: string }> = {
+  borrador: { texto: 'Borrador', clase: 'badge-marmol' },
+  en_revision: { texto: 'En revisión', clase: 'badge-medio' },
+  en_validacion: { texto: 'En validación', clase: 'badge-flow' },
+  aprobado: { texto: 'Aprobada', clase: 'badge-alto' },
+  rechazado: { texto: 'Rechazada', clase: 'badge-bajo' },
+  cancelada: { texto: 'Cancelada', clase: 'badge-marmol' },
+};
+
 export function ListaDocumentos({
   documentosIniciales,
   solicitudesIniciales,
   procesos,
+  colaboradores,
   empresaId,
+  miColaboradorId,
+  esAdminTh,
   puedeAprobar,
   puedeSolicitar,
 }: {
   documentosIniciales: Documento[];
   solicitudesIniciales: Solicitud[];
   procesos: ProcesoOpcion[];
+  colaboradores: ColaboradorOpcion[];
   empresaId: string;
+  miColaboradorId: string | null;
+  esAdminTh: boolean;
   puedeAprobar: boolean;
   puedeSolicitar: boolean;
 }) {
@@ -80,13 +119,51 @@ export function ListaDocumentos({
   const [mostrarForm, setMostrarForm] = useState(false);
   const [, startTransition] = useTransition();
 
-  const pendientes = solicitudes.filter((s) => s.estado === 'pendiente');
-  const resueltas = solicitudes.filter((s) => s.estado !== 'pendiente');
+  const puedeActuarSobre = (asignadoId: string | null) => esAdminTh || (Boolean(asignadoId) && miColaboradorId === asignadoId);
 
-  function resolver(id: string, aprobar: boolean, comentarios?: string) {
-    setSolicitudes((prev) => prev.map((s) => (s.id === id ? { ...s, estado: aprobar ? 'aprobado' : 'rechazado' } : s)));
+  const borradores = solicitudes.filter((s) => s.estado === 'borrador');
+  const enRevision = solicitudes.filter((s) => s.estado === 'en_revision');
+  const enValidacion = solicitudes.filter((s) => s.estado === 'en_validacion');
+  const resueltas = solicitudes.filter((s) => ['aprobado', 'rechazado', 'cancelada'].includes(s.estado));
+
+  function actualizarLocal(id: string, cambios: Partial<Solicitud>) {
+    setSolicitudes((prev) => prev.map((s) => (s.id === id ? { ...s, ...cambios } : s)));
+  }
+
+  function enviarARevision(id: string) {
+    actualizarLocal(id, { estado: 'en_revision', enviado_revision_at: new Date().toISOString() });
     startTransition(async () => {
-      if (aprobar) await aprobarSolicitud(id, comentarios);
+      await enviarSolicitudARevision(id);
+    });
+  }
+
+  function cancelar(id: string) {
+    actualizarLocal(id, { estado: 'cancelada' });
+    startTransition(async () => {
+      await cancelarBorrador(id);
+    });
+  }
+
+  function resolverRevision(id: string, aprobar: boolean, comentarios?: string) {
+    actualizarLocal(id, {
+      estado: aprobar ? 'en_validacion' : 'rechazado',
+      comentarios_revisor: comentarios || null,
+      revisado_at: new Date().toISOString(),
+    });
+    startTransition(async () => {
+      if (aprobar) await aprobarRevision(id, comentarios);
+      else await rechazarSolicitud(id, comentarios);
+    });
+  }
+
+  function resolverValidacion(id: string, aprobar: boolean, comentarios?: string) {
+    actualizarLocal(id, {
+      estado: aprobar ? 'aprobado' : 'rechazado',
+      comentarios_validador: comentarios || null,
+      validado_at: new Date().toISOString(),
+    });
+    startTransition(async () => {
+      if (aprobar) await aprobarValidacion(id, comentarios);
       else await rechazarSolicitud(id, comentarios);
       // El estado del documento/listado maestro se refresca por revalidatePath en el server action.
     });
@@ -94,14 +171,62 @@ export function ListaDocumentos({
 
   return (
     <div className="space-y-6">
-      {puedeAprobar && pendientes.length > 0 && (
+      {borradores.length > 0 && (
         <div className="card p-5">
           <h2 className="font-display font-semibold text-secundario mb-3">
-            Solicitudes pendientes <span className="text-marmol-400 font-normal">({pendientes.length})</span>
+            Borradores <span className="text-marmol-400 font-normal">({borradores.length})</span>
           </h2>
           <div className="space-y-2">
-            {pendientes.map((s) => (
-              <SolicitudPendiente key={s.id} solicitud={s} onResolver={resolver} />
+            {borradores.map((s) => (
+              <SolicitudBorrador
+                key={s.id}
+                solicitud={s}
+                puedeActuar={puedeActuarSobre(s.solicitante_id)}
+                onEnviar={() => enviarARevision(s.id)}
+                onCancelar={() => cancelar(s.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {enRevision.length > 0 && (
+        <div className="card p-5">
+          <h2 className="font-display font-semibold text-secundario mb-3">
+            En revisión <span className="text-marmol-400 font-normal">({enRevision.length})</span>
+          </h2>
+          <div className="space-y-2">
+            {enRevision.map((s) => (
+              <SolicitudEnCurso
+                key={s.id}
+                solicitud={s}
+                asignadoNombre={s.revisor_nombre}
+                etiquetaAsignado="Revisor"
+                puedeActuar={puedeActuarSobre(s.revisor_id)}
+                textoAprobar="Aprobar revisión"
+                onResolver={(aprobar, comentarios) => resolverRevision(s.id, aprobar, comentarios)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {enValidacion.length > 0 && (
+        <div className="card p-5">
+          <h2 className="font-display font-semibold text-secundario mb-3">
+            En validación <span className="text-marmol-400 font-normal">({enValidacion.length})</span>
+          </h2>
+          <div className="space-y-2">
+            {enValidacion.map((s) => (
+              <SolicitudEnCurso
+                key={s.id}
+                solicitud={s}
+                asignadoNombre={s.validador_nombre}
+                etiquetaAsignado="Validador"
+                puedeActuar={puedeActuarSobre(s.validador_id)}
+                textoAprobar="Aprobar y publicar"
+                onResolver={(aprobar, comentarios) => resolverValidacion(s.id, aprobar, comentarios)}
+              />
             ))}
           </div>
         </div>
@@ -124,8 +249,12 @@ export function ListaDocumentos({
           <FormularioSolicitud
             procesos={procesos}
             documentos={documentos}
+            colaboradores={colaboradores}
             empresaId={empresaId}
-            onCreada={() => setMostrarForm(false)}
+            onCreada={(s) => {
+              setSolicitudes((prev) => [s, ...prev]);
+              setMostrarForm(false);
+            }}
           />
         )}
 
@@ -187,9 +316,7 @@ export function ListaDocumentos({
                   <span className="text-marmol-400">{ETIQUETA_TIPO_SOLICITUD[s.tipo_solicitud]}</span>{' '}
                   {s.documento_codigo ?? s.nombre_documento} <span className="text-marmol-400">· {s.proceso_nombre}</span>
                 </span>
-                <span className={cn('text-[11px] rounded-full px-2 py-0.5 font-medium', s.estado === 'aprobado' ? 'badge-alto' : 'badge-bajo')}>
-                  {s.estado === 'aprobado' ? 'Aprobada' : 'Rechazada'}
-                </span>
+                <span className={cn('text-[11px] rounded-full px-2 py-0.5 font-medium', ETIQUETA_ESTADO[s.estado].clase)}>{ETIQUETA_ESTADO[s.estado].texto}</span>
               </div>
             ))}
           </div>
@@ -199,7 +326,67 @@ export function ListaDocumentos({
   );
 }
 
-function SolicitudPendiente({ solicitud, onResolver }: { solicitud: Solicitud; onResolver: (id: string, aprobar: boolean, comentarios?: string) => void }) {
+function SolicitudBorrador({
+  solicitud,
+  puedeActuar,
+  onEnviar,
+  onCancelar,
+}: {
+  solicitud: Solicitud;
+  puedeActuar: boolean;
+  onEnviar: () => void;
+  onCancelar: () => void;
+}) {
+  return (
+    <div className="rounded-lg border border-marmol-200 bg-marmol-50/60 p-3">
+      <div className="flex items-start justify-between gap-2 flex-wrap">
+        <div>
+          <p className="text-sm font-medium text-marmol-800">
+            {ETIQUETA_TIPO_SOLICITUD[solicitud.tipo_solicitud]}: {solicitud.documento_codigo ?? solicitud.nombre_documento}
+          </p>
+          <p className="text-xs text-marmol-500">
+            {solicitud.proceso_nombre} · {formatearFecha(solicitud.fecha_solicitud)}
+            {solicitud.solicitante_nombre && ` · ${solicitud.solicitante_nombre}`}
+          </p>
+          {solicitud.justificacion && <p className="text-xs text-marmol-600 mt-1">{solicitud.justificacion}</p>}
+          {(solicitud.revisor_nombre || solicitud.validador_nombre) && (
+            <p className="text-xs text-marmol-400 mt-1">
+              {solicitud.revisor_nombre && `Revisor: ${solicitud.revisor_nombre}`}
+              {solicitud.revisor_nombre && solicitud.validador_nombre && ' · '}
+              {solicitud.validador_nombre && `Validador: ${solicitud.validador_nombre}`}
+            </p>
+          )}
+        </div>
+      </div>
+      {puedeActuar && (
+        <div className="flex items-center gap-2 mt-2">
+          <button onClick={onEnviar} className="inline-flex items-center gap-1 rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-xs font-medium px-2.5 py-1.5">
+            <Send size={12} /> Enviar a revisión
+          </button>
+          <button onClick={onCancelar} className="inline-flex items-center gap-1 rounded-lg border border-marmol-200 text-marmol-600 hover:bg-marmol-100 text-xs font-medium px-2.5 py-1.5">
+            <Ban size={12} /> Cancelar
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SolicitudEnCurso({
+  solicitud,
+  asignadoNombre,
+  etiquetaAsignado,
+  puedeActuar,
+  textoAprobar,
+  onResolver,
+}: {
+  solicitud: Solicitud;
+  asignadoNombre: string | null;
+  etiquetaAsignado: string;
+  puedeActuar: boolean;
+  textoAprobar: string;
+  onResolver: (aprobar: boolean, comentarios?: string) => void;
+}) {
   const [comentarios, setComentarios] = useState('');
 
   return (
@@ -209,24 +396,32 @@ function SolicitudPendiente({ solicitud, onResolver }: { solicitud: Solicitud; o
           <p className="text-sm font-medium text-marmol-800">
             {ETIQUETA_TIPO_SOLICITUD[solicitud.tipo_solicitud]}: {solicitud.documento_codigo ?? solicitud.nombre_documento}
           </p>
-          <p className="text-xs text-marmol-500">{solicitud.proceso_nombre} · {formatearFecha(solicitud.fecha_solicitud)}</p>
+          <p className="text-xs text-marmol-500">
+            {solicitud.proceso_nombre} · {formatearFecha(solicitud.fecha_solicitud)}
+            {solicitud.solicitante_nombre && ` · Solicitó ${solicitud.solicitante_nombre}`}
+          </p>
+          <p className="text-xs text-marmol-400 mt-0.5">{etiquetaAsignado}: {asignadoNombre ?? 'sin asignar (cualquier admin_th puede resolver)'}</p>
           {solicitud.justificacion && <p className="text-xs text-marmol-600 mt-1">{solicitud.justificacion}</p>}
         </div>
       </div>
-      <div className="flex items-center gap-2 mt-2">
-        <input
-          value={comentarios}
-          onChange={(e) => setComentarios(e.target.value)}
-          placeholder="Comentario (opcional)"
-          className="flex-1 rounded-lg border border-marmol-200 px-2 py-1 text-xs"
-        />
-        <button onClick={() => onResolver(solicitud.id, true, comentarios)} className="inline-flex items-center gap-1 rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-xs font-medium px-2.5 py-1.5">
-          <Check size={12} /> Aprobar
-        </button>
-        <button onClick={() => onResolver(solicitud.id, false, comentarios)} className="inline-flex items-center gap-1 rounded-lg border border-marmol-200 text-marmol-600 hover:bg-marmol-100 text-xs font-medium px-2.5 py-1.5">
-          <X size={12} /> Rechazar
-        </button>
-      </div>
+      {puedeActuar ? (
+        <div className="flex items-center gap-2 mt-2">
+          <input
+            value={comentarios}
+            onChange={(e) => setComentarios(e.target.value)}
+            placeholder="Comentario (opcional)"
+            className="flex-1 rounded-lg border border-marmol-200 px-2 py-1 text-xs"
+          />
+          <button onClick={() => onResolver(true, comentarios)} className="inline-flex items-center gap-1 rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-xs font-medium px-2.5 py-1.5">
+            <Check size={12} /> {textoAprobar}
+          </button>
+          <button onClick={() => onResolver(false, comentarios)} className="inline-flex items-center gap-1 rounded-lg border border-marmol-200 text-marmol-600 hover:bg-marmol-100 text-xs font-medium px-2.5 py-1.5">
+            <X size={12} /> Rechazar
+          </button>
+        </div>
+      ) : (
+        <p className="text-xs text-marmol-400 mt-2 italic">Solo {asignadoNombre ?? 'la persona asignada'} (o admin_th) puede resolver esta etapa.</p>
+      )}
     </div>
   );
 }
@@ -234,13 +429,15 @@ function SolicitudPendiente({ solicitud, onResolver }: { solicitud: Solicitud; o
 function FormularioSolicitud({
   procesos,
   documentos,
+  colaboradores,
   empresaId,
   onCreada,
 }: {
   procesos: ProcesoOpcion[];
   documentos: Documento[];
+  colaboradores: ColaboradorOpcion[];
   empresaId: string;
-  onCreada: () => void;
+  onCreada: (s: Solicitud) => void;
 }) {
   const [procesoId, setProcesoId] = useState(procesos[0]?.id ?? '');
   const [tipoSolicitud, setTipoSolicitud] = useState<TipoSolicitud>('crear');
@@ -248,6 +445,8 @@ function FormularioSolicitud({
   const [nombreDocumento, setNombreDocumento] = useState('');
   const [tipoDocumento, setTipoDocumento] = useState<TipoDocumento>('procedimiento');
   const [justificacion, setJustificacion] = useState('');
+  const [revisorId, setRevisorId] = useState('');
+  const [validadorId, setValidadorId] = useState('');
   const [archivoUrl, setArchivoUrl] = useState<string | null>(null);
   const [archivoNombre, setArchivoNombre] = useState<string | null>(null);
   const [subiendo, setSubiendo] = useState(false);
@@ -292,9 +491,38 @@ function FormularioSolicitud({
         tipoDocumento: tipoSolicitud === 'crear' ? tipoDocumento : undefined,
         archivoPropuestoUrl: archivoUrl || undefined,
         justificacion,
+        revisorId: revisorId || undefined,
+        validadorId: validadorId || undefined,
       });
       if (res.ok) {
-        onCreada();
+        const proceso = procesos.find((p) => p.id === procesoId);
+        const documento = documentosDelProceso.find((d) => d.id === documentoId);
+        onCreada({
+          id: res.id,
+          proceso_id: procesoId,
+          documento_id: documentoId || null,
+          tipo_solicitud: tipoSolicitud,
+          nombre_documento: tipoSolicitud === 'crear' ? nombreDocumento : null,
+          tipo_documento: tipoSolicitud === 'crear' ? tipoDocumento : null,
+          justificacion: justificacion || null,
+          estado: 'borrador',
+          fecha_solicitud: new Date().toISOString(),
+          comentarios_aprobador: null,
+          documento_codigo: documento?.codigo ?? null,
+          documento_nombre: documento?.nombre ?? null,
+          proceso_nombre: proceso?.nombre ?? '—',
+          solicitante_id: null,
+          solicitante_nombre: null,
+          revisor_id: revisorId || null,
+          revisor_nombre: colaboradores.find((c) => c.id === revisorId)?.nombre_completo ?? null,
+          validador_id: validadorId || null,
+          validador_nombre: colaboradores.find((c) => c.id === validadorId)?.nombre_completo ?? null,
+          enviado_revision_at: null,
+          revisado_at: null,
+          comentarios_revisor: null,
+          validado_at: null,
+          comentarios_validador: null,
+        });
       } else {
         setError(res.error);
       }
@@ -343,6 +571,26 @@ function FormularioSolicitud({
 
       <textarea value={justificacion} onChange={(e) => setJustificacion(e.target.value)} placeholder="Justificación" rows={2} className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
 
+      <div className="grid grid-cols-2 gap-2">
+        <select value={revisorId} onChange={(e) => setRevisorId(e.target.value)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
+          <option value="">Revisor (opcional)</option>
+          {colaboradores.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nombre_completo}
+            </option>
+          ))}
+        </select>
+        <select value={validadorId} onChange={(e) => setValidadorId(e.target.value)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
+          <option value="">Validador (opcional)</option>
+          {colaboradores.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nombre_completo}
+            </option>
+          ))}
+        </select>
+      </div>
+      <p className="text-xs text-marmol-400">Si no eliges revisor/validador, cualquier admin_th puede resolver cada etapa.</p>
+
       {tipoSolicitud !== 'anular' && (
         <div>
           <input type="file" onChange={subirArchivo} disabled={subiendo} className="text-xs text-marmol-500" />
@@ -355,8 +603,10 @@ function FormularioSolicitud({
         </div>
       )}
 
+      <p className="text-xs text-marmol-400">Se guarda como borrador — la envías a revisión cuando quieras desde la sección "Borradores".</p>
+
       <button onClick={enviar} disabled={pending || subiendo} className="inline-flex items-center gap-1 rounded-lg bg-flow-500 hover:bg-flow-600 disabled:opacity-40 text-white text-sm font-medium px-3 py-1.5">
-        {pending ? 'Enviando…' : 'Enviar solicitud'}
+        {pending ? 'Guardando…' : 'Guardar borrador'}
       </button>
       {error && <p className="text-sm text-bajo">{error}</p>}
     </div>

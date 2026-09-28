@@ -8,7 +8,10 @@ import { otorgarPuntos, PUNTOS_PROCESOS } from '@/lib/nexa/gamificacion';
 
 const RUTA = '/procesos-gestion/documentos';
 
-async function requerirPerfil() {
+/** Cualquiera con acceso al módulo puede VER; solo quien esté asignado a la
+ * etapa (o admin_th, que conserva su rol de superusuario) puede ACTUAR --
+ * ver comprobarAsignado(). */
+async function requerirAccesoModulo() {
   const perfil = await getPerfilActual();
   if (!perfil || !['admin_th', 'lider', 'gerencia'].includes(perfil.rol)) return null;
   return perfil;
@@ -21,17 +24,20 @@ async function requerirAccesoConfirmacion() {
   return perfil;
 }
 
-async function requerirAdminTh() {
-  const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return null;
-  return perfil;
-}
-
 /** Solicitar documento: admin_th y líder (el "Líder SIG" de la conversación con Nexus, hasta que se valide un rol separado). */
 async function requerirSolicitante() {
   const perfil = await getPerfilActual();
   if (!perfil || !['admin_th', 'lider'].includes(perfil.rol)) return null;
   return perfil;
+}
+
+/** admin_th siempre puede actuar (superusuario del módulo); si la etapa
+ * tiene a alguien asignado, esa persona también puede -- si no hay nadie
+ * asignado, solo admin_th, exactamente el comportamiento de antes de esta
+ * migración. */
+function estaAsignado(perfil: { rol: string; colaborador_id: string | null }, asignadoId: string | null): boolean {
+  if (perfil.rol === 'admin_th') return true;
+  return Boolean(asignadoId) && perfil.colaborador_id === asignadoId;
 }
 
 const TIPO_DOC_PREFIJO: Record<string, string> = {
@@ -71,8 +77,15 @@ const SolicitudSchema = z.object({
   tipoDocumento: z.enum(['procedimiento', 'politica', 'formato', 'instructivo', 'registro']).optional(),
   archivoPropuestoUrl: z.string().trim().optional(),
   justificacion: z.string().trim().optional(),
+  revisorId: z.string().uuid().optional(),
+  validadorId: z.string().uuid().optional(),
 });
 
+/**
+ * Crea la solicitud en 'borrador' -- todavía no entra a ningún flujo de
+ * aprobación, el solicitante la puede revisar y enviarla cuando quiera (o
+ * cancelarla) con enviarSolicitudARevision/cancelarBorrador.
+ */
 export async function solicitarDocumento(input: z.infer<typeof SolicitudSchema>) {
   const perfil = await requerirSolicitante();
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
@@ -100,6 +113,9 @@ export async function solicitarDocumento(input: z.infer<typeof SolicitudSchema>)
       archivo_propuesto_url: d.archivoPropuestoUrl || null,
       justificacion: d.justificacion || null,
       solicitante_id: perfil.colaborador_id,
+      revisor_id: d.revisorId || null,
+      validador_id: d.validadorId || null,
+      estado: 'borrador',
     })
     .select('id')
     .single();
@@ -109,21 +125,92 @@ export async function solicitarDocumento(input: z.infer<typeof SolicitudSchema>)
   return { ok: true as const, id: data.id as string };
 }
 
-export async function aprobarSolicitud(id: string, comentarios?: string) {
-  const perfil = await requerirAdminTh();
+/** Borrador -> En revisión. Solo el solicitante (dueño del borrador) o admin_th. */
+export async function enviarSolicitudARevision(id: string) {
+  const perfil = await getPerfilActual();
+  if (!perfil || !['admin_th', 'lider'].includes(perfil.rol)) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { data: s } = await supabase.from('solicitudes_documento').select('id, estado, solicitante_id').eq('id', id).maybeSingle();
+  if (!s) return { ok: false as const, error: 'Solicitud no encontrada' };
+  if (s.estado !== 'borrador') return { ok: false as const, error: 'Esta solicitud ya no está en borrador' };
+  if (!(perfil.rol === 'admin_th' || perfil.colaborador_id === s.solicitante_id)) {
+    return { ok: false as const, error: 'Solo quien la creó puede enviarla a revisión' };
+  }
+
+  const { error } = await supabase
+    .from('solicitudes_documento')
+    .update({ estado: 'en_revision', enviado_revision_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(RUTA);
+  return { ok: true as const };
+}
+
+/** Borrador -> Cancelada. Solo el solicitante (dueño del borrador) o admin_th. */
+export async function cancelarBorrador(id: string) {
+  const perfil = await getPerfilActual();
+  if (!perfil || !['admin_th', 'lider'].includes(perfil.rol)) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { data: s } = await supabase.from('solicitudes_documento').select('id, estado, solicitante_id').eq('id', id).maybeSingle();
+  if (!s) return { ok: false as const, error: 'Solicitud no encontrada' };
+  if (s.estado !== 'borrador') return { ok: false as const, error: 'Esta solicitud ya no está en borrador' };
+  if (!(perfil.rol === 'admin_th' || perfil.colaborador_id === s.solicitante_id)) {
+    return { ok: false as const, error: 'Solo quien la creó puede cancelarla' };
+  }
+
+  const { error } = await supabase.from('solicitudes_documento').update({ estado: 'cancelada' }).eq('id', id);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(RUTA);
+  return { ok: true as const };
+}
+
+/** En revisión -> En validación. Solo el revisor asignado (si hay uno) o admin_th. */
+export async function aprobarRevision(id: string, comentarios?: string) {
+  const perfil = await requerirAccesoModulo();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { data: s } = await supabase.from('solicitudes_documento').select('id, estado, revisor_id').eq('id', id).maybeSingle();
+  if (!s) return { ok: false as const, error: 'Solicitud no encontrada' };
+  if (s.estado !== 'en_revision') return { ok: false as const, error: 'Esta solicitud no está en revisión' };
+  if (!estaAsignado(perfil, s.revisor_id as string | null)) return { ok: false as const, error: 'No estás asignado como revisor de esta solicitud' };
+
+  const { error } = await supabase
+    .from('solicitudes_documento')
+    .update({ estado: 'en_validacion', revisado_at: new Date().toISOString(), comentarios_revisor: comentarios || null })
+    .eq('id', id);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(RUTA);
+  return { ok: true as const };
+}
+
+/**
+ * En validación -> Aprobado. Solo el validador asignado (si hay uno) o
+ * admin_th. Este es el paso que de verdad publica: crea/actualiza/anula en
+ * documentos_proceso, genera código y versión, archiva la versión anterior,
+ * reinicia confirmaciones de lectura y anuncia en el Feed -- toda la lógica
+ * que antes vivía en el único paso "aprobar" de este flujo.
+ */
+export async function aprobarValidacion(id: string, comentarios?: string) {
+  const perfil = await requerirAccesoModulo();
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
   const supabase = createClient();
   const { data: solicitud, error: errSolicitud } = await supabase
     .from('solicitudes_documento')
-    .select('id, proceso_id, documento_id, tipo_solicitud, nombre_documento, tipo_documento, archivo_propuesto_url, estado')
+    .select('id, proceso_id, documento_id, tipo_solicitud, nombre_documento, tipo_documento, archivo_propuesto_url, estado, validador_id')
     .eq('id', id)
     .maybeSingle();
 
   if (errSolicitud || !solicitud) return { ok: false as const, error: 'Solicitud no encontrada' };
-  if (solicitud.estado !== 'pendiente') return { ok: false as const, error: 'Esta solicitud ya fue resuelta' };
+  if (solicitud.estado !== 'en_validacion') return { ok: false as const, error: 'Esta solicitud no está en validación' };
+  if (!estaAsignado(perfil, solicitud.validador_id as string | null)) {
+    return { ok: false as const, error: 'No estás asignado como validador de esta solicitud' };
+  }
 
-  const { data: proceso } = await supabase.from('procesos_gestion').select('nombre, codigo').eq('id', solicitud.proceso_id).maybeSingle();
+  const { data: proceso } = await supabase.from('procesos_gestion').select('nombre, codigo').eq('id', solicitud.proceso_id as string).maybeSingle();
 
   // Documento publicado/actualizado en este ciclo de aprobación — si requiere confirmación, se
   // anuncia en el Feed al final con un link a la pantalla angosta de confirmación (punto 3.2).
@@ -184,9 +271,17 @@ export async function aprobarSolicitud(id: string, comentarios?: string) {
     if (errAnular) return { ok: false as const, error: errAnular.message };
   }
 
+  const ahora = new Date().toISOString();
   const { error: errResolver } = await supabase
     .from('solicitudes_documento')
-    .update({ estado: 'aprobado', aprobador_id: perfil.colaborador_id, fecha_resolucion: new Date().toISOString(), comentarios_aprobador: comentarios || null })
+    .update({
+      estado: 'aprobado',
+      aprobador_id: perfil.colaborador_id,
+      fecha_resolucion: ahora,
+      comentarios_aprobador: comentarios || null,
+      validado_at: ahora,
+      comentarios_validador: comentarios || null,
+    })
     .eq('id', id);
   if (errResolver) return { ok: false as const, error: errResolver.message };
 
@@ -209,16 +304,40 @@ export async function aprobarSolicitud(id: string, comentarios?: string) {
   return { ok: true as const };
 }
 
+/**
+ * Rechaza una solicitud que está en revisión o en validación -- solo quien
+ * esté asignado a ESA etapa (o admin_th). Deja registrado en qué etapa se
+ * rechazó, además del campo compartido de resolución final.
+ */
 export async function rechazarSolicitud(id: string, comentarios?: string) {
-  const perfil = await requerirAdminTh();
+  const perfil = await requerirAccesoModulo();
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
   const supabase = createClient();
-  const { error } = await supabase
-    .from('solicitudes_documento')
-    .update({ estado: 'rechazado', aprobador_id: perfil.colaborador_id, fecha_resolucion: new Date().toISOString(), comentarios_aprobador: comentarios || null })
-    .eq('id', id)
-    .eq('estado', 'pendiente');
+  const { data: s } = await supabase.from('solicitudes_documento').select('id, estado, revisor_id, validador_id').eq('id', id).maybeSingle();
+  if (!s) return { ok: false as const, error: 'Solicitud no encontrada' };
+  if (s.estado !== 'en_revision' && s.estado !== 'en_validacion') {
+    return { ok: false as const, error: 'Esta solicitud no se puede rechazar en su estado actual' };
+  }
+
+  const enRevision = s.estado === 'en_revision';
+  const asignadoId = (enRevision ? s.revisor_id : s.validador_id) as string | null;
+  if (!estaAsignado(perfil, asignadoId)) {
+    return { ok: false as const, error: `No estás asignado como ${enRevision ? 'revisor' : 'validador'} de esta solicitud` };
+  }
+
+  const ahora = new Date().toISOString();
+  const cambiosBase = {
+    estado: 'rechazado',
+    aprobador_id: perfil.colaborador_id,
+    fecha_resolucion: ahora,
+    comentarios_aprobador: comentarios || null,
+  };
+  const cambios = enRevision
+    ? { ...cambiosBase, revisado_at: ahora, comentarios_revisor: comentarios || null }
+    : { ...cambiosBase, validado_at: ahora, comentarios_validador: comentarios || null };
+
+  const { error } = await supabase.from('solicitudes_documento').update(cambios).eq('id', id);
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(RUTA);
   return { ok: true as const };

@@ -101,16 +101,25 @@ export const moduloProcesosGestion: ModuloAyuda = {
       ruta: '/procesos-gestion/documentos',
       titulo: 'Gestión documental',
       resumen:
-        'El Procedimiento de Gestión Documental digitalizado: solicitar crear, actualizar o anular un documento, aprobarlo, y difundirlo con confirmación de lectura — todo con trazabilidad completa, sin depender del correo.',
+        'El Procedimiento de Gestión Documental digitalizado, con el flujo completo de control documental: Borrador → En revisión → En validación → Aprobado (Vigente) — cada etapa con su propio responsable opcional, y trazabilidad completa hasta la difusión con confirmación de lectura.',
       camposYBotones: [
         {
           nombre: 'Nueva solicitud (admin_th y líder)',
           explicacion:
-            'Elige el proceso y el tipo de solicitud (crear / actualizar / anular). Para "crear" se indica nombre y tipo de documento (procedimiento, política, formato, instructivo o registro — un registro es el diligenciado/evidencia, distinto del formato que es la plantilla en blanco); para "actualizar" o "anular" se elige el documento existente. Se puede adjuntar el borrador del archivo.',
+            'Elige el proceso y el tipo de solicitud (crear / actualizar / anular). Para "crear" se indica nombre y tipo de documento (procedimiento, política, formato, instructivo o registro — un registro es el diligenciado/evidencia, distinto del formato que es la plantilla en blanco); para "actualizar" o "anular" se elige el documento existente. Se puede adjuntar el borrador del archivo, y opcionalmente elegir un revisor y un validador — si se dejan en blanco, cualquier admin_th puede resolver esa etapa. Queda guardada como "Borrador", todavía no entra a ningún flujo de aprobación.',
         },
         {
-          nombre: 'Solicitudes pendientes (admin_th)',
-          explicacion: 'Aprobar o rechazar cada solicitud, con un comentario opcional. Al aprobar una solicitud de "crear", el documento se publica con un código automático (ej. PM-1-PO-001). Al aprobar una "actualizar", se archiva la versión anterior en el historial y sube la versión (v001 → v002…), y se reinicia el conteo de confirmaciones de lectura porque es contenido nuevo. Al aprobar una "anular", el documento pasa a Obsoleto.',
+          nombre: 'Borradores',
+          explicacion: 'Quien la creó (o admin_th) puede "Enviar a revisión" cuando esté lista, o "Cancelar" si ya no aplica — mientras está en borrador se puede seguir ajustando fuera de la plataforma sin que nadie más la vea todavía como pendiente.',
+        },
+        {
+          nombre: 'En revisión',
+          explicacion: 'El revisor asignado a la solicitud (o cualquier admin_th si no se asignó ninguno) la aprueba — pasa a "En validación" — o la rechaza, con un comentario opcional. Alguien sin ese rol asignado solo puede ver la solicitud, no resolverla.',
+        },
+        {
+          nombre: 'En validación',
+          explicacion:
+            'El validador asignado (o cualquier admin_th) da el visto bueno final: "Aprobar y publicar" es el paso que de verdad genera el código automático (ej. PM-1-PO-001), sube la versión (v001 → v002…), archiva la anterior en el historial, reinicia el conteo de confirmaciones de lectura y anuncia en el Feed. También puede rechazarla aquí, con comentario.',
         },
         {
           nombre: 'Listado Maestro',
@@ -133,7 +142,7 @@ export const moduloProcesosGestion: ModuloAyuda = {
         { nombre: 'Historial de versiones', explicacion: 'Dentro de la ficha de cada documento: cada versión anterior, cuándo se archivó y el resumen del cambio.' },
       ],
       notas: [
-        'Pueden ver esta pantalla: admin_th, líder y gerencia. Solicitar documentos: admin_th y líder. Aprobar o rechazar solicitudes: exclusivo de admin_th.',
+        'Pueden ver esta pantalla: admin_th, líder y gerencia. Solicitar documentos: admin_th y líder. Enviar a revisión/cancelar un borrador: quien lo creó, o admin_th. Resolver "En revisión"/"En validación": la persona asignada a esa etapa, o admin_th (admin_th siempre puede resolver cualquier etapa, aunque haya alguien más asignado).',
         'Solo la versión vigente de un documento es visible para la empresa; las versiones obsoletas quedan en un repositorio que solo admin_th puede consultar.',
         'Confirmar lectura ya está abierto a cualquier colaborador (no solo a quien tiene acceso a este módulo) — ver la página "Confirmar lectura de un documento".',
       ],
