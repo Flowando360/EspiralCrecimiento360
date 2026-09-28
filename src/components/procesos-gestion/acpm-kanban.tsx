@@ -16,7 +16,7 @@ import { crearAcpm, actualizarEstadoAcpm, cerrarAcpm, agregarTarea, actualizarTa
 import { cn, formatearFecha } from '@/lib/utils';
 import { Plus, Trash2, User, Calendar, X, Check, ShieldQuestion } from 'lucide-react';
 
-type OrigenTipo = 'hallazgo_auditoria' | 'riesgo' | 'indicador' | 'pqrs' | 'mejora_propia';
+type OrigenTipo = 'hallazgo_auditoria' | 'riesgo' | 'contexto' | 'indicador' | 'pqrs' | 'mejora_propia';
 type TipoAccion = 'correctiva' | 'preventiva' | 'mejora';
 type MetodologiaCausa = 'cinco_porques' | 'ishikawa' | 'libre';
 type EstadoAcpm = 'registrada' | 'analisis_causa' | 'plan_accion' | 'seguimiento' | 'validacion_eficacia' | 'cerrada_efectiva' | 'reabierta';
@@ -34,6 +34,11 @@ export interface Acpm {
   codigo: string | null;
   proceso_id: string | null;
   origen_tipo: OrigenTipo;
+  origen_hallazgo_id?: string | null;
+  origen_riesgo_id?: string | null;
+  origen_contexto_item_id?: string | null;
+  /** Enlace de vuelta al registro de origen (riesgo/hallazgo/ítem de contexto), ya resuelto por el servidor. */
+  origen_href?: string | null;
   origen_detalle: string | null;
   tipo_accion: TipoAccion;
   descripcion: string;
@@ -60,6 +65,7 @@ interface Colaborador {
 const ETIQUETA_ORIGEN: Record<OrigenTipo, string> = {
   hallazgo_auditoria: 'Hallazgo de auditoría',
   riesgo: 'Riesgo',
+  contexto: 'Análisis de contexto',
   indicador: 'Indicador',
   pqrs: 'PQRS',
   mejora_propia: 'Mejora propia',
@@ -79,9 +85,10 @@ const COLUMNAS: { valor: EstadoAcpm; etiqueta: string }[] = [
 ];
 
 export interface PrefillAcpm {
-  origenTipo: 'hallazgo_auditoria' | 'riesgo' | 'mejora_propia';
+  origenTipo: 'hallazgo_auditoria' | 'riesgo' | 'contexto' | 'mejora_propia';
   origenHallazgoId?: string;
   origenRiesgoId?: string;
+  origenContextoItemId?: string;
   procesoId?: string;
   origenDetalle?: string;
   descripcion?: string;
@@ -254,6 +261,17 @@ function TarjetaAcpm({ item, proceso, responsable, onAbrir }: { item: Acpm; proc
         <span className={cn('text-[10px] rounded-full px-1.5 py-0.5 font-medium', CLASE_TIPO_ACCION[item.tipo_accion])}>{ETIQUETA_TIPO_ACCION[item.tipo_accion]}</span>
       </div>
       <p className="text-sm font-medium text-marmol-800 mt-1 break-words">{item.descripcion}</p>
+      {item.origen_href ? (
+        <a
+          href={item.origen_href}
+          onClick={(e) => e.stopPropagation()}
+          className="text-xs text-flow-600 hover:underline mt-0.5 inline-block"
+        >
+          Origen: {ETIQUETA_ORIGEN[item.origen_tipo]} →
+        </a>
+      ) : (
+        item.origen_tipo !== 'mejora_propia' && <p className="text-xs text-marmol-400 mt-0.5">Origen: {ETIQUETA_ORIGEN[item.origen_tipo]}</p>
+      )}
       {proceso && <p className="text-xs text-marmol-400 mt-1">{proceso}</p>}
       <div className="flex items-center gap-2 flex-wrap mt-1.5">
         {item.fecha_compromiso && (
@@ -295,6 +313,7 @@ function FormularioAcpm({ procesos, prefill, onCreada }: { procesos: ProcesoOpci
         origenTipo,
         origenHallazgoId: prefill?.origenHallazgoId,
         origenRiesgoId: prefill?.origenRiesgoId,
+        origenContextoItemId: prefill?.origenContextoItemId,
         origenDetalle: origenDetalle || undefined,
         tipoAccion,
         descripcion,
@@ -307,6 +326,9 @@ function FormularioAcpm({ procesos, prefill, onCreada }: { procesos: ProcesoOpci
           codigo: res.codigo,
           proceso_id: procesoId || null,
           origen_tipo: origenTipo,
+          origen_hallazgo_id: origenTipo === 'hallazgo_auditoria' ? prefill?.origenHallazgoId ?? null : null,
+          origen_riesgo_id: origenTipo === 'riesgo' ? prefill?.origenRiesgoId ?? null : null,
+          origen_contexto_item_id: origenTipo === 'contexto' ? prefill?.origenContextoItemId ?? null : null,
           origen_detalle: origenDetalle || null,
           tipo_accion: tipoAccion,
           descripcion,
@@ -367,7 +389,7 @@ function FormularioAcpm({ procesos, prefill, onCreada }: { procesos: ProcesoOpci
           <option value="libre">Libre</option>
         </select>
       </div>
-      {(!prefill || prefill.origenTipo === 'mejora_propia') && origenTipo !== 'hallazgo_auditoria' && origenTipo !== 'riesgo' && (
+      {(!prefill || prefill.origenTipo === 'mejora_propia') && origenTipo !== 'hallazgo_auditoria' && origenTipo !== 'riesgo' && origenTipo !== 'contexto' && (
         <input value={origenDetalle} onChange={(e) => setOrigenDetalle(e.target.value)} placeholder="Detalle del origen (opcional)" className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
       )}
       <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Descripción de la ACPM" rows={2} className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
@@ -437,7 +459,16 @@ function ModalDetalleAcpm({
         <div className="flex items-center justify-between px-5 py-4 border-b border-marmol-100">
           <div>
             <h2 className="font-display font-semibold text-secundario">{item.codigo}</h2>
-            <p className="text-xs text-marmol-400">{ETIQUETA_ORIGEN[item.origen_tipo]}{proceso && ` · ${proceso}`}</p>
+            <p className="text-xs text-marmol-400">
+              {item.origen_href ? (
+                <a href={item.origen_href} className="text-flow-600 hover:underline">
+                  {ETIQUETA_ORIGEN[item.origen_tipo]} →
+                </a>
+              ) : (
+                ETIQUETA_ORIGEN[item.origen_tipo]
+              )}
+              {proceso && ` · ${proceso}`}
+            </p>
           </div>
           <button onClick={onCerrar} className="text-marmol-400 hover:text-marmol-700">
             <X size={18} />

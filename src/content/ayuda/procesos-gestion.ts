@@ -4,14 +4,14 @@ export const moduloProcesosGestion: ModuloAyuda = {
   slug: 'procesos-gestion',
   titulo: 'Procesos y Sistemas de Gestión',
   descripcion:
-    'Mapa de procesos, caracterización, gestión documental, matriz de riesgos y oportunidades cuantitativa, auditorías internas con hallazgos, ACPM, gestión de cambio, matriz de requisitos legales y diagnóstico ISO 9001:2015 — el ciclo PHVA completo del sistema de gestión, base del paquete de Evidencia de auditoría.',
+    'Mapa de procesos, caracterización, gestión documental, análisis de contexto (FODA), matriz de riesgos y oportunidades cuantitativa, auditorías internas con hallazgos, riesgos, ACPM, gestión de cambio, matriz de requisitos legales y diagnóstico ISO 9001:2015 — el ciclo PHVA completo del sistema de gestión, con trazabilidad entre todos los módulos (un riesgo, un hallazgo o una debilidad del contexto pueden generar una acción en ACPM sin volver a explicar de dónde salió), base del paquete de Evidencia de auditoría.',
   paginas: [
     {
       slug: 'indice',
       ruta: '/procesos-gestion',
       titulo: 'Procesos y Sistemas de Gestión',
       resumen:
-        'Mapa de procesos (con vista de cuadro y de interacciones), matriz de riesgos y controles, y el tablero de checklist de cumplimiento por marco normativo, en una sola pantalla.',
+        'Mapa de procesos (con vista de cuadro y de interacciones) y el tablero de checklist de cumplimiento por marco normativo, en una sola pantalla. La matriz de riesgos y oportunidades tiene su propia pantalla (botón "Riesgos").',
       camposYBotones: [
         {
           nombre: 'Mapa de procesos',
@@ -35,19 +35,6 @@ export const moduloProcesosGestion: ModuloAyuda = {
         {
           nombre: 'Estado del proceso',
           explicacion: 'Vigente / En definición / Obsoleto — editable directamente desde la tarjeta del mapa (admin_th). Un proceso obsoleto se muestra atenuado.',
-        },
-        {
-          nombre: 'Matriz de riesgos y oportunidades',
-          explicacion:
-            'Metodología cuantitativa real (no una versión genérica): cada fila es un riesgo o una oportunidad (ISO 9001 numeral 6.1 exige gestionar ambos), con marco normativo, categoría (Estratégico/Operativo/Financiero/Legal/Reputacional), descripción, consecuencia, impacto y probabilidad en escala 1-3. El nivel "Inherente" se calcula solo (impacto × probabilidad = 1 a 9, Bajo/Medio/Alto para riesgos, Bajo/Alto/Clave para oportunidades). Si hay control, su efectividad se califica 0-5 (0=No existe control … 5=Eficaz) y el nivel "Residual" se recalcula solo, reduciendo el inherente según esa efectividad — nunca se elige a mano. Con frecuencia de revisión definida (trimestral/semestral/anual), aparece una etiqueta roja "Revisión vencida" cuando ya pasó ese tiempo desde la última confirmación. Registrar uno con control definido suma 10 puntos al ranking de Nexa.',
-        },
-        {
-          nombre: 'Marcar revisado (admin_th)',
-          explicacion: 'Ícono de refrescar junto a un riesgo con frecuencia de revisión definida: confirma que sigue vigente hoy sin necesidad de abrir el formulario completo de edición (para volver a calificarlo, usa "Editar"). Suma 5 puntos al ranking de Nexa.',
-        },
-        {
-          nombre: 'Crear ACPM desde un riesgo (admin_th)',
-          explicacion: 'Ícono de lista junto a cada riesgo: abre el tablero de ACPM con una nueva tarjeta pre-vinculada a ese riesgo como origen.',
         },
         {
           nombre: 'Índice de madurez',
@@ -166,6 +153,26 @@ export const moduloProcesosGestion: ModuloAyuda = {
       ],
     },
     {
+      slug: 'contexto',
+      ruta: '/procesos-gestion/contexto',
+      titulo: 'Contexto (análisis FODA)',
+      resumen:
+        'Debilidades, oportunidades, fortalezas y amenazas, registradas de forma estructurada (no un archivo suelto) — cada análisis queda guardado con fecha y responsable, para comparar en el tiempo. Se recomienda repetirlo al menos una vez al año.',
+      camposYBotones: [
+        { nombre: 'Nuevo análisis (admin_th)', explicacion: 'Crea una nueva corrida del FODA con responsable y notas opcionales, y abre su tablero de 4 columnas.' },
+        { nombre: 'Agregar ítem', explicacion: 'Texto libre dentro de la columna correspondiente (Debilidad / Oportunidad / Fortaleza / Amenaza).' },
+        {
+          nombre: 'Crear acción (admin_th)',
+          explicacion: 'Enlace bajo cada ítem: abre el tablero de ACPM con una nueva tarjeta pre-vinculada a ese ítem del contexto como origen — igual que ya funciona desde un riesgo o un hallazgo de auditoría.',
+        },
+        { nombre: 'Crear gestión de cambio', explicacion: 'Ícono junto a "Crear acción": abre Gestión de cambio con una solicitud pre-vinculada a ese ítem, para cuando el hallazgo del contexto amerita un cambio mayor y no solo una ACPM.' },
+      ],
+      notas: [
+        'Pueden ver esta pantalla: admin_th, líder y gerencia. Crear análisis, agregar/editar/eliminar ítems es exclusivo de admin_th.',
+        'Es la pieza que antes faltaba del ciclo PHVA: sin esto, las debilidades y oportunidades del contexto quedaban solo en un documento aparte, sin conectar con ACPM.',
+      ],
+    },
+    {
       slug: 'auditorias-internas',
       ruta: '/procesos-gestion/auditorias',
       titulo: 'Auditorías internas',
@@ -193,6 +200,33 @@ export const moduloProcesosGestion: ModuloAyuda = {
       ],
     },
     {
+      slug: 'riesgos',
+      ruta: '/procesos-gestion/riesgos',
+      titulo: 'Riesgos y oportunidades',
+      resumen:
+        'Metodología cuantitativa real (no una versión genérica): cada fila es un riesgo o una oportunidad (ISO 9001 numeral 6.1 exige gestionar ambos). Antes vivía dentro de la pantalla principal de Procesos; ahora es su propio módulo, entre Auditorías internas y ACPM.',
+      camposYBotones: [
+        {
+          nombre: 'Matriz de riesgos y oportunidades',
+          explicacion:
+            'Marco normativo, categoría (Estratégico/Operativo/Financiero/Legal/Reputacional), descripción, consecuencia, impacto y probabilidad en escala 1-3. El nivel "Inherente" se calcula solo (impacto × probabilidad = 1 a 9, Bajo/Medio/Alto para riesgos, Bajo/Alto/Clave para oportunidades). Si hay control, su efectividad se califica 0-5 (0=No existe control … 5=Eficaz) y el nivel "Residual" se recalcula solo, reduciendo el inherente según esa efectividad — nunca se elige a mano. Con frecuencia de revisión definida (trimestral/semestral/anual), aparece una etiqueta roja "Revisión vencida" cuando ya pasó ese tiempo desde la última confirmación. Registrar uno con control definido suma 10 puntos al ranking de Nexa.',
+        },
+        {
+          nombre: 'Marcar revisado (admin_th)',
+          explicacion: 'Ícono de refrescar junto a un riesgo con frecuencia de revisión definida: confirma que sigue vigente hoy sin necesidad de abrir el formulario completo de edición (para volver a calificarlo, usa "Editar"). Suma 5 puntos al ranking de Nexa.',
+        },
+        {
+          nombre: 'Crear ACPM desde un riesgo (admin_th)',
+          explicacion: 'Ícono de lista junto a cada riesgo: abre el tablero de ACPM con una nueva tarjeta pre-vinculada a ese riesgo como origen. Si ya existen ACPM vinculadas, aparece un contador "N acción(es) ACPM relacionada(s)" debajo del riesgo.',
+        },
+        {
+          nombre: 'Crear gestión de cambio desde un riesgo (admin_th)',
+          explicacion: 'Ícono junto al de "Crear ACPM": para cuando el riesgo amerita evaluar un cambio de proceso/sistema/estructura, no solo una acción puntual.',
+        },
+      ],
+      notas: ['Pueden ver esta pantalla: admin_th, líder y gerencia. Crear, editar, marcar revisado y crear ACPM/cambio desde un riesgo es exclusivo de admin_th.'],
+    },
+    {
       slug: 'acpm',
       ruta: '/procesos-gestion/acpm',
       titulo: 'ACPM — Acciones Correctivas, Preventivas y de Mejora',
@@ -205,7 +239,11 @@ export const moduloProcesosGestion: ModuloAyuda = {
         },
         {
           nombre: 'Nueva ACPM (admin_th)',
-          explicacion: 'Origen (hallazgo de auditoría, riesgo, indicador, PQRS o mejora propia), tipo de acción (correctiva/preventiva/mejora), descripción, metodología de análisis de causa (5 porqués, Ishikawa o libre) y fecha compromiso. Si se llega desde el botón "Crear ACPM" de un hallazgo, un riesgo o una brecha del Diagnóstico ISO 9001, el origen ya viene vinculado o la descripción ya viene sugerida. Suma 10 puntos al ranking de Nexa, para el responsable de la ACPM (o para quien la crea, si no tiene responsable asignado).',
+          explicacion: 'Origen (hallazgo de auditoría, riesgo, análisis de contexto, indicador, PQRS o mejora propia), tipo de acción (correctiva/preventiva/mejora), descripción, metodología de análisis de causa (5 porqués, Ishikawa o libre) y fecha compromiso. Si se llega desde el botón "Crear ACPM"/"Crear acción" de un hallazgo, un riesgo, un ítem de contexto o una brecha del Diagnóstico ISO 9001, el origen ya viene vinculado o la descripción ya viene sugerida. Suma 10 puntos al ranking de Nexa, para el responsable de la ACPM (o para quien la crea, si no tiene responsable asignado).',
+        },
+        {
+          nombre: 'Origen con enlace (en la tarjeta y en el detalle)',
+          explicacion: 'Cuando el origen es un riesgo, un hallazgo o un ítem de contexto, aparece como enlace ("Origen: Riesgo →") que lleva directo al registro de origen — para no tener que recordar mentalmente de dónde salió cada ACPM.',
         },
         { nombre: 'Tablero de 7 columnas', explicacion: 'Arrastra una tarjeta para avanzarla en el ciclo. Haz clic en una tarjeta para abrir su detalle.' },
         {
@@ -231,6 +269,10 @@ export const moduloProcesosGestion: ModuloAyuda = {
         'Evalúa el impacto de un cambio a un proceso, documento, sistema o estructura antes de aprobarlo (ISO 9001 numeral 6.3) — distinto de Gestión documental, que versiona un documento puntual.',
       camposYBotones: [
         { nombre: 'Nueva solicitud (admin_th y líder)', explicacion: 'Proceso afectado, título, descripción, tipo de cambio (proceso/documento/sistema/estructura/otro) y motivo.' },
+        {
+          nombre: 'Origen opcional (riesgo o contexto)',
+          explicacion: 'No toda gestión de cambio tiene que venir de un riesgo o del contexto — por eso esto nunca es obligatorio. Se activa llegando desde el enlace "Crear gestión de cambio" de un riesgo o de un ítem del análisis de contexto, y queda vinculado con un enlace de vuelta al origen.',
+        },
         {
           nombre: 'Evaluar y resolver (admin_th)',
           explicacion: 'Registra la evaluación del impacto (bajo/medio/alto) y aprueba o rechaza. Una solicitud aprobada se puede marcar como "Implementada" cuando el cambio ya se hizo.',

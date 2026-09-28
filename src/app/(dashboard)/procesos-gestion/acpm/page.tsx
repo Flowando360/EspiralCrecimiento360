@@ -8,7 +8,14 @@ import { AcpmKanban, type Acpm } from '@/components/procesos-gestion/acpm-kanban
 export default async function AcpmPage({
   searchParams,
 }: {
-  searchParams: { origenHallazgo?: string; origenRiesgo?: string; proceso?: string; origenDetalle?: string; descripcion?: string };
+  searchParams: {
+    origenHallazgo?: string;
+    origenRiesgo?: string;
+    origenContexto?: string;
+    proceso?: string;
+    origenDetalle?: string;
+    descripcion?: string;
+  };
 }) {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
@@ -19,7 +26,9 @@ export default async function AcpmPage({
   const [{ data: acpmRaw }, { data: procesos }, { data: colaboradores }] = await Promise.all([
     supabase
       .from('acpm')
-      .select('id, codigo, proceso_id, origen_tipo, origen_detalle, tipo_accion, descripcion, metodologia_causa, analisis_causa, responsable_id, estado, fecha_compromiso, eficaz')
+      .select(
+        'id, codigo, proceso_id, origen_tipo, origen_hallazgo_id, origen_riesgo_id, origen_contexto_item_id, origen_detalle, tipo_accion, descripcion, metodologia_causa, analisis_causa, responsable_id, estado, fecha_compromiso, eficaz'
+      )
       .eq('empresa_id', perfil.empresa_id)
       .order('created_at', { ascending: false }),
     supabase.from('procesos_gestion').select('id, nombre, codigo').eq('empresa_id', perfil.empresa_id).order('codigo'),
@@ -38,7 +47,32 @@ export default async function AcpmPage({
     tareasPorAcpm.set((t as any).acpm_id, lista);
   }
 
-  const acpm: Acpm[] = (acpmRaw ?? []).map((a: any) => ({ ...a, tareas: tareasPorAcpm.get(a.id) ?? [] }));
+  // Resuelve el enlace de vuelta al registro de origen -- para el hallazgo
+  // hace falta la auditoría a la que pertenece, y para el ítem de contexto,
+  // el análisis al que pertenece (ninguno de los dos viaja directo en acpm).
+  const hallazgoIds = [...new Set((acpmRaw ?? []).map((a: any) => a.origen_hallazgo_id).filter(Boolean))];
+  const contextoItemIds = [...new Set((acpmRaw ?? []).map((a: any) => a.origen_contexto_item_id).filter(Boolean))];
+  const [{ data: hallazgosRaw }, { data: contextoItemsRaw }] = await Promise.all([
+    hallazgoIds.length ? supabase.from('hallazgos_auditoria').select('id, auditoria_id').in('id', hallazgoIds) : Promise.resolve({ data: [] as any[] }),
+    contextoItemIds.length ? supabase.from('contexto_items').select('id, analisis_id').in('id', contextoItemIds) : Promise.resolve({ data: [] as any[] }),
+  ]);
+  const auditoriaPorHallazgo = new Map<string, string>((hallazgosRaw ?? []).map((h: any) => [h.id, h.auditoria_id]));
+  const analisisPorContextoItem = new Map<string, string>((contextoItemsRaw ?? []).map((i: any) => [i.id, i.analisis_id]));
+
+  function origenHref(a: any): string | null {
+    if (a.origen_tipo === 'riesgo' && a.origen_riesgo_id) return `/procesos-gestion/riesgos#riesgo-${a.origen_riesgo_id}`;
+    if (a.origen_tipo === 'hallazgo_auditoria' && a.origen_hallazgo_id) {
+      const auditoriaId = auditoriaPorHallazgo.get(a.origen_hallazgo_id);
+      return auditoriaId ? `/procesos-gestion/auditorias/${auditoriaId}` : null;
+    }
+    if (a.origen_tipo === 'contexto' && a.origen_contexto_item_id) {
+      const analisisId = analisisPorContextoItem.get(a.origen_contexto_item_id);
+      return analisisId ? `/procesos-gestion/contexto/${analisisId}#contexto-item-${a.origen_contexto_item_id}` : null;
+    }
+    return null;
+  }
+
+  const acpm: Acpm[] = (acpmRaw ?? []).map((a: any) => ({ ...a, origen_href: origenHref(a), tareas: tareasPorAcpm.get(a.id) ?? [] }));
 
   const cerradasEfectivas = acpm.filter((a) => a.estado === 'cerrada_efectiva').length;
   const reabiertas = acpm.filter((a) => a.estado === 'reabierta').length;
@@ -46,12 +80,18 @@ export default async function AcpmPage({
   const tasaEficacia = resueltas > 0 ? Math.round((cerradasEfectivas / resueltas) * 100) : null;
 
   const prefill =
-    searchParams.origenHallazgo || searchParams.origenRiesgo
+    searchParams.origenHallazgo || searchParams.origenRiesgo || searchParams.origenContexto
       ? {
-          origenTipo: (searchParams.origenHallazgo ? 'hallazgo_auditoria' : 'riesgo') as 'hallazgo_auditoria' | 'riesgo',
+          origenTipo: (searchParams.origenHallazgo
+            ? 'hallazgo_auditoria'
+            : searchParams.origenRiesgo
+              ? 'riesgo'
+              : 'contexto') as 'hallazgo_auditoria' | 'riesgo' | 'contexto',
           origenHallazgoId: searchParams.origenHallazgo,
           origenRiesgoId: searchParams.origenRiesgo,
+          origenContextoItemId: searchParams.origenContexto,
           procesoId: searchParams.proceso,
+          descripcion: searchParams.descripcion,
         }
       : searchParams.origenDetalle
         ? {

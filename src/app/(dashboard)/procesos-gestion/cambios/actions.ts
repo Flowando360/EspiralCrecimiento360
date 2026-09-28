@@ -31,6 +31,10 @@ const SolicitudCambioSchema = z.object({
   tipoCambio: z.enum(['proceso', 'documento', 'sistema', 'estructura', 'otro']),
   motivo: z.string().trim().optional(),
   impacto: z.enum(['bajo', 'medio', 'alto']).optional(),
+  // Opcional a propósito: no todo cambio tiene que venir de un riesgo o del contexto.
+  origenTipo: z.enum(['riesgo', 'contexto', 'otro']).optional(),
+  origenRiesgoId: z.string().uuid().optional(),
+  origenContextoItemId: z.string().uuid().optional(),
 });
 
 export async function crearSolicitudCambio(input: z.infer<typeof SolicitudCambioSchema>) {
@@ -56,6 +60,9 @@ export async function crearSolicitudCambio(input: z.infer<typeof SolicitudCambio
       motivo: d.motivo || null,
       impacto: d.impacto || null,
       solicitante_id: perfil.colaborador_id,
+      origen_tipo: d.origenTipo || null,
+      origen_riesgo_id: d.origenTipo === 'riesgo' ? d.origenRiesgoId || null : null,
+      origen_contexto_item_id: d.origenTipo === 'contexto' ? d.origenContextoItemId || null : null,
     })
     .select('id')
     .single();

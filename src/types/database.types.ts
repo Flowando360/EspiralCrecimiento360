@@ -29,6 +29,7 @@ export type Database = {
           fecha_registro: string
           id: string
           metodologia_causa: string | null
+          origen_contexto_item_id: string | null
           origen_detalle: string | null
           origen_hallazgo_id: string | null
           origen_riesgo_id: string | null
@@ -52,6 +53,7 @@ export type Database = {
           fecha_registro?: string
           id?: string
           metodologia_causa?: string | null
+          origen_contexto_item_id?: string | null
           origen_detalle?: string | null
           origen_hallazgo_id?: string | null
           origen_riesgo_id?: string | null
@@ -75,6 +77,7 @@ export type Database = {
           fecha_registro?: string
           id?: string
           metodologia_causa?: string | null
+          origen_contexto_item_id?: string | null
           origen_detalle?: string | null
           origen_hallazgo_id?: string | null
           origen_riesgo_id?: string | null
@@ -380,6 +383,68 @@ export type Database = {
             columns: ["nexa_ruta_formacion_disparada_id"]
             isOneToOne: false
             referencedRelation: "nexa_rutas_formacion"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analisis_contexto: {
+        Row: {
+          created_at: string
+          empresa_id: string
+          fecha: string
+          id: string
+          notas: string | null
+          responsable_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          empresa_id: string
+          fecha?: string
+          id?: string
+          notas?: string | null
+          responsable_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          empresa_id?: string
+          fecha?: string
+          id?: string
+          notas?: string | null
+          responsable_id?: string | null
+        }
+        Relationships: []
+      }
+      contexto_items: {
+        Row: {
+          analisis_id: string
+          created_at: string
+          descripcion: string
+          id: string
+          orden: number
+          tipo: string
+        }
+        Insert: {
+          analisis_id: string
+          created_at?: string
+          descripcion: string
+          id?: string
+          orden?: number
+          tipo: string
+        }
+        Update: {
+          analisis_id?: string
+          created_at?: string
+          descripcion?: string
+          id?: string
+          orden?: number
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contexto_items_analisis_id_fkey"
+            columns: ["analisis_id"]
+            isOneToOne: false
+            referencedRelation: "analisis_contexto"
             referencedColumns: ["id"]
           },
         ]
@@ -7522,6 +7587,9 @@ export type Database = {
           id: string
           impacto: string | null
           motivo: string | null
+          origen_contexto_item_id: string | null
+          origen_riesgo_id: string | null
+          origen_tipo: string | null
           proceso_id: string
           solicitante_id: string | null
           tipo_cambio: string
@@ -7539,6 +7607,9 @@ export type Database = {
           id?: string
           impacto?: string | null
           motivo?: string | null
+          origen_contexto_item_id?: string | null
+          origen_riesgo_id?: string | null
+          origen_tipo?: string | null
           proceso_id: string
           solicitante_id?: string | null
           tipo_cambio?: string
@@ -7556,6 +7627,9 @@ export type Database = {
           id?: string
           impacto?: string | null
           motivo?: string | null
+          origen_contexto_item_id?: string | null
+          origen_riesgo_id?: string | null
+          origen_tipo?: string | null
           proceso_id?: string
           solicitante_id?: string | null
           tipo_cambio?: string

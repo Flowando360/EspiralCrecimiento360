@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { crearRiesgo, eliminarRiesgo, actualizarRiesgo, marcarRiesgoRevisado } from '@/app/(dashboard)/procesos-gestion/actions';
-import { Trash2, Plus, Pencil, Check, X, RefreshCw, AlertTriangle, ListChecks } from 'lucide-react';
+import { Trash2, Plus, Pencil, Check, X, RefreshCw, AlertTriangle, ListChecks, GitPullRequestArrow } from 'lucide-react';
 import { cn, formatearFecha } from '@/lib/utils';
 import {
   CATEGORIAS_RIESGO,
@@ -98,10 +98,12 @@ function SelectorGrado({
 export function ListaRiesgos({
   riesgosIniciales,
   procesos,
+  conteoAcpmPorRiesgo = {},
   puedeEditar,
 }: {
   riesgosIniciales: Riesgo[];
   procesos: ProcesoOpcion[];
+  conteoAcpmPorRiesgo?: Record<string, number>;
   puedeEditar: boolean;
 }) {
   const [riesgos, setRiesgos] = useState(riesgosIniciales);
@@ -352,7 +354,7 @@ export function ListaRiesgos({
               </div>
             </div>
           ) : (
-            <div key={r.id} className="flex items-start justify-between gap-2 border-b border-marmol-100 pb-2">
+            <div key={r.id} id={`riesgo-${r.id}`} className="flex items-start justify-between gap-2 border-b border-marmol-100 pb-2 scroll-mt-20">
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-xs rounded-full bg-flow-50 text-flow-700 px-2 py-0.5 font-medium">{ETIQUETA_MARCO[r.marco_normativo]}</span>
@@ -376,6 +378,11 @@ export function ListaRiesgos({
                 {r.consecuencia && <p className="text-xs text-marmol-500">Consecuencia: {r.consecuencia}</p>}
                 {r.control && <p className="text-xs text-marmol-500">Control: {r.control}</p>}
                 {r.acciones_a_realizar && <p className="text-xs text-marmol-500">Acciones: {r.acciones_a_realizar}</p>}
+                {(conteoAcpmPorRiesgo[r.id] ?? 0) > 0 && (
+                  <Link href="/procesos-gestion/acpm" className="text-xs text-flow-600 hover:underline">
+                    {conteoAcpmPorRiesgo[r.id]} acción(es) ACPM relacionada(s) →
+                  </Link>
+                )}
                 <p className="text-xs text-marmol-400 mt-0.5">
                   {nombreProceso(r.proceso_id) && <>{nombreProceso(r.proceso_id)} · </>}
                   {r.frecuencia_revision ? `Revisión ${r.frecuencia_revision}` : 'Sin frecuencia de revisión'}
@@ -384,6 +391,13 @@ export function ListaRiesgos({
               </div>
               {puedeEditar && (
                 <div className="flex items-center gap-2 shrink-0">
+                  <Link
+                    href={`/procesos-gestion/cambios?origenRiesgo=${r.id}&descripcion=${encodeURIComponent(r.riesgo)}`}
+                    title="Crear gestión de cambio desde este riesgo"
+                    className="text-marmol-300 hover:text-flow-600"
+                  >
+                    <GitPullRequestArrow size={13} />
+                  </Link>
                   <Link
                     href={`/procesos-gestion/acpm?origenRiesgo=${r.id}${r.proceso_id ? `&proceso=${r.proceso_id}` : ''}`}
                     title="Crear ACPM desde este riesgo"

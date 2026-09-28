@@ -22,7 +22,18 @@ export interface SolicitudCambio {
   fecha_solicitud: string;
   proceso_nombre: string;
   proceso_codigo: string | null;
+  origen_tipo?: 'riesgo' | 'contexto' | 'otro' | null;
+  origen_href?: string | null;
 }
+
+export interface PrefillCambio {
+  origenTipo: 'riesgo' | 'contexto';
+  origenRiesgoId?: string;
+  origenContextoItemId?: string;
+  descripcion?: string;
+}
+
+const ETIQUETA_ORIGEN_CAMBIO: Record<'riesgo' | 'contexto' | 'otro', string> = { riesgo: 'Riesgo', contexto: 'Análisis de contexto', otro: 'Otro' };
 
 interface ProcesoOpcion {
   id: string;
@@ -45,14 +56,16 @@ export function ListaCambios({
   procesos,
   puedeAprobar,
   puedeSolicitar,
+  prefill,
 }: {
   solicitudesIniciales: SolicitudCambio[];
   procesos: ProcesoOpcion[];
   puedeAprobar: boolean;
   puedeSolicitar: boolean;
+  prefill?: PrefillCambio;
 }) {
   const [solicitudes, setSolicitudes] = useState(solicitudesIniciales);
-  const [mostrarForm, setMostrarForm] = useState(false);
+  const [mostrarForm, setMostrarForm] = useState(!!prefill && puedeSolicitar);
   const [, startTransition] = useTransition();
 
   function actualizarLocal(id: string, cambios: Partial<SolicitudCambio>) {
@@ -76,6 +89,7 @@ export function ListaCambios({
       {mostrarForm && (
         <FormularioCambio
           procesos={procesos}
+          prefill={prefill}
           onCreada={(s) => {
             setSolicitudes((prev) => [s, ...prev]);
             setMostrarForm(false);
@@ -98,6 +112,17 @@ export function ListaCambios({
               {s.proceso_codigo ? `${s.proceso_codigo} · ` : ''}
               {s.proceso_nombre} · {formatearFecha(s.fecha_solicitud)}
             </p>
+            {s.origen_tipo && (
+              <p className="text-xs mt-0.5">
+                {s.origen_href ? (
+                  <a href={s.origen_href} className="text-flow-600 hover:underline">
+                    Origen: {ETIQUETA_ORIGEN_CAMBIO[s.origen_tipo]} →
+                  </a>
+                ) : (
+                  <span className="text-marmol-400">Origen: {ETIQUETA_ORIGEN_CAMBIO[s.origen_tipo]}</span>
+                )}
+              </p>
+            )}
             {s.evaluacion && <p className="text-xs text-marmol-600 mt-1 italic">Evaluación: {s.evaluacion}</p>}
 
             {puedeAprobar && (s.estado === 'solicitado' || s.estado === 'en_evaluacion') && (
@@ -178,10 +203,10 @@ function AccionesAprobacion({ id, onCambiar }: { id: string; onCambiar: (cambios
   );
 }
 
-function FormularioCambio({ procesos, onCreada }: { procesos: ProcesoOpcion[]; onCreada: (s: SolicitudCambio) => void }) {
+function FormularioCambio({ procesos, prefill, onCreada }: { procesos: ProcesoOpcion[]; prefill?: PrefillCambio; onCreada: (s: SolicitudCambio) => void }) {
   const [procesoId, setProcesoId] = useState(procesos[0]?.id ?? '');
   const [titulo, setTitulo] = useState('');
-  const [descripcion, setDescripcion] = useState('');
+  const [descripcion, setDescripcion] = useState(prefill?.descripcion ?? '');
   const [tipoCambio, setTipoCambio] = useState<TipoCambio>('proceso');
   const [motivo, setMotivo] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -194,7 +219,16 @@ function FormularioCambio({ procesos, onCreada }: { procesos: ProcesoOpcion[]; o
     }
     setError(null);
     startTransition(async () => {
-      const res = await crearSolicitudCambio({ procesoId, titulo, descripcion, tipoCambio, motivo: motivo || undefined });
+      const res = await crearSolicitudCambio({
+        procesoId,
+        titulo,
+        descripcion,
+        tipoCambio,
+        motivo: motivo || undefined,
+        origenTipo: prefill?.origenTipo,
+        origenRiesgoId: prefill?.origenRiesgoId,
+        origenContextoItemId: prefill?.origenContextoItemId,
+      });
       if (res.ok) {
         const proceso = procesos.find((p) => p.id === procesoId);
         onCreada({
@@ -210,6 +244,7 @@ function FormularioCambio({ procesos, onCreada }: { procesos: ProcesoOpcion[]; o
           fecha_solicitud: new Date().toISOString(),
           proceso_nombre: proceso?.nombre ?? '—',
           proceso_codigo: proceso?.codigo ?? null,
+          origen_tipo: prefill?.origenTipo ?? null,
         });
       } else {
         setError(res.error);
@@ -219,6 +254,11 @@ function FormularioCambio({ procesos, onCreada }: { procesos: ProcesoOpcion[]; o
 
   return (
     <div className="rounded-lg border border-marmol-200 p-3 mb-3 space-y-2">
+      {prefill && (
+        <p className="text-xs text-flow-700 bg-flow-50 rounded-lg px-2.5 py-1.5">
+          Origen: {ETIQUETA_ORIGEN_CAMBIO[prefill.origenTipo]} — se vincula automáticamente al guardar.
+        </p>
+      )}
       <div className="grid grid-cols-2 gap-2">
         <select value={procesoId} onChange={(e) => setProcesoId(e.target.value)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
           {procesos.map((p) => (

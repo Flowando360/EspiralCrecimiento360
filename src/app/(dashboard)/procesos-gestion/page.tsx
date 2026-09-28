@@ -2,9 +2,8 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { FileStack, ShieldCheck, GitPullRequestArrow, ListChecks } from 'lucide-react';
+import { FileStack, Compass, ShieldCheck, ShieldAlert, GitPullRequestArrow, ListChecks } from 'lucide-react';
 import { MapaProcesos, type Proceso, type Interaccion, type MarcoNormativo } from '@/components/procesos-gestion/mapa-procesos';
-import { ListaRiesgos } from '@/components/procesos-gestion/lista-riesgos';
 import { ChecklistKanban } from '@/components/procesos-gestion/checklist-kanban';
 import { calcularIndiceMadurez, fechaDentroDeMeses } from '@/lib/calculos/indice-madurez';
 
@@ -94,8 +93,8 @@ export default async function ProcesosGestionPage() {
         <div>
           <h1 className="font-display text-2xl font-semibold text-secundario">Procesos y Sistemas de Gestión</h1>
           <p className="text-sm text-marmol-500 mt-1">
-            Mapa de procesos, caracterización, matriz de riesgos y checklist de cumplimiento (ISO 9001, SST,
-            SARLAFT/SAGRILAFT, PTEE) — aporte de V&E a la alianza. Base del paquete de evidencia de auditoría.
+            Mapa de procesos, caracterización y checklist de cumplimiento (ISO 9001, SST, SARLAFT/SAGRILAFT, PTEE) —
+            aporte de V&E a la alianza. Base del paquete de evidencia de auditoría.
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -106,10 +105,22 @@ export default async function ProcesosGestionPage() {
             <FileStack size={15} /> Gestión documental
           </Link>
           <Link
+            href="/procesos-gestion/contexto"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
+          >
+            <Compass size={15} /> Contexto
+          </Link>
+          <Link
             href="/procesos-gestion/auditorias"
             className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
           >
             <ShieldCheck size={15} /> Auditorías internas
+          </Link>
+          <Link
+            href="/procesos-gestion/riesgos"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
+          >
+            <ShieldAlert size={15} /> Riesgos
           </Link>
           <Link
             href="/procesos-gestion/acpm"
@@ -132,7 +143,6 @@ export default async function ProcesosGestionPage() {
         colaboradores={(colaboradores ?? []) as any}
         puedeEditar={puedeEditar}
       />
-      <ListaRiesgos riesgosIniciales={(riesgos ?? []) as any} procesos={(procesos ?? []) as any} puedeEditar={puedeEditar} />
       <ChecklistKanban itemsIniciales={(checklist ?? []) as any} puedeEditar={puedeEditar} empresaId={perfil.empresa_id} />
     </div>
   );

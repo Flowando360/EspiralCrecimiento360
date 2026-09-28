@@ -21,9 +21,10 @@ async function generarCodigoAcpm(supabase: ReturnType<typeof createClient>, empr
 
 const AcpmSchema = z.object({
   procesoId: z.string().uuid().optional(),
-  origenTipo: z.enum(['hallazgo_auditoria', 'riesgo', 'indicador', 'pqrs', 'mejora_propia']),
+  origenTipo: z.enum(['hallazgo_auditoria', 'riesgo', 'contexto', 'indicador', 'pqrs', 'mejora_propia']),
   origenHallazgoId: z.string().uuid().optional(),
   origenRiesgoId: z.string().uuid().optional(),
+  origenContextoItemId: z.string().uuid().optional(),
   origenDetalle: z.string().trim().optional(),
   tipoAccion: z.enum(['correctiva', 'preventiva', 'mejora']),
   descripcion: z.string().trim().min(1, 'La descripción es requerida'),
@@ -52,6 +53,7 @@ export async function crearAcpm(input: z.infer<typeof AcpmSchema>) {
       origen_tipo: d.origenTipo,
       origen_hallazgo_id: d.origenTipo === 'hallazgo_auditoria' ? d.origenHallazgoId || null : null,
       origen_riesgo_id: d.origenTipo === 'riesgo' ? d.origenRiesgoId || null : null,
+      origen_contexto_item_id: d.origenTipo === 'contexto' ? d.origenContextoItemId || null : null,
       origen_detalle: d.origenDetalle || null,
       tipo_accion: d.tipoAccion,
       descripcion: d.descripcion,
@@ -102,6 +104,7 @@ export async function actualizarAcpm(input: z.infer<typeof EditarAcpmSchema>) {
       origen_tipo: d.origenTipo,
       origen_hallazgo_id: d.origenTipo === 'hallazgo_auditoria' ? d.origenHallazgoId || null : null,
       origen_riesgo_id: d.origenTipo === 'riesgo' ? d.origenRiesgoId || null : null,
+      origen_contexto_item_id: d.origenTipo === 'contexto' ? d.origenContextoItemId || null : null,
       origen_detalle: d.origenDetalle || null,
       tipo_accion: d.tipoAccion,
       descripcion: d.descripcion,
