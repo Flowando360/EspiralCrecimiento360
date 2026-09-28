@@ -28,22 +28,41 @@ export const DESCRIPCION_CATEGORIA: Record<CategoriaRiesgo, string> = {
   reputacional: 'Afecta la imagen y confianza de clientes, aliados y la sociedad hacia la empresa.',
 };
 
-const ETIQUETA_GRADO_IMPACTO: Record<TipoRiesgo, Record<1 | 2 | 3, string>> = {
-  riesgo: { 1: 'Menor', 2: 'Moderado', 3: 'Catastrófico' },
-  oportunidad: { 1: 'Beneficio mínimo', 2: 'Beneficio relevante', 3: 'Beneficio alto' },
-};
-
-const ETIQUETA_GRADO_PROBABILIDAD: Record<TipoRiesgo, Record<1 | 2 | 3, string>> = {
-  riesgo: { 1: 'Inusual', 2: 'Probable', 3: 'Muy posible' },
-  oportunidad: { 1: 'Difícil de lograr', 2: 'Probable', 3: 'Factible' },
-};
-
-export function etiquetaGradoImpacto(tipo: TipoRiesgo, grado: 1 | 2 | 3): string {
-  return ETIQUETA_GRADO_IMPACTO[tipo][grado];
+/**
+ * Escala de probabilidad/impacto configurable por empresa (columna
+ * `empresas.riesgos_escala`, ver migración 0097). Los valores de acá son el
+ * respaldo cuando la empresa todavía no ha guardado su propia configuración
+ * — son exactamente los de GC-MT-005/GC-PL-002, para no cambiar nada por
+ * defecto.
+ */
+export interface EscalaRiesgosConfig {
+  etiquetasImpacto: Record<TipoRiesgo, [string, string, string]>;
+  etiquetasProbabilidad: Record<TipoRiesgo, [string, string, string]>;
+  /** valoración <= umbralBajo → "bajo" */
+  umbralBajo: number;
+  /** valoración <= umbralMedio → "medio" (riesgo) / "alto" (oportunidad); por encima → "alto" (riesgo) / "clave" (oportunidad) */
+  umbralMedio: number;
 }
 
-export function etiquetaGradoProbabilidad(tipo: TipoRiesgo, grado: 1 | 2 | 3): string {
-  return ETIQUETA_GRADO_PROBABILIDAD[tipo][grado];
+export const ESCALA_RIESGOS_DEFECTO: EscalaRiesgosConfig = {
+  etiquetasImpacto: {
+    riesgo: ['Menor', 'Moderado', 'Catastrófico'],
+    oportunidad: ['Beneficio mínimo', 'Beneficio relevante', 'Beneficio alto'],
+  },
+  etiquetasProbabilidad: {
+    riesgo: ['Inusual', 'Probable', 'Muy posible'],
+    oportunidad: ['Difícil de lograr', 'Probable', 'Factible'],
+  },
+  umbralBajo: 2,
+  umbralMedio: 5,
+};
+
+export function etiquetaGradoImpacto(tipo: TipoRiesgo, grado: 1 | 2 | 3, escala: EscalaRiesgosConfig = ESCALA_RIESGOS_DEFECTO): string {
+  return escala.etiquetasImpacto[tipo][(grado - 1) as 0 | 1 | 2];
+}
+
+export function etiquetaGradoProbabilidad(tipo: TipoRiesgo, grado: 1 | 2 | 3, escala: EscalaRiesgosConfig = ESCALA_RIESGOS_DEFECTO): string {
+  return escala.etiquetasProbabilidad[tipo][(grado - 1) as 0 | 1 | 2];
 }
 
 /** Impacto (o beneficio) × probabilidad — 1 a 9. */
@@ -51,15 +70,15 @@ export function calcularValoracionInherente(gradoImpacto: number, gradoProbabili
   return gradoImpacto * gradoProbabilidad;
 }
 
-/** Riesgo: Bajo(1-2) / Medio(3-5) / Alto(6-9). Oportunidad: Bajo(1-2) / Alto(3-5) / Clave(6-9). */
-export function evaluarNivel(valoracion: number, tipo: TipoRiesgo): NivelEvaluacion {
+/** Riesgo: Bajo/Medio/Alto. Oportunidad: Bajo/Alto/Clave. Los cortes (por defecto 2 y 5) son configurables por empresa. */
+export function evaluarNivel(valoracion: number, tipo: TipoRiesgo, escala: EscalaRiesgosConfig = ESCALA_RIESGOS_DEFECTO): NivelEvaluacion {
   if (tipo === 'oportunidad') {
-    if (valoracion <= 2) return 'bajo';
-    if (valoracion <= 5) return 'alto';
+    if (valoracion <= escala.umbralBajo) return 'bajo';
+    if (valoracion <= escala.umbralMedio) return 'alto';
     return 'clave';
   }
-  if (valoracion <= 2) return 'bajo';
-  if (valoracion <= 5) return 'medio';
+  if (valoracion <= escala.umbralBajo) return 'bajo';
+  if (valoracion <= escala.umbralMedio) return 'medio';
   return 'alto';
 }
 

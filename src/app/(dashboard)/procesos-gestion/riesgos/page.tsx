@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { ChevronLeft, ShieldAlert } from 'lucide-react';
 import { ListaRiesgos } from '@/components/procesos-gestion/lista-riesgos';
+import { ESCALA_RIESGOS_DEFECTO, type EscalaRiesgosConfig } from '@/lib/calculos/matriz-riesgos';
 
 export default async function RiesgosPage() {
   const perfil = await getPerfilActual();
@@ -12,14 +13,17 @@ export default async function RiesgosPage() {
 
   const supabase = createClient();
 
-  const [{ data: riesgos }, { data: procesos }] = await Promise.all([
+  const [{ data: riesgos }, { data: procesos }, { data: empresa }] = await Promise.all([
     supabase
       .from('matriz_riesgos_controles')
       .select('id, marco_normativo, tipo, riesgo, consecuencia, categoria, grado_impacto, grado_probabilidad, control, grado_efectividad_control, acciones_a_realizar, proceso_id, frecuencia_revision, fecha_ultima_revision')
       .eq('empresa_id', perfil.empresa_id)
       .order('created_at', { ascending: false }),
     supabase.from('procesos_gestion').select('id, nombre, codigo').eq('empresa_id', perfil.empresa_id).order('codigo'),
+    supabase.from('empresas').select('riesgos_escala').eq('id', perfil.empresa_id).maybeSingle(),
   ]);
+
+  const escala = (empresa?.riesgos_escala as EscalaRiesgosConfig | null) ?? ESCALA_RIESGOS_DEFECTO;
 
   const riesgoIds = (riesgos ?? []).map((r) => r.id);
   const { data: acpmRaw } = riesgoIds.length
@@ -48,7 +52,13 @@ export default async function RiesgosPage() {
         </p>
       </div>
 
-      <ListaRiesgos riesgosIniciales={(riesgos ?? []) as any} procesos={(procesos ?? []) as any} conteoAcpmPorRiesgo={conteoAcpmPorRiesgo} puedeEditar={perfil.rol === 'admin_th'} />
+      <ListaRiesgos
+        riesgosIniciales={(riesgos ?? []) as any}
+        procesos={(procesos ?? []) as any}
+        conteoAcpmPorRiesgo={conteoAcpmPorRiesgo}
+        puedeEditar={perfil.rol === 'admin_th'}
+        escala={escala}
+      />
     </div>
   );
 }

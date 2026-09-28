@@ -243,6 +243,86 @@ export async function guardarUmbralDifusion(input: z.infer<typeof UmbralDifusion
   return { ok: true };
 }
 
+const EstructuraCodigoDocumentalSchema = z.object({
+  prefijos: z.object({
+    procedimiento: z.string().trim().min(1).max(6),
+    politica: z.string().trim().min(1).max(6),
+    formato: z.string().trim().min(1).max(6),
+    instructivo: z.string().trim().min(1).max(6),
+    registro: z.string().trim().min(1).max(6),
+  }),
+  separador: z.string().trim().min(1).max(3),
+  digitosConsecutivo: z.number().int().min(1).max(6),
+});
+
+/**
+ * Estructura del código de documento (prefijo por tipo, separador, dígitos
+ * del consecutivo) -- antes fija en el código de la app, ahora configurable
+ * por empresa (spec Procesos y Sistemas de Gestión, sección 9).
+ */
+export async function guardarEstructuraCodigoDocumental(input: z.infer<typeof EstructuraCodigoDocumentalSchema>) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+
+  const parsed = EstructuraCodigoDocumentalSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('empresas')
+    .update({
+      documental_prefijos_tipo: parsed.data.prefijos,
+      documental_separador_codigo: parsed.data.separador,
+      documental_digitos_consecutivo: parsed.data.digitosConsecutivo,
+    })
+    .eq('id', perfil.empresa_id);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath('/administracion/configuracion');
+  revalidatePath('/procesos-gestion/documentos');
+  return { ok: true };
+}
+
+const EscalaRiesgosSchema = z.object({
+  etiquetasImpacto: z.object({
+    riesgo: z.tuple([z.string().trim().min(1), z.string().trim().min(1), z.string().trim().min(1)]),
+    oportunidad: z.tuple([z.string().trim().min(1), z.string().trim().min(1), z.string().trim().min(1)]),
+  }),
+  etiquetasProbabilidad: z.object({
+    riesgo: z.tuple([z.string().trim().min(1), z.string().trim().min(1), z.string().trim().min(1)]),
+    oportunidad: z.tuple([z.string().trim().min(1), z.string().trim().min(1), z.string().trim().min(1)]),
+  }),
+  umbralBajo: z.number().int().min(1).max(8),
+  umbralMedio: z.number().int().min(2).max(9),
+});
+
+/**
+ * Etiquetas de los 3 grados de impacto/probabilidad (riesgo y oportunidad) y
+ * los umbrales bajo/medio de la valoración 1-9 -- antes fijos en el código,
+ * ahora configurables por empresa (spec Procesos y Sistemas de Gestión,
+ * sección 13). Ver src/lib/calculos/matriz-riesgos.ts.
+ */
+export async function guardarEscalaRiesgos(input: z.infer<typeof EscalaRiesgosSchema>) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+
+  const parsed = EscalaRiesgosSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+  if (parsed.data.umbralBajo >= parsed.data.umbralMedio) {
+    return { ok: false, error: 'El umbral "bajo" debe ser menor que el umbral "medio"' };
+  }
+
+  const supabase = createClient();
+  const { error } = await supabase.from('empresas').update({ riesgos_escala: parsed.data }).eq('id', perfil.empresa_id);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath('/administracion/configuracion');
+  revalidatePath('/procesos-gestion/riesgos');
+  return { ok: true };
+}
+
 export async function eliminarCursoRecomendado(id: string) {
   const perfil = await getPerfilActual();
   if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };

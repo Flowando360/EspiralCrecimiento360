@@ -2836,6 +2836,9 @@ export type Database = {
           color_marca: string | null
           created_at: string
           direccion: string | null
+          documental_digitos_consecutivo: number
+          documental_prefijos_tipo: Json
+          documental_separador_codigo: string
           documental_umbral_difusion_pct: number
           estado_facturacion: string
           fecha_fundacion: string | null
@@ -2848,6 +2851,7 @@ export type Database = {
           nombre: string
           plan_membresia: string
           precio_membresia_mensual: number | null
+          riesgos_escala: Json
           siglas: string | null
           slug: string
           telefono: string | null
@@ -2868,6 +2872,9 @@ export type Database = {
           color_marca?: string | null
           created_at?: string
           direccion?: string | null
+          documental_digitos_consecutivo?: number
+          documental_prefijos_tipo?: Json
+          documental_separador_codigo?: string
           documental_umbral_difusion_pct?: number
           estado_facturacion?: string
           fecha_fundacion?: string | null
@@ -2880,6 +2887,7 @@ export type Database = {
           nombre: string
           plan_membresia?: string
           precio_membresia_mensual?: number | null
+          riesgos_escala?: Json
           siglas?: string | null
           slug: string
           telefono?: string | null
@@ -2900,6 +2908,9 @@ export type Database = {
           color_marca?: string | null
           created_at?: string
           direccion?: string | null
+          documental_digitos_consecutivo?: number
+          documental_prefijos_tipo?: Json
+          documental_separador_codigo?: string
           documental_umbral_difusion_pct?: number
           estado_facturacion?: string
           fecha_fundacion?: string | null
@@ -2912,6 +2923,7 @@ export type Database = {
           nombre?: string
           plan_membresia?: string
           precio_membresia_mensual?: number | null
+          riesgos_escala?: Json
           siglas?: string | null
           slug?: string
           telefono?: string | null

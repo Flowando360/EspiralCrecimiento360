@@ -119,7 +119,7 @@ export const moduloProcesosGestion: ModuloAyuda = {
         {
           nombre: 'En validación',
           explicacion:
-            'El validador asignado (o cualquier admin_th) da el visto bueno final: "Aprobar y publicar" es el paso que de verdad genera el código automático (ej. PM-1-PO-001), sube la versión (v001 → v002…), archiva la anterior en el historial, reinicia el conteo de confirmaciones de lectura y anuncia en el Feed. También puede rechazarla aquí, con comentario.',
+            'El validador asignado (o cualquier admin_th) da el visto bueno final: "Aprobar y publicar" es el paso que de verdad genera el código automático (ej. PM-1-PO-001, con la estructura de prefijos/separador/consecutivo configurable en Administración → Configuración), sube la versión (v001 → v002…), archiva la anterior en el historial, reinicia el conteo de confirmaciones de lectura y anuncia en el Feed. También puede rechazarla aquí, con comentario.',
         },
         {
           nombre: 'Listado Maestro',
@@ -218,7 +218,7 @@ export const moduloProcesosGestion: ModuloAyuda = {
         {
           nombre: 'Matriz de riesgos y oportunidades',
           explicacion:
-            'Marco normativo, categoría (Estratégico/Operativo/Financiero/Legal/Reputacional), descripción, consecuencia, impacto y probabilidad en escala 1-3. El nivel "Inherente" se calcula solo (impacto × probabilidad = 1 a 9, Bajo/Medio/Alto para riesgos, Bajo/Alto/Clave para oportunidades). Si hay control, su efectividad se califica 0-5 (0=No existe control … 5=Eficaz) y el nivel "Residual" se recalcula solo, reduciendo el inherente según esa efectividad — nunca se elige a mano. Con frecuencia de revisión definida (trimestral/semestral/anual), aparece una etiqueta roja "Revisión vencida" cuando ya pasó ese tiempo desde la última confirmación. Registrar uno con control definido suma 10 puntos al ranking de Nexa.',
+            'Marco normativo, categoría (Estratégico/Operativo/Financiero/Legal/Reputacional), descripción, consecuencia, impacto y probabilidad en escala 1-3 (las etiquetas de cada grado y dónde caen los cortes de bajo/medio/alto son configurables por empresa en Administración → Configuración). El nivel "Inherente" se calcula solo (impacto × probabilidad = 1 a 9, Bajo/Medio/Alto para riesgos, Bajo/Alto/Clave para oportunidades). Si hay control, su efectividad se califica 0-5 (0=No existe control … 5=Eficaz) y el nivel "Residual" se recalcula solo, reduciendo el inherente según esa efectividad — nunca se elige a mano. Con frecuencia de revisión definida (trimestral/semestral/anual), aparece una etiqueta roja "Revisión vencida" cuando ya pasó ese tiempo desde la última confirmación. Registrar uno con control definido suma 10 puntos al ranking de Nexa.',
         },
         {
           nombre: 'Marcar revisado (admin_th)',
@@ -248,7 +248,7 @@ export const moduloProcesosGestion: ModuloAyuda = {
         },
         {
           nombre: 'Nueva ACPM (admin_th)',
-          explicacion: 'Origen (hallazgo de auditoría, riesgo, análisis de contexto, indicador, PQRS o mejora propia), tipo de acción (correctiva/preventiva/mejora), descripción, metodología de análisis de causa (5 porqués, Ishikawa o libre) y fecha compromiso. Si se llega desde el botón "Crear ACPM"/"Crear acción" de un hallazgo, un riesgo, un ítem de contexto o una brecha del Diagnóstico ISO 9001, el origen ya viene vinculado o la descripción ya viene sugerida. Suma 10 puntos al ranking de Nexa, para el responsable de la ACPM (o para quien la crea, si no tiene responsable asignado).',
+          explicacion: 'Origen (hallazgo de auditoría, riesgo, análisis de contexto, revisión de proceso, indicador, PQRS o mejora propia), tipo de acción (correctiva/preventiva/mejora), descripción, metodología de análisis de causa (5 porqués, Ishikawa o libre) y fecha compromiso. Si se llega desde el botón "Crear ACPM"/"Crear acción" de un hallazgo, un riesgo, un ítem de contexto o una brecha del Diagnóstico ISO 9001, el origen ya viene vinculado o la descripción ya viene sugerida. Suma 10 puntos al ranking de Nexa, para el responsable de la ACPM (o para quien la crea, si no tiene responsable asignado).',
         },
         {
           nombre: 'Origen con enlace (en la tarjeta y en el detalle)',

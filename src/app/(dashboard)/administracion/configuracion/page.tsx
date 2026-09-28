@@ -7,8 +7,11 @@ import { FormularioDatosEmpresa } from '@/components/administracion/formulario-d
 import { FormularioPreguntasClima } from '@/components/administracion/formulario-preguntas-clima';
 import { FormularioUmbralClima } from '@/components/administracion/formulario-umbral-clima';
 import { FormularioUmbralDifusion } from '@/components/administracion/formulario-umbral-difusion';
+import { FormularioEstructuraCodigoDocumental } from '@/components/administracion/formulario-estructura-codigo-documental';
+import { FormularioEscalaRiesgos } from '@/components/administracion/formulario-escala-riesgos';
 import { ListaCursosRecomendados } from '@/components/administracion/lista-cursos-recomendados';
 import { SlidersHorizontal } from 'lucide-react';
+import { ESCALA_RIESGOS_DEFECTO, type EscalaRiesgosConfig } from '@/lib/calculos/matriz-riesgos';
 
 export default async function AdminConfiguracionPage() {
   const perfil = await getPerfilActual();
@@ -20,7 +23,7 @@ export default async function AdminConfiguracionPage() {
   const { data: empresa } = await supabase
     .from('empresas')
     .select(
-      'nit, direccion, telefono, ciudad, firmante_nombre, firmante_cargo, siglas, clima_pregunta_enps, clima_pregunta_reconocimiento, clima_pregunta_liderazgo, clima_pregunta_desarrollo, clima_pregunta_comunicacion, clima_pregunta_condiciones, clima_pregunta_pertenencia, clima_umbral_tipo, clima_umbral_cantidad, clima_umbral_porcentaje, documental_umbral_difusion_pct'
+      'nit, direccion, telefono, ciudad, firmante_nombre, firmante_cargo, siglas, clima_pregunta_enps, clima_pregunta_reconocimiento, clima_pregunta_liderazgo, clima_pregunta_desarrollo, clima_pregunta_comunicacion, clima_pregunta_condiciones, clima_pregunta_pertenencia, clima_umbral_tipo, clima_umbral_cantidad, clima_umbral_porcentaje, documental_umbral_difusion_pct, documental_prefijos_tipo, documental_separador_codigo, documental_digitos_consecutivo, riesgos_escala'
     )
     .eq('id', perfil.empresa_id)
     .maybeSingle();
@@ -94,6 +97,22 @@ export default async function AdminConfiguracionPage() {
       />
 
       <FormularioUmbralDifusion inicial={empresa?.documental_umbral_difusion_pct ?? 100} />
+
+      <FormularioEstructuraCodigoDocumental
+        inicial={{
+          prefijos: (empresa?.documental_prefijos_tipo as any) ?? {
+            procedimiento: 'PO',
+            politica: 'PL',
+            formato: 'FO',
+            instructivo: 'IN',
+            registro: 'RE',
+          },
+          separador: empresa?.documental_separador_codigo ?? '-',
+          digitosConsecutivo: empresa?.documental_digitos_consecutivo ?? 3,
+        }}
+      />
+
+      <FormularioEscalaRiesgos inicial={(empresa?.riesgos_escala as EscalaRiesgosConfig | null) ?? ESCALA_RIESGOS_DEFECTO} />
 
       {ciclo ? (
         <FormularioPonderaciones

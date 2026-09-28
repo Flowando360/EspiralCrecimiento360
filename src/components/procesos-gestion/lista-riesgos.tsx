@@ -10,6 +10,7 @@ import {
   ETIQUETA_CATEGORIA,
   ETIQUETA_EVALUACION,
   ETIQUETA_EFECTIVIDAD_CONTROL,
+  ESCALA_RIESGOS_DEFECTO,
   etiquetaGradoImpacto,
   etiquetaGradoProbabilidad,
   calcularValoracionInherente,
@@ -17,6 +18,7 @@ import {
   evaluarNivel,
   type CategoriaRiesgo,
   type TipoRiesgo,
+  type EscalaRiesgosConfig,
 } from '@/lib/calculos/matriz-riesgos';
 
 const ETIQUETA_MARCO: Record<string, string> = {
@@ -100,11 +102,13 @@ export function ListaRiesgos({
   procesos,
   conteoAcpmPorRiesgo = {},
   puedeEditar,
+  escala = ESCALA_RIESGOS_DEFECTO,
 }: {
   riesgosIniciales: Riesgo[];
   procesos: ProcesoOpcion[];
   conteoAcpmPorRiesgo?: Record<string, number>;
   puedeEditar: boolean;
+  escala?: EscalaRiesgosConfig;
 }) {
   const [riesgos, setRiesgos] = useState(riesgosIniciales);
   const [marcoNormativo, setMarcoNormativo] = useState<'iso_9001' | 'sst' | 'sarlaft_sagrilaft' | 'ptee' | 'interno'>('iso_9001');
@@ -276,9 +280,9 @@ export function ListaRiesgos({
       <div className="space-y-2 mb-4">
         {riesgos.map((r) => {
           const inherente = calcularValoracionInherente(r.grado_impacto, r.grado_probabilidad);
-          const nivelInherente = evaluarNivel(inherente, r.tipo);
+          const nivelInherente = evaluarNivel(inherente, r.tipo, escala);
           const residual = r.tipo === 'riesgo' ? calcularValoracionResidual(inherente, r.grado_efectividad_control) : inherente;
-          const nivelResidual = evaluarNivel(residual, r.tipo);
+          const nivelResidual = evaluarNivel(residual, r.tipo, escala);
 
           return editandoId === r.id ? (
             <div key={r.id} className="space-y-1.5 border-b border-marmol-100 pb-2 bg-flow-50/40 -mx-1 px-1 rounded">
@@ -309,13 +313,13 @@ export function ListaRiesgos({
                   valor={edGradoImpacto}
                   onChange={setEdGradoImpacto}
                   prefijo="Impacto"
-                  opciones={[1, 2, 3].map((g) => [g, etiquetaGradoImpacto(edTipo, g as 1 | 2 | 3)])}
+                  opciones={[1, 2, 3].map((g) => [g, etiquetaGradoImpacto(edTipo, g as 1 | 2 | 3, escala)])}
                 />
                 <SelectorGrado
                   valor={edGradoProbabilidad}
                   onChange={setEdGradoProbabilidad}
                   prefijo="Prob."
-                  opciones={[1, 2, 3].map((g) => [g, etiquetaGradoProbabilidad(edTipo, g as 1 | 2 | 3)])}
+                  opciones={[1, 2, 3].map((g) => [g, etiquetaGradoProbabilidad(edTipo, g as 1 | 2 | 3, escala)])}
                 />
               </div>
               <select value={edProcesoId} onChange={(e) => setEdProcesoId(e.target.value)} className={cn('w-full', campo)}>
@@ -449,8 +453,8 @@ export function ListaRiesgos({
           <input value={riesgo} onChange={(e) => setRiesgo(e.target.value)} placeholder="Descripción del riesgo/oportunidad" className={cn('w-full', campo)} />
           <input value={consecuencia} onChange={(e) => setConsecuencia(e.target.value)} placeholder="Consecuencia (positiva/negativa, opcional)" className={cn('w-full', campo)} />
           <div className="grid grid-cols-2 gap-2">
-            <SelectorGrado valor={gradoImpacto} onChange={setGradoImpacto} prefijo="Impacto" opciones={[1, 2, 3].map((g) => [g, etiquetaGradoImpacto(tipo, g as 1 | 2 | 3)])} />
-            <SelectorGrado valor={gradoProbabilidad} onChange={setGradoProbabilidad} prefijo="Prob." opciones={[1, 2, 3].map((g) => [g, etiquetaGradoProbabilidad(tipo, g as 1 | 2 | 3)])} />
+            <SelectorGrado valor={gradoImpacto} onChange={setGradoImpacto} prefijo="Impacto" opciones={[1, 2, 3].map((g) => [g, etiquetaGradoImpacto(tipo, g as 1 | 2 | 3, escala)])} />
+            <SelectorGrado valor={gradoProbabilidad} onChange={setGradoProbabilidad} prefijo="Prob." opciones={[1, 2, 3].map((g) => [g, etiquetaGradoProbabilidad(tipo, g as 1 | 2 | 3, escala)])} />
           </div>
           <select value={procesoId} onChange={(e) => setProcesoId(e.target.value)} className={cn('w-full', campo)}>
             <option value="">Sin proceso asociado</option>

@@ -59,11 +59,27 @@ import {
   LogOut,
 } from 'lucide-react';
 
+type FasePhva = 'Planear' | 'Hacer' | 'Verificar' | 'Actuar';
+
 interface NavItem {
   href: string;
   label: string;
   icon: React.ElementType;
   roles: RolUsuario[];
+  /** Solo para el desplegable de Procesos y Cumplimiento: agrupa visualmente
+   * sus módulos bajo el ciclo PHVA. Sin este campo, el ítem se muestra suelto
+   * antes de los grupos de fase (p. ej. la página resumen del módulo). */
+  fase?: FasePhva;
+}
+
+const ORDEN_FASES: FasePhva[] = ['Planear', 'Hacer', 'Verificar', 'Actuar'];
+
+function agruparPorFase(items: NavItem[]): { fase: FasePhva | null; items: NavItem[] }[] {
+  const sinFase = items.filter((item) => !item.fase);
+  const grupos = ORDEN_FASES.map((fase) => ({ fase, items: items.filter((item) => item.fase === fase) })).filter(
+    (g) => g.items.length > 0
+  );
+  return sinFase.length > 0 ? [{ fase: null, items: sinFase }, ...grupos] : grupos;
 }
 
 interface NavGroup {
@@ -126,14 +142,14 @@ const NAV: NavGroup[] = [
     tituloCorto: 'Procesos',
     items: [
       { href: '/procesos-gestion', label: 'Procesos y sistemas de gestión', icon: ClipboardCheck, roles: ['admin_th', 'lider', 'gerencia'] },
-      { href: '/procesos-gestion/documentos', label: 'Gestión documental', icon: FileStack, roles: ['admin_th', 'lider', 'gerencia'] },
-      { href: '/procesos-gestion/contexto', label: 'Contexto (FODA)', icon: Compass, roles: ['admin_th', 'lider', 'gerencia'] },
-      { href: '/procesos-gestion/auditorias', label: 'Auditorías internas', icon: ShieldQuestion, roles: ['admin_th', 'lider', 'gerencia', 'auditor_externo'] },
-      { href: '/procesos-gestion/riesgos', label: 'Riesgos y oportunidades', icon: ShieldAlert, roles: ['admin_th', 'lider', 'gerencia'] },
-      { href: '/procesos-gestion/acpm', label: 'ACPM', icon: ListChecks, roles: ['admin_th', 'lider', 'gerencia'] },
-      { href: '/procesos-gestion/cambios', label: 'Gestión de cambio', icon: GitPullRequestArrow, roles: ['admin_th', 'lider', 'gerencia'] },
-      { href: '/procesos-gestion/legal', label: 'Matriz legal', icon: Scale, roles: ['admin_th', 'lider', 'gerencia'] },
-      { href: '/procesos-gestion/diagnostico-iso9001', label: 'Diagnóstico ISO 9001', icon: ClipboardList, roles: ['admin_th', 'lider', 'gerencia'] },
+      { href: '/procesos-gestion/contexto', label: 'Contexto (FODA)', icon: Compass, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Planear' },
+      { href: '/procesos-gestion/riesgos', label: 'Riesgos y oportunidades', icon: ShieldAlert, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Planear' },
+      { href: '/procesos-gestion/legal', label: 'Matriz legal', icon: Scale, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Planear' },
+      { href: '/procesos-gestion/documentos', label: 'Gestión documental', icon: FileStack, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Hacer' },
+      { href: '/procesos-gestion/auditorias', label: 'Auditorías internas', icon: ShieldQuestion, roles: ['admin_th', 'lider', 'gerencia', 'auditor_externo'], fase: 'Verificar' },
+      { href: '/procesos-gestion/diagnostico-iso9001', label: 'Diagnóstico ISO 9001', icon: ClipboardList, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Verificar' },
+      { href: '/procesos-gestion/acpm', label: 'ACPM', icon: ListChecks, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Actuar' },
+      { href: '/procesos-gestion/cambios', label: 'Gestión de cambio', icon: GitPullRequestArrow, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Actuar' },
     ],
   },
   {
@@ -295,23 +311,30 @@ export function BarraSuperior({
               <div className="invisible absolute left-0 top-full pt-1 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 z-50">
                 <div className="w-72 rounded-xl bg-white shadow-xl ring-1 ring-black/5 p-2 max-h-[75vh] overflow-y-auto">
                   <p className="px-2.5 pb-1 pt-0.5 text-xs font-semibold uppercase tracking-wide text-marmol-400">{grupo.titulo}</p>
-                  {grupo.items.map((item) => {
-                    const Icon = item.icon;
-                    const itemActivo = pathname.startsWith(item.href);
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={cn(
-                          'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition',
-                          itemActivo ? 'bg-flow-50 text-flow-700 font-semibold' : 'text-marmol-700 hover:bg-marmol-100'
-                        )}
-                      >
-                        <Icon size={16} strokeWidth={2} className="shrink-0 text-marmol-400" />
-                        <span className="min-w-0 break-words">{item.label}</span>
-                      </Link>
-                    );
-                  })}
+                  {agruparPorFase(grupo.items).map((sub, si) => (
+                    <div key={sub.fase ?? `sin-fase-${si}`} className={si > 0 ? 'mt-1.5 pt-1.5 border-t border-marmol-100' : undefined}>
+                      {sub.fase && (
+                        <p className="px-2.5 pb-0.5 text-[11px] font-bold uppercase tracking-wider text-flow-600">{sub.fase}</p>
+                      )}
+                      {sub.items.map((item) => {
+                        const Icon = item.icon;
+                        const itemActivo = pathname.startsWith(item.href);
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className={cn(
+                              'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition',
+                              itemActivo ? 'bg-flow-50 text-flow-700 font-semibold' : 'text-marmol-700 hover:bg-marmol-100'
+                            )}
+                          >
+                            <Icon size={16} strokeWidth={2} className="shrink-0 text-marmol-400" />
+                            <span className="min-w-0 break-words">{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -391,23 +414,30 @@ export function BarraSuperior({
                 </button>
                 {expandido && (
                   <div className="mt-0.5 mb-1 ml-2 space-y-0.5 border-l-2 border-white/10 pl-2">
-                    {grupo.items.map((item) => {
-                      const Icon = item.icon;
-                      const itemActivo = pathname.startsWith(item.href);
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className={cn(
-                            'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition',
-                            itemActivo ? 'bg-white/15 text-white font-semibold' : 'text-white/75 hover:bg-white/10 hover:text-white'
-                          )}
-                        >
-                          <Icon size={15} strokeWidth={2} className="shrink-0" />
-                          <span className="min-w-0 break-words">{item.label}</span>
-                        </Link>
-                      );
-                    })}
+                    {agruparPorFase(grupo.items).map((sub, si) => (
+                      <div key={sub.fase ?? `sin-fase-${si}`} className={si > 0 ? 'mt-1.5 pt-1.5 border-t border-white/10' : undefined}>
+                        {sub.fase && (
+                          <p className="px-3 pb-0.5 text-[11px] font-bold uppercase tracking-wider text-acento/90">{sub.fase}</p>
+                        )}
+                        {sub.items.map((item) => {
+                          const Icon = item.icon;
+                          const itemActivo = pathname.startsWith(item.href);
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              className={cn(
+                                'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition',
+                                itemActivo ? 'bg-white/15 text-white font-semibold' : 'text-white/75 hover:bg-white/10 hover:text-white'
+                              )}
+                            >
+                              <Icon size={15} strokeWidth={2} className="shrink-0" />
+                              <span className="min-w-0 break-words">{item.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

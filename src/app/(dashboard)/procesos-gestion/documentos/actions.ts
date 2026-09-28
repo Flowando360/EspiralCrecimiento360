@@ -40,7 +40,8 @@ function estaAsignado(perfil: { rol: string; colaborador_id: string | null }, as
   return Boolean(asignadoId) && perfil.colaborador_id === asignadoId;
 }
 
-const TIPO_DOC_PREFIJO: Record<string, string> = {
+/** Respaldo si la empresa todavía no tiene `documental_prefijos_tipo` guardado (columna con default, así que en la práctica siempre debería venir). */
+const TIPO_DOC_PREFIJO_DEFECTO: Record<string, string> = {
   procedimiento: 'PO',
   politica: 'PL',
   formato: 'FO',
@@ -48,19 +49,23 @@ const TIPO_DOC_PREFIJO: Record<string, string> = {
   registro: 'RE',
 };
 
+/** Estructura de código configurable por empresa (Administración → Configuración) -- spec sección 9. */
 async function generarCodigoDocumento(
   supabase: ReturnType<typeof createClient>,
+  empresaId: string,
   procesoId: string,
   procesoCodigo: string | null,
   tipoDocumento: string
 ) {
-  const { count } = await supabase
-    .from('documentos_proceso')
-    .select('id', { count: 'exact', head: true })
-    .eq('proceso_id', procesoId)
-    .eq('tipo_documento', tipoDocumento);
-  const consecutivo = String((count ?? 0) + 1).padStart(3, '0');
-  return `${procesoCodigo ?? 'DOC'}-${TIPO_DOC_PREFIJO[tipoDocumento] ?? 'DO'}-${consecutivo}`;
+  const [{ count }, { data: empresa }] = await Promise.all([
+    supabase.from('documentos_proceso').select('id', { count: 'exact', head: true }).eq('proceso_id', procesoId).eq('tipo_documento', tipoDocumento),
+    supabase.from('empresas').select('documental_prefijos_tipo, documental_separador_codigo, documental_digitos_consecutivo').eq('id', empresaId).maybeSingle(),
+  ]);
+  const prefijos = (empresa?.documental_prefijos_tipo as Record<string, string> | null) ?? TIPO_DOC_PREFIJO_DEFECTO;
+  const separador = empresa?.documental_separador_codigo ?? '-';
+  const digitos = empresa?.documental_digitos_consecutivo ?? 3;
+  const consecutivo = String((count ?? 0) + 1).padStart(digitos, '0');
+  return [procesoCodigo ?? 'DOC', prefijos[tipoDocumento] ?? 'DO', consecutivo].join(separador);
 }
 
 function siguienteVersion(versionActual: string) {
@@ -217,7 +222,7 @@ export async function aprobarValidacion(id: string, comentarios?: string) {
   let documentoParaFeed: { id: string; nombre: string; requiereConfirmacion: boolean; esNuevo: boolean } | null = null;
 
   if (solicitud.tipo_solicitud === 'crear') {
-    const codigo = await generarCodigoDocumento(supabase, solicitud.proceso_id as string, (proceso?.codigo as string) ?? null, solicitud.tipo_documento as string);
+    const codigo = await generarCodigoDocumento(supabase, perfil.empresa_id, solicitud.proceso_id as string, (proceso?.codigo as string) ?? null, solicitud.tipo_documento as string);
     const requiereConfirmacion = solicitud.tipo_documento === 'procedimiento' || solicitud.tipo_documento === 'politica';
 
     const { data: creado, error: errCrear } = await supabase
