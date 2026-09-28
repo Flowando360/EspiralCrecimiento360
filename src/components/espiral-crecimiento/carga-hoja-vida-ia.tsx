@@ -63,15 +63,15 @@ export function CargaHojaVidaIA({ onDatos }: { onDatos: (datos: DatosHojaVida) =
           className="hidden"
         />
       </label>
-      <p className="text-[11px] text-marmol-400 mt-1">
+      <p className="text-[13px] text-marmol-400 mt-1">
         Solo lee nombre, documento, correo y teléfono — revisa y corrige lo que necesites antes de guardar.
       </p>
       {camposEncontrados && (
-        <p className="text-[11px] text-alto mt-1 flex items-center gap-1">
+        <p className="text-[13px] text-alto mt-1 flex items-center gap-1">
           <Check size={11} /> Se llenaron: {camposEncontrados.map((c) => ETIQUETAS[c] ?? c).join(', ')}
         </p>
       )}
-      {error && <p className="text-[11px] text-bajo mt-1">{error}</p>}
+      {error && <p className="text-[13px] text-bajo mt-1">{error}</p>}
     </div>
   );
 }

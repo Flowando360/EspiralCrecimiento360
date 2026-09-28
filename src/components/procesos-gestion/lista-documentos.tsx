@@ -287,7 +287,7 @@ export function ListaDocumentos({
                   <td className="px-2 py-2 text-marmol-600 text-xs">{ETIQUETA_TIPO_DOC[d.tipo_documento]}</td>
                   <td className="px-2 py-2 text-marmol-600 text-xs">{d.version_vigente}</td>
                   <td className="px-2 py-2">
-                    <span className={cn('text-[11px] rounded-full px-2 py-0.5 font-medium', d.estado === 'vigente' ? 'badge-alto' : 'badge-marmol')}>
+                    <span className={cn('text-[13px] rounded-full px-2 py-0.5 font-medium', d.estado === 'vigente' ? 'badge-alto' : 'badge-marmol')}>
                       {d.estado === 'vigente' ? 'Vigente' : 'Obsoleto'}
                     </span>
                   </td>
@@ -316,7 +316,7 @@ export function ListaDocumentos({
                   <span className="text-marmol-400">{ETIQUETA_TIPO_SOLICITUD[s.tipo_solicitud]}</span>{' '}
                   {s.documento_codigo ?? s.nombre_documento} <span className="text-marmol-400">· {s.proceso_nombre}</span>
                 </span>
-                <span className={cn('text-[11px] rounded-full px-2 py-0.5 font-medium', ETIQUETA_ESTADO[s.estado].clase)}>{ETIQUETA_ESTADO[s.estado].texto}</span>
+                <span className={cn('text-[13px] rounded-full px-2 py-0.5 font-medium', ETIQUETA_ESTADO[s.estado].clase)}>{ETIQUETA_ESTADO[s.estado].texto}</span>
               </div>
             ))}
           </div>

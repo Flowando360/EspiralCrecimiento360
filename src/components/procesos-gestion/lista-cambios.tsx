@@ -102,9 +102,9 @@ export function ListaCambios({
           <div key={s.id} className="border-b border-marmol-100 pb-2">
             <div className="flex items-center gap-1.5 flex-wrap">
               {s.codigo && <span className="text-xs font-semibold text-marmol-400">{s.codigo}</span>}
-              <span className={cn('text-[11px] rounded-full px-2 py-0.5 font-medium', ETIQUETA_ESTADO[s.estado].clase)}>{ETIQUETA_ESTADO[s.estado].texto}</span>
-              <span className="text-[11px] rounded-full badge-marmol px-2 py-0.5 font-medium">{ETIQUETA_TIPO[s.tipo_cambio]}</span>
-              {s.impacto && <span className={cn('text-[11px] rounded-full px-2 py-0.5 font-medium', CLASE_IMPACTO[s.impacto])}>Impacto {s.impacto}</span>}
+              <span className={cn('text-[13px] rounded-full px-2 py-0.5 font-medium', ETIQUETA_ESTADO[s.estado].clase)}>{ETIQUETA_ESTADO[s.estado].texto}</span>
+              <span className="text-[13px] rounded-full badge-marmol px-2 py-0.5 font-medium">{ETIQUETA_TIPO[s.tipo_cambio]}</span>
+              {s.impacto && <span className={cn('text-[13px] rounded-full px-2 py-0.5 font-medium', CLASE_IMPACTO[s.impacto])}>Impacto {s.impacto}</span>}
             </div>
             <p className="text-sm font-medium text-marmol-800 mt-1">{s.titulo}</p>
             <p className="text-xs text-marmol-500 mt-0.5">{s.descripcion}</p>

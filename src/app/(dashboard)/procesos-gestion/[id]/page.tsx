@@ -85,7 +85,7 @@ export default async function FichaProcesoPage({ params }: { params: { id: strin
             {(marcos ?? []).length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {(marcos ?? []).map((m: any) => (
-                  <span key={m.marco_normativo} className="text-[10px] rounded-full bg-flow-50 text-flow-700 px-1.5 py-0.5 font-medium">
+                  <span key={m.marco_normativo} className="text-[12px] rounded-full bg-flow-50 text-flow-700 px-1.5 py-0.5 font-medium">
                     {ETIQUETA_MARCO[m.marco_normativo]}
                   </span>
                 ))}

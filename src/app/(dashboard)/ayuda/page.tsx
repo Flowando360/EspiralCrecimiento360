@@ -38,7 +38,7 @@ export default function AyudaHomePage() {
           ) : (
             resultados.map((r, i) => (
               <Link key={i} href={r.href} className="block card p-4 hover:border-flow-300 transition">
-                <span className="text-[10px] uppercase tracking-wide text-flow-600 font-medium">{r.tipo}</span>
+                <span className="text-[12px] uppercase tracking-wide text-flow-600 font-medium">{r.tipo}</span>
                 <p className="text-sm font-medium text-marmol-800">{r.titulo}</p>
                 <p className="text-xs text-marmol-500 line-clamp-2 mt-0.5">{r.texto}</p>
               </Link>

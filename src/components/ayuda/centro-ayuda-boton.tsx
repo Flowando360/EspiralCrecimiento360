@@ -13,7 +13,7 @@ const ETIQUETA_TIPO: Record<ResultadoBusqueda['tipo'], string> = {
   glosario: 'Glosario',
 };
 
-export function CentroAyudaBoton() {
+export function CentroAyudaBoton({ className }: { className?: string }) {
   const pathname = usePathname();
   const [abierto, setAbierto] = useState(false);
   const [consulta, setConsulta] = useState('');
@@ -26,7 +26,7 @@ export function CentroAyudaBoton() {
       <button
         type="button"
         onClick={() => setAbierto(true)}
-        className="rounded-lg p-2 text-marmol-500 hover:bg-marmol-100 transition"
+        className={className ?? 'rounded-lg p-2 text-marmol-500 hover:bg-marmol-100 transition'}
         title="Centro de Ayuda"
       >
         <HelpCircle size={18} />
@@ -70,7 +70,7 @@ export function CentroAyudaBoton() {
                         onClick={() => setAbierto(false)}
                         className="block rounded-lg border border-marmol-200 p-3 hover:border-flow-300 transition"
                       >
-                        <span className="text-[10px] uppercase tracking-wide text-flow-600 font-medium">
+                        <span className="text-[12px] uppercase tracking-wide text-flow-600 font-medium">
                           {ETIQUETA_TIPO[r.tipo]}
                         </span>
                         <p className="text-sm font-medium text-marmol-800">{r.titulo}</p>
@@ -83,7 +83,7 @@ export function CentroAyudaBoton() {
                 <>
                   {contextual ? (
                     <div>
-                      <p className="text-[10px] uppercase tracking-wide text-flow-600 font-medium mb-1">
+                      <p className="text-[12px] uppercase tracking-wide text-flow-600 font-medium mb-1">
                         Esta pantalla · {contextual.modulo.titulo}
                       </p>
                       <h3 className="font-display font-semibold text-secundario">{contextual.pagina.titulo}</h3>

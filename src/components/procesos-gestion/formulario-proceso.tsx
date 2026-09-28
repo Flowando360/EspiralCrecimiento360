@@ -182,7 +182,7 @@ export function FormularioProceso({
                 <span
                   key={p}
                   className={cn(
-                    'text-[10px] rounded-full px-2 py-0.5 font-medium',
+                    'text-[12px] rounded-full px-2 py-0.5 font-medium',
                     i === paso ? 'bg-flow-500 text-white' : i < paso ? 'bg-flow-100 text-flow-700' : 'bg-marmol-100 text-marmol-400'
                   )}
                 >
@@ -228,7 +228,7 @@ export function FormularioProceso({
                 rows={2}
                 className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
               />
-              {esNuevo && <p className="text-[11px] text-marmol-400">El código (ej. {TIPO_OPCIONES.find((o) => o.valor === tipo)?.etiqueta === 'Estratégico' ? 'PE-1' : tipo === 'misional' ? 'PM-1' : tipo === 'apoyo' ? 'PA-1' : 'EV-1'}) se genera automáticamente al guardar.</p>}
+              {esNuevo && <p className="text-[13px] text-marmol-400">El código (ej. {TIPO_OPCIONES.find((o) => o.valor === tipo)?.etiqueta === 'Estratégico' ? 'PE-1' : tipo === 'misional' ? 'PM-1' : tipo === 'apoyo' ? 'PA-1' : 'EV-1'}) se genera automáticamente al guardar.</p>}
             </>
           )}
 

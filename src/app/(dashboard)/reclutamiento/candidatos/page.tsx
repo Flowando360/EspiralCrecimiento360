@@ -42,7 +42,7 @@ export default async function BancoCandidatosPage() {
               </div>
               <div className="text-right">
                 <p className="text-xs text-marmol-400">{c.postulaciones?.[0]?.count ?? 0} postulación{(c.postulaciones?.[0]?.count ?? 0) === 1 ? '' : 'es'}</p>
-                <p className="text-[11px] text-marmol-300 capitalize">{c.origen === 'postulacion_publica' ? 'Formulario público' : 'Manual'}</p>
+                <p className="text-[13px] text-marmol-300 capitalize">{c.origen === 'postulacion_publica' ? 'Formulario público' : 'Manual'}</p>
               </div>
             </Link>
           ))}

@@ -361,11 +361,11 @@ function TarjetaChecklist({
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => texto.trim() && onGuardarEdicion(item.id, marco, texto)}
-            className="inline-flex items-center gap-1 rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-[11px] font-medium px-2 py-1"
+            className="inline-flex items-center gap-1 rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-[13px] font-medium px-2 py-1"
           >
             <Check size={11} /> Guardar
           </button>
-          <button onClick={() => onIniciarEdicion(null)} className="inline-flex items-center gap-1 rounded-lg border border-marmol-200 text-marmol-600 hover:bg-marmol-100 text-[11px] font-medium px-2 py-1">
+          <button onClick={() => onIniciarEdicion(null)} className="inline-flex items-center gap-1 rounded-lg border border-marmol-200 text-marmol-600 hover:bg-marmol-100 text-[13px] font-medium px-2 py-1">
             <X size={11} /> Cancelar
           </button>
         </div>
@@ -378,11 +378,11 @@ function TarjetaChecklist({
       <div className="flex items-start justify-between gap-1.5">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[10px] rounded-full bg-flow-50 text-flow-700 px-1.5 py-0.5 font-medium">
+            <span className="text-[12px] rounded-full bg-flow-50 text-flow-700 px-1.5 py-0.5 font-medium">
               {ETIQUETA_MARCO[item.marco_normativo]}
             </span>
             {item.evidencia_url && (
-              <span className="text-[10px] text-marmol-400 inline-flex items-center gap-1">
+              <span className="text-[12px] text-marmol-400 inline-flex items-center gap-1">
                 <Paperclip size={10} /> Evidencia
               </span>
             )}

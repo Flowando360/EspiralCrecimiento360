@@ -61,7 +61,7 @@ export function HiloMensajes({ destinatarioId, itemsIniciales }: { destinatarioI
                 )}
               >
                 <p>{m.contenido}</p>
-                <p className={cn('text-[10px] mt-1', m.esMio ? 'text-white/70' : 'text-marmol-400')}>
+                <p className={cn('text-[12px] mt-1', m.esMio ? 'text-white/70' : 'text-marmol-400')}>
                   {formatearFecha(m.created_at)}
                 </p>
               </div>

@@ -156,7 +156,7 @@ function TarjetaIndicador({
             meta {formatearValor(indicador.meta, indicador.unidad)}
           </span>
         )}
-        {cumple !== null && <span className={cn('text-[10px] rounded-full px-1.5 py-0.5 font-medium', cumple ? 'badge-alto' : 'badge-bajo')}>{cumple ? 'Cumple' : 'No cumple'}</span>}
+        {cumple !== null && <span className={cn('text-[12px] rounded-full px-1.5 py-0.5 font-medium', cumple ? 'badge-alto' : 'badge-bajo')}>{cumple ? 'Cumple' : 'No cumple'}</span>}
       </div>
 
       {indicador.mediciones.length > 0 && (

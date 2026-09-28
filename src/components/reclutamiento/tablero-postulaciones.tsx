@@ -350,7 +350,7 @@ function TarjetaPostulacion({
             (mostrarEntrevista ? (
               <FormularioEntrevista postulacionId={postulacion.id} vacanteId={vacanteId} colaboradores={colaboradores} onListo={() => setMostrarEntrevista(false)} />
             ) : (
-              <button type="button" onClick={() => setMostrarEntrevista(true)} className="inline-flex items-center gap-1 text-[11px] text-flow-600 hover:text-flow-700 font-medium">
+              <button type="button" onClick={() => setMostrarEntrevista(true)} className="inline-flex items-center gap-1 text-[13px] text-flow-600 hover:text-flow-700 font-medium">
                 <CalendarPlus size={12} /> Agendar entrevista
               </button>
             ))}
@@ -362,11 +362,11 @@ function TarjetaPostulacion({
           <button
             type="button"
             onClick={() => onMarcarFinal(postulacion.id, 'contratado')}
-            className="inline-flex items-center gap-1 text-[11px] text-alto hover:underline font-medium"
+            className="inline-flex items-center gap-1 text-[13px] text-alto hover:underline font-medium"
           >
             <UserCheck size={12} /> Contratar
           </button>
-          <button type="button" onClick={descartar} className="inline-flex items-center gap-1 text-[11px] text-bajo hover:underline font-medium">
+          <button type="button" onClick={descartar} className="inline-flex items-center gap-1 text-[13px] text-bajo hover:underline font-medium">
             <UserX size={12} /> Descartar
           </button>
         </div>
@@ -459,7 +459,7 @@ function FilaEntrevista({ entrevista, vacanteId, puedeRegistrar }: { entrevista:
   const [notas, setNotas] = useState(entrevista.notas ?? '');
 
   return (
-    <li className="text-[11px] bg-marmol-50 rounded-lg px-2 py-1.5">
+    <li className="text-[13px] bg-marmol-50 rounded-lg px-2 py-1.5">
       <div className="flex items-center justify-between gap-2">
         <span className="text-marmol-600">
           {new Date(entrevista.fecha_hora).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })}
@@ -467,7 +467,7 @@ function FilaEntrevista({ entrevista, vacanteId, puedeRegistrar }: { entrevista:
         </span>
         {puedeRegistrar ? (
           <select
-            className="rounded border border-marmol-200 px-1 py-0.5 text-[11px] bg-white"
+            className="rounded border border-marmol-200 px-1 py-0.5 text-[13px] bg-white"
             defaultValue={entrevista.estado}
             disabled={pending}
             onChange={(e) => startTransition(() => { actualizarEntrevista(entrevista.id, e.target.value as any, notas, vacanteId); })}
@@ -482,7 +482,7 @@ function FilaEntrevista({ entrevista, vacanteId, puedeRegistrar }: { entrevista:
       </div>
       {puedeRegistrar && (
         <textarea
-          className="w-full mt-1 rounded border border-marmol-200 px-1.5 py-1 text-[11px]"
+          className="w-full mt-1 rounded border border-marmol-200 px-1.5 py-1 text-[13px]"
           rows={2}
           placeholder="Notas de la entrevista…"
           value={notas}
@@ -522,7 +522,7 @@ function FormularioEntrevista({
 
   return (
     <div className="space-y-1.5">
-      <select className="w-full rounded-lg border border-marmol-200 px-2 py-1 text-[11px]" value={entrevistadorId} onChange={(e) => setEntrevistadorId(e.target.value)}>
+      <select className="w-full rounded-lg border border-marmol-200 px-2 py-1 text-[13px]" value={entrevistadorId} onChange={(e) => setEntrevistadorId(e.target.value)}>
         <option value="">Entrevistador…</option>
         {colaboradores.map((c) => (
           <option key={c.id} value={c.id}>
@@ -530,21 +530,21 @@ function FormularioEntrevista({
           </option>
         ))}
       </select>
-      <input type="datetime-local" className="w-full rounded-lg border border-marmol-200 px-2 py-1 text-[11px]" value={fechaHora} onChange={(e) => setFechaHora(e.target.value)} />
-      <select className="w-full rounded-lg border border-marmol-200 px-2 py-1 text-[11px]" value={modalidad} onChange={(e) => setModalidad(e.target.value as any)}>
+      <input type="datetime-local" className="w-full rounded-lg border border-marmol-200 px-2 py-1 text-[13px]" value={fechaHora} onChange={(e) => setFechaHora(e.target.value)} />
+      <select className="w-full rounded-lg border border-marmol-200 px-2 py-1 text-[13px]" value={modalidad} onChange={(e) => setModalidad(e.target.value as any)}>
         <option value="virtual">Virtual</option>
         <option value="presencial">Presencial</option>
         <option value="telefonica">Telefónica</option>
       </select>
       <div className="flex items-center gap-2">
-        <button type="button" onClick={agendar} disabled={pending || !fechaHora} className="rounded-lg bg-flow-500 hover:bg-flow-600 disabled:opacity-50 text-white text-[11px] font-medium px-2.5 py-1">
+        <button type="button" onClick={agendar} disabled={pending || !fechaHora} className="rounded-lg bg-flow-500 hover:bg-flow-600 disabled:opacity-50 text-white text-[13px] font-medium px-2.5 py-1">
           Agendar
         </button>
-        <button type="button" onClick={onListo} className="text-[11px] text-marmol-400 hover:text-marmol-600">
+        <button type="button" onClick={onListo} className="text-[13px] text-marmol-400 hover:text-marmol-600">
           Cancelar
         </button>
       </div>
-      {error && <p className="text-[11px] text-bajo">{error}</p>}
+      {error && <p className="text-[13px] text-bajo">{error}</p>}
     </div>
   );
 }

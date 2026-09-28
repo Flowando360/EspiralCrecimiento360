@@ -227,7 +227,7 @@ export function ListaHistorialMovimientos({
                       </option>
                     ))}
                   </select>
-                  <p className="text-[11px] text-marmol-400 mt-1">
+                  <p className="text-[13px] text-marmol-400 mt-1">
                     Al guardar, la ficha queda inactiva con esta fecha y motivo, y si la persona tenía cuenta
                     de acceso, se retira automáticamente (ya no podrá iniciar sesión).
                   </p>
@@ -247,7 +247,7 @@ export function ListaHistorialMovimientos({
                     ))}
                   </select>
                   <input ref={archivoRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="text-sm w-full" />
-                  <p className="text-[11px] text-marmol-400">Soporte o descargo firmado (opcional).</p>
+                  <p className="text-[13px] text-marmol-400">Soporte o descargo firmado (opcional).</p>
                 </div>
               )}
               <textarea

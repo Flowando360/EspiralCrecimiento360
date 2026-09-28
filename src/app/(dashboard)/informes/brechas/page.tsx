@@ -20,7 +20,7 @@ function Celda({ promedio, conDato, tamano, semaforo, sufijo = '' }: { promedio:
         {promedio}
         {sufijo}
       </span>
-      {conDato < tamano && <span className="text-[10px] text-marmol-400">({conDato}/{tamano})</span>}
+      {conDato < tamano && <span className="text-[12px] text-marmol-400">({conDato}/{tamano})</span>}
     </div>
   );
 }

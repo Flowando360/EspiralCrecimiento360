@@ -114,7 +114,7 @@ export function ListaAspectosSer({
                 className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-xs"
               />
               {guardados[a.id] && (
-                <p className="text-[11px] text-alto flex items-center gap-1 mt-1">
+                <p className="text-[13px] text-alto flex items-center gap-1 mt-1">
                   <Check size={10} /> Guardado
                 </p>
               )}

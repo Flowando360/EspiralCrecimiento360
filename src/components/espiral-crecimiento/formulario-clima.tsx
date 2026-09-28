@@ -138,7 +138,7 @@ export function FormularioClima({
               </button>
             ))}
           </div>
-          <div className="flex justify-between text-[11px] text-marmol-400 mt-1 px-0.5">
+          <div className="flex justify-between text-[13px] text-marmol-400 mt-1 px-0.5">
             <span>Muy en desacuerdo</span>
             <span>Muy de acuerdo</span>
           </div>
@@ -154,7 +154,7 @@ export function FormularioClima({
           placeholder="Tu comentario…"
           className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
         />
-        <p className="text-[11px] text-marmol-400 mt-1">
+        <p className="text-[13px] text-marmol-400 mt-1">
           Solo Talento Humano puede leer comentarios de texto libre — ni tu líder ni gerencia los ven.
         </p>
       </div>

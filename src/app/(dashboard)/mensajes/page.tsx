@@ -74,7 +74,7 @@ export default async function MensajesPage() {
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-xs text-marmol-400">{formatearFecha(c.ultimaFecha)}</span>
                 {c.noLeidos > 0 && (
-                  <span className="h-5 min-w-5 rounded-full bg-flow-500 text-white text-[10px] flex items-center justify-center px-1.5">
+                  <span className="h-5 min-w-5 rounded-full bg-flow-500 text-white text-[12px] flex items-center justify-center px-1.5">
                     {c.noLeidos}
                   </span>
                 )}

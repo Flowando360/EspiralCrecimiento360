@@ -170,7 +170,7 @@ export function DiagnosticoIso9001Form({
                     {puedeEditar && esDebil && (
                       <Link
                         href={`/procesos-gestion/acpm?origenDetalle=${encodeURIComponent(descripcionAcpm)}&descripcion=${encodeURIComponent(`Cerrar la brecha detectada en el numeral ${item.numeral} (${item.titulo}) del diagnóstico ISO 9001.`)}`}
-                        className="inline-flex items-center gap-1 text-[11px] text-flow-600 hover:text-flow-700 font-medium mt-1.5"
+                        className="inline-flex items-center gap-1 text-[13px] text-flow-600 hover:text-flow-700 font-medium mt-1.5"
                       >
                         <ListChecks size={12} /> Crear ACPM para esta brecha
                       </Link>

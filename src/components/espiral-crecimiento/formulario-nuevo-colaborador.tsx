@@ -112,7 +112,7 @@ export function FormularioNuevoColaborador({
               </option>
             ))}
           </select>
-          <p className="text-[11px] text-marmol-400">
+          <p className="text-[13px] text-marmol-400">
             Úsalo cuando ya le crearon el usuario para iniciar sesión desde Usuarios y roles, pero
             todavía no tiene su ficha de colaborador.
           </p>
@@ -145,7 +145,7 @@ export function FormularioNuevoColaborador({
           <div className="sm:col-span-2">
             <label className={label}>Correo</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@marmolesyservicios.com" className={campo} />
-            <p className="text-[11px] text-marmol-400 mt-1">
+            <p className="text-[13px] text-marmol-400 mt-1">
               Este es el correo de contacto de la persona. La cuenta para iniciar sesión se crea aparte, en Usuarios y roles.
             </p>
           </div>
@@ -224,7 +224,7 @@ export function FormularioNuevoColaborador({
 
       <section className="space-y-4 pt-4 border-t border-marmol-100">
         <h2 className="font-display font-semibold text-secundario text-sm">Afiliaciones (SG-SST)</h2>
-        <p className="text-[11px] text-marmol-400 -mt-2">
+        <p className="text-[13px] text-marmol-400 -mt-2">
           Son datos de referencia para el certificado laboral y trazabilidad — el sistema no los calcula ni los valida contra ninguna entidad.
         </p>
         <div className="grid sm:grid-cols-2 gap-4">

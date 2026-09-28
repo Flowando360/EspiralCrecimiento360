@@ -201,7 +201,7 @@ export function FormularioCrearUsuario({
               placeholder="nombre.apellido"
               className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm font-mono"
             />
-            <p className="text-[11px] text-marmol-400 mt-1">
+            <p className="text-[13px] text-marmol-400 mt-1">
               Se sugiere solo a partir del nombre — independiente del correo. Puedes corregirlo si hay un
               choque con otra persona o el nombre trae algún error.
             </p>

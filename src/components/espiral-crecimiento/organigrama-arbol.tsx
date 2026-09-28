@@ -17,7 +17,7 @@ function NodoArbol({ nodo, colaboradores }: { nodo: NodoColaborador; colaborador
     <div className="flex flex-col items-center">
       <div className="rounded-lg border border-marmol-200 bg-white px-3 py-2 text-center shadow-sm min-w-[150px]">
         <p className="text-xs font-semibold text-marmol-900">{nodo.nombre_completo}</p>
-        <p className="text-[11px] text-marmol-400">{nodo.cargo?.nombre}</p>
+        <p className="text-[13px] text-marmol-400">{nodo.cargo?.nombre}</p>
       </div>
       {hijos.length > 0 && (
         <>

@@ -121,7 +121,7 @@ export function TableroMakigami({
                 : undefined
             }
           />
-          <div className="flex flex-wrap gap-x-4 gap-y-1 px-1 text-[11px] text-marmol-400">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 px-1 text-[13px] text-marmol-400">
             <span>
               <span className="inline-block w-5 border-t-2 border-dashed border-amber-600 align-middle" /> Traspaso entre áreas
             </span>

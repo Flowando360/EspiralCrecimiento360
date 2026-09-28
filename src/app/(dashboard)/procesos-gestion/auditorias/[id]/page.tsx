@@ -53,8 +53,8 @@ export default async function DetalleAuditoriaPage({ params }: { params: { id: s
         </Link>
         <div className="flex items-center gap-2 flex-wrap">
           {auditoria.codigo && <span className="text-sm font-semibold text-marmol-400">{auditoria.codigo}</span>}
-          <span className="text-[11px] rounded-full px-2 py-0.5 font-medium badge-marmol">{ETIQUETA_ESTADO[auditoria.estado]}</span>
-          {auditoria.marco_normativo && <span className="text-[11px] rounded-full bg-flow-50 text-flow-700 px-2 py-0.5 font-medium">{ETIQUETA_MARCO[auditoria.marco_normativo]}</span>}
+          <span className="text-[13px] rounded-full px-2 py-0.5 font-medium badge-marmol">{ETIQUETA_ESTADO[auditoria.estado]}</span>
+          {auditoria.marco_normativo && <span className="text-[13px] rounded-full bg-flow-50 text-flow-700 px-2 py-0.5 font-medium">{ETIQUETA_MARCO[auditoria.marco_normativo]}</span>}
         </div>
         <h1 className="font-display text-2xl font-semibold text-secundario mt-1">{auditoria.objetivo || 'Auditoría interna'}</h1>
         <p className="text-sm text-marmol-500 mt-1">

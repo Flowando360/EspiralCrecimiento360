@@ -239,17 +239,17 @@ function TarjetaHallazgo({
       <div className="flex items-start justify-between gap-1.5">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            {hallazgo.codigo && <span className="text-[10px] font-semibold text-marmol-400">{hallazgo.codigo}</span>}
-            <span className={cn('text-[10px] rounded-full px-1.5 py-0.5 font-medium', CLASE_TIPO[hallazgo.tipo])}>{ETIQUETA_TIPO[hallazgo.tipo]}</span>
+            {hallazgo.codigo && <span className="text-[12px] font-semibold text-marmol-400">{hallazgo.codigo}</span>}
+            <span className={cn('text-[12px] rounded-full px-1.5 py-0.5 font-medium', CLASE_TIPO[hallazgo.tipo])}>{ETIQUETA_TIPO[hallazgo.tipo]}</span>
           </div>
           <p className="text-sm font-medium text-marmol-800 mt-1 break-words">{hallazgo.descripcion}</p>
           {proceso && <p className="text-xs text-marmol-400 mt-1">{proceso}</p>}
           <div className="flex items-center gap-2 flex-wrap mt-1.5">
-            <span className="text-[10px] text-marmol-400 inline-flex items-center gap-1">
+            <span className="text-[12px] text-marmol-400 inline-flex items-center gap-1">
               <Calendar size={10} /> {formatearFecha(hallazgo.fecha_deteccion)}
             </span>
             {responsable && (
-              <span className="text-[10px] text-marmol-400 inline-flex items-center gap-1">
+              <span className="text-[12px] text-marmol-400 inline-flex items-center gap-1">
                 <User size={10} /> {responsable}
               </span>
             )}
@@ -258,7 +258,7 @@ function TarjetaHallazgo({
             <Link
               href={`/procesos-gestion/acpm?origenHallazgo=${hallazgo.id}${hallazgo.proceso_id ? `&proceso=${hallazgo.proceso_id}` : ''}`}
               onPointerDown={(e) => e.stopPropagation()}
-              className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-flow-600 hover:text-flow-700 font-medium"
+              className="mt-1.5 inline-flex items-center gap-1 text-[12px] text-flow-600 hover:text-flow-700 font-medium"
             >
               <ListChecks size={10} /> Crear ACPM
             </Link>

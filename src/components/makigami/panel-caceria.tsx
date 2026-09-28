@@ -70,7 +70,7 @@ export function PanelCaceria({
     <div className="space-y-4">
       <div>
         <div className="flex items-center gap-2 text-xs text-marmol-500">
-          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-secundario text-[10px] font-bold text-white">{numero}</span>
+          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-secundario text-[12px] font-bold text-white">{numero}</span>
           {carril?.nombre}
           {paso.clasificacion && <span className="ml-auto">{CLASIFICACIONES[paso.clasificacion].nombre}</span>}
         </div>
@@ -112,7 +112,7 @@ export function PanelCaceria({
                 <span className={cn('text-base transition', marcado && 'animate-pop')}>{d.emoji}</span>
                 <span className="leading-tight">{d.nombre}</span>
                 {n > 0 && (
-                  <span className={cn('ml-auto rounded-full px-1.5 text-[10px] font-bold', validado ? 'bg-bajo text-white' : 'bg-marmol-100 text-marmol-600')}>
+                  <span className={cn('ml-auto rounded-full px-1.5 text-[12px] font-bold', validado ? 'bg-bajo text-white' : 'bg-marmol-100 text-marmol-600')}>
                     {validado ? '✓' : ''}
                     {n}
                   </span>

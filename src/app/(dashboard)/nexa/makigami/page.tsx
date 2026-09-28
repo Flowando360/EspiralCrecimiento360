@@ -120,10 +120,10 @@ export default async function MakigamiPage() {
                 return (
                   <Link key={r.id} href={`/nexa/makigami/${r.id}`} className="card group p-4 transition hover:-translate-y-0.5 hover:border-flow-300 hover:shadow-md">
                     <div className="flex items-center justify-between gap-2">
-                      <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-semibold', TONO_ESTADO[r.estado as EstadoReto])}>
+                      <span className={cn('rounded-full px-2 py-0.5 text-[13px] font-semibold', TONO_ESTADO[r.estado as EstadoReto])}>
                         {ETIQUETA_ESTADO[r.estado as EstadoReto]}
                       </span>
-                      {r.fecha_limite && r.estado === 'caceria' && <span className="text-[11px] text-marmol-400">Hasta {formatearFecha(r.fecha_limite)}</span>}
+                      {r.fecha_limite && r.estado === 'caceria' && <span className="text-[13px] text-marmol-400">Hasta {formatearFecha(r.fecha_limite)}</span>}
                     </div>
                     <h3 className="mt-2 font-medium text-marmol-900 group-hover:text-secundario">{r.titulo}</h3>
                     {r.proceso && (
@@ -135,15 +135,15 @@ export default async function MakigamiPage() {
                     <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                       <div>
                         <p className="font-display font-semibold text-secundario">{pasosReto.length}</p>
-                        <p className="text-[10px] text-marmol-400">pasos</p>
+                        <p className="text-[12px] text-marmol-400">pasos</p>
                       </div>
                       <div>
                         <p className="font-display font-semibold text-bajo">{cazasReto.length}</p>
-                        <p className="text-[10px] text-marmol-400">cazas</p>
+                        <p className="text-[12px] text-marmol-400">cazas</p>
                       </div>
                       <div>
                         <p className="font-display font-semibold text-flow-700">{cazadores}</p>
-                        <p className="text-[10px] text-marmol-400">cazadores</p>
+                        <p className="text-[12px] text-marmol-400">cazadores</p>
                       </div>
                     </div>
                     {m.tiempoTotal > 0 && (
@@ -186,7 +186,7 @@ export default async function MakigamiPage() {
                   >
                     <p className="text-2xl">{ins.emoji}</p>
                     <p className="text-xs font-semibold text-marmol-800">{ins.nombre}</p>
-                    <p className="text-[10px] leading-tight text-marmol-400">{ins.descripcion}</p>
+                    <p className="text-[12px] leading-tight text-marmol-400">{ins.descripcion}</p>
                   </div>
                 );
               })}
@@ -214,7 +214,7 @@ export default async function MakigamiPage() {
                   </li>
                 ))}
               </ol>
-              <p className="mt-2 text-[11px] text-marmol-400">Los puntos de cada cacería se suman al ranking general de Reconocimientos.</p>
+              <p className="mt-2 text-[13px] text-marmol-400">Los puntos de cada cacería se suman al ranking general de Reconocimientos.</p>
             </div>
           )}
         </div>
@@ -239,7 +239,7 @@ export default async function MakigamiPage() {
         <div className="mt-4 grid gap-3 sm:grid-cols-4 text-xs text-marmol-600">
           {ETAPAS_RETO.map((e, i) => (
             <div key={e.estado} className="flex gap-2">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secundario text-[11px] font-bold text-white">{i + 1}</span>
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secundario text-[13px] font-bold text-white">{i + 1}</span>
               <span>
                 <strong className="text-marmol-800">{e.titulo}.</strong> {e.descripcion}
               </span>

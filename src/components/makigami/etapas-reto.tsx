@@ -50,7 +50,7 @@ export function EtapasReto({ retoId, estado, esFacilitador }: { retoId: string; 
             <p className={cn('mt-1.5 text-xs font-semibold', i === idx ? 'text-secundario' : i < idx ? 'text-flow-700' : 'text-marmol-400')}>
               {i + 1}. {e.titulo}
             </p>
-            <p className="hidden sm:block text-[11px] leading-tight text-marmol-400">{e.descripcion}</p>
+            <p className="hidden sm:block text-[13px] leading-tight text-marmol-400">{e.descripcion}</p>
           </li>
         ))}
       </ol>

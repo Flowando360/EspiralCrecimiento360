@@ -203,7 +203,7 @@ export function MapaProcesos({
             return (
               <div key={tipo} className="rounded-xl border border-marmol-100 bg-marmol-50/60 p-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className={cn('text-[11px] font-semibold rounded-full px-2 py-0.5', info.badge)}>{info.titulo}</span>
+                  <span className={cn('text-[13px] font-semibold rounded-full px-2 py-0.5', info.badge)}>{info.titulo}</span>
                   <span className="text-xs text-marmol-400">{info.descripcion}</span>
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -226,7 +226,7 @@ export function MapaProcesos({
           {procesosOrdenados.some((p) => !p.tipo) && (
             <div className="rounded-xl border border-dashed border-marmol-200 p-3">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-[11px] font-semibold rounded-full px-2 py-0.5 badge-marmol">Sin clasificar</span>
+                <span className="text-[13px] font-semibold rounded-full px-2 py-0.5 badge-marmol">Sin clasificar</span>
                 <span className="text-xs text-marmol-400">Procesos documentados antes del mapa — edítalos para ubicarlos en una categoría</span>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -280,7 +280,7 @@ export function MapaProcesos({
                   </td>
                   <td className="px-2 py-2 text-marmol-600">{p.tipo ? TIPO_INFO[p.tipo].titulo.replace('Procesos ', '') : 'Sin clasificar'}</td>
                   <td className="px-2 py-2">
-                    <span className={cn('text-[11px] rounded-full px-2 py-0.5 font-medium', ESTADO_INFO[p.estado].clase)}>{ESTADO_INFO[p.estado].etiqueta}</span>
+                    <span className={cn('text-[13px] rounded-full px-2 py-0.5 font-medium', ESTADO_INFO[p.estado].clase)}>{ESTADO_INFO[p.estado].etiqueta}</span>
                   </td>
                   <td className="px-2 py-2">
                     <IndicadorMadurez puntaje={p.indice_madurez} />
@@ -397,12 +397,12 @@ function TarjetaProceso({
       <div className="flex items-start justify-between gap-1.5">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap mb-1">
-            {proceso.codigo && <span className="text-[10px] font-semibold text-marmol-400">{proceso.codigo}</span>}
+            {proceso.codigo && <span className="text-[12px] font-semibold text-marmol-400">{proceso.codigo}</span>}
             {puedeEditar ? (
               <select
                 value={proceso.estado}
                 onChange={(e) => onCambiarEstado(e.target.value as EstadoProceso)}
-                className={cn('text-[10px] rounded-full px-1.5 py-0.5 font-medium border-0 cursor-pointer', ESTADO_INFO[proceso.estado].clase)}
+                className={cn('text-[12px] rounded-full px-1.5 py-0.5 font-medium border-0 cursor-pointer', ESTADO_INFO[proceso.estado].clase)}
               >
                 {Object.entries(ESTADO_INFO).map(([v, info]) => (
                   <option key={v} value={v}>
@@ -411,7 +411,7 @@ function TarjetaProceso({
                 ))}
               </select>
             ) : (
-              <span className={cn('text-[10px] rounded-full px-1.5 py-0.5 font-medium', ESTADO_INFO[proceso.estado].clase)}>{ESTADO_INFO[proceso.estado].etiqueta}</span>
+              <span className={cn('text-[12px] rounded-full px-1.5 py-0.5 font-medium', ESTADO_INFO[proceso.estado].clase)}>{ESTADO_INFO[proceso.estado].etiqueta}</span>
             )}
           </div>
           <Link href={`/procesos-gestion/${proceso.id}`} className="text-sm font-medium text-marmol-800 hover:text-flow-600 break-words">
@@ -421,7 +421,7 @@ function TarjetaProceso({
           {proceso.marcos.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1.5">
               {proceso.marcos.map((m) => (
-                <span key={m} className="text-[10px] rounded-full bg-flow-50 text-flow-700 px-1.5 py-0.5 font-medium">
+                <span key={m} className="text-[12px] rounded-full bg-flow-50 text-flow-700 px-1.5 py-0.5 font-medium">
                   {ETIQUETA_MARCO[m]}
                 </span>
               ))}
@@ -453,7 +453,7 @@ function IndicadorMadurez({ puntaje }: { puntaje: number }) {
       <div className="w-14 h-1.5 rounded-full bg-marmol-100 overflow-hidden">
         <div className={cn('h-full rounded-full', clase)} style={{ width: `${puntaje}%` }} />
       </div>
-      <span className="text-[10px] text-marmol-400">{puntaje}%</span>
+      <span className="text-[12px] text-marmol-400">{puntaje}%</span>
     </div>
   );
 }

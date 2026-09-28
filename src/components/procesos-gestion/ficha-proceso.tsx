@@ -111,7 +111,7 @@ function ColumnaElementos({
   return (
     <div>
       <p className="text-sm font-semibold text-marmol-700">{columna.titulo}</p>
-      <p className="text-[11px] text-marmol-400 mb-2">{columna.ayuda}</p>
+      <p className="text-[13px] text-marmol-400 mb-2">{columna.ayuda}</p>
       <div className="space-y-1.5 min-h-[40px]">
         {elementos.map((e) => (
           <div key={e.id} className="card p-2.5 group">
@@ -119,7 +119,7 @@ function ColumnaElementos({
               <div className="min-w-0">
                 <p className="text-xs text-marmol-700 break-words">{e.descripcion}</p>
                 {nombreProceso(e.proceso_relacionado_id) && (
-                  <p className="text-[10px] text-marmol-400 mt-0.5">
+                  <p className="text-[12px] text-marmol-400 mt-0.5">
                     {columna.tipo === 'salida' ? 'Va para: ' : 'Viene de: '}
                     {nombreProceso(e.proceso_relacionado_id)}
                   </p>

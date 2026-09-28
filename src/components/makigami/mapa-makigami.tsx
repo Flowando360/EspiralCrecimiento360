@@ -121,7 +121,7 @@ export function MapaMakigami({
         {pasos.map((p, i) => (
           <div
             key={`h-${p.id}`}
-            className="flex items-center justify-center text-[11px] font-medium uppercase tracking-wide text-marmol-400 border-b border-marmol-200"
+            className="flex items-center justify-center text-[13px] font-medium uppercase tracking-wide text-marmol-400 border-b border-marmol-200"
             style={{ gridColumn: i + 2, gridRow: 1 }}
           >
             Paso {i + 1}
@@ -193,14 +193,14 @@ export function MapaMakigami({
               style={{ gridColumn: i + 2, gridRow: fila + 2, boxShadow: seleccionado ? undefined : SOMBRA_CALOR[nivel] }}
             >
               <div className="flex items-center justify-between gap-1 mb-1">
-                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-secundario text-[10px] font-bold text-white">{i + 1}</span>
+                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-secundario text-[12px] font-bold text-white">{i + 1}</span>
                 {p.clasificacion && (
-                  <span className={cn('rounded px-1 text-[10px] font-semibold', TONO_CLASIFICACION[p.clasificacion])} title={CLASIFICACIONES[p.clasificacion].nombre}>
+                  <span className={cn('rounded px-1 text-[12px] font-semibold', TONO_CLASIFICACION[p.clasificacion])} title={CLASIFICACIONES[p.clasificacion].nombre}>
                     {CLASIFICACIONES[p.clasificacion].corto}
                   </span>
                 )}
                 {mostrarCalor && total > 0 && (
-                  <span className={cn('ml-auto text-[11px] font-semibold', nivel >= 3 ? 'text-bajo' : 'text-medio')} title={`${total} cazas en este paso`}>
+                  <span className={cn('ml-auto text-[13px] font-semibold', nivel >= 3 ? 'text-bajo' : 'text-medio')} title={`${total} cazas en este paso`}>
                     🔥 {total}
                   </span>
                 )}
@@ -212,7 +212,7 @@ export function MapaMakigami({
                     key={h.tipo}
                     title={`${DESPERDICIOS[h.tipo as TipoDesperdicio].nombre}: ${h.cazas.length}${h.validado ? ' · validado por el equipo' : ''}`}
                     className={cn(
-                      'inline-flex items-center gap-0.5 rounded-full px-1.5 text-[10px] leading-4',
+                      'inline-flex items-center gap-0.5 rounded-full px-1.5 text-[12px] leading-4',
                       h.validado ? 'bg-red-100 text-bajo ring-1 ring-red-300 font-semibold' : 'bg-marmol-100 text-marmol-600'
                     )}
                   >
@@ -220,7 +220,7 @@ export function MapaMakigami({
                     {h.cazas.length}
                   </span>
                 ))}
-                {hallazgos.length > 4 && <span className="text-[10px] text-marmol-400">+{hallazgos.length - 4}</span>}
+                {hallazgos.length > 4 && <span className="text-[12px] text-marmol-400">+{hallazgos.length - 4}</span>}
               </div>
             </button>
           );
@@ -244,7 +244,7 @@ export function MapaMakigami({
         {(['Trabajo', 'Espera'] as const).map((etiqueta, f) => (
           <div
             key={etiqueta}
-            className="sticky left-0 z-20 flex items-center gap-1 px-2 sm:px-3 bg-marmol-100 border-r border-b border-marmol-200 text-[10px] sm:text-[11px] font-semibold uppercase sm:tracking-wide text-marmol-500"
+            className="sticky left-0 z-20 flex items-center gap-1 px-2 sm:px-3 bg-marmol-100 border-r border-b border-marmol-200 text-[12px] sm:text-[13px] font-semibold uppercase sm:tracking-wide text-marmol-500"
             style={{ gridColumn: 1, gridRow: carriles.length + 2 + f }}
           >
             {etiqueta === 'Trabajo' ? '⚙️' : '⏳'} {etiqueta}

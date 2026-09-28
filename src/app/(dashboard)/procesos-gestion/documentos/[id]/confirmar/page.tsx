@@ -46,7 +46,7 @@ export default async function ConfirmarDocumentoPage({ params }: { params: { id:
       <div className="card p-5">
         <div className="flex items-center gap-2 flex-wrap mb-1">
           <span className="text-xs font-semibold text-marmol-400">{documento.codigo}</span>
-          <span className="text-[11px] rounded-full bg-flow-50 text-flow-700 px-2 py-0.5 font-medium">{ETIQUETA_TIPO_DOC[documento.tipo_documento]}</span>
+          <span className="text-[13px] rounded-full bg-flow-50 text-flow-700 px-2 py-0.5 font-medium">{ETIQUETA_TIPO_DOC[documento.tipo_documento]}</span>
         </div>
         <h1 className="font-display text-xl font-semibold text-secundario">{documento.nombre}</h1>
         <p className="text-sm text-marmol-500 mt-1">

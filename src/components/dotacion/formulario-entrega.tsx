@@ -220,7 +220,7 @@ export function FormularioEntrega({
         <div>
           <label className={label}>Vencimiento / renovación</label>
           <input className={campo} type="date" value={fechaVencimiento} onChange={(e) => setFechaVencimiento(e.target.value)} />
-          <p className="text-[11px] text-marmol-400 mt-0.5">Sugerido a 4 meses (referencia legal de EPP/uniformes) — corrígelo si aplica otro plazo.</p>
+          <p className="text-[13px] text-marmol-400 mt-0.5">Sugerido a 4 meses (referencia legal de EPP/uniformes) — corrígelo si aplica otro plazo.</p>
         </div>
       </div>
 

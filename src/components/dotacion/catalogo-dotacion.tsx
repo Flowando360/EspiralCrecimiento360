@@ -198,7 +198,7 @@ function FilaArticulo({
                 value={t.stock_minimo}
                 onChange={(e) => cambiarStockMinimo(t.id, e.target.value)}
                 title="Stock mínimo antes de avisar"
-                className="w-10 rounded border border-marmol-200 px-1 py-0.5 text-[11px]"
+                className="w-10 rounded border border-marmol-200 px-1 py-0.5 text-[13px]"
               />
               <button type="button" onClick={() => recibir(t.id)} title="Registrar entrada de bodega" className="text-flow-600 hover:text-flow-700">
                 <PackagePlus size={13} />

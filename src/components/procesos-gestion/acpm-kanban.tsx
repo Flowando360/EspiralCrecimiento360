@@ -257,8 +257,8 @@ function TarjetaAcpm({ item, proceso, responsable, onAbrir }: { item: Acpm; proc
   return (
     <div className="card p-3">
       <div className="flex items-center gap-1.5 flex-wrap">
-        {item.codigo && <span className="text-[10px] font-semibold text-marmol-400">{item.codigo}</span>}
-        <span className={cn('text-[10px] rounded-full px-1.5 py-0.5 font-medium', CLASE_TIPO_ACCION[item.tipo_accion])}>{ETIQUETA_TIPO_ACCION[item.tipo_accion]}</span>
+        {item.codigo && <span className="text-[12px] font-semibold text-marmol-400">{item.codigo}</span>}
+        <span className={cn('text-[12px] rounded-full px-1.5 py-0.5 font-medium', CLASE_TIPO_ACCION[item.tipo_accion])}>{ETIQUETA_TIPO_ACCION[item.tipo_accion]}</span>
       </div>
       <p className="text-sm font-medium text-marmol-800 mt-1 break-words">{item.descripcion}</p>
       {item.origen_href ? (
@@ -275,16 +275,16 @@ function TarjetaAcpm({ item, proceso, responsable, onAbrir }: { item: Acpm; proc
       {proceso && <p className="text-xs text-marmol-400 mt-1">{proceso}</p>}
       <div className="flex items-center gap-2 flex-wrap mt-1.5">
         {item.fecha_compromiso && (
-          <span className="text-[10px] text-marmol-400 inline-flex items-center gap-1">
+          <span className="text-[12px] text-marmol-400 inline-flex items-center gap-1">
             <Calendar size={10} /> {formatearFecha(item.fecha_compromiso)}
           </span>
         )}
         {responsable && (
-          <span className="text-[10px] text-marmol-400 inline-flex items-center gap-1">
+          <span className="text-[12px] text-marmol-400 inline-flex items-center gap-1">
             <User size={10} /> {responsable}
           </span>
         )}
-        {item.tareas.length > 0 && <span className="text-[10px] text-marmol-400">{completadas}/{item.tareas.length} tareas</span>}
+        {item.tareas.length > 0 && <span className="text-[12px] text-marmol-400">{completadas}/{item.tareas.length} tareas</span>}
       </div>
     </div>
   );

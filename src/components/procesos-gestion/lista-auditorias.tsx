@@ -89,10 +89,10 @@ export function ListaAuditorias({
             <Link href={`/procesos-gestion/auditorias/${a.id}`} className="min-w-0 group">
               <div className="flex items-center gap-1.5 flex-wrap">
                 {a.codigo && <span className="text-xs font-semibold text-marmol-400">{a.codigo}</span>}
-                <span className={cn('text-[11px] rounded-full px-2 py-0.5 font-medium', ETIQUETA_ESTADO[a.estado].clase)}>{ETIQUETA_ESTADO[a.estado].texto}</span>
-                {a.marco_normativo && <span className="text-[11px] rounded-full bg-flow-50 text-flow-700 px-2 py-0.5 font-medium">{ETIQUETA_MARCO[a.marco_normativo]}</span>}
+                <span className={cn('text-[13px] rounded-full px-2 py-0.5 font-medium', ETIQUETA_ESTADO[a.estado].clase)}>{ETIQUETA_ESTADO[a.estado].texto}</span>
+                {a.marco_normativo && <span className="text-[13px] rounded-full bg-flow-50 text-flow-700 px-2 py-0.5 font-medium">{ETIQUETA_MARCO[a.marco_normativo]}</span>}
                 {a.hallazgos_abiertos > 0 && (
-                  <span className="text-[11px] rounded-full badge-bajo px-2 py-0.5 font-medium">{a.hallazgos_abiertos} hallazgo{a.hallazgos_abiertos !== 1 ? 's' : ''} abierto{a.hallazgos_abiertos !== 1 ? 's' : ''}</span>
+                  <span className="text-[13px] rounded-full badge-bajo px-2 py-0.5 font-medium">{a.hallazgos_abiertos} hallazgo{a.hallazgos_abiertos !== 1 ? 's' : ''} abierto{a.hallazgos_abiertos !== 1 ? 's' : ''}</span>
                 )}
               </div>
               <p className="text-sm font-medium text-marmol-800 mt-1 group-hover:text-flow-600">{a.objetivo || 'Sin objetivo definido'}</p>

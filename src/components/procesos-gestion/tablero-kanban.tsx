@@ -455,13 +455,13 @@ function TarjetaCaso({
           {caso.descripcion && <p className="text-xs text-marmol-500 mt-0.5 line-clamp-2">{caso.descripcion}</p>}
 
           <div className="flex items-center gap-1.5 flex-wrap mt-2">
-            <span className={cn('text-[10px] rounded-full px-1.5 py-0.5 font-medium', CLASE_PRIORIDAD[caso.prioridad])}>
+            <span className={cn('text-[12px] rounded-full px-1.5 py-0.5 font-medium', CLASE_PRIORIDAD[caso.prioridad])}>
               {caso.prioridad}
             </span>
             {caso.fecha_limite && (
               <span
                 className={cn(
-                  'text-[10px] rounded-full px-1.5 py-0.5 font-medium inline-flex items-center gap-1',
+                  'text-[12px] rounded-full px-1.5 py-0.5 font-medium inline-flex items-center gap-1',
                   vencido ? 'badge-bajo' : 'bg-marmol-100 text-marmol-500'
                 )}
               >

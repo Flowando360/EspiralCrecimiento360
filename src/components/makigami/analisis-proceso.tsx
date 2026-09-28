@@ -49,7 +49,7 @@ export function AnalisisProceso({
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {tarjetas.map((t) => (
           <div key={t.etiqueta}>
-            <p className="text-[11px] font-medium text-marmol-500 leading-tight">{t.etiqueta}</p>
+            <p className="text-[13px] font-medium text-marmol-500 leading-tight">{t.etiqueta}</p>
             <p className={`font-display text-xl font-semibold ${t.tono}`}>{t.valor}</p>
           </div>
         ))}

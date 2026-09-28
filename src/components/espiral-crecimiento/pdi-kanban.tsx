@@ -162,12 +162,12 @@ function TarjetaPdi({ plan }: { plan: Plan }) {
   return (
     <div className="card p-3">
       <div className="flex items-center gap-1.5 flex-wrap mb-1">
-        <span className={cn('text-[10px] rounded-full px-1.5 py-0.5 font-medium capitalize', ORIGEN_COLOR[plan.origen])}>
+        <span className={cn('text-[12px] rounded-full px-1.5 py-0.5 font-medium capitalize', ORIGEN_COLOR[plan.origen])}>
           {plan.origen}
         </span>
         {plan.generado_automaticamente && (
           <span
-            className="text-[10px] rounded-full px-1.5 py-0.5 font-medium bg-crecimiento/10 text-crecimiento"
+            className="text-[12px] rounded-full px-1.5 py-0.5 font-medium bg-crecimiento/10 text-crecimiento"
             title="Generado automáticamente por el motor de brechas al cerrar la evaluación"
           >
             Automático
@@ -181,7 +181,7 @@ function TarjetaPdi({ plan }: { plan: Plan }) {
       {plan.fecha_compromiso && (
         <span
           className={cn(
-            'mt-2 inline-flex items-center gap-1 text-[10px] rounded-full px-1.5 py-0.5 font-medium',
+            'mt-2 inline-flex items-center gap-1 text-[12px] rounded-full px-1.5 py-0.5 font-medium',
             vencido ? 'badge-bajo' : 'bg-marmol-100 text-marmol-500'
           )}
         >

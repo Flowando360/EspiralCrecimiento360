@@ -44,7 +44,7 @@ export function RankingReto({
     <div className="card p-5">
       <div className="flex items-baseline justify-between mb-3">
         <h2 className="font-display font-semibold text-secundario">🏆 Cazadores de este reto</h2>
-        <span className="text-[11px] text-marmol-400">{puntosEntregados ? 'Puntos ya sumados en Reconocimientos' : 'Puntos en juego'}</span>
+        <span className="text-[13px] text-marmol-400">{puntosEntregados ? 'Puntos ya sumados en Reconocimientos' : 'Puntos en juego'}</span>
       </div>
       {filas.length === 0 ? (
         <p className="text-sm text-marmol-400">Nadie ha cazado todavía. ¡El primero se lleva el título de pionero!</p>
@@ -75,7 +75,7 @@ export function RankingReto({
       )}
       <div className="mt-4 grid grid-cols-2 gap-1.5 border-t border-marmol-100 pt-3">
         {INSIGNIAS.map((ins) => (
-          <div key={ins.id} className="flex items-start gap-1.5 text-[11px] text-marmol-500">
+          <div key={ins.id} className="flex items-start gap-1.5 text-[13px] text-marmol-500">
             <span className="text-base leading-none">{ins.emoji}</span>
             <span>
               <strong className="text-marmol-700">{ins.nombre}</strong> · {ins.descripcion}

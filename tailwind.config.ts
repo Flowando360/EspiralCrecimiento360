@@ -12,17 +12,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Escala recorrida un escalón hacia el oscuro a partir del 300 (2026-09-27,
+        // a pedido de Diana: "oscurece el gris de las letras, sin que dejen de ser
+        // grises, que contrasten mejor con el blanco de fondo"). 50/100/200 quedan
+        // igual (son casi siempre fondo/bordes claros, no letras). 300-800 toman el
+        // valor que antes tenía el escalón siguiente (más oscuro), y se agrega un 900
+        // nuevo, más oscuro que el anterior.
         marmol: {
           50: '#faf9f7',
           100: '#f2f0ec',
           200: '#e4e0d8',
-          300: '#cfc8ba',
-          400: '#aca194',
-          500: '#8a7f70',
-          600: '#6b6153',
-          700: '#524a40',
-          800: '#3a352e',
-          900: '#25211c',
+          300: '#aca194',
+          400: '#8a7f70',
+          500: '#6b6153',
+          600: '#524a40',
+          700: '#3a352e',
+          800: '#25211c',
+          900: '#17140f',
         },
         flow: {
           50: '#f0fdf4',
@@ -47,8 +53,9 @@ const config: Config = {
         // oscuro (secundario). Distinta a propósito de la paleta violeta del
         // aplicativo original — ver docs/sistema-diseno-y-lenguaje.md si se
         // vuelve a alinear con el original más adelante.
-        secundario: '#1E3A8A', // azul noche — encabezados, textos importantes, nav
+        secundario: '#1E3A8A', // azul noche — encabezados, textos importantes
         acento: '#A3E635', // verde lima — logros, insignias, gamificación
+        barra: '#0F1F52', // azul más oscuro que "secundario" — fondo de la barra de navegación superior
       },
       backgroundImage: {
         // Degradado verde → azul oscuro: hero, barras de progreso, tarjetas de logro
@@ -57,6 +64,20 @@ const config: Config = {
       fontFamily: {
         display: ['var(--font-display)', 'system-ui', 'sans-serif'],
         body: ['var(--font-body)', 'system-ui', 'sans-serif'],
+      },
+      // Toda la escala con tamaño de letra +2px (2026-09-27, a pedido de Diana:
+      // "súbele 2 puntos a cada tipo de letra en todo el aplicativo") — al
+      // redefinir la escala acá, cada clase text-xs/sm/base/lg/xl/2xl/3xl del
+      // proyecto entero queda más grande sin tener que tocar cada archivo. Los
+      // interlineados suben la misma cantidad, para conservar la proporción.
+      fontSize: {
+        xs: ['0.875rem', { lineHeight: '1.125rem' }], // 14px / 18px (antes 12px / 16px)
+        sm: ['1rem', { lineHeight: '1.375rem' }], // 16px / 22px (antes 14px / 20px)
+        base: ['1.125rem', { lineHeight: '1.625rem' }], // 18px / 26px (antes 16px / 24px)
+        lg: ['1.25rem', { lineHeight: '1.875rem' }], // 20px / 30px (antes 18px / 28px)
+        xl: ['1.375rem', { lineHeight: '1.875rem' }], // 22px / 30px (antes 20px / 28px)
+        '2xl': ['1.625rem', { lineHeight: '2.125rem' }], // 26px / 34px (antes 24px / 32px)
+        '3xl': ['2rem', { lineHeight: '2.375rem' }], // 32px / 38px (antes 30px / 36px)
       },
       borderRadius: {
         xl: '0.875rem',

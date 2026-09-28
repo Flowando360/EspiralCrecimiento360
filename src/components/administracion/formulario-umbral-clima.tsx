@@ -103,7 +103,7 @@ export function FormularioUmbralClima({ inicial }: { inicial: UmbralClimaInicial
             />
             <span className="text-sm text-marmol-500">%</span>
           </div>
-          <p className="text-[11px] text-marmol-400 mt-1">
+          <p className="text-[13px] text-marmol-400 mt-1">
             Se redondea siempre hacia arriba y nunca baja de 1 respuesta.
           </p>
         </div>
