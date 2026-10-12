@@ -9,6 +9,7 @@ import { User, HeartPulse, Paperclip } from 'lucide-react';
 import { FechasPersonalesForm } from '@/components/espiral-crecimiento/fechas-personales-form';
 import { NombrePreferidoForm } from '@/components/espiral-crecimiento/nombre-preferido-form';
 import { MisFechasEspeciales } from '@/components/espiral-crecimiento/mis-fechas-especiales';
+import { ConfirmarRecibido } from '@/components/dotacion/confirmar-recibido';
 
 const ETIQUETA_TIPO_INCAPACIDAD: Record<string, string> = {
   enfermedad_general: 'Enfermedad general',
@@ -88,6 +89,15 @@ export default async function MiPerfilPage() {
     }))
   );
 
+  // Dotación que el trabajador todavía debe confirmar como recibida.
+  const { data: dotacionesPorConfirmar } = await supabase
+    .from('dotacion_entregas')
+    .select('id, nombre_elemento, talla, cantidad, fecha_entrega, fecha_vencimiento')
+    .eq('colaborador_id', perfil.colaborador_id)
+    .eq('firma_confirmada', false)
+    .eq('estado', 'entregado')
+    .order('fecha_entrega', { ascending: false });
+
   const cargo = colaborador?.cargo as any;
   const lider = colaborador?.lider as any;
   const evaluacionResultadoId = (resultado?.evaluacion as any)?.id as string | undefined;
@@ -164,6 +174,28 @@ export default async function MiPerfilPage() {
               sistema.
             </p>
           )}
+        </div>
+      )}
+
+      {(dotacionesPorConfirmar ?? []).length > 0 && (
+        <div className="card p-4 space-y-3">
+          <div>
+            <h2 className="font-display font-semibold text-secundario text-sm">Dotación por confirmar</h2>
+            <p className="text-xs text-marmol-400 mt-0.5">Confirma que recibiste estos elementos en buenas condiciones.</p>
+          </div>
+          <div className="divide-y divide-marmol-100">
+            {(dotacionesPorConfirmar ?? []).map((d) => (
+              <div key={d.id} className="flex items-center justify-between gap-3 py-2.5 flex-wrap">
+                <div>
+                  <p className="text-sm font-medium text-marmol-800">
+                    {d.nombre_elemento} {d.talla ? `— talla ${d.talla}` : ''} {d.cantidad > 1 ? `× ${d.cantidad}` : ''}
+                  </p>
+                  <p className="text-xs text-marmol-400">Entregado el {formatearFecha(d.fecha_entrega)}</p>
+                </div>
+                <ConfirmarRecibido entregaId={d.id} />
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

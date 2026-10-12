@@ -2486,6 +2486,7 @@ export type Database = {
           es_vestuario_calzado: boolean
           id: string
           nombre: string
+          referencia: string | null
           requiere_talla: boolean
           updated_at: string
         }
@@ -2497,6 +2498,7 @@ export type Database = {
           es_vestuario_calzado?: boolean
           id?: string
           nombre: string
+          referencia?: string | null
           requiere_talla?: boolean
           updated_at?: string
         }
@@ -2508,6 +2510,7 @@ export type Database = {
           es_vestuario_calzado?: boolean
           id?: string
           nombre?: string
+          referencia?: string | null
           requiere_talla?: boolean
           updated_at?: string
         }
@@ -2560,6 +2563,7 @@ export type Database = {
         Row: {
           acta_firmada_url: string | null
           articulo_talla_id: string | null
+          buenas_condiciones: boolean
           cantidad: number
           categoria: Database["public"]["Enums"]["categoria_dotacion"]
           colaborador_id: string
@@ -2588,6 +2592,7 @@ export type Database = {
         Insert: {
           acta_firmada_url?: string | null
           articulo_talla_id?: string | null
+          buenas_condiciones?: boolean
           cantidad?: number
           categoria: Database["public"]["Enums"]["categoria_dotacion"]
           colaborador_id: string
@@ -2616,6 +2621,7 @@ export type Database = {
         Update: {
           acta_firmada_url?: string | null
           articulo_talla_id?: string | null
+          buenas_condiciones?: boolean
           cantidad?: number
           categoria?: Database["public"]["Enums"]["categoria_dotacion"]
           colaborador_id?: string
@@ -2717,6 +2723,55 @@ export type Database = {
             columns: ["entregado_por"]
             isOneToOne: false
             referencedRelation: "perfiles_usuario"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dotacion_kit_cargo: {
+        Row: {
+          articulo_id: string
+          cargo_id: string
+          cantidad: number
+          created_at: string
+          empresa_id: string
+          id: string
+        }
+        Insert: {
+          articulo_id: string
+          cargo_id: string
+          cantidad?: number
+          created_at?: string
+          empresa_id: string
+          id?: string
+        }
+        Update: {
+          articulo_id?: string
+          cargo_id?: string
+          cantidad?: number
+          created_at?: string
+          empresa_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dotacion_kit_cargo_articulo_id_fkey"
+            columns: ["articulo_id"]
+            isOneToOne: false
+            referencedRelation: "dotacion_catalogo_articulos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dotacion_kit_cargo_cargo_id_fkey"
+            columns: ["cargo_id"]
+            isOneToOne: false
+            referencedRelation: "cargos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dotacion_kit_cargo_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
             referencedColumns: ["id"]
           },
         ]
@@ -9371,6 +9426,7 @@ export type Database = {
         | "baby_shower"
         | "fecha_especial"
         | "dotacion_vencimiento"
+        | "dotacion_corte"
       tipo_contrato:
         | "indefinido"
         | "fijo"
@@ -9635,6 +9691,7 @@ export const Constants = {
         "baby_shower",
         "fecha_especial",
         "dotacion_vencimiento",
+        "dotacion_corte",
       ],
       tipo_contrato: [
         "indefinido",
