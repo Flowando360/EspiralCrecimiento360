@@ -15,12 +15,27 @@ export const moduloDotacion: ModuloAyuda = {
         {
           nombre: 'Registrar entrega (admin_th)',
           explicacion:
-            'Elige el colaborador y la categoría. Puede tomarse "Del catálogo" (elige artículo y talla ya cargados en el inventario — el stock baja solo) o "Texto libre" (nombre y talla escritos a mano, sin descontar inventario). La fecha de vencimiento/renovación se sugiere automáticamente a 4 meses desde la entrega (referencia legal usual de EPP/uniformes en Colombia), editable si aplica otro plazo.',
+            'Elige el colaborador y la categoría. Puede tomarse "Del catálogo" (elige artículo y talla ya cargados en el inventario — el stock baja solo) o "Texto libre" (nombre y talla escritos a mano, sin descontar inventario). En dotación, el periodo se calcula desde la fecha de entrega y la renovación es el próximo corte obligatorio (30 de abril, 31 de agosto o 20 de diciembre). Antes de guardar se verifica que el colaborador gane hasta 2 SMLMV y tenga más de 3 meses de antigüedad continua.',
+        },
+        {
+          nombre: 'Entrega no elegible (justificación)',
+          explicacion:
+            'Si el colaborador no cumple, la entrega queda bloqueada y se muestran los motivos. Admin_th puede entregarla de todos modos escribiendo una justificación, que queda registrada en la entrega.',
+        },
+        {
+          nombre: 'Bono de vestuario (admin_th)',
+          explicacion:
+            'Solo está disponible para artículos del catálogo marcados como vestuario o calzado. Canjeable únicamente por esos elementos; nunca en dinero.',
+        },
+        {
+          nombre: 'Uso: verificado / no usó (admin_th)',
+          explicacion:
+            'Registra si el trabajador usó la dotación. Si no la usó, el empleador queda eximido de entregarla en el periodo siguiente, y la app lo muestra como "No es obligatoria".',
         },
         { nombre: 'Confirmar recibido', explicacion: 'El propio colaborador confirma que recibió el elemento — queda marcado como "Firmado" con fecha y hora.' },
         { nombre: 'Adjuntar acta (foto o PDF)', explicacion: 'Para cuando la constancia se firma en papel en vez de confirmarse en la plataforma. Puede adjuntarla admin_th o el propio colaborador dueño de la entrega.' },
         { nombre: 'Cambiar estado (admin_th)', explicacion: 'Entregado / Devuelto / Perdido / Dañado — el checklist de devolución al momento de un retiro, o para registrar pérdida/daño en cualquier momento.' },
-        { nombre: 'Renovar antes de… (en rojo)', explicacion: 'Se resalta cuando la fecha de vencimiento está a 15 días o menos.' },
+        { nombre: 'Renovar antes de… (en rojo)', explicacion: 'Se resalta cuando la fecha de vencimiento (próximo corte obligatorio) está a 15 días o menos.' },
         { nombre: 'Catálogo e inventario / Reporte de consumo (admin_th)', explicacion: 'Accesos directos a las otras dos pantallas del módulo.' },
       ],
       notas: [
@@ -34,7 +49,7 @@ export const moduloDotacion: ModuloAyuda = {
       titulo: 'Catálogo e inventario',
       resumen: 'Artículos que la empresa maneja en bodega, agrupados por categoría, con existencias por talla.',
       camposYBotones: [
-        { nombre: 'Agregar artículo', explicacion: 'Categoría (texto libre, ej. Calzado, Camisas, Cascos), nombre, y si maneja tallas o no.' },
+        { nombre: 'Agregar artículo', explicacion: 'Categoría (texto libre, ej. Calzado, Camisas, Cascos), nombre, si maneja tallas o no, y si es vestuario o calzado (admite bono de vestuario).' },
         { nombre: 'Agregar talla', explicacion: 'Talla (o "Única" si no aplica), stock inicial y stock mínimo antes de avisar.' },
         { nombre: 'Recibir en bodega', explicacion: 'Suma unidades al stock disponible cuando llega una compra del proveedor.' },
         { nombre: 'Stock mínimo', explicacion: 'Editable en línea — cuando el disponible cae a ese nivel o menos, la talla se resalta en rojo con un ícono de alerta.' },

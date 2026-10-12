@@ -3,13 +3,14 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { redirect } from 'next/navigation';
 import { ArrowLeft, FileBarChart } from 'lucide-react';
+import { etiquetaPeriodo } from '@/lib/dotacion/normativa';
 
 const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
 export default async function ReporteConsumoDotacionPage({
   searchParams,
 }: {
-  searchParams?: { area?: string; cargo?: string; mes?: string };
+  searchParams?: { area?: string; cargo?: string; mes?: string; anio?: string };
 }) {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
@@ -57,6 +58,10 @@ export default async function ReporteConsumoDotacionPage({
   }
 
   const totalUnidades = filtradas.reduce((acc, f) => acc + f.cantidad, 0);
+
+  // Cumplimiento de los cortes obligatorios (30 abr, 31 ago, 20 dic): elegibles frente a entregados.
+  const anioCumplimiento = Number(searchParams?.anio) || new Date().getFullYear();
+  const { data: cumplimiento } = await supabase.rpc('fn_cumplimiento_dotacion', { p_anio: anioCumplimiento });
 
   const campo = 'rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm';
 
@@ -122,6 +127,61 @@ export default async function ReporteConsumoDotacionPage({
         <TablaAgrupada titulo="Por mes" filas={agrupar('mes').map((f) => ({ ...f, nombre: etiquetaMes(f.nombre) }))} />
         <TablaAgrupada titulo="Por área" filas={agrupar('area')} />
         <TablaAgrupada titulo="Por cargo" filas={agrupar('cargo')} />
+      </div>
+
+      <div className="card p-4 space-y-3">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h2 className="font-display font-semibold text-secundario text-sm">Cumplimiento de los cortes obligatorios {anioCumplimiento}</h2>
+            <p className="text-xs text-marmol-400 mt-0.5">
+              Colaboradores elegibles (≤ 2 SMLMV y más de 3 meses de antigüedad) frente a los que recibieron dotación en cada corte. El cálculo usa el salario actual de la ficha.
+            </p>
+          </div>
+          <form className="flex items-center gap-2" method="get">
+            {searchParams?.area && <input type="hidden" name="area" value={searchParams.area} />}
+            {searchParams?.cargo && <input type="hidden" name="cargo" value={searchParams.cargo} />}
+            {searchParams?.mes && <input type="hidden" name="mes" value={searchParams.mes} />}
+            <input className={`${campo} w-24`} type="number" name="anio" min={2000} max={2100} defaultValue={anioCumplimiento} />
+            <button type="submit" className="rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-700 text-sm px-3 py-1.5">
+              Ver año
+            </button>
+          </form>
+        </div>
+
+        {!cumplimiento || cumplimiento.length === 0 ? (
+          <p className="text-xs text-marmol-400">Sin datos.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs text-marmol-400 border-b border-marmol-100">
+                  <th className="font-medium pb-1.5">Corte</th>
+                  <th className="font-medium pb-1.5 text-right">Elegibles</th>
+                  <th className="font-medium pb-1.5 text-right">Con dotación</th>
+                  <th className="font-medium pb-1.5 text-right">Uso verificado</th>
+                  <th className="font-medium pb-1.5 text-right">No usó</th>
+                  <th className="font-medium pb-1.5 text-right">Uso pendiente</th>
+                  <th className="font-medium pb-1.5 text-right">Con excepción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cumplimiento.map((c) => (
+                  <tr key={c.corte} className="border-b border-marmol-50 last:border-0">
+                    <td className="py-1.5 text-marmol-700">
+                      {etiquetaPeriodo(anioCumplimiento, c.corte)} <span className="text-xs text-marmol-400">· {c.fecha_corte}</span>
+                    </td>
+                    <td className="py-1.5 text-right">{c.elegibles}</td>
+                    <td className="py-1.5 text-right">{c.entregados}</td>
+                    <td className="py-1.5 text-right">{c.uso_verificado}</td>
+                    <td className="py-1.5 text-right">{c.uso_no_verificado}</td>
+                    <td className="py-1.5 text-right">{c.uso_pendiente}</td>
+                    <td className="py-1.5 text-right">{c.con_excepcion}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

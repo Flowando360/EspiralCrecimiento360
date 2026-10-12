@@ -1,8 +1,9 @@
 'use client';
 
 import { useRef, useState, useTransition } from 'react';
-import { confirmarFirmaDotacion, actualizarEstadoDotacion, subirActaFirmada } from '@/app/(dashboard)/dotacion/actions';
-import { CheckCircle2, Clock, ShieldCheck, Camera, FileImage } from 'lucide-react';
+import { confirmarFirmaDotacion, actualizarEstadoDotacion, subirActaFirmada, registrarUsoDotacion } from '@/app/(dashboard)/dotacion/actions';
+import { CheckCircle2, Clock, ShieldCheck, Camera, FileImage, Ticket } from 'lucide-react';
+import { etiquetaPeriodo, type CorteDotacion } from '@/lib/dotacion/normativa';
 import type { RolUsuario } from '@/types/colaborador';
 
 type Entrega = {
@@ -17,6 +18,12 @@ type Entrega = {
   firma_confirmada: boolean;
   firmado_en: string | null;
   acta_firmada_url: string | null;
+  tipo_entrega: 'especie' | 'bono_vestuario';
+  periodo_anio: number | null;
+  periodo_corte: CorteDotacion | null;
+  uso_verificado: boolean | null;
+  uso_observacion: string | null;
+  excepcion_motivo: string | null;
   colaborador: { id: string; nombre_completo: string };
 };
 
@@ -48,9 +55,11 @@ function FilaEntrega({ entrega, puedeAdministrar, esPropia }: { entrega: Entrega
   const [pending, startTransition] = useTransition();
   const [subiendoActa, setSubiendoActa] = useState(false);
   const [actaUrl, setActaUrl] = useState(entrega.acta_firmada_url);
+  const [errorUso, setErrorUso] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const vencidaProximo = entrega.fecha_vencimiento && new Date(entrega.fecha_vencimiento) < new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
   const puedeAdjuntarActa = puedeAdministrar || esPropia;
+  const esDotacion = entrega.categoria === 'elemento_personal';
 
   function archivoActaSeleccionado(file: File | undefined) {
     if (!file) return;
@@ -66,22 +75,43 @@ function FilaEntrega({ entrega, puedeAdministrar, esPropia }: { entrega: Entrega
     });
   }
 
+  function cambiarUso(valor: string) {
+    const usoVerificado = valor === 'si' ? true : valor === 'no' ? false : null;
+    setErrorUso(null);
+    startTransition(async () => {
+      const res = await registrarUsoDotacion(entrega.id, usoVerificado);
+      if (!res.ok) setErrorUso(res.error);
+    });
+  }
+
+  const valorUso = entrega.uso_verificado === true ? 'si' : entrega.uso_verificado === false ? 'no' : 'pendiente';
+
   return (
-    <div className="flex items-center justify-between gap-3 px-4 py-3 flex-wrap">
-      <div>
-        <p className="font-medium text-marmol-800">
+    <div className="flex items-start justify-between gap-3 px-4 py-3 flex-wrap">
+      <div className="min-w-0">
+        <p className="font-medium text-marmol-800 flex items-center gap-2 flex-wrap">
           {entrega.nombre_elemento} {entrega.talla ? `— talla ${entrega.talla}` : ''} {entrega.cantidad > 1 ? `× ${entrega.cantidad}` : ''}
+          {entrega.tipo_entrega === 'bono_vestuario' && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium rounded-full px-2 py-0.5 bg-flow-50 text-flow-700">
+              <Ticket size={11} /> Bono de vestuario
+            </span>
+          )}
         </p>
         <p className="text-xs text-marmol-400">
-          {entrega.colaborador.nombre_completo} · {entrega.categoria === 'elemento_personal' ? 'Elemento personal' : 'Equipo de trabajo'} · Entregado{' '}
-          {entrega.fecha_entrega}
+          {entrega.colaborador.nombre_completo} · {esDotacion ? 'Dotación' : 'Equipo de trabajo'} · Entregado {entrega.fecha_entrega}
+          {esDotacion && entrega.periodo_anio && entrega.periodo_corte && <span> · {etiquetaPeriodo(entrega.periodo_anio, entrega.periodo_corte)}</span>}
           {entrega.fecha_vencimiento && (
             <span className={vencidaProximo ? 'text-medio font-medium' : ''}> · Renovar antes de {entrega.fecha_vencimiento}</span>
           )}
         </p>
+        {entrega.excepcion_motivo && <p className="text-xs text-medio mt-0.5">Entregada con excepción: {entrega.excepcion_motivo}</p>}
+        {esDotacion && entrega.uso_verificado === false && (
+          <p className="text-xs text-marmol-500 mt-0.5">No se usó: el empleador queda eximido de entregarla en el periodo siguiente.{entrega.uso_observacion ? ` ${entrega.uso_observacion}` : ''}</p>
+        )}
+        {errorUso && <p className="text-xs text-bajo mt-0.5">{errorUso}</p>}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         {entrega.firma_confirmada ? (
           <span className="inline-flex items-center gap-1 text-xs text-alto font-medium">
             <ShieldCheck size={13} /> Firmado
@@ -107,6 +137,20 @@ function FilaEntrega({ entrega, puedeAdministrar, esPropia }: { entrega: Entrega
             {subiendoActa ? 'Subiendo…' : actaUrl ? 'Acta adjunta' : 'Adjuntar acta'}
             <input ref={inputRef} type="file" accept="image/*,.pdf" disabled={subiendoActa} onChange={(e) => archivoActaSeleccionado(e.target.files?.[0])} className="hidden" />
           </label>
+        )}
+
+        {puedeAdministrar && esDotacion && (
+          <select
+            className="rounded-lg border border-marmol-200 px-2 py-1.5 text-xs bg-white"
+            value={valorUso}
+            disabled={pending}
+            title="Uso de la dotación: si no se usó, el empleador queda eximido de entregarla en el periodo siguiente"
+            onChange={(e) => cambiarUso(e.target.value)}
+          >
+            <option value="pendiente">Uso: pendiente</option>
+            <option value="si">Uso: verificado</option>
+            <option value="no">Uso: no usó</option>
+          </select>
         )}
 
         {puedeAdministrar ? (

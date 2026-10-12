@@ -2483,6 +2483,7 @@ export type Database = {
           categoria: string
           created_at: string
           empresa_id: string
+          es_vestuario_calzado: boolean
           id: string
           nombre: string
           requiere_talla: boolean
@@ -2493,6 +2494,7 @@ export type Database = {
           categoria: string
           created_at?: string
           empresa_id: string
+          es_vestuario_calzado?: boolean
           id?: string
           nombre: string
           requiere_talla?: boolean
@@ -2503,6 +2505,7 @@ export type Database = {
           categoria?: string
           created_at?: string
           empresa_id?: string
+          es_vestuario_calzado?: boolean
           id?: string
           nombre?: string
           requiere_talla?: boolean
@@ -2564,6 +2567,7 @@ export type Database = {
           empresa_id: string
           entregado_por: string | null
           estado: Database["public"]["Enums"]["estado_dotacion"]
+          excepcion_motivo: string | null
           fecha_devolucion: string | null
           fecha_entrega: string
           fecha_vencimiento: string | null
@@ -2572,8 +2576,14 @@ export type Database = {
           id: string
           nombre_elemento: string
           observaciones: string | null
+          periodo_anio: number | null
+          periodo_corte: Database["public"]["Enums"]["corte_dotacion"] | null
           talla: string | null
+          tipo_entrega: Database["public"]["Enums"]["tipo_entrega_dotacion"]
           updated_at: string
+          uso_observacion: string | null
+          uso_verificado: boolean | null
+          uso_verificado_en: string | null
         }
         Insert: {
           acta_firmada_url?: string | null
@@ -2585,6 +2595,7 @@ export type Database = {
           empresa_id: string
           entregado_por?: string | null
           estado?: Database["public"]["Enums"]["estado_dotacion"]
+          excepcion_motivo?: string | null
           fecha_devolucion?: string | null
           fecha_entrega?: string
           fecha_vencimiento?: string | null
@@ -2593,8 +2604,14 @@ export type Database = {
           id?: string
           nombre_elemento: string
           observaciones?: string | null
+          periodo_anio?: number | null
+          periodo_corte?: Database["public"]["Enums"]["corte_dotacion"] | null
           talla?: string | null
+          tipo_entrega?: Database["public"]["Enums"]["tipo_entrega_dotacion"]
           updated_at?: string
+          uso_observacion?: string | null
+          uso_verificado?: boolean | null
+          uso_verificado_en?: string | null
         }
         Update: {
           acta_firmada_url?: string | null
@@ -2605,6 +2622,7 @@ export type Database = {
           created_at?: string
           empresa_id?: string
           entregado_por?: string | null
+          excepcion_motivo?: string | null
           estado?: Database["public"]["Enums"]["estado_dotacion"]
           fecha_devolucion?: string | null
           fecha_entrega?: string
@@ -2614,8 +2632,14 @@ export type Database = {
           id?: string
           nombre_elemento?: string
           observaciones?: string | null
+          periodo_anio?: number | null
+          periodo_corte?: Database["public"]["Enums"]["corte_dotacion"] | null
           talla?: string | null
+          tipo_entrega?: Database["public"]["Enums"]["tipo_entrega_dotacion"]
           updated_at?: string
+          uso_observacion?: string | null
+          uso_verificado?: boolean | null
+          uso_verificado_en?: string | null
         }
         Relationships: [
           {
@@ -6850,6 +6874,35 @@ export type Database = {
           },
         ]
       }
+      parametros_legales: {
+        Row: {
+          anio: number
+          empresa_id: string
+          smlmv: number
+          updated_at: string
+        }
+        Insert: {
+          anio: number
+          empresa_id: string
+          smlmv: number
+          updated_at?: string
+        }
+        Update: {
+          anio?: number
+          empresa_id?: string
+          smlmv?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parametros_legales_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       perfiles_usuario: {
         Row: {
           activo: boolean
@@ -9120,6 +9173,20 @@ export type Database = {
         Args: { p_colaborador_id: string }
         Returns: boolean
       }
+      fn_cumplimiento_dotacion: {
+        Args: { p_anio: number }
+        Returns: {
+          corte: Database["public"]["Enums"]["corte_dotacion"]
+          elegibles: number
+          entregados: number
+          entregas: number
+          fecha_corte: string
+          uso_no_verificado: number
+          uso_pendiente: number
+          uso_verificado: number
+          con_excepcion: number
+        }[]
+      }
       fn_entregar_desde_catalogo: {
         Args: {
           p_articulo_talla_id: string
@@ -9127,8 +9194,29 @@ export type Database = {
           p_categoria: Database["public"]["Enums"]["categoria_dotacion"]
           p_colaborador_id: string
           p_fecha_entrega: string
-          p_fecha_vencimiento?: string
+          p_tipo?: Database["public"]["Enums"]["tipo_entrega_dotacion"]
+          p_excepcion_motivo?: string | null
         }
+        Returns: string
+      }
+      fn_evaluar_elegibilidad_dotacion: {
+        Args: { p_colaborador_id: string; p_fecha: string }
+        Returns: Json
+      }
+      fn_fecha_corte_dotacion: {
+        Args: { p_anio: number; p_corte: Database["public"]["Enums"]["corte_dotacion"] }
+        Returns: string
+      }
+      fn_ordinal_periodo_dotacion: {
+        Args: { p_anio: number; p_corte: Database["public"]["Enums"]["corte_dotacion"] }
+        Returns: number
+      }
+      fn_periodo_dotacion_de_fecha: {
+        Args: { p_fecha: string }
+        Returns: { periodo_anio: number; periodo_corte: Database["public"]["Enums"]["corte_dotacion"] }
+      }
+      fn_proximo_corte_dotacion: {
+        Args: { p_fecha: string }
         Returns: string
       }
       fn_es_mi_equipo: { Args: { p_colaborador_id: string }; Returns: boolean }
@@ -9199,6 +9287,7 @@ export type Database = {
         | "desafios"
       canal_notificacion: "email" | "whatsapp" | "in_app"
       categoria_dotacion: "elemento_personal" | "equipo_trabajo"
+      corte_dotacion: "abril" | "agosto" | "diciembre"
       categoria_induccion:
         | "proposito_organizacional"
         | "funciones"
@@ -9231,6 +9320,7 @@ export type Database = {
         | "completado"
         | "vencido"
       estado_dotacion: "entregado" | "devuelto" | "perdido" | "danado"
+      tipo_entrega_dotacion: "especie" | "bono_vestuario"
       estado_entrevista: "programada" | "realizada" | "cancelada"
       estado_pdi: "pendiente" | "en_curso" | "cumplido" | "vencido"
       estado_ronda_clima: "abierta" | "cerrada"
@@ -9453,6 +9543,7 @@ export const Constants = {
       ],
       canal_notificacion: ["email", "whatsapp", "in_app"],
       categoria_dotacion: ["elemento_personal", "equipo_trabajo"],
+      corte_dotacion: ["abril", "agosto", "diciembre"],
       categoria_induccion: [
         "proposito_organizacional",
         "funciones",
@@ -9490,6 +9581,7 @@ export const Constants = {
         "vencido",
       ],
       estado_dotacion: ["entregado", "devuelto", "perdido", "danado"],
+      tipo_entrega_dotacion: ["especie", "bono_vestuario"],
       estado_entrevista: ["programada", "realizada", "cancelada"],
       estado_pdi: ["pendiente", "en_curso", "cumplido", "vencido"],
       estado_ronda_clima: ["abierta", "cerrada"],

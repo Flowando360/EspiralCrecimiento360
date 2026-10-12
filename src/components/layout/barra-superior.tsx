@@ -178,6 +178,7 @@ const NAV: NavGroup[] = [
       { href: '/administracion/sincronizaciones-guia-flow', label: 'Sincronizaciones Guía del Flow', icon: RefreshCw, roles: ['admin_th'] },
       { href: '/administracion/usuarios', label: 'Usuarios y roles', icon: Users, roles: ['admin_th'] },
       { href: '/administracion/salarios', label: 'Salarios', icon: Wallet, roles: ['admin_th'] },
+      { href: '/administracion/parametros-legales', label: 'Parámetros legales', icon: Scale, roles: ['admin_th'] },
       { href: '/administracion/configuracion', label: 'Configuración', icon: Settings, roles: ['admin_th'] },
     ],
   },
