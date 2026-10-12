@@ -27,7 +27,7 @@ export default async function AcpmPage({
     supabase
       .from('acpm')
       .select(
-        'id, codigo, proceso_id, origen_tipo, origen_hallazgo_id, origen_riesgo_id, origen_contexto_item_id, origen_detalle, tipo_accion, descripcion, metodologia_causa, analisis_causa, responsable_id, estado, fecha_compromiso, eficaz'
+        'id, codigo, proceso_id, origen_tipo, origen_hallazgo_id, origen_riesgo_id, origen_contexto_item_id, origen_detalle, tipo_accion, descripcion, metodologia_causa, analisis_causa, responsable_id, estado, fecha_compromiso, eficaz, prioridad, correccion_inmediata, conclusion_causa_raiz'
       )
       .eq('empresa_id', perfil.empresa_id)
       .order('created_at', { ascending: false }),

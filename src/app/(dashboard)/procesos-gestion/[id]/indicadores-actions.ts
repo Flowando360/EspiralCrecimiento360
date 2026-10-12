@@ -20,9 +20,11 @@ const IndicadorSchema = z.object({
   sentido: z.enum(['mayor_mejor', 'menor_mejor']),
   frecuenciaMedicion: z.enum(['mensual', 'trimestral', 'semestral', 'anual']).optional(),
   responsableId: z.string().uuid().optional(),
+  objetivo: z.string().trim().optional(),
+  recursos: z.string().trim().optional(),
 });
 
-export async function crearIndicador(input: z.infer<typeof IndicadorSchema>) {
+export async function crearIndicador(input: z.input<typeof IndicadorSchema>) {
   const perfil = await requerirAdminTh();
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
@@ -42,6 +44,8 @@ export async function crearIndicador(input: z.infer<typeof IndicadorSchema>) {
       sentido: d.sentido,
       frecuencia_medicion: d.frecuenciaMedicion || null,
       responsable_id: d.responsableId || null,
+      objetivo: d.objetivo || null,
+      recursos: d.recursos || null,
     })
     .select('id')
     .single();

@@ -84,6 +84,10 @@ const SolicitudSchema = z.object({
   justificacion: z.string().trim().optional(),
   revisorId: z.string().uuid().optional(),
   validadorId: z.string().uuid().optional(),
+  elaboradoPor: z.string().trim().optional(),
+  revisadoPor: z.string().trim().optional(),
+  ubicacion: z.string().trim().optional(),
+  formato: z.string().trim().optional(),
 });
 
 /**
@@ -120,6 +124,10 @@ export async function solicitarDocumento(input: z.infer<typeof SolicitudSchema>)
       solicitante_id: perfil.colaborador_id,
       revisor_id: d.revisorId || null,
       validador_id: d.validadorId || null,
+      elaborado_por: d.elaboradoPor || null,
+      revisado_por: d.revisadoPor || null,
+      ubicacion: d.ubicacion || null,
+      formato: d.formato || null,
       estado: 'borrador',
     })
     .select('id')
@@ -205,7 +213,7 @@ export async function aprobarValidacion(id: string, comentarios?: string) {
   const supabase = createClient();
   const { data: solicitud, error: errSolicitud } = await supabase
     .from('solicitudes_documento')
-    .select('id, proceso_id, documento_id, tipo_solicitud, nombre_documento, tipo_documento, archivo_propuesto_url, estado, validador_id')
+    .select('id, proceso_id, documento_id, tipo_solicitud, nombre_documento, tipo_documento, archivo_propuesto_url, estado, validador_id, elaborado_por, revisado_por, ubicacion, formato')
     .eq('id', id)
     .maybeSingle();
 
@@ -236,6 +244,11 @@ export async function aprobarValidacion(id: string, comentarios?: string) {
         estado: 'vigente',
         archivo_url: solicitud.archivo_propuesto_url,
         requiere_confirmacion: requiereConfirmacion,
+        elaborado_por: solicitud.elaborado_por ?? null,
+        revisado_por: solicitud.revisado_por ?? null,
+        ubicacion: solicitud.ubicacion ?? null,
+        formato: solicitud.formato ?? null,
+        fecha_emision: new Date().toISOString().slice(0, 10),
       })
       .select('id')
       .single();

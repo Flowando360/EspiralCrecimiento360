@@ -2,7 +2,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { FileStack, Compass, ShieldCheck, ShieldAlert, GitPullRequestArrow, ListChecks } from 'lucide-react';
+import { PanelPhva, type Pendiente } from '@/components/procesos-gestion/panel-phva';
 import { MapaProcesos, type Proceso, type Interaccion, type MarcoNormativo } from '@/components/procesos-gestion/mapa-procesos';
 import { ChecklistKanban } from '@/components/procesos-gestion/checklist-kanban';
 import { calcularIndiceMadurez, fechaDentroDeMeses } from '@/lib/calculos/indice-madurez';
@@ -35,6 +35,11 @@ export default async function ProcesosGestionPage() {
       .order('marco_normativo'),
     supabase.from('colaboradores').select('id, nombre_completo').eq('empresa_id', perfil.empresa_id).eq('estado', 'activo').order('nombre_completo'),
   ]);
+
+  const { count: totalComunicaciones } = await supabase
+    .from('matriz_comunicaciones')
+    .select('id', { count: 'exact', head: true })
+    .eq('empresa_id', perfil.empresa_id);
 
   const procesoIds = (procesos ?? []).map((p: any) => p.id);
   const [{ data: elementosRaw }, { data: documentosRaw }, { data: acpmRaw }, { data: indicadoresRaw }] = procesoIds.length
@@ -87,6 +92,37 @@ export default async function ProcesosGestionPage() {
     return { ...p, marcos: marcosPorProceso.get(p.id) ?? [], indice_madurez: puntaje };
   });
 
+  const hace6Meses = (fecha: string | null) => fechaDentroDeMeses(fecha, 6);
+  const indicadoresConMedicionReciente = new Set<string>();
+  for (const m of medicionesRaw ?? []) {
+    if (fechaDentroDeMeses((m as any).fecha_medicion, 6)) indicadoresConMedicionReciente.add((m as any).indicador_id);
+  }
+  const pendientes: Pendiente[] = [
+    {
+      etiqueta: 'Acciones (ACPM) vencidas',
+      cantidad: (acpmRaw ?? []).filter((a: any) => a.fecha_compromiso && a.fecha_compromiso < hoy && a.estado !== 'cerrada_efectiva').length,
+      href: '/procesos-gestion/acpm',
+    },
+    {
+      etiqueta: 'Indicadores sin medición en 6 meses',
+      cantidad: (indicadoresRaw ?? []).filter((i: any) => !indicadoresConMedicionReciente.has(i.id)).length,
+      href: '/procesos-gestion',
+    },
+    {
+      etiqueta: 'Riesgos sin revisar en 6 meses',
+      cantidad: (riesgos ?? []).filter((r: any) => !hace6Meses(r.fecha_ultima_revision)).length,
+      href: '/procesos-gestion/riesgos',
+    },
+    {
+      etiqueta: 'Matriz de comunicaciones vacía',
+      cantidad: (totalComunicaciones ?? 0) === 0 ? 1 : 0,
+      href: '/procesos-gestion/comunicaciones',
+    },
+  ];
+  const madurezPromedio = procesosConMarcos.length
+    ? Math.round(procesosConMarcos.reduce((acc, p) => acc + (p.indice_madurez ?? 0), 0) / procesosConMarcos.length)
+    : 0;
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -97,45 +133,9 @@ export default async function ProcesosGestionPage() {
             aporte de V&E a la alianza. Base del paquete de evidencia de auditoría.
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Link
-            href="/procesos-gestion/documentos"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
-          >
-            <FileStack size={15} /> Gestión documental
-          </Link>
-          <Link
-            href="/procesos-gestion/contexto"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
-          >
-            <Compass size={15} /> Contexto
-          </Link>
-          <Link
-            href="/procesos-gestion/auditorias"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
-          >
-            <ShieldCheck size={15} /> Auditorías internas
-          </Link>
-          <Link
-            href="/procesos-gestion/riesgos"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
-          >
-            <ShieldAlert size={15} /> Riesgos
-          </Link>
-          <Link
-            href="/procesos-gestion/acpm"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
-          >
-            <ListChecks size={15} /> ACPM
-          </Link>
-          <Link
-            href="/procesos-gestion/cambios"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-600 text-sm font-medium px-3.5 py-2"
-          >
-            <GitPullRequestArrow size={15} /> Gestión de cambio
-          </Link>
-        </div>
       </div>
+
+      <PanelPhva madurezPromedio={madurezPromedio} pendientes={pendientes} />
 
       <MapaProcesos
         procesosIniciales={procesosConMarcos}

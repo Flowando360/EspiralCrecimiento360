@@ -38,6 +38,9 @@ export type Database = {
           responsable_id: string | null
           tipo_accion: string
           updated_at: string
+          conclusion_causa_raiz: string | null
+          correccion_inmediata: string | null
+          prioridad: string
         }
         Insert: {
           analisis_causa?: string | null
@@ -62,6 +65,9 @@ export type Database = {
           responsable_id?: string | null
           tipo_accion?: string
           updated_at?: string
+          conclusion_causa_raiz?: string | null
+          correccion_inmediata?: string | null
+          prioridad?: string
         }
         Update: {
           analisis_causa?: string | null
@@ -86,6 +92,9 @@ export type Database = {
           responsable_id?: string | null
           tipo_accion?: string
           updated_at?: string
+          conclusion_causa_raiz?: string | null
+          correccion_inmediata?: string | null
+          prioridad?: string
         }
         Relationships: [
           {
@@ -2440,6 +2449,11 @@ export type Database = {
           tipo_documento: string
           updated_at: string
           version_vigente: string
+          elaborado_por: string | null
+          fecha_emision: string | null
+          formato: string | null
+          revisado_por: string | null
+          ubicacion: string | null
         }
         Insert: {
           archivo_url?: string | null
@@ -2453,6 +2467,11 @@ export type Database = {
           tipo_documento: string
           updated_at?: string
           version_vigente?: string
+          elaborado_por?: string | null
+          fecha_emision?: string | null
+          formato?: string | null
+          revisado_por?: string | null
+          ubicacion?: string | null
         }
         Update: {
           archivo_url?: string | null
@@ -2466,6 +2485,11 @@ export type Database = {
           tipo_documento?: string
           updated_at?: string
           version_vigente?: string
+          elaborado_por?: string | null
+          fecha_emision?: string | null
+          formato?: string | null
+          revisado_por?: string | null
+          ubicacion?: string | null
         }
         Relationships: [
           {
@@ -5049,6 +5073,8 @@ export type Database = {
           responsable_id: string | null
           sentido: string
           unidad: string
+          objetivo: string | null
+          recursos: string | null
         }
         Insert: {
           activo?: boolean
@@ -5062,6 +5088,8 @@ export type Database = {
           responsable_id?: string | null
           sentido?: string
           unidad?: string
+          objetivo?: string | null
+          recursos?: string | null
         }
         Update: {
           activo?: boolean
@@ -5075,6 +5103,8 @@ export type Database = {
           responsable_id?: string | null
           sentido?: string
           unidad?: string
+          objetivo?: string | null
+          recursos?: string | null
         }
         Relationships: [
           {
@@ -6958,6 +6988,73 @@ export type Database = {
           },
         ]
       }
+      matriz_comunicaciones: {
+        Row: {
+          a_quien: string
+          como: string
+          created_at: string
+          empresa_id: string
+          frecuencia: string | null
+          id: string
+          observaciones: string | null
+          proceso_id: string | null
+          que_comunicar: string
+          responsable_id: string | null
+          ultima_fecha: string | null
+          updated_at: string
+        }
+        Insert: {
+          a_quien: string
+          como: string
+          created_at?: string
+          empresa_id: string
+          frecuencia?: string | null
+          id?: string
+          observaciones?: string | null
+          proceso_id?: string | null
+          que_comunicar: string
+          responsable_id?: string | null
+          ultima_fecha?: string | null
+          updated_at?: string
+        }
+        Update: {
+          a_quien?: string
+          como?: string
+          created_at?: string
+          empresa_id?: string
+          frecuencia?: string | null
+          id?: string
+          observaciones?: string | null
+          proceso_id?: string | null
+          que_comunicar?: string
+          responsable_id?: string | null
+          ultima_fecha?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matriz_comunicaciones_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matriz_comunicaciones_proceso_id_fkey"
+            columns: ["proceso_id"]
+            isOneToOne: false
+            referencedRelation: "procesos_gestion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matriz_comunicaciones_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       perfiles_usuario: {
         Row: {
           activo: boolean
@@ -8065,6 +8162,10 @@ export type Database = {
           tipo_solicitud: string
           validado_at: string | null
           validador_id: string | null
+          elaborado_por: string | null
+          formato: string | null
+          revisado_por: string | null
+          ubicacion: string | null
         }
         Insert: {
           aprobador_id?: string | null
@@ -8088,6 +8189,10 @@ export type Database = {
           tipo_solicitud: string
           validado_at?: string | null
           validador_id?: string | null
+          elaborado_por?: string | null
+          formato?: string | null
+          revisado_por?: string | null
+          ubicacion?: string | null
         }
         Update: {
           aprobador_id?: string | null
@@ -8111,6 +8216,10 @@ export type Database = {
           tipo_solicitud?: string
           validado_at?: string | null
           validador_id?: string | null
+          elaborado_por?: string | null
+          formato?: string | null
+          revisado_por?: string | null
+          ubicacion?: string | null
         }
         Relationships: [
           {

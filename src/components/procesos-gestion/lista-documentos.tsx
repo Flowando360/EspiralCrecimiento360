@@ -445,6 +445,10 @@ function FormularioSolicitud({
   const [nombreDocumento, setNombreDocumento] = useState('');
   const [tipoDocumento, setTipoDocumento] = useState<TipoDocumento>('procedimiento');
   const [justificacion, setJustificacion] = useState('');
+  const [elaboradoPor, setElaboradoPor] = useState('');
+  const [revisadoPor, setRevisadoPor] = useState('');
+  const [ubicacion, setUbicacion] = useState('');
+  const [formato, setFormato] = useState('');
   const [revisorId, setRevisorId] = useState('');
   const [validadorId, setValidadorId] = useState('');
   const [archivoUrl, setArchivoUrl] = useState<string | null>(null);
@@ -491,6 +495,10 @@ function FormularioSolicitud({
         tipoDocumento: tipoSolicitud === 'crear' ? tipoDocumento : undefined,
         archivoPropuestoUrl: archivoUrl || undefined,
         justificacion,
+        elaboradoPor: tipoSolicitud === 'crear' ? elaboradoPor || undefined : undefined,
+        revisadoPor: tipoSolicitud === 'crear' ? revisadoPor || undefined : undefined,
+        ubicacion: tipoSolicitud === 'crear' ? ubicacion || undefined : undefined,
+        formato: tipoSolicitud === 'crear' ? formato || undefined : undefined,
         revisorId: revisorId || undefined,
         validadorId: validadorId || undefined,
       });
@@ -569,6 +577,21 @@ function FormularioSolicitud({
         </select>
       )}
 
+      {tipoSolicitud === 'crear' && (
+        <div className="grid grid-cols-2 gap-2">
+          <input value={elaboradoPor} onChange={(e) => setElaboradoPor(e.target.value)} placeholder="Elaboró" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
+          <input value={revisadoPor} onChange={(e) => setRevisadoPor(e.target.value)} placeholder="Revisó" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
+          <input value={ubicacion} onChange={(e) => setUbicacion(e.target.value)} placeholder="Ubicación (carpeta, sistema o enlace)" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
+          <select value={formato} onChange={(e) => setFormato(e.target.value)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
+            <option value="">Formato</option>
+            <option value="Word">Word</option>
+            <option value="Excel">Excel</option>
+            <option value="PDF">PDF</option>
+            <option value="Físico">Físico</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+      )}
       <textarea value={justificacion} onChange={(e) => setJustificacion(e.target.value)} placeholder="Justificación" rows={2} className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
 
       <div className="grid grid-cols-2 gap-2">

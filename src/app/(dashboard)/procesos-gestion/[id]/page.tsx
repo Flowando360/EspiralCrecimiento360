@@ -47,7 +47,7 @@ export default async function FichaProcesoPage({ params }: { params: { id: strin
     proceso.responsable_id
       ? supabase.from('colaboradores').select('nombre_completo').eq('id', proceso.responsable_id).maybeSingle()
       : Promise.resolve({ data: null } as any),
-    supabase.from('indicadores_proceso').select('id, nombre, formula, meta, unidad, sentido, frecuencia_medicion').eq('proceso_id', params.id).eq('activo', true).order('created_at'),
+    supabase.from('indicadores_proceso').select('id, nombre, formula, meta, unidad, sentido, frecuencia_medicion, objetivo, recursos').eq('proceso_id', params.id).eq('activo', true).order('created_at'),
   ]);
 
   const indicadorIds = (indicadoresRaw ?? []).map((i: any) => i.id);
