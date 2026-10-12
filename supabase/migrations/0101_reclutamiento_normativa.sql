@@ -125,7 +125,7 @@ begin
       or new.orden is distinct from old.orden then
       raise exception 'El líder solo puede registrar su evaluación del candidato.';
     end if;
-    if new.etapa is distinct from old.etapa and not (old.etapa = 'evaluacion_lider' and new.etapa = 'devuelto_th') then
+    if new.etapa is distinct from old.etapa and not (old.etapa::text = 'evaluacion_lider' and new.etapa::text = 'devuelto_th') then
       raise exception 'El líder solo puede devolver el candidato a Talento Humano.';
     end if;
   end if;
