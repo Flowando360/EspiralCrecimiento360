@@ -95,7 +95,7 @@ drop policy if exists "postulaciones: lectura empresa (admin_th, lider)" on post
 create policy "postulaciones: el líder ve las asignadas vigentes" on postulaciones for select
   using (empresa_id_de_vacante(vacante_id) = fn_mi_empresa_id() and fn_mi_rol() = 'lider' and fn_lider_ve_postulacion(id));
 create policy "postulaciones: el líder devuelve su evaluación" on postulaciones for update
-  using (fn_mi_rol() = 'lider' and fn_lider_ve_postulacion(id) and etapa = 'evaluacion_lider')
+  using (fn_mi_rol() = 'lider' and fn_lider_ve_postulacion(id) and etapa::text = 'evaluacion_lider')
   with check (fn_mi_rol() = 'lider' and fn_lider_ve_postulacion(id));
 
 drop policy if exists "entrevistas: lectura empresa (admin_th, lider)" on entrevistas;
