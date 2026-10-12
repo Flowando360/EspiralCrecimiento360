@@ -52,6 +52,8 @@ type Postulacion = {
 const COLUMNAS: { etapa: string; titulo: string }[] = [
   { etapa: 'recibido', titulo: 'Postulados' },
   { etapa: 'preseleccionado', titulo: 'Filtrados / Preseleccionados' },
+  { etapa: 'evaluacion_lider', titulo: 'En evaluación del líder' },
+  { etapa: 'devuelto_th', titulo: 'Devueltos por el líder' },
   { etapa: 'entrevista', titulo: 'En Entrevista' },
   { etapa: 'prueba', titulo: 'En Pruebas' },
   { etapa: 'oferta', titulo: 'Oferta' },

@@ -394,3 +394,97 @@ export async function verificarReferencia(id: string, candidatoId: string, notas
   revalidatePath(`${RUTA}/candidatos/${candidatoId}`);
   return { ok: true as const };
 }
+
+// ── Flujo de tres pasos: Talento Humano filtra → el líder evalúa → Talento Humano cierra ──
+
+/** Talento Humano envía un candidato preseleccionado a un líder. La asignación le da visibilidad por un plazo. */
+export async function enviarAEvaluacionLider(postulacionId: string, liderId: string, dias = 30) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { data: postulacion } = await supabase
+    .from('postulaciones')
+    .select('id, etapa, vacante:vacantes(empresa_id)')
+    .eq('id', postulacionId)
+    .maybeSingle();
+  if (!postulacion || (postulacion.vacante as any)?.empresa_id !== perfil.empresa_id) {
+    return { ok: false as const, error: 'Postulación no encontrada' };
+  }
+  if (postulacion.etapa !== 'preseleccionado' && postulacion.etapa !== 'devuelto_th') {
+    return { ok: false as const, error: 'Solo se envían al líder los candidatos preseleccionados o devueltos' };
+  }
+
+  const vence = new Date();
+  vence.setDate(vence.getDate() + Math.min(Math.max(dias, 1), 60));
+
+  const { error: errorAsignacion } = await supabase.from('asignaciones_evaluacion_lider').insert({
+    empresa_id: perfil.empresa_id,
+    postulacion_id: postulacionId,
+    lider_id: liderId,
+    vence_en: vence.toISOString().slice(0, 10),
+  });
+  if (errorAsignacion) return { ok: false as const, error: errorAsignacion.message };
+
+  const { error } = await supabase.from('postulaciones').update({ etapa: 'evaluacion_lider' }).eq('id', postulacionId);
+  if (error) return { ok: false as const, error: error.message };
+
+  revalidatePath(RUTA);
+  return { ok: true as const };
+}
+
+/** El líder devuelve sus apreciaciones a Talento Humano. Las políticas y el trigger limitan lo que puede tocar. */
+export async function devolverEvaluacionLider(postulacionId: string, evaluacion: string) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'lider') return { ok: false as const, error: 'No autorizado' };
+  const texto = evaluacion.trim();
+  if (texto.length < 5) return { ok: false as const, error: 'Escribe tus apreciaciones sobre el candidato' };
+
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('postulaciones')
+    .update({ evaluacion_lider: texto, evaluacion_lider_en: new Date().toISOString(), etapa: 'devuelto_th' })
+    .eq('id', postulacionId)
+    .eq('etapa', 'evaluacion_lider')
+    .select('id');
+  if (error) return { ok: false as const, error: error.message };
+  if (!data || data.length === 0) return { ok: false as const, error: 'Esta evaluación ya no está disponible para ti.' };
+
+  revalidatePath(RUTA);
+  return { ok: true as const };
+}
+
+// ── Banco de candidatos ─────────────────────────────────────────────────────
+
+export async function actualizarDisponibilidadCandidato(candidatoId: string, disponibleOtrosCargos: boolean) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('candidatos')
+    .update({ disponible_otros_cargos: disponibleOtrosCargos })
+    .eq('id', candidatoId)
+    .eq('empresa_id', perfil.empresa_id);
+  if (error) return { ok: false as const, error: error.message };
+
+  revalidatePath('/reclutamiento/candidatos');
+  return { ok: true as const };
+}
+
+/** Marca una solicitud de titular como atendida. Debe responderse dentro del plazo legal. */
+export async function atenderSolicitudTitular(solicitudId: string) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('solicitudes_titular')
+    .update({ estado: 'atendida', atendida_en: new Date().toISOString() })
+    .eq('id', solicitudId)
+    .eq('empresa_id', perfil.empresa_id);
+  if (error) return { ok: false as const, error: error.message };
+
+  revalidatePath('/reclutamiento/candidatos');
+  return { ok: true as const };
+}

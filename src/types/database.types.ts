@@ -687,6 +687,9 @@ export type Database = {
           numero_documento: string | null
           origen: string
           telefono: string | null
+          autorizacion_banco: boolean
+          conservar_hasta: string | null
+          disponible_otros_cargos: boolean
         }
         Insert: {
           correo?: string | null
@@ -700,6 +703,9 @@ export type Database = {
           numero_documento?: string | null
           origen?: string
           telefono?: string | null
+          autorizacion_banco?: boolean
+          conservar_hasta?: string | null
+          disponible_otros_cargos?: boolean
         }
         Update: {
           correo?: string | null
@@ -713,6 +719,9 @@ export type Database = {
           numero_documento?: string | null
           origen?: string
           telefono?: string | null
+          autorizacion_banco?: boolean
+          conservar_hasta?: string | null
+          disponible_otros_cargos?: boolean
         }
         Relationships: [
           {
@@ -7055,6 +7064,34 @@ export type Database = {
           },
         ]
       }
+      asignaciones_evaluacion_lider: {
+        Row: { asignado_en: string; created_at: string; empresa_id: string; id: string; lider_id: string; postulacion_id: string; vence_en: string }
+        Insert: { asignado_en?: string; created_at?: string; empresa_id: string; id?: string; lider_id: string; postulacion_id: string; vence_en?: string }
+        Update: { asignado_en?: string; created_at?: string; empresa_id?: string; id?: string; lider_id?: string; postulacion_id?: string; vence_en?: string }
+        Relationships: [
+          { foreignKeyName: "asignaciones_evaluacion_lider_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "asignaciones_evaluacion_lider_lider_id_fkey"; columns: ["lider_id"]; isOneToOne: false; referencedRelation: "colaboradores"; referencedColumns: ["id"] },
+          { foreignKeyName: "asignaciones_evaluacion_lider_postulacion_id_fkey"; columns: ["postulacion_id"]; isOneToOne: false; referencedRelation: "postulaciones"; referencedColumns: ["id"] },
+        ]
+      }
+      autorizaciones_tratamiento: {
+        Row: { acepto_banco: boolean; aceptada_en: string; canal: string; candidato_id: string; empresa_id: string; finalidades: string[]; id: string; vacante_id: string | null; version_politica: string }
+        Insert: { acepto_banco?: boolean; aceptada_en?: string; canal?: string; candidato_id: string; empresa_id: string; finalidades: string[]; id?: string; vacante_id?: string | null; version_politica: string }
+        Update: { acepto_banco?: boolean; aceptada_en?: string; canal?: string; candidato_id?: string; empresa_id?: string; finalidades?: string[]; id?: string; vacante_id?: string | null; version_politica?: string }
+        Relationships: [
+          { foreignKeyName: "autorizaciones_tratamiento_candidato_id_fkey"; columns: ["candidato_id"]; isOneToOne: false; referencedRelation: "candidatos"; referencedColumns: ["id"] },
+          { foreignKeyName: "autorizaciones_tratamiento_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "autorizaciones_tratamiento_vacante_id_fkey"; columns: ["vacante_id"]; isOneToOne: false; referencedRelation: "vacantes"; referencedColumns: ["id"] },
+        ]
+      }
+      solicitudes_titular: {
+        Row: { atendida_en: string | null; correo: string | null; detalle: string; empresa_id: string; estado: string; id: string; nombre_titular: string; numero_documento: string | null; recibida_en: string; tipo: string }
+        Insert: { atendida_en?: string | null; correo?: string | null; detalle: string; empresa_id: string; estado?: string; id?: string; nombre_titular: string; numero_documento?: string | null; recibida_en?: string; tipo: string }
+        Update: { atendida_en?: string | null; correo?: string | null; detalle?: string; empresa_id?: string; estado?: string; id?: string; nombre_titular?: string; numero_documento?: string | null; recibida_en?: string; tipo?: string }
+        Relationships: [
+          { foreignKeyName: "solicitudes_titular_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+        ]
+      }
       perfiles_usuario: {
         Row: {
           activo: boolean
@@ -7288,6 +7325,8 @@ export type Database = {
           orden: number
           updated_at: string
           vacante_id: string
+          evaluacion_lider: string | null
+          evaluacion_lider_en: string | null
         }
         Insert: {
           calificacion?: number | null
@@ -7300,6 +7339,8 @@ export type Database = {
           orden?: number
           updated_at?: string
           vacante_id: string
+          evaluacion_lider?: string | null
+          evaluacion_lider_en?: string | null
         }
         Update: {
           calificacion?: number | null
@@ -7312,6 +7353,8 @@ export type Database = {
           orden?: number
           updated_at?: string
           vacante_id?: string
+          evaluacion_lider?: string | null
+          evaluacion_lider_en?: string | null
         }
         Relationships: [
           {
@@ -9498,6 +9541,8 @@ export type Database = {
       etapa_postulacion:
         | "recibido"
         | "preseleccionado"
+        | "evaluacion_lider"
+        | "devuelto_th"
         | "entrevista"
         | "prueba"
         | "oferta"
@@ -9761,6 +9806,8 @@ export const Constants = {
       etapa_postulacion: [
         "recibido",
         "preseleccionado",
+        "evaluacion_lider",
+        "devuelto_th",
         "entrevista",
         "prueba",
         "oferta",

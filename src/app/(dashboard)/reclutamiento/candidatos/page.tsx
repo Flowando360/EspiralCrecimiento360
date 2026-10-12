@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { Users, ArrowLeft } from 'lucide-react';
+import { PanelBanco } from '@/components/reclutamiento/panel-banco';
 
 export default async function BancoCandidatosPage() {
   const perfil = await getPerfilActual();
@@ -11,9 +12,16 @@ export default async function BancoCandidatosPage() {
   const supabase = createClient();
   const { data: candidatos } = await supabase
     .from('candidatos')
-    .select('id, nombre_completo, correo, telefono, origen, created_at, postulaciones(count)')
+    .select('id, nombre_completo, correo, telefono, origen, created_at, disponible_otros_cargos, conservar_hasta, postulaciones(count)')
     .eq('empresa_id', perfil.empresa_id)
     .order('created_at', { ascending: false });
+
+  const { data: solicitudes } = await supabase
+    .from('solicitudes_titular')
+    .select('id, tipo, nombre_titular, correo, detalle, recibida_en')
+    .eq('empresa_id', perfil.empresa_id)
+    .eq('estado', 'recibida')
+    .order('recibida_en');
 
   return (
     <div className="space-y-6">
@@ -47,6 +55,26 @@ export default async function BancoCandidatosPage() {
             </Link>
           ))}
         </div>
+      )}
+
+      {perfil.rol === 'admin_th' && (
+        <PanelBanco
+          candidatos={(candidatos ?? []).map((c: any) => ({
+            id: c.id,
+            nombre: c.nombre_completo,
+            origen: c.origen,
+            disponible: !!c.disponible_otros_cargos,
+            conservarHasta: c.conservar_hasta,
+          }))}
+          solicitudes={(solicitudes ?? []).map((s: any) => ({
+            id: s.id,
+            tipo: s.tipo,
+            nombre: s.nombre_titular,
+            correo: s.correo,
+            detalle: s.detalle,
+            recibidaEn: s.recibida_en,
+          }))}
+        />
       )}
     </div>
   );

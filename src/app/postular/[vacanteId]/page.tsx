@@ -35,7 +35,7 @@ export default async function PostularPage({ params }: { params: { vacanteId: st
               {(vacante.cargo as any)?.nombre ? `Cargo: ${(vacante.cargo as any).nombre}` : ''}
               {vacante.descripcion ? ` — ${vacante.descripcion}` : ''}
             </p>
-            <FormularioPostulacionPublica vacanteId={vacante.id} />
+            <FormularioPostulacionPublica vacanteId={vacante.id} nombreEmpresa={(vacante.empresa as any)?.nombre ?? 'la empresa'} />
           </div>
         )}
       </div>

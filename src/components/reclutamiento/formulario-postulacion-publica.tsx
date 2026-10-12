@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { enviarPostulacion } from '@/app/postular/[vacanteId]/actions';
 import { CheckCircle2 } from 'lucide-react';
 
-export function FormularioPostulacionPublica({ vacanteId }: { vacanteId: string }) {
+export function FormularioPostulacionPublica({ vacanteId, nombreEmpresa }: { vacanteId: string; nombreEmpresa: string }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [enviado, setEnviado] = useState(false);
@@ -59,6 +59,31 @@ export function FormularioPostulacionPublica({ vacanteId }: { vacanteId: string 
       <div>
         <label className={label}>Hoja de vida (PDF o Word, máx. 8 MB)</label>
         <input className="w-full text-sm" type="file" name="hojaVida" accept=".pdf,.doc,.docx" />
+      </div>
+
+      <div className="rounded-lg border border-marmol-200 bg-marmol-50 p-3 space-y-2.5 text-xs text-marmol-700">
+        <label className="flex items-start gap-2">
+          <input type="checkbox" name="autorizaTratamiento" required className="mt-0.5" />
+          <span>
+            Autorizo a {nombreEmpresa} a tratar mis datos personales y mi hoja de vida para evaluar mi perfil en este proceso de selección.
+            Lo leí en la{' '}
+            <a href={`/politica-tratamiento-datos?vacanteId=${vacanteId}`} target="_blank" className="text-flow-700 underline">
+              política de tratamiento de datos
+            </a>
+            .
+          </span>
+        </label>
+        <label className="flex items-start gap-2">
+          <input type="checkbox" name="autorizaBanco" className="mt-0.5" />
+          <span>Opcional: autorizo conservar mis datos en el banco de talento para futuras vacantes durante 12 meses.</span>
+        </label>
+        <p>
+          Puedes pedir en cualquier momento conocer, corregir, revocar o suprimir tus datos desde{' '}
+          <a href={`/ejercer-derechos?vacanteId=${vacanteId}`} target="_blank" className="text-flow-700 underline">
+            este enlace
+          </a>
+          .
+        </p>
       </div>
 
       <button
