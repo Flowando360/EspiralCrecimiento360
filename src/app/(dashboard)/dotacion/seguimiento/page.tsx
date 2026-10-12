@@ -69,8 +69,8 @@ export default async function SeguimientoDotacionPage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/dotacion" className="inline-flex items-center gap-1 text-xs text-marmol-400 hover:text-marmol-600 mb-2">
-          <ArrowLeft size={12} /> Volver a Gestión de dotaciones
+        <Link href="/administracion/dotaciones" className="inline-flex items-center gap-1 text-xs text-marmol-400 hover:text-marmol-600 mb-2">
+          <ArrowLeft size={12} /> Volver a Dotaciones
         </Link>
         <h1 className="font-display text-2xl font-semibold text-secundario flex items-center gap-2">
           <Users size={22} className="text-flow-600" /> Seguimiento por persona
