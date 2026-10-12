@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { Briefcase, Plus, Users } from 'lucide-react';
+import { EvaluacionesLider } from '@/components/reclutamiento/evaluaciones-lider';
 
 const ESTADO_LABEL: Record<string, string> = { abierta: 'Abierta', pausada: 'En pausa', cancelada: 'Cancelada', cubierta: 'Cubierto', cerrada: 'Cerrada' };
 const ESTADO_CLASE: Record<string, string> = {
@@ -25,6 +26,16 @@ export default async function ReclutamientoPage() {
     )
     .eq('empresa_id', perfil.empresa_id)
     .order('created_at', { ascending: false });
+
+  // Paso 2 del flujo, lado del líder: solo llegan los candidatos que Talento Humano le asignó y están vigentes (RLS).
+  const { data: evaluacionesRaw } =
+    perfil.rol === 'lider'
+      ? await supabase
+          .from('postulaciones')
+          .select('id, candidato:candidatos(nombre_completo), vacante:vacantes(titulo)')
+          .eq('etapa', 'evaluacion_lider')
+      : { data: [] };
+  const evaluaciones = (evaluacionesRaw ?? []).map((e: any) => ({ id: e.id, candidato: e.candidato?.nombre_completo ?? '', vacante: e.vacante?.titulo ?? '' }));
 
   return (
     <div className="space-y-6">
@@ -88,6 +99,15 @@ export default async function ReclutamientoPage() {
             </Link>
           ))}
         </div>
+      )}
+      {perfil.rol === 'lider' && (
+        <section className="space-y-3">
+          <div>
+            <h2 className="font-display font-semibold text-secundario">Candidatos para evaluar</h2>
+            <p className="text-sm text-marmol-500">Paso 2: deja tus apreciaciones sobre cada candidato asignado y devuélvelo a Talento Humano.</p>
+          </div>
+          <EvaluacionesLider items={evaluaciones} />
+        </section>
       )}
     </div>
   );

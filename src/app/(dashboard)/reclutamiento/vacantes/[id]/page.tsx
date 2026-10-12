@@ -6,6 +6,7 @@ import { TableroPostulaciones } from '@/components/reclutamiento/tablero-postula
 import { EnlacePostulacion } from '@/components/reclutamiento/enlace-postulacion';
 import { SelectorEstadoVacante } from '@/components/reclutamiento/selector-estado-vacante';
 import { EditarVacante } from '@/components/reclutamiento/editar-vacante';
+import { EnviarALider } from '@/components/reclutamiento/enviar-a-lider';
 import { ArrowLeft, Briefcase, Wallet, UserCog } from 'lucide-react';
 
 const ESTADO_LABEL: Record<string, string> = { abierta: 'Abierta', pausada: 'En pausa', cancelada: 'Cancelada', cubierta: 'Cubierto', cerrada: 'Cerrada' };
@@ -39,6 +40,7 @@ export default async function DetalleVacantePage({ params }: { params: { id: str
       .from('postulaciones')
       .select(
         `id, etapa, calificacion, notas, descartado_motivo, orden, created_at,
+         evaluacion_lider, evaluacion_lider_en,
          candidato:candidatos(id, nombre_completo, correo, telefono, hoja_vida_url),
          entrevistas(id, fecha_hora, modalidad, estado, notas, entrevistador:colaboradores(id, nombre_completo))`
       )
@@ -127,6 +129,32 @@ export default async function DetalleVacantePage({ params }: { params: { id: str
         puedeAdministrar={perfil.rol === 'admin_th'}
         miColaboradorId={perfil.colaborador_id}
       />
+
+      {perfil.rol === 'admin_th' && (
+        <section className="card p-4 space-y-3">
+          <div>
+            <h2 className="font-display font-semibold text-secundario text-sm">Evaluación por el líder</h2>
+            <p className="text-xs text-marmol-400">
+              Paso 2: envía a un líder los candidatos preseleccionados. El líder solo verá a quien le asignes y por el plazo que definas.
+            </p>
+          </div>
+          {(postulaciones ?? []).filter((p: any) => p.etapa === 'preseleccionado' || p.etapa === 'devuelto_th').length === 0 ? (
+            <p className="text-sm text-marmol-500">No hay candidatos preseleccionados para enviar.</p>
+          ) : (
+            (postulaciones ?? [])
+              .filter((p: any) => p.etapa === 'preseleccionado' || p.etapa === 'devuelto_th')
+              .map((p: any) => (
+                <div key={p.id} className="border-b border-marmol-50 last:border-0 py-2 space-y-1.5">
+                  <p className="text-sm font-medium text-marmol-800">{p.candidato?.nombre_completo}</p>
+                  {p.etapa === 'devuelto_th' && p.evaluacion_lider && (
+                    <p className="text-xs text-marmol-600 bg-marmol-50 rounded-lg p-2">Apreciaciones del líder: {p.evaluacion_lider}</p>
+                  )}
+                  <EnviarALider postulacionId={p.id} lideres={(lideres ?? []) as any} />
+                </div>
+              ))
+          )}
+        </section>
+      )}
     </div>
   );
 }

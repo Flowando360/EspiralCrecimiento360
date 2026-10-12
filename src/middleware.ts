@@ -57,7 +57,11 @@ export async function middleware(request: NextRequest) {
     // Formulario público de postulación (Reclutamiento y Selección): lo abre
     // un candidato externo que nunca ha iniciado sesión, así que no puede
     // exigir usuario autenticado como el resto del dashboard.
-    request.nextUrl.pathname.startsWith('/postular');
+    request.nextUrl.pathname.startsWith('/postular') ||
+    // Política de tratamiento de datos y canal de derechos del titular: también los
+    // consulta el candidato sin sesión, desde el formulario de postulación.
+    request.nextUrl.pathname.startsWith('/politica-tratamiento-datos') ||
+    request.nextUrl.pathname.startsWith('/ejercer-derechos');
 
   if (!user && !isAuthRoute && !isPublicAsset) {
     const redirectUrl = request.nextUrl.clone();
