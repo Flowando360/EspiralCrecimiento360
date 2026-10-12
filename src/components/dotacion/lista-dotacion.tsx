@@ -1,8 +1,9 @@
 'use client';
 
 import { useRef, useState, useTransition } from 'react';
-import { confirmarFirmaDotacion, actualizarEstadoDotacion, subirActaFirmada, registrarUsoDotacion } from '@/app/(dashboard)/dotacion/actions';
-import { CheckCircle2, Clock, ShieldCheck, Camera, FileImage, Ticket } from 'lucide-react';
+import { actualizarEstadoDotacion, subirActaFirmada, registrarUsoDotacion } from '@/app/(dashboard)/dotacion/actions';
+import { Clock, ShieldCheck, Camera, FileImage, Ticket } from 'lucide-react';
+import { ConfirmarRecibido } from '@/components/dotacion/confirmar-recibido';
 import { etiquetaPeriodo, type CorteDotacion } from '@/lib/dotacion/normativa';
 import type { RolUsuario } from '@/types/colaborador';
 
@@ -56,6 +57,7 @@ function FilaEntrega({ entrega, puedeAdministrar, esPropia }: { entrega: Entrega
   const [subiendoActa, setSubiendoActa] = useState(false);
   const [actaUrl, setActaUrl] = useState(entrega.acta_firmada_url);
   const [errorUso, setErrorUso] = useState<string | null>(null);
+  const [buenas, setBuenas] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const vencidaProximo = entrega.fecha_vencimiento && new Date(entrega.fecha_vencimiento) < new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
   const puedeAdjuntarActa = puedeAdministrar || esPropia;
@@ -67,6 +69,7 @@ function FilaEntrega({ entrega, puedeAdministrar, esPropia }: { entrega: Entrega
     const formData = new FormData();
     formData.append('entregaId', entrega.id);
     formData.append('archivo', file);
+    formData.append('buenasCondiciones', String(buenas));
     startTransition(async () => {
       const res = await subirActaFirmada(formData);
       setSubiendoActa(false);
@@ -117,14 +120,7 @@ function FilaEntrega({ entrega, puedeAdministrar, esPropia }: { entrega: Entrega
             <ShieldCheck size={13} /> Firmado
           </span>
         ) : esPropia ? (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => startTransition(() => { confirmarFirmaDotacion(entrega.id); })}
-            className="inline-flex items-center gap-1 text-xs bg-flow-500 hover:bg-flow-600 disabled:opacity-50 text-white font-medium rounded-lg px-2.5 py-1.5"
-          >
-            <CheckCircle2 size={13} /> Confirmar recibido
-          </button>
+          <ConfirmarRecibido entregaId={entrega.id} />
         ) : (
           <span className="inline-flex items-center gap-1 text-xs text-marmol-400">
             <Clock size={13} /> Sin firmar
@@ -132,11 +128,20 @@ function FilaEntrega({ entrega, puedeAdministrar, esPropia }: { entrega: Entrega
         )}
 
         {puedeAdjuntarActa && (
-          <label className="inline-flex items-center gap-1 text-xs text-marmol-400 hover:text-flow-600 cursor-pointer" title="Adjuntar foto del acta firmada en papel">
-            {actaUrl ? <FileImage size={13} className="text-flow-600" /> : <Camera size={13} />}
-            {subiendoActa ? 'Subiendo…' : actaUrl ? 'Acta adjunta' : 'Adjuntar acta'}
-            <input ref={inputRef} type="file" accept="image/*,.pdf" disabled={subiendoActa} onChange={(e) => archivoActaSeleccionado(e.target.files?.[0])} className="hidden" />
-          </label>
+          <div className="flex flex-col items-end gap-1">
+            <label className="inline-flex items-center gap-1.5 text-xs text-marmol-600">
+              <input type="checkbox" checked={buenas} onChange={(e) => setBuenas(e.target.checked)} disabled={subiendoActa} />
+              En buenas condiciones
+            </label>
+            <label
+              className={`inline-flex items-center gap-1 text-xs ${buenas ? 'text-marmol-400 hover:text-flow-600 cursor-pointer' : 'text-marmol-300 cursor-not-allowed'}`}
+              title="Adjuntar foto del acta firmada en papel"
+            >
+              {actaUrl ? <FileImage size={13} className="text-flow-600" /> : <Camera size={13} />}
+              {subiendoActa ? 'Subiendo…' : actaUrl ? 'Acta adjunta' : 'Adjuntar acta'}
+              <input ref={inputRef} type="file" accept="image/*,.pdf" disabled={!buenas || subiendoActa} onChange={(e) => archivoActaSeleccionado(e.target.files?.[0])} className="hidden" />
+            </label>
+          </div>
         )}
 
         {puedeAdministrar && esDotacion && (

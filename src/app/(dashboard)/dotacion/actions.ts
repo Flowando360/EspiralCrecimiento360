@@ -91,14 +91,15 @@ export async function registrarUsoDotacion(id: string, usoVerificado: boolean | 
 }
 
 /** El propio colaborador confirma que recibió el elemento — casilla + fecha, mismo mecanismo del Acuerdo de Crecimiento. */
-export async function confirmarFirmaDotacion(id: string) {
+export async function confirmarFirmaDotacion(id: string, buenasCondiciones: boolean) {
   const perfil = await getPerfilActual();
   if (!perfil || perfil.rol !== 'colaborador') return { ok: false as const, error: 'No autorizado' };
+  if (!buenasCondiciones) return { ok: false as const, error: 'Confirma que recibiste el elemento en buenas condiciones' };
 
   const supabase = createClient();
   const { error } = await supabase
     .from('dotacion_entregas')
-    .update({ firma_confirmada: true, firmado_en: new Date().toISOString() })
+    .update({ firma_confirmada: true, firmado_en: new Date().toISOString(), buenas_condiciones: true })
     .eq('id', id)
     .eq('colaborador_id', perfil.colaborador_id ?? '');
 
@@ -131,6 +132,7 @@ export async function subirActaFirmada(formData: FormData) {
 
   const entregaId = formData.get('entregaId') as string;
   const archivo = formData.get('archivo') as File | null;
+  if (formData.get('buenasCondiciones') !== 'true') return { ok: false as const, error: 'Confirma que el elemento se recibió en buenas condiciones' };
   if (!archivo || archivo.size === 0) return { ok: false as const, error: 'Selecciona un archivo' };
   if (archivo.size > 8 * 1024 * 1024) return { ok: false as const, error: 'El archivo no puede pesar más de 8 MB.' };
 
@@ -144,7 +146,7 @@ export async function subirActaFirmada(formData: FormData) {
   const { error: errorSubida } = await supabase.storage.from('actas-dotacion').upload(ruta, archivo, { contentType: archivo.type || undefined, upsert: true });
   if (errorSubida) return { ok: false as const, error: 'No se pudo subir el archivo: ' + errorSubida.message };
 
-  const { error } = await supabase.from('dotacion_entregas').update({ acta_firmada_url: ruta }).eq('id', entregaId);
+  const { error } = await supabase.from('dotacion_entregas').update({ acta_firmada_url: ruta, buenas_condiciones: true }).eq('id', entregaId);
   if (error) return { ok: false as const, error: error.message };
 
   revalidatePath(RUTA);
@@ -159,6 +161,7 @@ const ArticuloSchema = z.object({
   nombre: z.string().trim().min(1, 'El nombre es requerido'),
   requiereTalla: z.boolean(),
   esVestuarioCalzado: z.boolean().default(false),
+  referencia: z.string().trim().optional(),
 });
 
 export async function crearArticuloCatalogo(input: z.input<typeof ArticuloSchema>) {
@@ -177,6 +180,7 @@ export async function crearArticuloCatalogo(input: z.input<typeof ArticuloSchema
       nombre: parsed.data.nombre,
       requiere_talla: parsed.data.requiereTalla,
       es_vestuario_calzado: parsed.data.esVestuarioCalzado,
+      referencia: parsed.data.referencia || null,
     })
     .select('id')
     .single();
@@ -330,5 +334,46 @@ export async function actualizarVestuarioArticuloCatalogo(articuloId: string, es
     .eq('empresa_id', perfil.empresa_id);
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(RUTA_CATALOGO);
+  return { ok: true as const };
+}
+
+// ── Kit por cargo ──────────────────────────────────────────────────────────
+const KitSchema = z.object({
+  cargoId: z.string().uuid('Selecciona un cargo'),
+  articuloId: z.string().uuid('Selecciona un artículo'),
+  cantidad: z.coerce.number().int().min(1, 'La cantidad debe ser mayor a 0').default(1),
+});
+
+/** Define qué artículos del catálogo le corresponden a un cargo. El área define el kit; las fechas siguen siendo las de ley. */
+export async function agregarKitCargo(input: z.input<typeof KitSchema>) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = KitSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('dotacion_kit_cargo')
+    .insert({ empresa_id: perfil.empresa_id, cargo_id: parsed.data.cargoId, articulo_id: parsed.data.articuloId, cantidad: parsed.data.cantidad })
+    .select('id')
+    .single();
+  if (error) {
+    return { ok: false as const, error: error.code === '23505' ? 'Ese artículo ya está en el kit de este cargo' : error.message };
+  }
+  revalidatePath(RUTA_CATALOGO);
+  revalidatePath(RUTA);
+  return { ok: true as const, id: data.id as string };
+}
+
+export async function eliminarKitCargo(kitId: string) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { error } = await supabase.from('dotacion_kit_cargo').delete().eq('id', kitId).eq('empresa_id', perfil.empresa_id);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(RUTA_CATALOGO);
+  revalidatePath(RUTA);
   return { ok: true as const };
 }

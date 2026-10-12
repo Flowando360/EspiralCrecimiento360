@@ -27,6 +27,7 @@ interface Articulo {
   requiere_talla: boolean;
   activo: boolean;
   es_vestuario_calzado: boolean;
+  referencia: string | null;
   tallas: Talla[];
 }
 
@@ -40,17 +41,19 @@ export function CatalogoDotacion({ articulosIniciales }: { articulosIniciales: A
   const [nombre, setNombre] = useState('');
   const [requiereTalla, setRequiereTalla] = useState(true);
   const [esVestuario, setEsVestuario] = useState(false);
+  const [referencia, setReferencia] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   function agregarArticulo() {
     setError(null);
     startTransition(async () => {
-      const res = await crearArticuloCatalogo({ categoria, nombre, requiereTalla, esVestuarioCalzado: esVestuario });
+      const res = await crearArticuloCatalogo({ categoria, nombre, requiereTalla, esVestuarioCalzado: esVestuario, referencia });
       if (res.ok) {
-        setArticulos((prev) => [...prev, { id: res.id, categoria, nombre, requiere_talla: requiereTalla, activo: true, es_vestuario_calzado: esVestuario, tallas: [] }]);
+        setArticulos((prev) => [...prev, { id: res.id, categoria, nombre, requiere_talla: requiereTalla, activo: true, es_vestuario_calzado: esVestuario, referencia: referencia || null, tallas: [] }]);
         setCategoria('');
         setNombre('');
         setEsVestuario(false);
+        setReferencia('');
       } else {
         setError(res.error);
       }
@@ -87,6 +90,7 @@ export function CatalogoDotacion({ articulosIniciales }: { articulosIniciales: A
         <div className="flex flex-wrap items-center gap-2">
           <input className={campo} value={categoria} onChange={(e) => setCategoria(e.target.value)} placeholder="Categoría (ej. Calzado, Camisas, Cascos)" />
           <input className={campo} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre del artículo" />
+          <input className={campo} value={referencia} onChange={(e) => setReferencia(e.target.value)} placeholder="Referencia (opcional)" />
           <label className="flex items-center gap-1.5 text-sm text-marmol-600">
             <input type="checkbox" checked={requiereTalla} onChange={(e) => setRequiereTalla(e.target.checked)} /> Maneja tallas
           </label>
@@ -186,7 +190,8 @@ function FilaArticulo({
     <div className={articulo.activo ? '' : 'opacity-50'}>
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium text-marmol-800 flex items-center gap-2 flex-wrap">
-          {articulo.nombre} {!articulo.requiere_talla && <span className="text-xs text-marmol-400">(sin tallas)</span>}
+          {articulo.nombre} {articulo.referencia && <span className="text-xs text-marmol-400">· Ref. {articulo.referencia}</span>}{' '}
+          {!articulo.requiere_talla && <span className="text-xs text-marmol-400">(sin tallas)</span>}
           {articulo.es_vestuario_calzado && (
             <span className="inline-flex items-center gap-1 text-[11px] font-medium rounded-full px-2 py-0.5 bg-flow-50 text-flow-700">
               <Shirt size={11} /> Admite bono

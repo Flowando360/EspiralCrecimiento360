@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { asignarFormacionPorAlerta } from '@/lib/nexa/asignar-formacion-por-alerta';
 import { enviarEmail } from '@/lib/email/resend';
+import { proximoCorte, etiquetaPeriodo, periodoDeFecha } from '@/lib/dotacion/normativa';
+
+const DIAS_AVISO_CORTE_DOTACION = 15;
 
 /**
  * Job programado (Vercel Cron o llamado manualmente) que:
@@ -87,11 +90,81 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // 3. Aviso anticipado a Talento Humano antes de cada corte obligatorio de dotación.
+  // Se crea una sola alerta por empresa y corte (sin colaborador) y se notifica a los admin_th.
+  let avisosCorteCreados = 0;
+  const { data: empresas } = await supabase.from('empresas').select('id');
+  for (const empresa of empresas ?? []) {
+    const corte = proximoCorte(hoy);
+    const diasHastaCorte = Math.round((new Date(corte).getTime() - new Date(hoy).getTime()) / 86400000);
+    if (diasHastaCorte > DIAS_AVISO_CORTE_DOTACION) continue;
+
+    const { anio, corte: nombreCorte } = periodoDeFecha(corte);
+    const etiqueta = etiquetaPeriodo(anio, nombreCorte);
+
+    const { data: existente } = await supabase
+      .from('alertas')
+      .select('id')
+      .eq('empresa_id', empresa.id)
+      .eq('tipo', 'dotacion_corte')
+      .eq('fecha_objetivo', corte)
+      .maybeSingle();
+    if (existente) continue;
+
+    const { data: alerta } = await supabase
+      .from('alertas')
+      .insert({
+        empresa_id: empresa.id,
+        tipo: 'dotacion_corte',
+        severidad: 'atencion',
+        titulo: `Corte de dotación ${etiqueta}`,
+        descripcion: `Faltan ${diasHastaCorte} días para el corte obligatorio de dotación (${corte}). Revisa el seguimiento por persona y el catálogo antes de la fecha.`,
+        fecha_objetivo: corte,
+        dias_anticipacion: DIAS_AVISO_CORTE_DOTACION,
+        estado: 'notificada',
+      })
+      .select('id')
+      .single();
+    if (!alerta) continue;
+    avisosCorteCreados++;
+
+    const { data: talentoHumano } = await supabase
+      .from('perfiles_usuario')
+      .select('id, email')
+      .eq('empresa_id', empresa.id)
+      .eq('rol', 'admin_th')
+      .eq('activo', true);
+
+    for (const th of talentoHumano ?? []) {
+      const asunto = `Corte de dotación ${etiqueta}`;
+      const cuerpo = `Faltan ${diasHastaCorte} días para el corte obligatorio de dotación (${corte}).`;
+      const envio = th.email
+        ? await enviarEmail({
+            to: th.email,
+            subject: asunto,
+            html: `<p>${cuerpo}</p><p style="color:#6b7280;font-size:12px">Espiral de Crecimiento — Flow, Nexus y Visión</p>`,
+          })
+        : { ok: false as const, motivo: 'sin correo registrado' };
+
+      await supabase.from('notificaciones').insert({
+        destinatario_usuario_id: th.id,
+        alerta_id: alerta.id,
+        canal: 'email',
+        asunto,
+        cuerpo,
+        enviado: envio.ok,
+        enviado_en: envio.ok ? new Date().toISOString() : null,
+      });
+      if (envio.ok) correosEnviados++;
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     alertas_vencidas: vencidas?.length ?? 0,
     notificaciones_creadas: notificacionesCreadas,
     correos_enviados: correosEnviados,
     cursos_asignados_automaticamente: cursosAsignados,
+    avisos_corte_dotacion: avisosCorteCreados,
   });
 }
