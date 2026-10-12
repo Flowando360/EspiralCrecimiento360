@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { ListaDotacion } from '@/components/dotacion/lista-dotacion';
 import { FormularioEntrega } from '@/components/dotacion/formulario-entrega';
-import { Shirt, Package, FileBarChart } from 'lucide-react';
+import { Shirt, Package, FileBarChart, ArrowLeft } from 'lucide-react';
 
 export default async function DotacionPage({ searchParams }: { searchParams?: { colaborador_id?: string } }) {
   const perfil = await getPerfilActual();
@@ -49,6 +49,12 @@ export default async function DotacionPage({ searchParams }: { searchParams?: { 
 
   return (
     <div className="space-y-6">
+      {perfil.rol === 'admin_th' && (
+        <Link href="/administracion/dotaciones" className="inline-flex items-center gap-1 text-xs text-marmol-400 hover:text-marmol-600">
+          <ArrowLeft size={12} /> Volver a Dotaciones
+        </Link>
+      )}
+
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-display text-2xl font-semibold text-secundario flex items-center gap-2">

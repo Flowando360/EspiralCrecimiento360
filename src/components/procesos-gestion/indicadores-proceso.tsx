@@ -24,6 +24,8 @@ export interface Indicador {
   unidad: Unidad;
   sentido: Sentido;
   frecuencia_medicion: string | null;
+  objetivo?: string | null;
+  recursos?: string | null;
   mediciones: Medicion[];
 }
 
@@ -260,6 +262,8 @@ function FormularioIndicador({ procesoId, onCreado }: { procesoId: string; onCre
   const [unidad, setUnidad] = useState<Unidad>('porcentaje');
   const [sentido, setSentido] = useState<Sentido>('mayor_mejor');
   const [frecuencia, setFrecuencia] = useState<'mensual' | 'trimestral' | 'semestral' | 'anual' | ''>('');
+  const [objetivo, setObjetivo] = useState('');
+  const [recursos, setRecursos] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -278,9 +282,11 @@ function FormularioIndicador({ procesoId, onCreado }: { procesoId: string; onCre
         unidad,
         sentido,
         frecuenciaMedicion: frecuencia || undefined,
+        objetivo: objetivo || undefined,
+        recursos: recursos || undefined,
       });
       if (res.ok) {
-        onCreado({ id: res.id, nombre, formula: formula || null, meta: meta !== '' ? Number(meta) : null, unidad, sentido, frecuencia_medicion: frecuencia || null, mediciones: [] });
+        onCreado({ id: res.id, nombre, formula: formula || null, meta: meta !== '' ? Number(meta) : null, unidad, sentido, frecuencia_medicion: frecuencia || null, objetivo: objetivo || null, recursos: recursos || null, mediciones: [] });
       } else {
         setError(res.error);
       }
@@ -292,6 +298,10 @@ function FormularioIndicador({ procesoId, onCreado }: { procesoId: string; onCre
       <div className="grid grid-cols-2 gap-2">
         <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre del indicador" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" autoFocus />
         <input value={formula} onChange={(e) => setFormula(e.target.value)} placeholder="Fórmula / fuente (opcional)" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <input value={objetivo} onChange={(e) => setObjetivo(e.target.value)} placeholder="Objetivo: qué se quiere lograr (opcional)" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
+        <input value={recursos} onChange={(e) => setRecursos(e.target.value)} placeholder="Recursos necesarios (opcional)" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <input value={meta} onChange={(e) => setMeta(e.target.value)} placeholder="Meta" type="number" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />

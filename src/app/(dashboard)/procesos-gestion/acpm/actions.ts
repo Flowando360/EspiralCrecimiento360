@@ -31,9 +31,12 @@ const AcpmSchema = z.object({
   metodologiaCausa: z.enum(['cinco_porques', 'ishikawa', 'libre']).optional(),
   responsableId: z.string().uuid().optional(),
   fechaCompromiso: z.string().trim().optional(),
+  prioridad: z.enum(['baja', 'media', 'alta', 'critica']).default('media'),
+  correccionInmediata: z.string().trim().optional(),
+  conclusionCausaRaiz: z.string().trim().optional(),
 });
 
-export async function crearAcpm(input: z.infer<typeof AcpmSchema>) {
+export async function crearAcpm(input: z.input<typeof AcpmSchema>) {
   const perfil = await requerirAdminTh();
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
@@ -56,6 +59,9 @@ export async function crearAcpm(input: z.infer<typeof AcpmSchema>) {
       origen_contexto_item_id: d.origenTipo === 'contexto' ? d.origenContextoItemId || null : null,
       origen_detalle: d.origenDetalle || null,
       tipo_accion: d.tipoAccion,
+      prioridad: d.prioridad,
+      correccion_inmediata: d.correccionInmediata || null,
+      conclusion_causa_raiz: d.conclusionCausaRaiz || null,
       descripcion: d.descripcion,
       metodologia_causa: d.metodologiaCausa || null,
       responsable_id: d.responsableId || null,
@@ -107,6 +113,9 @@ export async function actualizarAcpm(input: z.infer<typeof EditarAcpmSchema>) {
       origen_contexto_item_id: d.origenTipo === 'contexto' ? d.origenContextoItemId || null : null,
       origen_detalle: d.origenDetalle || null,
       tipo_accion: d.tipoAccion,
+      prioridad: d.prioridad,
+      correccion_inmediata: d.correccionInmediata || null,
+      conclusion_causa_raiz: d.conclusionCausaRaiz || null,
       descripcion: d.descripcion,
       metodologia_causa: d.metodologiaCausa || null,
       analisis_causa: d.analisisCausa || null,

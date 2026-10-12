@@ -41,6 +41,9 @@ export interface Acpm {
   origen_href?: string | null;
   origen_detalle: string | null;
   tipo_accion: TipoAccion;
+  prioridad: 'baja' | 'media' | 'alta' | 'critica';
+  correccion_inmediata: string | null;
+  conclusion_causa_raiz: string | null;
   descripcion: string;
   metodologia_causa: MetodologiaCausa | null;
   analisis_causa: string | null;
@@ -260,6 +263,11 @@ function TarjetaAcpm({ item, proceso, responsable, onAbrir }: { item: Acpm; proc
       <div className="flex items-center gap-1.5 flex-wrap">
         {item.codigo && <span className="text-[12px] font-semibold text-marmol-400">{item.codigo}</span>}
         <span className={cn('text-[12px] rounded-full px-1.5 py-0.5 font-medium', CLASE_TIPO_ACCION[item.tipo_accion])}>{ETIQUETA_TIPO_ACCION[item.tipo_accion]}</span>
+        {item.prioridad && item.prioridad !== 'media' && (
+          <span className={cn('text-[12px] rounded-full px-1.5 py-0.5 font-medium', item.prioridad === 'critica' || item.prioridad === 'alta' ? 'badge-bajo' : 'bg-marmol-100 text-marmol-500')}>
+            Prioridad {item.prioridad}
+          </span>
+        )}
       </div>
       <p className="text-sm font-medium text-marmol-800 mt-1 break-words">{item.descripcion}</p>
       {item.origen_href ? (
@@ -299,6 +307,9 @@ function FormularioAcpm({ procesos, prefill, onCreada }: { procesos: ProcesoOpci
   const [descripcion, setDescripcion] = useState(prefill?.descripcion ?? '');
   const [metodologiaCausa, setMetodologiaCausa] = useState<MetodologiaCausa | ''>('');
   const [fechaCompromiso, setFechaCompromiso] = useState('');
+  const [prioridad, setPrioridad] = useState<'baja' | 'media' | 'alta' | 'critica'>('media');
+  const [correccionInmediata, setCorreccionInmediata] = useState('');
+  const [conclusionCausaRaiz, setConclusionCausaRaiz] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -320,6 +331,9 @@ function FormularioAcpm({ procesos, prefill, onCreada }: { procesos: ProcesoOpci
         descripcion,
         metodologiaCausa: metodologiaCausa || undefined,
         fechaCompromiso: fechaCompromiso || undefined,
+        prioridad,
+        correccionInmediata: correccionInmediata || undefined,
+        conclusionCausaRaiz: conclusionCausaRaiz || undefined,
       });
       if (res.ok) {
         onCreada({
@@ -332,6 +346,9 @@ function FormularioAcpm({ procesos, prefill, onCreada }: { procesos: ProcesoOpci
           origen_contexto_item_id: origenTipo === 'contexto' ? prefill?.origenContextoItemId ?? null : null,
           origen_detalle: origenDetalle || null,
           tipo_accion: tipoAccion,
+          prioridad,
+          correccion_inmediata: correccionInmediata || null,
+          conclusion_causa_raiz: conclusionCausaRaiz || null,
           descripcion,
           metodologia_causa: metodologiaCausa || null,
           analisis_causa: null,
@@ -394,7 +411,17 @@ function FormularioAcpm({ procesos, prefill, onCreada }: { procesos: ProcesoOpci
         <input value={origenDetalle} onChange={(e) => setOrigenDetalle(e.target.value)} placeholder="Detalle del origen (opcional)" className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
       )}
       <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Descripción de la ACPM" rows={2} className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
-      <input type="date" value={fechaCompromiso} onChange={(e) => setFechaCompromiso(e.target.value)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
+      <div className="grid grid-cols-2 gap-2">
+        <select value={prioridad} onChange={(e) => setPrioridad(e.target.value as typeof prioridad)} className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm">
+          <option value="baja">Prioridad: baja</option>
+          <option value="media">Prioridad: media</option>
+          <option value="alta">Prioridad: alta</option>
+          <option value="critica">Prioridad: crítica</option>
+        </select>
+        <input type="date" value={fechaCompromiso} onChange={(e) => setFechaCompromiso(e.target.value)} title="Fecha límite" className="rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
+      </div>
+      <textarea value={correccionInmediata} onChange={(e) => setCorreccionInmediata(e.target.value)} placeholder="Corrección inmediata (qué se hizo para contener el problema)" rows={2} className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
+      <textarea value={conclusionCausaRaiz} onChange={(e) => setConclusionCausaRaiz(e.target.value)} placeholder="Conclusión de la causa raíz (o por qué no aplica el análisis)" rows={2} className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
       <button onClick={crear} disabled={pending} className="inline-flex items-center gap-1 rounded-lg bg-flow-500 hover:bg-flow-600 disabled:opacity-40 text-white text-sm font-medium px-3 py-1.5">
         {pending ? 'Creando…' : 'Crear ACPM'}
       </button>
