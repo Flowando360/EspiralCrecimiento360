@@ -13,7 +13,7 @@ export default async function CatalogoDotacionPage() {
   const supabase = createClient();
   const { data: articulos } = await supabase
     .from('dotacion_catalogo_articulos')
-    .select('id, categoria, nombre, requiere_talla, activo, tallas:dotacion_catalogo_tallas(id, talla, stock_disponible, stock_minimo)')
+    .select('id, categoria, nombre, requiere_talla, activo, es_vestuario_calzado, tallas:dotacion_catalogo_tallas(id, talla, stock_disponible, stock_minimo)')
     .eq('empresa_id', perfil.empresa_id)
     .order('categoria')
     .order('nombre');

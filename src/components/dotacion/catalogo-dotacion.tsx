@@ -9,8 +9,9 @@ import {
   actualizarStockMinimo,
   eliminarTallaCatalogo,
   recibirEnBodega,
+  actualizarVestuarioArticuloCatalogo,
 } from '@/app/(dashboard)/dotacion/actions';
-import { Plus, Trash2, AlertTriangle, PackagePlus, EyeOff, Eye } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, PackagePlus, EyeOff, Eye, Shirt } from 'lucide-react';
 
 interface Talla {
   id: string;
@@ -25,6 +26,7 @@ interface Articulo {
   nombre: string;
   requiere_talla: boolean;
   activo: boolean;
+  es_vestuario_calzado: boolean;
   tallas: Talla[];
 }
 
@@ -37,16 +39,18 @@ export function CatalogoDotacion({ articulosIniciales }: { articulosIniciales: A
   const [categoria, setCategoria] = useState('');
   const [nombre, setNombre] = useState('');
   const [requiereTalla, setRequiereTalla] = useState(true);
+  const [esVestuario, setEsVestuario] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function agregarArticulo() {
     setError(null);
     startTransition(async () => {
-      const res = await crearArticuloCatalogo({ categoria, nombre, requiereTalla });
+      const res = await crearArticuloCatalogo({ categoria, nombre, requiereTalla, esVestuarioCalzado: esVestuario });
       if (res.ok) {
-        setArticulos((prev) => [...prev, { id: res.id, categoria, nombre, requiere_talla: requiereTalla, activo: true, tallas: [] }]);
+        setArticulos((prev) => [...prev, { id: res.id, categoria, nombre, requiere_talla: requiereTalla, activo: true, es_vestuario_calzado: esVestuario, tallas: [] }]);
         setCategoria('');
         setNombre('');
+        setEsVestuario(false);
       } else {
         setError(res.error);
       }
@@ -66,6 +70,11 @@ export function CatalogoDotacion({ articulosIniciales }: { articulosIniciales: A
     startTransition(() => { actualizarActivoArticuloCatalogo(id, activo); });
   }
 
+  function alternarVestuario(id: string, esVestuarioCalzado: boolean) {
+    setArticulos((prev) => prev.map((a) => (a.id === id ? { ...a, es_vestuario_calzado: esVestuarioCalzado } : a)));
+    startTransition(() => { actualizarVestuarioArticuloCatalogo(id, esVestuarioCalzado); });
+  }
+
   const porCategoria = articulos.reduce<Record<string, Articulo[]>>((acc, a) => {
     (acc[a.categoria] ??= []).push(a);
     return acc;
@@ -80,6 +89,9 @@ export function CatalogoDotacion({ articulosIniciales }: { articulosIniciales: A
           <input className={campo} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre del artículo" />
           <label className="flex items-center gap-1.5 text-sm text-marmol-600">
             <input type="checkbox" checked={requiereTalla} onChange={(e) => setRequiereTalla(e.target.checked)} /> Maneja tallas
+          </label>
+          <label className="flex items-center gap-1.5 text-sm text-marmol-600" title="Solo estos artículos pueden entregarse como bono de vestuario o calzado">
+            <input type="checkbox" checked={esVestuario} onChange={(e) => setEsVestuario(e.target.checked)} /> Vestuario o calzado (admite bono)
           </label>
           <button
             type="button"
@@ -101,7 +113,7 @@ export function CatalogoDotacion({ articulosIniciales }: { articulosIniciales: A
             <h3 className="font-display font-semibold text-secundario text-sm">{cat}</h3>
             <div className="space-y-3">
               {items.map((a) => (
-                <FilaArticulo key={a.id} articulo={a} onEliminar={eliminarArticulo} onAlternarActivo={alternarActivo} />
+                <FilaArticulo key={a.id} articulo={a} onEliminar={eliminarArticulo} onAlternarActivo={alternarActivo} onAlternarVestuario={alternarVestuario} />
               ))}
             </div>
           </div>
@@ -115,10 +127,12 @@ function FilaArticulo({
   articulo,
   onEliminar,
   onAlternarActivo,
+  onAlternarVestuario,
 }: {
   articulo: Articulo;
   onEliminar: (id: string) => void;
   onAlternarActivo: (id: string, activo: boolean) => void;
+  onAlternarVestuario: (id: string, esVestuarioCalzado: boolean) => void;
 }) {
   const [tallas, setTallas] = useState(articulo.tallas);
   const [mostrarAgregarTalla, setMostrarAgregarTalla] = useState(false);
@@ -171,10 +185,23 @@ function FilaArticulo({
   return (
     <div className={articulo.activo ? '' : 'opacity-50'}>
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-marmol-800">
+        <p className="text-sm font-medium text-marmol-800 flex items-center gap-2 flex-wrap">
           {articulo.nombre} {!articulo.requiere_talla && <span className="text-xs text-marmol-400">(sin tallas)</span>}
+          {articulo.es_vestuario_calzado && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium rounded-full px-2 py-0.5 bg-flow-50 text-flow-700">
+              <Shirt size={11} /> Admite bono
+            </span>
+          )}
         </p>
         <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => onAlternarVestuario(articulo.id, !articulo.es_vestuario_calzado)}
+            title={articulo.es_vestuario_calzado ? 'Quitar la opción de bono de vestuario' : 'Permitir bono de vestuario (vestuario o calzado)'}
+            className={`text-xs ${articulo.es_vestuario_calzado ? 'text-flow-600' : 'text-marmol-400 hover:text-flow-600'}`}
+          >
+            <Shirt size={14} />
+          </button>
           <button type="button" onClick={() => onAlternarActivo(articulo.id, !articulo.activo)} title={articulo.activo ? 'Desactivar' : 'Reactivar'} className="text-marmol-300 hover:text-flow-600">
             {articulo.activo ? <Eye size={14} /> : <EyeOff size={14} />}
           </button>

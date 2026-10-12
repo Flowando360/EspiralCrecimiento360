@@ -13,6 +13,8 @@ async function requerirAdminTh() {
   return perfil;
 }
 
+// La validación normativa (elegibilidad, periodo, vencimiento, bono) vive en la base de datos
+// (trigger trg_dotacion_validar_entrega). Aquí solo se sanea la entrada y se devuelve el mensaje.
 const EntregaSchema = z.object({
   colaboradorId: z.string().uuid('Selecciona un colaborador'),
   categoria: z.enum(['elemento_personal', 'equipo_trabajo']),
@@ -20,8 +22,10 @@ const EntregaSchema = z.object({
   talla: z.string().trim().optional(),
   cantidad: z.coerce.number().int().min(1).default(1),
   fechaEntrega: z.string().min(1, 'La fecha de entrega es requerida'),
+  // Solo para equipos de trabajo: en dotación el vencimiento es el próximo corte obligatorio.
   fechaVencimiento: z.string().optional(),
   observaciones: z.string().trim().optional(),
+  excepcionMotivo: z.string().trim().optional(),
 });
 
 export async function crearEntrega(input: z.infer<typeof EntregaSchema>) {
@@ -31,6 +35,7 @@ export async function crearEntrega(input: z.infer<typeof EntregaSchema>) {
   const parsed = EntregaSchema.safeParse(input);
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
 
+  const esEquipo = parsed.data.categoria === 'equipo_trabajo';
   const supabase = createClient();
   const { error } = await supabase.from('dotacion_entregas').insert({
     empresa_id: perfil.empresa_id,
@@ -40,10 +45,45 @@ export async function crearEntrega(input: z.infer<typeof EntregaSchema>) {
     talla: parsed.data.talla || null,
     cantidad: parsed.data.cantidad,
     fecha_entrega: parsed.data.fechaEntrega,
-    fecha_vencimiento: parsed.data.fechaVencimiento || null,
+    fecha_vencimiento: esEquipo ? parsed.data.fechaVencimiento || null : null,
     observaciones: parsed.data.observaciones || null,
+    excepcion_motivo: parsed.data.excepcionMotivo || null,
     entregado_por: perfil.usuario_id,
   });
+
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(RUTA);
+  return { ok: true as const };
+}
+
+/** Evalúa si un colaborador es elegible para dotación en una fecha (salario ≤ 2 SMLMV y > 3 meses de antigüedad). */
+export async function consultarElegibilidadDotacion(colaboradorId: string, fechaEntrega: string) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('fn_evaluar_elegibilidad_dotacion', { p_colaborador_id: colaboradorId, p_fecha: fechaEntrega });
+  if (error) return { ok: false as const, error: error.message };
+
+  const r = data as { elegible: boolean; exento_por_no_uso: boolean; motivos: string[]; antiguedad_meses: number };
+  return { ok: true as const, elegible: r.elegible, exentoPorNoUso: r.exento_por_no_uso, motivos: r.motivos, antiguedadMeses: r.antiguedad_meses };
+}
+
+/** Admin_th verifica si el trabajador usó la dotación. "No usó" exime al empleador de entregarla en el periodo siguiente. */
+export async function registrarUsoDotacion(id: string, usoVerificado: boolean | null, observacion?: string) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('dotacion_entregas')
+    .update({
+      uso_verificado: usoVerificado,
+      uso_verificado_en: usoVerificado === null ? null : new Date().toISOString(),
+      uso_observacion: observacion?.trim() || null,
+    })
+    .eq('id', id)
+    .eq('empresa_id', perfil.empresa_id);
 
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(RUTA);
@@ -118,9 +158,10 @@ const ArticuloSchema = z.object({
   categoria: z.string().trim().min(1, 'La categoría es requerida'),
   nombre: z.string().trim().min(1, 'El nombre es requerido'),
   requiereTalla: z.boolean(),
+  esVestuarioCalzado: z.boolean().default(false),
 });
 
-export async function crearArticuloCatalogo(input: z.infer<typeof ArticuloSchema>) {
+export async function crearArticuloCatalogo(input: z.input<typeof ArticuloSchema>) {
   const perfil = await requerirAdminTh();
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
@@ -130,7 +171,13 @@ export async function crearArticuloCatalogo(input: z.infer<typeof ArticuloSchema
   const supabase = createClient();
   const { data, error } = await supabase
     .from('dotacion_catalogo_articulos')
-    .insert({ empresa_id: perfil.empresa_id, categoria: parsed.data.categoria, nombre: parsed.data.nombre, requiere_talla: parsed.data.requiereTalla })
+    .insert({
+      empresa_id: perfil.empresa_id,
+      categoria: parsed.data.categoria,
+      nombre: parsed.data.nombre,
+      requiere_talla: parsed.data.requiereTalla,
+      es_vestuario_calzado: parsed.data.esVestuarioCalzado,
+    })
     .select('id')
     .single();
 
@@ -241,11 +288,12 @@ const EntregaDesdeCatalogoSchema = z.object({
   categoria: z.enum(['elemento_personal', 'equipo_trabajo']),
   cantidad: z.coerce.number().int().min(1).default(1),
   fechaEntrega: z.string().min(1, 'La fecha de entrega es requerida'),
-  fechaVencimiento: z.string().optional(),
+  tipo: z.enum(['especie', 'bono_vestuario']).default('especie'),
+  excepcionMotivo: z.string().trim().optional(),
 });
 
 /** Entrega desde el catálogo: descuenta stock y crea la entrega en una sola operación atómica (fn_entregar_desde_catalogo). */
-export async function crearEntregaDesdeCatalogo(input: z.infer<typeof EntregaDesdeCatalogoSchema>) {
+export async function crearEntregaDesdeCatalogo(input: z.input<typeof EntregaDesdeCatalogoSchema>) {
   const perfil = await requerirAdminTh();
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
@@ -259,11 +307,28 @@ export async function crearEntregaDesdeCatalogo(input: z.infer<typeof EntregaDes
     p_categoria: parsed.data.categoria,
     p_cantidad: parsed.data.cantidad,
     p_fecha_entrega: parsed.data.fechaEntrega,
-    p_fecha_vencimiento: parsed.data.fechaVencimiento || undefined,
+    p_tipo: parsed.data.tipo,
+    p_excepcion_motivo: parsed.data.excepcionMotivo || undefined,
   });
   if (error) return { ok: false as const, error: error.message };
 
   revalidatePath(RUTA);
+  revalidatePath(RUTA_CATALOGO);
+  return { ok: true as const };
+}
+
+/** Marca o desmarca un artículo como vestuario/calzado. Solo ese tipo admite bono de vestuario. */
+export async function actualizarVestuarioArticuloCatalogo(articuloId: string, esVestuarioCalzado: boolean) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('dotacion_catalogo_articulos')
+    .update({ es_vestuario_calzado: esVestuarioCalzado })
+    .eq('id', articuloId)
+    .eq('empresa_id', perfil.empresa_id);
+  if (error) return { ok: false as const, error: error.message };
   revalidatePath(RUTA_CATALOGO);
   return { ok: true as const };
 }

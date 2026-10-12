@@ -14,7 +14,7 @@ export default async function DotacionPage({ searchParams }: { searchParams?: { 
   let query = supabase
     .from('dotacion_entregas')
     .select(
-      'id, categoria, nombre_elemento, talla, cantidad, fecha_entrega, fecha_vencimiento, estado, firma_confirmada, firmado_en, acta_firmada_url, colaborador:colaboradores(id, nombre_completo)'
+      'id, categoria, nombre_elemento, talla, cantidad, fecha_entrega, fecha_vencimiento, estado, firma_confirmada, firmado_en, acta_firmada_url, tipo_entrega, periodo_anio, periodo_corte, uso_verificado, uso_observacion, excepcion_motivo, colaborador:colaboradores(id, nombre_completo)'
     )
     .eq('empresa_id', perfil.empresa_id)
     .order('fecha_entrega', { ascending: false });
@@ -39,7 +39,7 @@ export default async function DotacionPage({ searchParams }: { searchParams?: { 
             .then((r) => r.data ?? []),
           supabase
             .from('dotacion_catalogo_articulos')
-            .select('id, categoria, nombre, requiere_talla, tallas:dotacion_catalogo_tallas(id, talla, stock_disponible)')
+            .select('id, categoria, nombre, requiere_talla, es_vestuario_calzado, tallas:dotacion_catalogo_tallas(id, talla, stock_disponible)')
             .eq('empresa_id', perfil.empresa_id)
             .eq('activo', true)
             .order('categoria')
