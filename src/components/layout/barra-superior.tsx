@@ -265,20 +265,31 @@ export function BarraSuperior({
           <Menu size={22} />
         </button>
 
-        <Link href="/inicio" className="flex items-center gap-2 shrink-0 min-w-0">
-          <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center overflow-hidden shrink-0">
-            {marca?.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={marca.logoUrl} alt={marca.nombre ?? ''} className="h-7 w-7 object-contain" />
-            ) : (
+        {/* Encabezado: logo y nombre del aplicativo (Espiral) + logo y nombre de la empresa. */}
+        <div className="flex items-center gap-2.5 shrink-0 min-w-0">
+          <Link href="/inicio" className="flex items-center gap-2 shrink-0 min-w-0" aria-label="Espiral de Crecimiento 360°">
+            <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center overflow-hidden shrink-0">
               <Image src="/marca/EspiralIsotipo.png" alt="" width={32} height={32} className="h-7 w-7 object-contain" />
-            )}
-          </div>
-          <div className="hidden md:block leading-tight min-w-0">
-            <p className="font-display text-sm font-semibold text-white truncate">{marca?.nombre ?? 'Espiral de Crecimiento'}</p>
-            <p className="text-xs text-acento/80 truncate">Espiral de Crecimiento 360°</p>
-          </div>
-        </Link>
+            </div>
+            <div className="hidden md:block leading-tight min-w-0">
+              <p className="font-display text-sm font-semibold text-white truncate">Espiral de Crecimiento 360°</p>
+            </div>
+          </Link>
+          {marca?.nombre && (
+            <>
+              <span className="hidden sm:block h-7 w-px bg-white/25 shrink-0" aria-hidden="true" />
+              <div className="flex items-center gap-2 min-w-0">
+                {marca.logoUrl && (
+                  <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center overflow-hidden shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={marca.logoUrl} alt={marca.nombre} className="h-7 w-7 object-contain" />
+                  </div>
+                )}
+                <p className="hidden sm:block font-display text-sm font-semibold text-acento truncate">{marca.nombre}</p>
+              </div>
+            </>
+          )}
+        </div>
 
         <div className="ml-auto flex items-center gap-0.5 sm:gap-1.5 shrink-0">
           <CentroAyudaBoton className="rounded-lg p-2 text-white/85 hover:bg-white/10 hover:text-white transition" />
