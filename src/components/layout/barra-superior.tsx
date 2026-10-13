@@ -195,7 +195,6 @@ const NAV: NavGroup[] = [
 
 export function BarraSuperior({
   rol,
-  esSuperadmin,
   nombre,
   alertasPendientes,
   notificacionesNoLeidas,
@@ -204,7 +203,6 @@ export function BarraSuperior({
   permisos,
 }: {
   rol: RolUsuario;
-  esSuperadmin?: boolean;
   nombre: string;
   alertasPendientes: number;
   notificacionesNoLeidas: number;
@@ -368,18 +366,6 @@ export function BarraSuperior({
           );
         })}
 
-        {esSuperadmin && (
-          <Link
-            href="/meta-admin"
-            className={cn(
-              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold whitespace-nowrap transition',
-              pathname.startsWith('/meta-admin') ? 'bg-white/15 text-white' : 'text-white/85 hover:bg-white/10 hover:text-white'
-            )}
-          >
-            <Building2 size={16} strokeWidth={2.25} />
-            Cuentas y membresías
-          </Link>
-        )}
       </nav>
 
       {/* Menú móvil: NO es un costado — es la misma barra de arriba, que se
@@ -471,18 +457,6 @@ export function BarraSuperior({
             );
           })}
 
-          {esSuperadmin && (
-            <Link
-              href="/meta-admin"
-              className={cn(
-                'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-bold transition',
-                pathname.startsWith('/meta-admin') ? 'bg-white/15 text-white' : 'text-white/85 hover:bg-white/10 hover:text-white'
-              )}
-            >
-              <Building2 size={17} strokeWidth={2.25} />
-              Cuentas y membresías
-            </Link>
-          )}
         </nav>
       </div>
     </header>

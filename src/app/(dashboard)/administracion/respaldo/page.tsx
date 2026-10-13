@@ -5,7 +5,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 export default async function RespaldoPage() {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
-  if (perfil.rol !== 'admin_th' && !perfil.es_superadmin) redirect('/inicio');
+  if (perfil.rol !== 'admin_th') redirect('/inicio');
 
   return (
     <div className="space-y-6 max-w-3xl">

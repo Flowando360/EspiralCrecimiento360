@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { crearEmpresaConAdministrador } from '@/app/(dashboard)/meta-admin/actions';
+import { crearEmpresaConAdministrador } from '@/app/proveedor/(panel)/actions';
 import { generarPassword, usuarioSugerido } from '@/lib/utils';
 import { Building2, Check, Copy } from 'lucide-react';
 

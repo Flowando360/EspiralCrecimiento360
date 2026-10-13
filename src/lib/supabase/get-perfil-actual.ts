@@ -36,28 +36,10 @@ export interface PerfilActual {
   nombre_preferido: string | null;
   email: string;
   colaborador_id: string | null;
-  es_superadmin: boolean;
   /** Rol personalizado asignado, o null si aplica solo el rol de sistema. */
   rol_personalizado_id: string | null;
   /** Matriz del rol personalizado; null cuando no tiene rol personalizado. */
   permisos: PermisosModulo | null;
-}
-
-/**
- * Consulta es_superadmin en una llamada aparte, tolerante a que la
- * migración 0029_meta_admin_membresias.sql todavía no se haya aplicado en
- * la base de datos (esa columna no existe aún) — así el login y el resto
- * de la app nunca dependen de que esta migración puntual ya haya corrido.
- * Devuelve false ante cualquier error, nunca lanza.
- */
-async function obtenerEsSuperadmin(supabase: ReturnType<typeof createClient>, usuarioId: string): Promise<boolean> {
-  const { data, error } = await supabase
-    .from('perfiles_usuario')
-    .select('es_superadmin')
-    .eq('id', usuarioId)
-    .maybeSingle();
-  if (error || !data) return false;
-  return Boolean((data as any).es_superadmin);
 }
 
 /** Lee la matriz de permisos de un rol personalizado. */
@@ -100,7 +82,6 @@ async function armarPerfil(
     nombre_preferido: perfil.nombre_preferido ?? null,
     email: perfil.email,
     colaborador_id: (colaborador?.id as string) ?? null,
-    es_superadmin: await obtenerEsSuperadmin(supabase, usuarioId),
     rol_personalizado_id: rolPersonalizadoId,
     permisos: rolPersonalizadoId ? await obtenerPermisos(supabase, rolPersonalizadoId) : null,
   };
@@ -116,6 +97,16 @@ async function armarPerfil(
  * piloto — así el dashboard es navegable mientras se resuelve el login.
  */
 export async function getPerfilActual(): Promise<PerfilActual | null> {
+  const perfil = await leerPerfil();
+  if (!perfil) return null;
+  // Una empresa desactivada por el proveedor deja sin acceso a todos sus usuarios.
+  const supabase = createClient();
+  const { data: empresa } = await supabase.from('empresas').select('activo').eq('id', perfil.empresa_id).maybeSingle();
+  if (!empresa || empresa.activo === false) return null;
+  return perfil;
+}
+
+async function leerPerfil(): Promise<PerfilActual | null> {
   const supabase = createClient();
   const columnas = 'id, empresa_id, rol, nombre_completo, nombre_preferido, email, activo, rol_personalizado_id';
 

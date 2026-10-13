@@ -9,7 +9,6 @@ import type { PermisosModulo } from '@/lib/supabase/get-perfil-actual';
  */
 export function AppShell({
   rol,
-  esSuperadmin,
   nombre,
   alertasPendientes,
   notificacionesNoLeidas,
@@ -19,7 +18,6 @@ export function AppShell({
   children,
 }: {
   rol: RolUsuario;
-  esSuperadmin: boolean;
   nombre: string;
   alertasPendientes: number;
   notificacionesNoLeidas: number;
@@ -32,7 +30,6 @@ export function AppShell({
     <div className="min-h-screen bg-marmol-50">
       <BarraSuperior
         rol={rol}
-        esSuperadmin={esSuperadmin}
         nombre={nombre}
         alertasPendientes={alertasPendientes}
         notificacionesNoLeidas={notificacionesNoLeidas}

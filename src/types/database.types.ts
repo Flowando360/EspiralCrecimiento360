@@ -7098,6 +7098,63 @@ export type Database = {
           { foreignKeyName: "solicitudes_titular_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
         ]
       }
+      proveedores: {
+        Row: {
+          activo: boolean
+          creado_en: string
+          email: string
+          id: string
+          nombre: string
+          rol: string
+          ultimo_acceso_en: string | null
+        }
+        Insert: {
+          activo?: boolean
+          creado_en?: string
+          email: string
+          id: string
+          nombre: string
+          rol?: string
+          ultimo_acceso_en?: string | null
+        }
+        Update: {
+          activo?: boolean
+          creado_en?: string
+          email?: string
+          id?: string
+          nombre?: string
+          rol?: string
+          ultimo_acceso_en?: string | null
+        }
+        Relationships: []
+      }
+      bitacora_proveedor: {
+        Row: {
+          accion: string
+          creado_en: string
+          detalle: Json
+          empresa_id: string | null
+          id: number
+          proveedor_id: string | null
+        }
+        Insert: {
+          accion: string
+          creado_en?: string
+          detalle?: Json
+          empresa_id?: string | null
+          id?: number
+          proveedor_id?: string | null
+        }
+        Update: {
+          accion?: string
+          creado_en?: string
+          detalle?: Json
+          empresa_id?: string | null
+          id?: number
+          proveedor_id?: string | null
+        }
+        Relationships: []
+      }
       roles_empresa: {
         Row: {
           created_at: string
@@ -7168,7 +7225,6 @@ export type Database = {
           created_at: string
           email: string
           empresa_id: string
-          es_superadmin: boolean
           id: string
           nombre_completo: string
           nombre_preferido: string | null
@@ -7181,7 +7237,6 @@ export type Database = {
           created_at?: string
           email: string
           empresa_id: string
-          es_superadmin?: boolean
           id: string
           nombre_completo: string
           nombre_preferido?: string | null
@@ -7194,7 +7249,6 @@ export type Database = {
           created_at?: string
           email?: string
           empresa_id?: string
-          es_superadmin?: boolean
           id?: string
           nombre_completo?: string
           nombre_preferido?: string | null

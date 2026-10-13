@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { actualizarDatosEmpresa } from '@/app/(dashboard)/meta-admin/actions';
+import { actualizarDatosEmpresa } from '@/app/proveedor/(panel)/actions';
 
 const CAMPO = 'w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm';
 

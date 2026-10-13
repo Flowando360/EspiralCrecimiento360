@@ -6,7 +6,10 @@ import { css, variablesDeMarca } from '@/lib/marca/tema';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const perfil = await getPerfilActual();
-  if (!perfil) redirect('/login');
+  if (!perfil) {
+    await createClient().auth.signOut();
+    redirect('/login?motivo=sin-acceso');
+  }
 
   const supabase = createClient();
   const [{ count }, { count: countNotificaciones }, { count: countMensajes }, { data: empresa }] = await Promise.all([
@@ -47,7 +50,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
       marca={{ nombre: empresa?.nombre ?? null, logoUrl: empresa?.logo_url ?? null }}
       permisos={perfil.permisos}
       rol={perfil.rol}
-      esSuperadmin={perfil.es_superadmin}
       nombre={perfil.nombre_preferido?.trim() || perfil.nombre_completo}
       alertasPendientes={count ?? 0}
       notificacionesNoLeidas={countNotificaciones ?? 0}

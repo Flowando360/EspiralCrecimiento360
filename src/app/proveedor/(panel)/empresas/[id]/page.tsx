@@ -1,25 +1,21 @@
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { ArrowLeft, DatabaseBackup } from 'lucide-react';
-import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createAdminClient } from '@/lib/supabase/server';
-import { EditarDatosEmpresa } from '@/components/meta-admin/editar-datos-empresa';
+import { EditarDatosEmpresa } from '@/components/proveedor/empresas/editar-datos-empresa';
+import { CambiarEstadoEmpresa } from '@/components/proveedor/empresas/cambiar-estado-empresa';
 
 export default async function EmpresaSuperadminPage({ params }: { params: { id: string } }) {
-  const perfil = await getPerfilActual();
-  if (!perfil) return null;
-  if (!perfil.es_superadmin) redirect('/inicio');
-
   const admin = createAdminClient();
   const { data: empresa } = await admin
     .from('empresas')
-    .select('id, nombre, slug, logo_url, color_marca, color_secundario, color_acento, plan_membresia, estado_facturacion')
+    .select('id, nombre, slug, activo, logo_url, color_marca, color_secundario, color_acento, plan_membresia, estado_facturacion')
     .eq('id', params.id)
     .maybeSingle();
   if (!empresa) notFound();
 
   const [usuarios, colaboradores, cargos, vacantes] = await Promise.all([
-    admin.from('perfiles_usuario').select('id, nombre_completo, usuario, email, rol, activo, es_superadmin').eq('empresa_id', params.id).order('nombre_completo'),
+    admin.from('perfiles_usuario').select('id, nombre_completo, usuario, email, rol, activo').eq('empresa_id', params.id).order('nombre_completo'),
     admin.from('colaboradores').select('id', { count: 'exact', head: true }).eq('empresa_id', params.id).eq('estado', 'activo'),
     admin.from('cargos').select('id', { count: 'exact', head: true }).eq('empresa_id', params.id),
     admin.from('vacantes').select('id', { count: 'exact', head: true }).eq('empresa_id', params.id),
@@ -27,7 +23,7 @@ export default async function EmpresaSuperadminPage({ params }: { params: { id: 
 
   return (
     <div className="space-y-6">
-      <Link href="/meta-admin" className="inline-flex items-center gap-1 text-xs text-marmol-400 hover:text-marmol-600">
+      <Link href="/proveedor" className="inline-flex items-center gap-1 text-xs text-marmol-400 hover:text-marmol-600">
         <ArrowLeft size={12} /> Todas las empresas
       </Link>
 
@@ -36,12 +32,15 @@ export default async function EmpresaSuperadminPage({ params }: { params: { id: 
           <h1 className="font-display text-2xl font-semibold text-secundario">{empresa.nombre}</h1>
           <p className="text-sm text-marmol-500 mt-1 font-mono">{empresa.slug}</p>
         </div>
+        <div className="flex items-center gap-2">
+        <CambiarEstadoEmpresa empresaId={empresa.id} activo={empresa.activo} />
         <a
           href={`/api/respaldo?empresa_id=${empresa.id}`}
           className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:bg-marmol-50 text-marmol-700 text-sm font-medium px-3 py-2 transition"
         >
           <DatabaseBackup size={15} /> Descargar respaldo
         </a>
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-4">
@@ -75,7 +74,7 @@ export default async function EmpresaSuperadminPage({ params }: { params: { id: 
             {(usuarios.data ?? []).map((u: any) => (
               <tr key={u.id} className="border-b border-marmol-100 last:border-0">
                 <td className="px-4 py-2.5 text-marmol-900">
-                  {u.nombre_completo} {u.es_superadmin && <span className="text-xs text-flow-600">(superadmin)</span>}
+                  {u.nombre_completo}
                 </td>
                 <td className="px-4 py-2.5 font-mono text-xs text-marmol-600">{u.usuario}</td>
                 <td className="px-4 py-2.5 text-marmol-600">{u.rol}</td>

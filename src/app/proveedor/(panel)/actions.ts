@@ -1,22 +1,18 @@
 'use server';
 
 import { createAdminClient } from '@/lib/supabase/server';
-import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { getProveedorActual, requerirPropietario, registrarBitacora } from '@/lib/proveedor/auth';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
 /**
- * Panel meta-admin (Modelo de Negocio Espiral Evolutiva secc. 5): cuentas y
- * membresías de TODAS las empresas cliente de la alianza Flowando/Nexus/V&E.
- * Se autoriza en la capa de aplicación (perfiles_usuario.es_superadmin) y se
- * consulta con el cliente admin (service role) porque un superadmin no
- * pertenece a una sola empresa — las policies existentes de "empresas" y
- * "perfiles_usuario" siguen intactas para todos los demás roles.
+ * Panel del proveedor (Modelo de Negocio Espiral Evolutiva secc. 5): empresas
+ * cliente de la alianza Flowando/Nexus/V&E. Autoriza con la tabla `proveedores`
+ * y lee/escribe con el cliente de servicio, porque el proveedor no pertenece a
+ * ninguna empresa. Cada acción queda en bitacora_proveedor.
  */
 async function requerirSuperadmin() {
-  const perfil = await getPerfilActual();
-  if (!perfil || !perfil.es_superadmin) return null;
-  return perfil;
+  return getProveedorActual();
 }
 
 const MembresiaSchema = z.object({
@@ -46,7 +42,8 @@ export async function actualizarMembresia(input: z.infer<typeof MembresiaSchema>
     .eq('id', parsed.data.empresaId);
 
   if (error) return { ok: false as const, error: error.message };
-  revalidatePath('/meta-admin');
+  await registrarBitacora(perfil.id, 'membresia', parsed.data.empresaId, { plan: parsed.data.planMembresia, facturacion: parsed.data.estadoFacturacion });
+  revalidatePath('/proveedor');
   return { ok: true as const };
 }
 
@@ -148,53 +145,9 @@ export async function crearEmpresaConAdministrador(input: z.infer<typeof NuevaEm
     };
   }
 
-  revalidatePath('/meta-admin');
+  await registrarBitacora(perfil.id, 'crear_empresa', empresa.id, { slug: datos.slug, admin: datos.adminUsuario });
+  revalidatePath('/proveedor');
   return { ok: true as const, empresaId: empresa.id as string };
-}
-
-/** Concede superusuario a una cuenta existente, identificada por su usuario de login. */
-export async function concederSuperusuario(usuarioLogin: string) {
-  const perfil = await requerirSuperadmin();
-  if (!perfil) return { ok: false as const, error: 'No autorizado' };
-
-  const parsed = UsuarioLoginSchema.safeParse(usuarioLogin);
-  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Usuario inválido' };
-
-  const admin = createAdminClient();
-  const { data: cuenta } = await admin
-    .from('perfiles_usuario')
-    .select('id, es_superadmin')
-    .eq('usuario', parsed.data)
-    .maybeSingle();
-  if (!cuenta) return { ok: false as const, error: 'No existe una cuenta con ese usuario' };
-  if (cuenta.es_superadmin) return { ok: false as const, error: 'Esa cuenta ya es superusuario' };
-
-  const { error } = await admin.from('perfiles_usuario').update({ es_superadmin: true }).eq('id', cuenta.id);
-  if (error) return { ok: false as const, error: error.message };
-
-  revalidatePath('/meta-admin');
-  return { ok: true as const };
-}
-
-/** Quita superusuario. Nadie se quita a sí mismo y siempre debe quedar al menos uno. */
-export async function quitarSuperusuario(usuarioId: string) {
-  const perfil = await requerirSuperadmin();
-  if (!perfil) return { ok: false as const, error: 'No autorizado' };
-  if (!z.string().uuid().safeParse(usuarioId).success) return { ok: false as const, error: 'Usuario inválido' };
-  if (usuarioId === perfil.usuario_id) return { ok: false as const, error: 'No puedes quitarte tu propio superusuario' };
-
-  const admin = createAdminClient();
-  const { count } = await admin
-    .from('perfiles_usuario')
-    .select('id', { count: 'exact', head: true })
-    .eq('es_superadmin', true);
-  if ((count ?? 0) <= 1) return { ok: false as const, error: 'Debe quedar al menos un superusuario' };
-
-  const { error } = await admin.from('perfiles_usuario').update({ es_superadmin: false }).eq('id', usuarioId);
-  if (error) return { ok: false as const, error: error.message };
-
-  revalidatePath('/meta-admin');
-  return { ok: true as const };
 }
 
 const DatosEmpresaSchema = z.object({
@@ -228,7 +181,81 @@ export async function actualizarDatosEmpresa(input: z.infer<typeof DatosEmpresaS
     .eq('id', datos.empresaId);
 
   if (error) return { ok: false as const, error: error.message };
-  revalidatePath('/meta-admin');
-  revalidatePath(`/meta-admin/empresas/${datos.empresaId}`);
+  await registrarBitacora(perfil.id, 'datos_empresa', datos.empresaId, { nombre: datos.nombre });
+  revalidatePath('/proveedor');
+  revalidatePath(`/proveedor/empresas/${datos.empresaId}`);
+  return { ok: true as const };
+}
+
+/** Activa o desactiva una empresa. Si está inactiva, ninguno de sus usuarios puede entrar. */
+export async function cambiarEstadoEmpresa(empresaId: string, activo: boolean) {
+  const perfil = await requerirSuperadmin();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+  if (!z.string().uuid().safeParse(empresaId).success) return { ok: false as const, error: 'Empresa inválida' };
+
+  const admin = createAdminClient();
+  const { error } = await admin.from('empresas').update({ activo }).eq('id', empresaId);
+  if (error) return { ok: false as const, error: error.message };
+
+  await registrarBitacora(perfil.id, activo ? 'activar_empresa' : 'desactivar_empresa', empresaId);
+  revalidatePath('/proveedor');
+  revalidatePath(`/proveedor/empresas/${empresaId}`);
+  return { ok: true as const };
+}
+
+const NuevoProveedorSchema = z.object({
+  nombre: z.string().trim().min(2, 'El nombre es requerido'),
+  email: z.string().trim().email('Correo inválido'),
+  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+  rol: z.enum(['propietario', 'operador']),
+});
+
+/** Crea una cuenta del equipo proveedor. Solo propietarios. */
+export async function crearProveedor(input: z.infer<typeof NuevoProveedorSchema>) {
+  const propietario = await requerirPropietario();
+  if (!propietario) return { ok: false as const, error: 'Solo un propietario puede gestionar el equipo proveedor' };
+
+  const parsed = NuevoProveedorSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+  const datos = parsed.data;
+
+  const admin = createAdminClient();
+  const { data: auth, error: errorAuth } = await admin.auth.admin.createUser({
+    email: datos.email,
+    password: datos.password,
+    email_confirm: true,
+    user_metadata: { nombre_completo: datos.nombre, proveedor: true },
+  });
+  if (errorAuth || !auth.user) return { ok: false as const, error: errorAuth?.message ?? 'No se pudo crear la cuenta' };
+
+  const { error: errorFila } = await admin.from('proveedores').insert({
+    id: auth.user.id,
+    nombre: datos.nombre,
+    email: datos.email,
+    rol: datos.rol,
+  });
+  if (errorFila) {
+    await admin.auth.admin.deleteUser(auth.user.id);
+    return { ok: false as const, error: errorFila.message };
+  }
+
+  await registrarBitacora(propietario.id, 'crear_proveedor', null, { email: datos.email, rol: datos.rol });
+  revalidatePath('/proveedor/equipo');
+  return { ok: true as const };
+}
+
+/** Activa o desactiva una cuenta del equipo proveedor. Solo propietarios; nadie se desactiva a sí mismo. */
+export async function cambiarEstadoProveedor(proveedorId: string, activo: boolean) {
+  const propietario = await requerirPropietario();
+  if (!propietario) return { ok: false as const, error: 'Solo un propietario puede gestionar el equipo proveedor' };
+  if (!z.string().uuid().safeParse(proveedorId).success) return { ok: false as const, error: 'Proveedor inválido' };
+  if (proveedorId === propietario.id && !activo) return { ok: false as const, error: 'No puedes desactivar tu propia cuenta' };
+
+  const admin = createAdminClient();
+  const { error } = await admin.from('proveedores').update({ activo }).eq('id', proveedorId);
+  if (error) return { ok: false as const, error: error.message };
+
+  await registrarBitacora(propietario.id, activo ? 'activar_proveedor' : 'desactivar_proveedor', null, { proveedorId });
+  revalidatePath('/proveedor/equipo');
   return { ok: true as const };
 }

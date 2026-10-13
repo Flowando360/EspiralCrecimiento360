@@ -51,7 +51,9 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/login');
+  const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/proveedor/login');
+  // El panel del proveedor usa su propio inicio de sesión, separado del de empresas.
+  const isProveedor = request.nextUrl.pathname.startsWith('/proveedor');
   const isPublicAsset = request.nextUrl.pathname.startsWith('/_next') ||
     request.nextUrl.pathname.startsWith('/api') ||
     // Formulario público de postulación (Reclutamiento y Selección): lo abre
@@ -65,13 +67,15 @@ export async function middleware(request: NextRequest) {
 
   if (!user && !isAuthRoute && !isPublicAsset) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = '/login';
+    redirectUrl.pathname = isProveedor ? '/proveedor/login' : '/login';
     return NextResponse.redirect(redirectUrl);
   }
 
+  // Un usuario de empresa con sesión que abre /login va a su inicio. El proveedor
+  // con sesión que abre su login va al panel. Ninguno de los dos se confunde con el otro.
   if (user && isAuthRoute) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = '/inicio';
+    redirectUrl.pathname = request.nextUrl.pathname.startsWith('/proveedor') ? '/proveedor' : '/inicio';
     return NextResponse.redirect(redirectUrl);
   }
 
