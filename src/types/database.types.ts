@@ -2967,6 +2967,8 @@ export type Database = {
           siglas: string | null
           slug: string
           telefono: string | null
+          color_acento: string
+          color_secundario: string
         }
         Insert: {
           activo?: boolean
@@ -3003,6 +3005,8 @@ export type Database = {
           siglas?: string | null
           slug: string
           telefono?: string | null
+          color_acento?: string
+          color_secundario?: string
         }
         Update: {
           activo?: boolean
@@ -3039,6 +3043,8 @@ export type Database = {
           siglas?: string | null
           slug?: string
           telefono?: string | null
+          color_acento?: string
+          color_secundario?: string
         }
         Relationships: []
       }
@@ -7092,6 +7098,70 @@ export type Database = {
           { foreignKeyName: "solicitudes_titular_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
         ]
       }
+      roles_empresa: {
+        Row: {
+          created_at: string
+          descripcion: string | null
+          empresa_id: string
+          id: string
+          nombre: string
+        }
+        Insert: {
+          created_at?: string
+          descripcion?: string | null
+          empresa_id: string
+          id?: string
+          nombre: string
+        }
+        Update: {
+          created_at?: string
+          descripcion?: string | null
+          empresa_id?: string
+          id?: string
+          nombre?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roles_empresa_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permisos_rol: {
+        Row: {
+          borrar: boolean
+          escribir: boolean
+          leer: boolean
+          modulo: string
+          rol_id: string
+        }
+        Insert: {
+          borrar?: boolean
+          escribir?: boolean
+          leer?: boolean
+          modulo: string
+          rol_id: string
+        }
+        Update: {
+          borrar?: boolean
+          escribir?: boolean
+          leer?: boolean
+          modulo?: string
+          rol_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permisos_rol_rol_id_fkey"
+            columns: ["rol_id"]
+            isOneToOne: false
+            referencedRelation: "roles_empresa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       perfiles_usuario: {
         Row: {
           activo: boolean
@@ -7103,6 +7173,7 @@ export type Database = {
           nombre_completo: string
           nombre_preferido: string | null
           rol: Database["public"]["Enums"]["rol_usuario"]
+          rol_personalizado_id: string | null
           usuario: string
         }
         Insert: {
@@ -7115,6 +7186,7 @@ export type Database = {
           nombre_completo: string
           nombre_preferido?: string | null
           rol?: Database["public"]["Enums"]["rol_usuario"]
+          rol_personalizado_id?: string | null
           usuario: string
         }
         Update: {
@@ -7127,6 +7199,7 @@ export type Database = {
           nombre_completo?: string
           nombre_preferido?: string | null
           rol?: Database["public"]["Enums"]["rol_usuario"]
+          rol_personalizado_id?: string | null
           usuario?: string
         }
         Relationships: [

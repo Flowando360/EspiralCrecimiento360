@@ -1,5 +1,6 @@
 import type { RolUsuario } from '@/types/colaborador';
 import { BarraSuperior } from './barra-superior';
+import type { PermisosModulo } from '@/lib/supabase/get-perfil-actual';
 
 /**
  * Estructura del dashboard: una sola barra de navegación arriba (con
@@ -13,6 +14,8 @@ export function AppShell({
   alertasPendientes,
   notificacionesNoLeidas,
   mensajesNoLeidos,
+  marca,
+  permisos,
   children,
 }: {
   rol: RolUsuario;
@@ -21,6 +24,8 @@ export function AppShell({
   alertasPendientes: number;
   notificacionesNoLeidas: number;
   mensajesNoLeidos: number;
+  marca?: { nombre: string | null; logoUrl: string | null };
+  permisos?: PermisosModulo | null;
   children: React.ReactNode;
 }) {
   return (
@@ -32,6 +37,8 @@ export function AppShell({
         alertasPendientes={alertasPendientes}
         notificacionesNoLeidas={notificacionesNoLeidas}
         mensajesNoLeidos={mensajesNoLeidos}
+        marca={marca}
+        permisos={permisos}
       />
       <main className="p-4 sm:p-6 max-w-[1400px] w-full mx-auto min-w-0">{children}</main>
     </div>

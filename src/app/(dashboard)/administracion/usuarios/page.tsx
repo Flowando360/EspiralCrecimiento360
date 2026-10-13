@@ -11,10 +11,10 @@ export default async function AdminUsuariosPage() {
 
   const supabase = createClient();
 
-  const [{ data: usuarios }, { data: sinCuentaRaw }, { data: vinculados }] = await Promise.all([
+  const [{ data: usuarios }, { data: sinCuentaRaw }, { data: vinculados }, { data: rolesPersonalizadosRaw }] = await Promise.all([
     supabase
       .from('perfiles_usuario')
-      .select('id, nombre_completo, nombre_preferido, usuario, email, rol, activo')
+      .select('id, nombre_completo, nombre_preferido, usuario, email, rol, activo, rol_personalizado_id')
       .eq('empresa_id', perfil.empresa_id)
       .order('nombre_completo'),
     supabase
@@ -29,7 +29,13 @@ export default async function AdminUsuariosPage() {
       .select('id, nombre_completo, usuario_id')
       .eq('empresa_id', perfil.empresa_id)
       .not('usuario_id', 'is', null),
+    supabase
+      .from('roles_empresa')
+      .select('id, nombre')
+      .eq('empresa_id', perfil.empresa_id)
+      .order('nombre'),
   ]);
+  const rolesPersonalizados = (rolesPersonalizadosRaw ?? []).map((r) => ({ id: r.id, nombre: r.nombre }));
   const fichaPorUsuario = new Map((vinculados ?? []).map((c) => [c.usuario_id as string, { id: c.id, nombre_completo: c.nombre_completo }]));
 
   // Los 10 colaboradores de demostración (correo demo.*@ejemplo.com) no
@@ -48,7 +54,7 @@ export default async function AdminUsuariosPage() {
             mismo · gerencia ve reportes agregados.
           </p>
         </div>
-        <FormularioCrearUsuario colaboradoresSinCuenta={colaboradoresSinCuenta} />
+        <FormularioCrearUsuario colaboradoresSinCuenta={colaboradoresSinCuenta} rolesPersonalizados={rolesPersonalizados} />
       </div>
 
       <div className="card overflow-hidden">
@@ -75,10 +81,12 @@ export default async function AdminUsuariosPage() {
                   email: u.email,
                   rol: u.rol as UsuarioFila['rol'],
                   activo: u.activo,
+                  rol_personalizado_id: u.rol_personalizado_id ?? null,
                 }}
                 esUsuarioActual={u.id === perfil.usuario_id}
                 ficha={fichaPorUsuario.get(u.id) ?? null}
                 fichasDisponibles={colaboradoresSinCuenta}
+                rolesPersonalizados={rolesPersonalizados}
               />
             ))}
           </tbody>

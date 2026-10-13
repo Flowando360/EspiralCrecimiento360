@@ -2,6 +2,9 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createAdminClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { FilaEmpresa, type EmpresaMetaAdmin } from '@/components/meta-admin/fila-empresa';
+import { FormularioNuevaEmpresa } from '@/components/meta-admin/formulario-nueva-empresa';
+import { GestorSuperusuarios, type SuperusuarioFila } from '@/components/meta-admin/gestor-superusuarios';
+import { DatabaseBackup } from 'lucide-react';
 
 export default async function MetaAdminPage() {
   const perfil = await getPerfilActual();
@@ -10,14 +13,26 @@ export default async function MetaAdminPage() {
 
   const admin = createAdminClient();
 
-  const [{ data: empresas }, { data: perfiles }, { data: colaboradores }] = await Promise.all([
+  const [{ data: empresas }, { data: perfiles }, { data: colaboradores }, { data: superusuariosRaw }] = await Promise.all([
     admin
       .from('empresas')
       .select('id, nombre, plan_membresia, precio_membresia_mensual, estado_facturacion, fecha_proximo_pago')
       .order('nombre'),
     admin.from('perfiles_usuario').select('empresa_id, activo'),
     admin.from('colaboradores').select('empresa_id, estado'),
+    admin
+      .from('perfiles_usuario')
+      .select('id, nombre_completo, usuario, email')
+      .eq('es_superadmin', true)
+      .order('nombre_completo'),
   ]);
+
+  const superusuarios: SuperusuarioFila[] = ((superusuariosRaw ?? []) as any[]).map((u) => ({
+    id: u.id,
+    nombre_completo: u.nombre_completo,
+    usuario: u.usuario,
+    email: u.email,
+  }));
 
   const usuariosActivosPorEmpresa = new Map<string, number>();
   for (const p of (perfiles ?? []) as any[]) {
@@ -52,6 +67,10 @@ export default async function MetaAdminPage() {
         </p>
       </div>
 
+      <div className="flex justify-end">
+        <FormularioNuevaEmpresa />
+      </div>
+
       <div className="card overflow-hidden">
         <table className="w-full text-sm">
           <thead>
@@ -72,6 +91,30 @@ export default async function MetaAdminPage() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <GestorSuperusuarios superusuarios={superusuarios} usuarioActualId={perfil.usuario_id} />
+
+        <div className="card p-5 space-y-3">
+          <h2 className="font-semibold text-marmol-800 flex items-center gap-2">
+            <DatabaseBackup size={18} className="text-flow-600" /> Respaldo por empresa
+          </h2>
+          <p className="text-xs text-marmol-500">
+            Descarga todos los datos de una empresa en ZIP con un CSV por tabla. El respaldo de la plataforma completa
+            incluye además las tablas globales.
+          </p>
+          <ul className="divide-y divide-marmol-100">
+            {filas.map((e) => (
+              <li key={e.id} className="flex items-center justify-between py-2">
+                <span className="text-sm text-marmol-700">{e.nombre}</span>
+                <a href={`/api/respaldo?empresa_id=${e.id}`} className="text-xs text-flow-700 hover:underline">
+                  Descargar respaldo
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

@@ -21,6 +21,8 @@ const CrearCuentaSchema = z.object({
   rol: z.enum(['admin_th', 'lider', 'colaborador', 'gerencia', 'auditor_externo']),
   password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   colaboradorId: z.string().uuid().optional(),
+  /** Rol personalizado de la empresa; si no se envía, aplica solo el rol de sistema. */
+  rolPersonalizadoId: z.string().uuid().nullable().optional(),
 });
 
 const EditarUsuarioSchema = z.object({
@@ -32,7 +34,27 @@ const EditarUsuarioSchema = z.object({
   rol: z.enum(['admin_th', 'lider', 'colaborador', 'gerencia', 'auditor_externo']),
   /** undefined = no tocar el vínculo; null = desvincular; uuid = vincular a esa ficha. */
   colaboradorId: z.string().uuid().nullable().optional(),
+  /** undefined = no tocar; null = quitar el rol personalizado; uuid = asignarlo. */
+  rolPersonalizadoId: z.string().uuid().nullable().optional(),
 });
+
+/**
+ * El service role ignora RLS, así que hay que comprobar a mano que el rol
+ * personalizado sea de la misma empresa antes de asignarlo.
+ */
+async function rolPersonalizadoEsDeEmpresa(
+  admin: ReturnType<typeof createAdminClient>,
+  empresaId: string,
+  rolId: string
+): Promise<boolean> {
+  const { data } = await admin
+    .from('roles_empresa')
+    .select('id')
+    .eq('id', rolId)
+    .eq('empresa_id', empresaId)
+    .maybeSingle();
+  return Boolean(data);
+}
 
 /** Traduce la violación de la restricción UNIQUE de `usuario` a un mensaje entendible. */
 function mensajeErrorUsuarioDuplicado(error: { code?: string; message: string }): string {
@@ -59,6 +81,11 @@ export async function crearCuentaUsuario(input: z.infer<typeof CrearCuentaSchema
 
   const admin = createAdminClient();
 
+  const rolPersonalizadoId = parsed.data.rolPersonalizadoId ?? null;
+  if (rolPersonalizadoId && !(await rolPersonalizadoEsDeEmpresa(admin, perfil.empresa_id, rolPersonalizadoId))) {
+    return { ok: false as const, error: 'El rol personalizado no existe en tu empresa' };
+  }
+
   const { data: authData, error: authError } = await admin.auth.admin.createUser({
     email: parsed.data.email,
     password: parsed.data.password,
@@ -74,6 +101,7 @@ export async function crearCuentaUsuario(input: z.infer<typeof CrearCuentaSchema
     id: authData.user.id,
     empresa_id: perfil.empresa_id,
     rol: parsed.data.rol,
+    rol_personalizado_id: rolPersonalizadoId,
     nombre_completo: parsed.data.nombreCompleto,
     usuario: parsed.data.usuario,
     email: parsed.data.email,
@@ -120,6 +148,10 @@ export async function actualizarUsuario(input: z.infer<typeof EditarUsuarioSchem
 
   const admin = createAdminClient();
 
+  if (parsed.data.rolPersonalizadoId && !(await rolPersonalizadoEsDeEmpresa(admin, perfil.empresa_id, parsed.data.rolPersonalizadoId))) {
+    return { ok: false as const, error: 'El rol personalizado no existe en tu empresa' };
+  }
+
   const { data: usuario } = await admin
     .from('perfiles_usuario')
     .select('id, email')
@@ -145,6 +177,7 @@ export async function actualizarUsuario(input: z.infer<typeof EditarUsuarioSchem
       usuario: parsed.data.usuario,
       email: parsed.data.email,
       rol: parsed.data.rol,
+      ...(parsed.data.rolPersonalizadoId !== undefined ? { rol_personalizado_id: parsed.data.rolPersonalizadoId } : {}),
     })
     .eq('id', parsed.data.usuarioId)
     .eq('empresa_id', perfil.empresa_id);
