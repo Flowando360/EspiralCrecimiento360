@@ -75,6 +75,64 @@ const NuevaEmpresaSchema = z.object({
   adminPassword: z.string().min(8, 'La contraseña del administrador debe tener al menos 8 caracteres'),
 });
 
+/** Empresa de la que se copia la configuración base (escala, competencias y parámetros legales). */
+const EMPRESA_PLANTILLA_ID = '00000000-0000-0000-0000-000000000001';
+
+/**
+ * Copia la configuración base de la plantilla a una empresa nueva. Son los
+ * datos que la app necesita para funcionar y que no vienen con la empresa:
+ * escala de niveles, competencias con sus criterios y parámetros legales.
+ * No copia datos de trabajo (procesos, colaboradores, evaluaciones, etc.).
+ */
+async function copiarConfiguracionBase(admin: ReturnType<typeof createAdminClient>, destinoId: string): Promise<string | null> {
+  const db = admin as any;
+  const yaTiene = async (tabla: string) => {
+    const { count } = await db.from(tabla).select('id', { count: 'exact', head: true }).eq('empresa_id', destinoId);
+    return (count ?? 0) > 0;
+  };
+  for (const tabla of ['escala_niveles', 'parametros_legales'] as const) {
+    if (await yaTiene(tabla)) continue;
+    const { data, error } = await db.from(tabla).select('*').eq('empresa_id', EMPRESA_PLANTILLA_ID);
+    if (error) return `${tabla}: ${error.message}`;
+    const filas = ((data ?? []) as Record<string, unknown>[]).map(({ id, created_at, updated_at, ...resto }) => ({ ...resto, empresa_id: destinoId }));
+    if (filas.length > 0) {
+      const { error: errorInsert } = await db.from(tabla).insert(filas);
+      if (errorInsert) return `${tabla}: ${errorInsert.message}`;
+    }
+  }
+
+  // Competencias: cada una recibe un id nuevo, y sus criterios apuntan al nuevo id.
+  if (await yaTiene('competencias')) return null;
+  const { data: competencias, error: errorComp } = await db.from('competencias').select('*').eq('empresa_id', EMPRESA_PLANTILLA_ID);
+  if (errorComp) return `competencias: ${errorComp.message}`;
+  const idNuevo = new Map<string, string>();
+  const filasComp = ((competencias ?? []) as Record<string, unknown>[]).map((c) => {
+    const nuevoId = crypto.randomUUID();
+    idNuevo.set(c.id as string, nuevoId);
+    const { id, created_at, updated_at, ...resto } = c;
+    return { ...resto, id: nuevoId, empresa_id: destinoId };
+  });
+  if (filasComp.length > 0) {
+    const { error: errorInsertComp } = await db.from('competencias').insert(filasComp);
+    if (errorInsertComp) return `competencias: ${errorInsertComp.message}`;
+
+    const { data: criterios, error: errorCrit } = await db
+      .from('competencia_criterios')
+      .select('*')
+      .in('competencia_id', [...idNuevo.keys()]);
+    if (errorCrit) return `competencia_criterios: ${errorCrit.message}`;
+    const filasCrit = ((criterios ?? []) as Record<string, unknown>[]).map(({ id, created_at, updated_at, ...resto }) => ({
+      ...resto,
+      competencia_id: idNuevo.get(resto.competencia_id as string),
+    }));
+    if (filasCrit.length > 0) {
+      const { error: errorInsertCrit } = await db.from('competencia_criterios').insert(filasCrit);
+      if (errorInsertCrit) return `competencia_criterios: ${errorInsertCrit.message}`;
+    }
+  }
+  return null;
+}
+
 /**
  * Crea una empresa cliente con su primer administrador (admin_th). Si un paso
  * falla, revierte los anteriores para no dejar una empresa sin administrador
@@ -113,6 +171,12 @@ export async function crearEmpresaConAdministrador(input: z.infer<typeof NuevaEm
   }
 
   const revertirEmpresa = () => admin.from('empresas').delete().eq('id', empresa.id);
+
+  const errorBase = await copiarConfiguracionBase(admin, empresa.id);
+  if (errorBase) {
+    await revertirEmpresa();
+    return { ok: false as const, error: `No se pudo preparar la configuración base de la empresa (${errorBase}).` };
+  }
 
   const { data: authData, error: errorAuth } = await admin.auth.admin.createUser({
     email: datos.adminEmail,
@@ -310,5 +374,21 @@ export async function crearAdministradorEmpresa(input: z.infer<typeof NuevoAdmin
 
   await registrarBitacora(perfil.id, 'crear_administrador', datos.empresaId, { usuario: datos.usuario });
   revalidatePath(`/proveedor/empresas/${datos.empresaId}`);
+  return { ok: true as const };
+}
+
+/** Completa la configuración base de una empresa existente (idempotente: no toca lo que ya tiene). */
+export async function completarConfiguracionBase(empresaId: string) {
+  const perfil = await requerirSuperadmin();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+  if (!z.string().uuid().safeParse(empresaId).success) return { ok: false as const, error: 'Empresa inválida' };
+  if (empresaId === EMPRESA_PLANTILLA_ID) return { ok: false as const, error: 'Esa es la empresa plantilla' };
+
+  const admin = createAdminClient();
+  const errorBase = await copiarConfiguracionBase(admin, empresaId);
+  if (errorBase) return { ok: false as const, error: errorBase };
+
+  await registrarBitacora(perfil.id, 'completar_configuracion_base', empresaId);
+  revalidatePath(`/proveedor/empresas/${empresaId}`);
   return { ok: true as const };
 }
