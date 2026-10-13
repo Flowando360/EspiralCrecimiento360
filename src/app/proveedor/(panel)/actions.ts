@@ -259,3 +259,56 @@ export async function cambiarEstadoProveedor(proveedorId: string, activo: boolea
   revalidatePath('/proveedor/equipo');
   return { ok: true as const };
 }
+
+const NuevoAdministradorSchema = z.object({
+  empresaId: z.string().uuid(),
+  nombre: z.string().trim().min(1, 'El nombre es requerido'),
+  usuario: UsuarioLoginSchema,
+  email: z.string().trim().email('Correo inválido'),
+  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+});
+
+/** Crea el administrador (admin_th) de una empresa que ya existe. */
+export async function crearAdministradorEmpresa(input: z.infer<typeof NuevoAdministradorSchema>) {
+  const perfil = await requerirSuperadmin();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = NuevoAdministradorSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+  const datos = parsed.data;
+
+  const admin = createAdminClient();
+  const { data: empresa } = await admin.from('empresas').select('id, nombre').eq('id', datos.empresaId).maybeSingle();
+  if (!empresa) return { ok: false as const, error: 'La empresa no existe' };
+
+  const { data: auth, error: errorAuth } = await admin.auth.admin.createUser({
+    email: datos.email,
+    password: datos.password,
+    email_confirm: true,
+    user_metadata: { nombre_completo: datos.nombre },
+  });
+  if (errorAuth || !auth.user) {
+    return { ok: false as const, error: errorAuth?.message ?? 'No se pudo crear la cuenta' };
+  }
+
+  const { error: errorPerfil } = await admin.from('perfiles_usuario').insert({
+    id: auth.user.id,
+    empresa_id: datos.empresaId,
+    rol: 'admin_th',
+    nombre_completo: datos.nombre,
+    usuario: datos.usuario,
+    email: datos.email,
+  });
+  if (errorPerfil) {
+    await admin.auth.admin.deleteUser(auth.user.id);
+    const usuarioDuplicado = errorPerfil.code === '23505' && errorPerfil.message.includes('usuario');
+    return {
+      ok: false as const,
+      error: usuarioDuplicado ? 'Ese usuario ya existe. Prueba con otro.' : errorPerfil.message,
+    };
+  }
+
+  await registrarBitacora(perfil.id, 'crear_administrador', datos.empresaId, { usuario: datos.usuario });
+  revalidatePath(`/proveedor/empresas/${datos.empresaId}`);
+  return { ok: true as const };
+}
