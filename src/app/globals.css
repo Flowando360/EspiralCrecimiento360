@@ -60,3 +60,20 @@ textarea {
     min-width: 640px;
   }
 }
+
+/* Marca por empresa (defaults; el layout del dashboard los reemplaza). */
+:root {
+  --flow-50: 240 253 244;
+  --flow-100: 220 252 231;
+  --flow-200: 187 247 208;
+  --flow-300: 134 239 172;
+  --flow-400: 74 222 128;
+  --flow-500: 22 163 74;
+  --flow-600: 21 128 61;
+  --flow-700: 22 101 52;
+  --flow-800: 20 83 45;
+  --flow-900: 5 46 22;
+  --secundario: 30 58 138;
+  --acento: 163 230 53;
+  --barra: 15 31 82;
+}

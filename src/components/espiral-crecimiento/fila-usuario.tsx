@@ -21,6 +21,7 @@ export interface UsuarioFila {
   email: string;
   rol: RolUsuario;
   activo: boolean;
+  rol_personalizado_id: string | null;
 }
 
 interface FichaColaborador {
@@ -33,6 +34,7 @@ export function FilaUsuario({
   esUsuarioActual,
   ficha,
   fichasDisponibles,
+  rolesPersonalizados,
 }: {
   usuario: UsuarioFila;
   esUsuarioActual: boolean;
@@ -40,6 +42,7 @@ export function FilaUsuario({
   ficha: FichaColaborador | null;
   /** Fichas activas que todavía no tienen cuenta, para poder vincular una. */
   fichasDisponibles: FichaColaborador[];
+  rolesPersonalizados: { id: string; nombre: string }[];
 }) {
   const [editando, setEditando] = useState(false);
   const [nombreCompleto, setNombreCompleto] = useState(usuario.nombre_completo);
@@ -47,6 +50,7 @@ export function FilaUsuario({
   const [usuarioLogin, setUsuarioLogin] = useState(usuario.usuario);
   const [email, setEmail] = useState(usuario.email);
   const [rol, setRol] = useState<RolUsuario>(usuario.rol);
+  const [rolPersonalizadoId, setRolPersonalizadoId] = useState(usuario.rol_personalizado_id ?? '');
   const [fichaId, setFichaId] = useState(ficha?.id ?? '');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -66,6 +70,7 @@ export function FilaUsuario({
         usuario: usuarioLogin,
         email,
         rol,
+        rolPersonalizadoId: rolPersonalizadoId || null,
         colaboradorId: fichaId === (ficha?.id ?? '') ? undefined : fichaId || null,
       });
       if (res.ok) {
@@ -82,6 +87,7 @@ export function FilaUsuario({
     setUsuarioLogin(usuario.usuario);
     setEmail(usuario.email);
     setRol(usuario.rol);
+    setRolPersonalizadoId(usuario.rol_personalizado_id ?? '');
     setFichaId(ficha?.id ?? '');
     setError(null);
     setEditando(false);
@@ -178,6 +184,21 @@ export function FilaUsuario({
               </option>
             ))}
           </select>
+          {rolesPersonalizados.length > 0 && (
+            <select
+              value={rolPersonalizadoId}
+              onChange={(e) => setRolPersonalizadoId(e.target.value)}
+              className="mt-1 block rounded-lg border border-marmol-200 px-2 py-1 text-xs"
+              title="Rol personalizado (opcional): limita los módulos que ve esta persona"
+            >
+              <option value="">Sin rol personalizado</option>
+              {rolesPersonalizados.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.nombre}
+                </option>
+              ))}
+            </select>
+          )}
           <select
             value={fichaId}
             onChange={(e) => setFichaId(e.target.value)}
@@ -282,6 +303,11 @@ export function FilaUsuario({
           <span className="text-xs rounded-full bg-flow-50 text-flow-700 px-2 py-0.5 font-medium">
             {etiquetaRol[usuario.rol] ?? usuario.rol}
           </span>
+          {usuario.rol_personalizado_id && rolesPersonalizados.find((r) => r.id === usuario.rol_personalizado_id) && (
+            <span className="ml-1 text-xs rounded-full bg-marmol-100 text-marmol-700 px-2 py-0.5 font-medium">
+              {rolesPersonalizados.find((r) => r.id === usuario.rol_personalizado_id)?.nombre}
+            </span>
+          )}
         </td>
         <td className="px-4 py-3 text-marmol-500">{usuario.activo ? 'Activo' : 'Inactivo'}</td>
         <td className="px-4 py-3">

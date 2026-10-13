@@ -31,16 +31,16 @@ const config: Config = {
           900: '#17140f',
         },
         flow: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#16a34a',
-          600: '#15803d',
-          700: '#166534',
-          800: '#14532d',
-          900: '#052e16',
+          50: 'rgb(var(--flow-50) / <alpha-value>)',
+          100: 'rgb(var(--flow-100) / <alpha-value>)',
+          200: 'rgb(var(--flow-200) / <alpha-value>)',
+          300: 'rgb(var(--flow-300) / <alpha-value>)',
+          400: 'rgb(var(--flow-400) / <alpha-value>)',
+          500: 'rgb(var(--flow-500) / <alpha-value>)',
+          600: 'rgb(var(--flow-600) / <alpha-value>)',
+          700: 'rgb(var(--flow-700) / <alpha-value>)',
+          800: 'rgb(var(--flow-800) / <alpha-value>)',
+          900: 'rgb(var(--flow-900) / <alpha-value>)',
         },
         ser: '#7c3aed',
         saber: '#0ea5a4',
@@ -53,9 +53,9 @@ const config: Config = {
         // oscuro (secundario). Distinta a propósito de la paleta violeta del
         // aplicativo original — ver docs/sistema-diseno-y-lenguaje.md si se
         // vuelve a alinear con el original más adelante.
-        secundario: '#1E3A8A', // azul noche — encabezados, textos importantes
-        acento: '#A3E635', // verde lima — logros, insignias, gamificación
-        barra: '#0F1F52', // azul más oscuro que "secundario" — fondo de la barra de navegación superior
+        secundario: 'rgb(var(--secundario) / <alpha-value>)', // azul noche — encabezados, textos importantes (por empresa)
+        acento: 'rgb(var(--acento) / <alpha-value>)', // acento — logros, insignias, gamificación (por empresa)
+        barra: 'rgb(var(--barra) / <alpha-value>)', // fondo de la barra de navegación superior (por empresa)
       },
       backgroundImage: {
         // Degradado verde → azul oscuro: hero, barras de progreso, tarjetas de logro

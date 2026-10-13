@@ -46,10 +46,10 @@ export const planPruebas: SeccionPlanPruebas[] = [
       },
       {
         titulo: 'El panel Meta-Admin es exclusivo del equipo interno',
-        rolNecesario: 'admin_th (para confirmar que NO entra) y una cuenta superadmin',
+        rolNecesario: 'admin_th (para confirmar que NO entra) y una cuenta del equipo proveedor',
         pasos: [
-          { paso: 'Inicia sesión como admin_th y escribe la URL /meta-admin directamente en el navegador.', resultadoEsperado: 'Redirige a Inicio — admin_th no tiene acceso, aunque sea el rol más alto dentro de su empresa.' },
-          { paso: 'Inicia sesión con una cuenta marcada como superadmin (equipo interno de la alianza) y entra a /meta-admin.', resultadoEsperado: 'Carga la tabla de "Cuentas y membresías" con todas las empresas cliente del sistema, no solo la propia.' },
+          { paso: 'Inicia sesión como admin_th y escribe la URL /proveedor directamente en el navegador.', resultadoEsperado: 'Redirige a Inicio — admin_th no tiene acceso, aunque sea el rol más alto dentro de su empresa.' },
+          { paso: 'Inicia sesión en /proveedor/login con una cuenta del equipo proveedor y entra a /proveedor.', resultadoEsperado: 'Carga la tabla de "Cuentas y membresías" con todas las empresas cliente del sistema, no solo la propia.' },
         ],
       },
     ],
@@ -713,9 +713,9 @@ export const planPruebas: SeccionPlanPruebas[] = [
     escenarios: [
       {
         titulo: 'Editar el plan y la facturación de una empresa cliente',
-        rolNecesario: 'Cuenta superadmin',
+        rolNecesario: 'Cuenta del equipo proveedor',
         pasos: [
-          { paso: 'Entra a /meta-admin y localiza una empresa en la tabla.', resultadoEsperado: 'Ve usuarios activos y colaboradores activos de esa empresa (conteos de solo lectura).' },
+          { paso: 'Entra a /proveedor y localiza una empresa en la tabla.', resultadoEsperado: 'Ve usuarios activos y colaboradores activos de esa empresa (conteos de solo lectura).' },
           { paso: 'Cambia su Plan a "Premium", ajusta el precio mensual, el estado de facturación a "Pendiente" y la fecha de próximo pago, y presiona "Guardar" en esa fila.', resultadoEsperado: 'El botón muestra "Guardando…" y luego "Guardado"; al recargar la página, los valores nuevos siguen ahí.' },
           { paso: 'Repite el cambio en otra fila (otra empresa).', resultadoEsperado: 'Solo se actualiza esa empresa — las demás filas no cambian.' },
         ],

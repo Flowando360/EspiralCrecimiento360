@@ -2,13 +2,17 @@ import { redirect } from 'next/navigation';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { AppShell } from '@/components/layout/app-shell';
+import { css, variablesDeMarca } from '@/lib/marca/tema';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const perfil = await getPerfilActual();
-  if (!perfil) redirect('/login');
+  if (!perfil) {
+    await createClient().auth.signOut();
+    redirect('/login?motivo=sin-acceso');
+  }
 
   const supabase = createClient();
-  const [{ count }, { count: countNotificaciones }, { count: countMensajes }] = await Promise.all([
+  const [{ count }, { count: countNotificaciones }, { count: countMensajes }, { data: empresa }] = await Promise.all([
     supabase
       .from('alertas')
       .select('*', { count: 'exact', head: true })
@@ -24,12 +28,28 @@ export default async function DashboardLayout({ children }: { children: React.Re
       .select('*', { count: 'exact', head: true })
       .eq('destinatario_id', perfil.usuario_id)
       .eq('leido', false),
+    supabase
+      .from('empresas')
+      .select('nombre, logo_url, color_marca, color_secundario, color_acento')
+      .eq('id', perfil.empresa_id)
+      .maybeSingle(),
   ]);
 
+  const tema = css(
+    variablesDeMarca({
+      colorMarca: empresa?.color_marca,
+      colorSecundario: empresa?.color_secundario,
+      colorAcento: empresa?.color_acento,
+    })
+  );
+
   return (
+    <>
+    <style dangerouslySetInnerHTML={{ __html: tema }} />
     <AppShell
+      marca={{ nombre: empresa?.nombre ?? null, logoUrl: empresa?.logo_url ?? null }}
+      permisos={perfil.permisos}
       rol={perfil.rol}
-      esSuperadmin={perfil.es_superadmin}
       nombre={perfil.nombre_preferido?.trim() || perfil.nombre_completo}
       alertasPendientes={count ?? 0}
       notificacionesNoLeidas={countNotificaciones ?? 0}
@@ -37,5 +57,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
     >
       {children}
     </AppShell>
+    </>
   );
 }

@@ -10,8 +10,10 @@ const ROLES: RolUsuario[] = ['admin_th', 'lider', 'colaborador', 'gerencia', 'au
 
 export function FormularioCrearUsuario({
   colaboradoresSinCuenta,
+  rolesPersonalizados,
 }: {
   colaboradoresSinCuenta: { id: string; nombre_completo: string }[];
+  rolesPersonalizados: { id: string; nombre: string }[];
 }) {
   const [mostrarForm, setMostrarForm] = useState(false);
   const [modo, setModo] = useState<'vincular' | 'nueva'>('vincular');
@@ -21,6 +23,7 @@ export function FormularioCrearUsuario({
   const [usuarioTocado, setUsuarioTocado] = useState(false);
   const [email, setEmail] = useState('');
   const [rol, setRol] = useState<RolUsuario>('colaborador');
+  const [rolPersonalizadoId, setRolPersonalizadoId] = useState('');
   const [password, setPassword] = useState(generarPassword());
   const [pending, startTransition] = useTransition();
   const [resultado, setResultado] = useState<{ ok: boolean; error?: string } | null>(null);
@@ -63,6 +66,7 @@ export function FormularioCrearUsuario({
         usuario,
         email,
         rol,
+        rolPersonalizadoId: rolPersonalizadoId || null,
         password,
         colaboradorId: modo === 'vincular' && colaboradorId ? colaboradorId : undefined,
       });
@@ -231,6 +235,21 @@ export function FormularioCrearUsuario({
                 </option>
               ))}
             </select>
+            {rolesPersonalizados.length > 0 && (
+              <select
+                value={rolPersonalizadoId}
+                onChange={(e) => setRolPersonalizadoId(e.target.value)}
+                className="mt-1.5 w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
+                title="Rol personalizado de tu empresa (opcional). Limita los módulos que ve."
+              >
+                <option value="">Sin rol personalizado</option>
+                {rolesPersonalizados.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.nombre}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div>

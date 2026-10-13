@@ -49,7 +49,7 @@ export async function iniciarSesion(input: { identificador: string; password: st
   // Se corta acá, antes de redirigir, con un mensaje claro.
   const { data: perfil } = await supabase
     .from('perfiles_usuario')
-    .select('activo')
+    .select('activo, empresa_id')
     .eq('id', sesion.user.id)
     .maybeSingle();
 
@@ -58,6 +58,20 @@ export async function iniciarSesion(input: { identificador: string; password: st
     return {
       ok: false as const,
       error: 'Tu cuenta no tiene un perfil activo en el sistema. Contacta a Talento Humano.',
+    };
+  }
+
+  // Empresa desactivada por el proveedor: nadie de esa empresa entra hasta que la reactiven.
+  const { data: empresa } = await supabase
+    .from('empresas')
+    .select('activo')
+    .eq('id', perfil.empresa_id)
+    .maybeSingle();
+  if (!empresa || empresa.activo === false) {
+    await supabase.auth.signOut();
+    return {
+      ok: false as const,
+      error: 'La cuenta de tu empresa está desactivada. Contacta al proveedor de Espiral de Crecimiento 360°.',
     };
   }
 

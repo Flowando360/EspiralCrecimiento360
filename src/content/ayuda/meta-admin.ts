@@ -8,7 +8,7 @@ export const moduloMetaAdmin: ModuloAyuda = {
   paginas: [
     {
       slug: 'cuentas-membresias',
-      ruta: '/meta-admin',
+      ruta: '/proveedor',
       titulo: 'Cuentas y membresías',
       resumen:
         'Tabla con todas las empresas cliente del sistema (no solo la propia): usuarios y colaboradores activos de cada una, su plan de membresía y el estado de facturación.',
@@ -21,7 +21,7 @@ export const moduloMetaAdmin: ModuloAyuda = {
         { nombre: 'Guardar', explicacion: 'Guarda los cambios de esa fila (empresa) únicamente.' },
       ],
       notas: [
-        'Acceso exclusivo de cuentas marcadas como "superadmin" (equipo interno de la alianza) — ni admin_th ni gerencia de una empresa cliente pueden ver ni entrar a esta pantalla, sin importar su rol.',
+        'Acceso exclusivo del equipo proveedor (cuentas registradas en la tabla proveedores, con su propio inicio de sesión en /proveedor/login) — ni admin_th ni gerencia de una empresa cliente pueden ver ni entrar a esta pantalla, sin importar su rol.',
         'Corresponde al Modelo de Negocio Espiral Evolutiva (secc. 5): permite a la alianza ver de un vistazo el estado comercial de todas las empresas que usan el sistema, sin mezclar esa información con los datos operativos de cada empresa.',
       ],
     },

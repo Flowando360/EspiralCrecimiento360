@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { actualizarMembresia } from '@/app/(dashboard)/meta-admin/actions';
+import Link from 'next/link';
+import { actualizarMembresia } from '@/app/proveedor/(panel)/actions';
 import { Check } from 'lucide-react';
 
 export interface EmpresaMetaAdmin {
   id: string;
   nombre: string;
+  activo: boolean;
   usuariosActivos: number;
   colaboradoresActivos: number;
   planMembresia: 'piloto' | 'estandar' | 'premium';
@@ -48,7 +50,11 @@ export function FilaEmpresa({ empresa }: { empresa: EmpresaMetaAdmin }) {
 
   return (
     <tr className="border-b border-marmol-100 last:border-0">
-      <td className="px-4 py-3 font-medium text-marmol-900">{empresa.nombre}</td>
+      <td className="px-4 py-3 font-medium text-marmol-900">
+        <Link href={`/proveedor/empresas/${empresa.id}`} className="hover:text-flow-700 hover:underline">
+          {empresa.nombre}
+        </Link>
+      </td>
       <td className="px-4 py-3 text-marmol-600">{empresa.usuariosActivos}</td>
       <td className="px-4 py-3 text-marmol-600">{empresa.colaboradoresActivos}</td>
       <td className="px-4 py-3">

@@ -58,7 +58,9 @@ import {
   Menu,
   ChevronDown,
   LogOut,
+  DatabaseBackup,
 } from 'lucide-react';
+import type { Modulo, PermisosModulo } from '@/lib/supabase/get-perfil-actual';
 
 type FasePhva = 'Planear' | 'Hacer' | 'Verificar' | 'Actuar';
 
@@ -67,6 +69,8 @@ interface NavItem {
   label: string;
   icon: React.ElementType;
   roles: RolUsuario[];
+  /** Módulo de permisos si difiere del grupo (ej. Dotaciones dentro de Administración). */
+  modulo?: Modulo;
   /** Solo para el desplegable de Procesos y Cumplimiento: agrupa visualmente
    * sus módulos bajo el ciclo PHVA. Sin este campo, el ítem se muestra suelto
    * antes de los grupos de fase (p. ej. la página resumen del módulo). */
@@ -86,6 +90,8 @@ function agruparPorFase(items: NavItem[]): { fase: FasePhva | null; items: NavIt
 interface NavGroup {
   /** Vacío = no es un grupo, es un ítem suelto (se renderiza directo, sin desplegable). */
   titulo: string;
+  /** Módulo que controla la visibilidad del grupo con un rol personalizado. */
+  modulo: Modulo;
   /** Etiqueta corta para el botón del desplegable en escritorio, cuando "titulo" es
    * más largo de lo que cabe cómodo en la barra — el desplegable en sí sigue
    * usando los nombres completos de cada página. */
@@ -94,10 +100,11 @@ interface NavGroup {
 }
 
 const NAV: NavGroup[] = [
-  { titulo: '', items: [{ href: '/inicio', label: 'Inicio', icon: Home, roles: ['admin_th', 'lider', 'colaborador', 'gerencia', 'auditor_externo'] }] },
-  { titulo: '', items: [{ href: '/mi-perfil', label: 'Mi Perfil', icon: User, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] }] },
+  { titulo: '', modulo: 'inicio', items: [{ href: '/inicio', label: 'Inicio', icon: Home, roles: ['admin_th', 'lider', 'colaborador', 'gerencia', 'auditor_externo'] }] },
+  { titulo: '', modulo: 'mi_perfil', items: [{ href: '/mi-perfil', label: 'Mi Perfil', icon: User, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] }] },
   {
     titulo: 'Espiral de Crecimiento 360°',
+    modulo: 'espiral_360',
     tituloCorto: 'Espiral 360°',
     items: [
       { href: '/espiral-crecimiento/colaboradores', label: 'Colaboradores', icon: Users, roles: ['admin_th', 'lider', 'gerencia'] },
@@ -115,6 +122,7 @@ const NAV: NavGroup[] = [
   },
   {
     titulo: 'Reclutamiento y selección',
+    modulo: 'reclutamiento',
     items: [
       { href: '/reclutamiento', label: 'Reclutamiento y Selección', icon: UserSearch, roles: ['admin_th', 'lider'] },
       { href: '/reclutamiento/candidatos', label: 'Banco de candidatos', icon: Users2, roles: ['admin_th', 'lider'] },
@@ -122,6 +130,7 @@ const NAV: NavGroup[] = [
   },
   {
     titulo: 'Nexa · Cultura y Formación',
+    modulo: 'nexa',
     tituloCorto: 'Nexa',
     items: [
       { href: '/nexa/feed', label: 'Feed corporativo', icon: Rss, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },
@@ -133,6 +142,7 @@ const NAV: NavGroup[] = [
   },
   {
     titulo: 'Procesos y Cumplimiento',
+    modulo: 'procesos',
     tituloCorto: 'Procesos',
     items: [
       { href: '/procesos-gestion', label: 'Procesos y sistemas de gestión', icon: ClipboardCheck, roles: ['admin_th', 'lider', 'gerencia'] },
@@ -150,6 +160,7 @@ const NAV: NavGroup[] = [
   },
   {
     titulo: 'Informes',
+    modulo: 'informes',
     items: [
       { href: '/informes', label: 'Todos los informes', icon: FileBarChart, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },
       { href: '/informes/360', label: 'Encuentro 360° Integrado', icon: Users2, roles: ['admin_th', 'lider', 'colaborador'] },
@@ -166,12 +177,15 @@ const NAV: NavGroup[] = [
   },
   {
     titulo: 'Administración',
+    modulo: 'administracion',
     items: [
       { href: '/administracion/cargos', label: 'Cargos y perfiles', icon: Sparkles, roles: ['admin_th'] },
       { href: '/administracion/organigrama', label: 'Organigrama (editar)', icon: Network, roles: ['admin_th'] },
       { href: '/administracion/identidad', label: 'Identidad Organizacional', icon: Compass, roles: ['admin_th'] },
-      { href: '/administracion/dotaciones', label: 'Dotaciones', icon: Shirt, roles: ['admin_th'] },
+      { href: '/administracion/dotaciones', label: 'Dotaciones', icon: Shirt, roles: ['admin_th'], modulo: 'dotaciones' },
       { href: '/administracion/usuarios', label: 'Usuarios y roles', icon: Users, roles: ['admin_th'] },
+      { href: '/administracion/roles', label: 'Roles y permisos', icon: ShieldCheck, roles: ['admin_th'] },
+      { href: '/administracion/respaldo', label: 'Respaldo de datos', icon: DatabaseBackup, roles: ['admin_th'] },
       { href: '/administracion/salarios', label: 'Salarios', icon: Wallet, roles: ['admin_th'] },
       { href: '/administracion/parametros-legales', label: 'Parámetros legales', icon: Scale, roles: ['admin_th'] },
       { href: '/administracion/configuracion', label: 'Configuración', icon: Settings, roles: ['admin_th'] },
@@ -181,18 +195,21 @@ const NAV: NavGroup[] = [
 
 export function BarraSuperior({
   rol,
-  esSuperadmin,
   nombre,
   alertasPendientes,
   notificacionesNoLeidas,
   mensajesNoLeidos,
+  marca,
+  permisos,
 }: {
   rol: RolUsuario;
-  esSuperadmin?: boolean;
   nombre: string;
   alertasPendientes: number;
   notificacionesNoLeidas: number;
   mensajesNoLeidos: number;
+  marca?: { nombre: string | null; logoUrl: string | null };
+  /** Matriz del rol personalizado; null = sin rol personalizado, aplica solo el rol de sistema. */
+  permisos?: PermisosModulo | null;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -224,7 +241,14 @@ export function BarraSuperior({
     });
   }
 
-  const gruposVisibles = NAV.map((grupo, i) => ({ ...grupo, i, items: grupo.items.filter((item) => item.roles.includes(rol)) })).filter(
+  // Con rol personalizado, el módulo debe tener lectura. El rol de sistema sigue
+  // filtrando: un rol personalizado solo quita módulos, nunca da más de lo que el rol permite.
+  const puedeVer = (modulo: Modulo | undefined) => !permisos || !modulo || Boolean(permisos[modulo]?.leer);
+  const gruposVisibles = NAV.map((grupo, i) => ({
+    ...grupo,
+    i,
+    items: grupo.items.filter((item) => item.roles.includes(rol) && puedeVer(item.modulo ?? grupo.modulo)),
+  })).filter(
     (g) => g.items.length > 0
   );
 
@@ -243,11 +267,16 @@ export function BarraSuperior({
 
         <Link href="/inicio" className="flex items-center gap-2 shrink-0 min-w-0">
           <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center overflow-hidden shrink-0">
-            <Image src="/marca/EspiralIsotipo.png" alt="" width={32} height={32} className="h-7 w-7 object-contain" />
+            {marca?.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={marca.logoUrl} alt={marca.nombre ?? ''} className="h-7 w-7 object-contain" />
+            ) : (
+              <Image src="/marca/EspiralIsotipo.png" alt="" width={32} height={32} className="h-7 w-7 object-contain" />
+            )}
           </div>
           <div className="hidden md:block leading-tight min-w-0">
-            <p className="font-display text-sm font-semibold text-white truncate">Espiral de Crecimiento</p>
-            <p className="text-xs text-acento/80 truncate">Flow, Nexus y Visión</p>
+            <p className="font-display text-sm font-semibold text-white truncate">{marca?.nombre ?? 'Espiral de Crecimiento'}</p>
+            <p className="text-xs text-acento/80 truncate">Espiral de Crecimiento 360°</p>
           </div>
         </Link>
 
@@ -337,18 +366,6 @@ export function BarraSuperior({
           );
         })}
 
-        {esSuperadmin && (
-          <Link
-            href="/meta-admin"
-            className={cn(
-              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold whitespace-nowrap transition',
-              pathname.startsWith('/meta-admin') ? 'bg-white/15 text-white' : 'text-white/85 hover:bg-white/10 hover:text-white'
-            )}
-          >
-            <Building2 size={16} strokeWidth={2.25} />
-            Cuentas y membresías
-          </Link>
-        )}
       </nav>
 
       {/* Menú móvil: NO es un costado — es la misma barra de arriba, que se
@@ -440,18 +457,6 @@ export function BarraSuperior({
             );
           })}
 
-          {esSuperadmin && (
-            <Link
-              href="/meta-admin"
-              className={cn(
-                'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-bold transition',
-                pathname.startsWith('/meta-admin') ? 'bg-white/15 text-white' : 'text-white/85 hover:bg-white/10 hover:text-white'
-              )}
-            >
-              <Building2 size={17} strokeWidth={2.25} />
-              Cuentas y membresías
-            </Link>
-          )}
         </nav>
       </div>
     </header>
