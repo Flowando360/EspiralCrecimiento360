@@ -196,3 +196,39 @@ export async function quitarSuperusuario(usuarioId: string) {
   revalidatePath('/meta-admin');
   return { ok: true as const };
 }
+
+const DatosEmpresaSchema = z.object({
+  empresaId: z.string().uuid(),
+  nombre: z.string().trim().min(2, 'El nombre de la empresa es requerido'),
+  colorMarca: ColorSchema,
+  colorSecundario: ColorSchema,
+  colorAcento: ColorSchema,
+  logoUrl: z.string().trim().nullable(),
+});
+
+/** Edita los datos y la marca de cualquier empresa (solo superadmin). */
+export async function actualizarDatosEmpresa(input: z.infer<typeof DatosEmpresaSchema>) {
+  const perfil = await requerirSuperadmin();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+
+  const parsed = DatosEmpresaSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+  const datos = parsed.data;
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from('empresas')
+    .update({
+      nombre: datos.nombre,
+      color_marca: datos.colorMarca,
+      color_secundario: datos.colorSecundario,
+      color_acento: datos.colorAcento,
+      logo_url: datos.logoUrl || null,
+    })
+    .eq('id', datos.empresaId);
+
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath('/meta-admin');
+  revalidatePath(`/meta-admin/empresas/${datos.empresaId}`);
+  return { ok: true as const };
+}
