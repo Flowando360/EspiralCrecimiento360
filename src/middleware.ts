@@ -73,9 +73,12 @@ export async function middleware(request: NextRequest) {
 
   // Un usuario de empresa con sesión que abre /login va a su inicio. El proveedor
   // con sesión que abre su login va al panel. Ninguno de los dos se confunde con el otro.
-  if (user && isAuthRoute) {
+  // El login del proveedor no redirige aunque haya otra sesión abierta: si no, una
+  // cuenta de empresa que entra a /proveedor/login cae en un bucle con el panel.
+  // Así puede iniciar sesión con la cuenta del proveedor, que reemplaza la sesión.
+  if (user && isAuthRoute && !request.nextUrl.pathname.startsWith('/proveedor')) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = request.nextUrl.pathname.startsWith('/proveedor') ? '/proveedor' : '/inicio';
+    redirectUrl.pathname = '/inicio';
     return NextResponse.redirect(redirectUrl);
   }
 
