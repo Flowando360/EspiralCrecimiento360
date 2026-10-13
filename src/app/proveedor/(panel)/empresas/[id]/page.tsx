@@ -4,6 +4,7 @@ import { ArrowLeft, DatabaseBackup } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/server';
 import { EditarDatosEmpresa } from '@/components/proveedor/empresas/editar-datos-empresa';
 import { CambiarEstadoEmpresa } from '@/components/proveedor/empresas/cambiar-estado-empresa';
+import { CrearAdministrador } from '@/components/proveedor/empresas/crear-administrador';
 
 export default async function EmpresaSuperadminPage({ params }: { params: { id: string } }) {
   const admin = createAdminClient();
@@ -58,6 +59,8 @@ export default async function EmpresaSuperadminPage({ params }: { params: { id: 
       </div>
 
       <EditarDatosEmpresa empresa={empresa} />
+
+      <CrearAdministrador empresaId={empresa.id} />
 
       <div className="card overflow-hidden">
         <h2 className="font-semibold text-marmol-800 px-5 pt-5 pb-3">Usuarios de esta empresa</h2>
