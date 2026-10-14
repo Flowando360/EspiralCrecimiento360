@@ -1,10 +1,16 @@
 import { createAdminClient } from '@/lib/supabase/server';
 import { CambiarEstadoRequerimiento } from '@/components/proveedor/cambiar-estado-requerimiento';
 
+const ETIQUETA_TIPO: Record<string, string> = {
+  mejora: 'Mejora',
+  nueva_funcion: 'Requerimiento',
+  falla: 'Falla',
+};
+
 export default async function RequerimientosPage() {
   const admin = createAdminClient();
   const [{ data: requerimientos }, { data: empresas }] = await Promise.all([
-    admin.from('requerimientos').select('id, empresa_id, nombre_usuario, correo_usuario, pagina, que_pasa, que_esperaba, solucion_imaginada, estado, correo_enviado, creado_en').order('creado_en', { ascending: false }).limit(200),
+    admin.from('requerimientos').select('id, empresa_id, nombre_usuario, correo_usuario, pagina, tipo, consulta, respuesta_mostrada, que_pasa, que_esperaba, solucion_imaginada, estado, correo_enviado, creado_en').order('creado_en', { ascending: false }).limit(200),
     admin.from('empresas').select('id, nombre'),
   ]);
   const nombreEmpresa = new Map((empresas ?? []).map((e) => [e.id, e.nombre]));
@@ -25,7 +31,16 @@ export default async function RequerimientosPage() {
           <div key={r.id} className="card p-5 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="font-medium text-marmol-900">{r.nombre_usuario} · {nombreEmpresa.get(r.empresa_id) ?? 'Empresa'}</p>
+                <p className="font-medium text-marmol-900">
+                  <span className="mr-2 text-xs rounded-full bg-flow-50 text-flow-700 px-2 py-0.5">{ETIQUETA_TIPO[r.tipo] ?? r.tipo}</span>
+                  {r.nombre_usuario} · {nombreEmpresa.get(r.empresa_id) ?? 'Empresa'}
+                </p>
+                {(r.consulta || r.respuesta_mostrada) && (
+                  <p className="text-xs text-marmol-500">
+                    {r.consulta ? `Buscó: “${r.consulta}”` : ''}
+                    {r.respuesta_mostrada ? ` · Vio: ${r.respuesta_mostrada}` : ''}
+                  </p>
+                )}
                 <p className="text-xs text-marmol-500">
                   {new Date(r.creado_en).toLocaleString('es-CO')} · {r.correo_usuario}
                   {r.pagina ? ` · Pantalla: ${r.pagina}` : ''}

@@ -7,7 +7,32 @@ import { Send, Check } from 'lucide-react';
 const AREA = 'w-full rounded-lg border border-marmol-200 px-2.5 py-2 text-sm min-h-[80px]';
 
 /** Tres preguntas para entender el problema o la necesidad: qué pasa, qué se esperaba y cómo imagina la solución. */
-export function FormularioRequerimiento({ pagina, onCerrar }: { pagina: string; onCerrar: () => void }) {
+export type TipoRequerimiento = 'mejora' | 'nueva_funcion' | 'falla';
+
+const OPCIONES_TIPO: { valor: TipoRequerimiento; etiqueta: string }[] = [
+  { valor: 'mejora', etiqueta: 'Quiero mejorar algo que ya existe en el aplicativo' },
+  { valor: 'nueva_funcion', etiqueta: 'No encontré cómo hacerlo / quiero algo nuevo' },
+  { valor: 'falla', etiqueta: 'Algo no funciona como debería' },
+];
+
+/**
+ * Formulario de requerimiento. Puede abrirse para mejorar una función que sí existe
+ * (tipo "mejora"), o cuando la búsqueda no encontró cómo hacer algo (tipo "nueva_funcion").
+ */
+export function FormularioRequerimiento({
+  pagina,
+  tipoInicial,
+  consulta,
+  respuestaMostrada,
+  onCerrar,
+}: {
+  pagina: string;
+  tipoInicial: TipoRequerimiento;
+  consulta?: string;
+  respuestaMostrada?: string;
+  onCerrar: () => void;
+}) {
+  const [tipo, setTipo] = useState<TipoRequerimiento>(tipoInicial);
   const [quePasa, setQuePasa] = useState('');
   const [quePesperaba, setQuePesperaba] = useState('');
   const [solucion, setSolucion] = useState('');
@@ -19,7 +44,15 @@ export function FormularioRequerimiento({ pagina, onCerrar }: { pagina: string; 
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      const res = await enviarRequerimiento({ quePasa, quePesperaba, solucion, pagina });
+      const res = await enviarRequerimiento({
+        quePasa,
+        quePesperaba,
+        solucion,
+        pagina,
+        tipo,
+        consulta,
+        respuestaMostrada,
+      });
       if (!res.ok) return setError(res.error);
       setResultado({ correoEnviado: res.correoEnviado });
     });
@@ -52,6 +85,14 @@ export function FormularioRequerimiento({ pagina, onCerrar }: { pagina: string; 
         </p>
       </div>
       <div>
+        <label className="block text-xs font-medium text-marmol-700 mb-1">¿Qué quieres decirnos?</label>
+        <select className="w-full rounded-lg border border-marmol-200 px-2.5 py-2 text-sm" value={tipo} onChange={(e) => setTipo(e.target.value as TipoRequerimiento)}>
+          {OPCIONES_TIPO.map((o) => (
+            <option key={o.valor} value={o.valor}>{o.etiqueta}</option>
+          ))}
+        </select>
+      </div>
+      <div>
         <label className="block text-xs font-medium text-marmol-700 mb-1">¿Qué pasa?</label>
         <textarea className={AREA} value={quePasa} onChange={(e) => setQuePasa(e.target.value)} required />
       </div>
@@ -64,6 +105,7 @@ export function FormularioRequerimiento({ pagina, onCerrar }: { pagina: string; 
         <textarea className={AREA} value={solucion} onChange={(e) => setSolucion(e.target.value)} required />
       </div>
       {pagina && <p className="text-xs text-marmol-400">Pantalla: {pagina}</p>}
+      {consulta && <p className="text-xs text-marmol-400">Buscaste: “{consulta}”</p>}
       {error && <p className="text-sm text-bajo">{error}</p>}
       <div className="flex gap-2">
         <button

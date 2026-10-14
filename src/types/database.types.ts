@@ -7157,6 +7157,9 @@ export type Database = {
       }
       requerimientos: {
         Row: {
+          consulta: string | null
+          respuesta_mostrada: string | null
+          tipo: string
           correo_enviado: boolean
           correo_usuario: string
           creado_en: string
@@ -7171,6 +7174,9 @@ export type Database = {
           usuario_id: string | null
         }
         Insert: {
+          consulta?: string | null
+          respuesta_mostrada?: string | null
+          tipo?: string
           correo_enviado?: boolean
           correo_usuario: string
           creado_en?: string
@@ -7185,6 +7191,9 @@ export type Database = {
           usuario_id?: string | null
         }
         Update: {
+          consulta?: string | null
+          respuesta_mostrada?: string | null
+          tipo?: string
           correo_enviado?: boolean
           correo_usuario?: string
           creado_en?: string
