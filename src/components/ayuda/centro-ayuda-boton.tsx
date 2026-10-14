@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import { buscarPaginaPorRuta } from '@/content/ayuda';
 import { buscarEnAyuda, type ResultadoBusqueda } from '@/content/ayuda/buscador';
 import { HelpCircle, X, Search, BookOpen, HelpingHand, SpellCheck, ClipboardList, MessageSquarePlus } from 'lucide-react';
@@ -32,7 +33,9 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
         className={className ?? 'rounded-lg p-2 text-marmol-500 hover:bg-marmol-100 transition'}
         title="Centro de Ayuda"
       >
-        <HelpCircle size={18} />
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm">
+          <Image src="/marca/ayuda-icono.png" alt="" width={24} height={24} className="h-6 w-6 object-contain" />
+        </span>
       </button>
 
       {abierto && (
