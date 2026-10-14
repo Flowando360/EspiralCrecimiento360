@@ -103,6 +103,7 @@ export const moduloAdministracion: ModuloAyuda = {
       resumen: 'Crea cuentas de acceso para los colaboradores y administra sus roles.',
       camposYBotones: [
         { nombre: 'Nuevo usuario', explicacion: 'Elige un colaborador sin cuenta todavía, su nombre completo (con el usuario ya sugerido a partir del nombre — editable), correo, rol (admin_th/líder/colaborador/gerencia/auditor_externo) y una contraseña temporal.' },
+        { nombre: 'Rol personalizado (opcional)', explicacion: 'Aparece solo si la empresa ya creó roles en Roles y permisos. Al crear o editar un usuario puedes asignarle uno. Limita los módulos del menú que esa persona ve; el rol de sistema sigue decidiendo qué datos puede ver. Déjalo en "Sin rol personalizado" para usar solo el rol de sistema.' },
         { nombre: 'Tabla de usuarios', explicacion: 'Nombre (con el apodo debajo si esa persona ya definió uno), correo, Usuario, rol, si la cuenta está activa, y una columna de Acciones.' },
         { nombre: 'Usuario', explicacion: 'Lo que la persona escribe en el login en vez del correo completo (ver "Usuario o correo" en el login). Es un dato propio de la cuenta, independiente del correo — siempre primernombre.primerapellido, sugerido automáticamente a partir del nombre, pero editable por admin_th en cualquier momento (por ejemplo si dos personas chocan, o si el nombre trae un error). Cambiarlo no cambia el correo de la cuenta.' },
         { nombre: 'Editar', explicacion: 'Cambia nombre, apodo ("cómo le gusta que le llamen"), usuario, correo, rol o ficha de colaborador vinculada de una cuenta ya existente, sin salir de la tabla.' },
@@ -115,6 +116,86 @@ export const moduloAdministracion: ModuloAyuda = {
         'Roles y su alcance: admin_th ve y edita todo; líder ve su equipo y su propia información; colaborador se ve solo a sí mismo; gerencia ve reportes agregados; auditor_externo solo ve, de solo lectura, nombre/cargo de los colaboradores y sus certificaciones de hoja de vida — pensado para entregar evidencia a una auditoría sin exponer el resto del sistema.',
         'Sin ficha de colaborador, una cuenta puede entrar y ver, pero no participar en lo que se registra a nombre de un colaborador: cazar y proponer en la Cacería Makigami, recibir puntos y reconocimientos, cursos asignados, etc. Si una ficha ya está vinculada a otra cuenta no aparece en la lista (una ficha, una cuenta).',
         'El apodo también lo puede fijar cada persona por sí misma desde Mi Perfil — ver Inicio y Mi Perfil. El usuario de login, en cambio, solo lo fija admin_th (no hay autoservicio para eso todavía).',
+      ],
+    },
+    {
+      slug: 'roles-permisos',
+      ruta: '/administracion/roles',
+      titulo: 'Roles y permisos',
+      resumen:
+        'Crea roles propios para tu empresa y decide, módulo por módulo, qué puede leer, escribir y borrar quien los tenga. Luego asígnalos desde Usuarios y roles.',
+      camposYBotones: [
+        { nombre: 'Lista de roles', explicacion: 'Roles creados en la empresa, con cuántos usuarios los tienen. Haz clic en uno para editarlo.' },
+        { nombre: 'Nuevo rol', explicacion: 'Crea un rol con nombre (mínimo 2 caracteres) y descripción opcional. Nace con Inicio y Mi perfil en lectura, y el resto sin acceso.' },
+        { nombre: 'Nombre y descripción', explicacion: 'Se pueden cambiar en cualquier momento con "Guardar cambios".' },
+        { nombre: 'Matriz de permisos (Leer / Escribir / Borrar)', explicacion: 'Una fila por módulo: Inicio, Mi perfil, Espiral de Crecimiento 360°, Reclutamiento, Nexa, Procesos, Informes, Dotaciones y Administración. Escribir marca Leer automáticamente; Borrar marca Escribir y Leer.' },
+        { nombre: 'Guardar cambios', explicacion: 'Guarda la matriz y los datos del rol.' },
+        { nombre: 'Eliminar rol', explicacion: 'Borra el rol. Los usuarios que lo tenían quedan solo con su rol de sistema. Pide confirmación y avisa cuántos usuarios se verán afectados.' },
+      ],
+      proceso: [
+        'Crear el rol: pulsa "Nuevo rol", escribe el nombre (por ejemplo, "Gerencia de solo lectura") y guarda.',
+        'Marcar permisos: en la matriz, activa Leer en los módulos que debe ver. Activa Escribir solo donde debe modificar datos, y Borrar solo donde debe eliminar.',
+        'Guardar y asignar: pulsa "Guardar cambios" y luego asigna el rol a los usuarios desde Usuarios y roles → Rol personalizado.',
+      ],
+      notas: [
+        'Un rol personalizado no da acceso a datos que el rol de sistema del usuario no ve. Por ejemplo, un colaborador con un rol personalizado no puede ver la información de todo el equipo, aunque la matriz lo permita.',
+        'Hoy, la lectura controla qué módulos aparecen en el menú. Escribir y Borrar se guardan para aplicarlos en cada acción; mientras esa parte esté pendiente, no los uses como única protección de información sensible.',
+        'Solo el administrador de la empresa (admin_th) ve y edita los roles de su empresa.',
+      ],
+    },
+    {
+      slug: 'respaldo-datos',
+      ruta: '/administracion/respaldo',
+      titulo: 'Respaldo de datos',
+      resumen:
+        'Descarga todos los datos de tu empresa en un archivo ZIP, con un CSV por tabla. Sirve como copia fuera de la plataforma o para migrar la información.',
+      camposYBotones: [
+        { nombre: 'Descargar respaldo completo (.zip)', explicacion: 'Genera el ZIP con todas las tablas de tu empresa. Puede tardar según el volumen de datos.' },
+        { nombre: 'LEEME.txt (dentro del ZIP)', explicacion: 'Fecha y hora del respaldo, cantidad de tablas, filas por tabla, y las notas de formato.' },
+        { nombre: 'Archivos CSV', explicacion: 'Están en UTF-8 con BOM, para que Excel abra bien las tildes y las eñes. Las celdas con listas u objetos van en formato JSON.' },
+      ],
+      notas: [
+        'El respaldo contiene datos personales completos. Guárdalo en un lugar con acceso restringido.',
+        'Solo el administrador de la empresa puede descargar su propio respaldo. El respaldo de otras empresas lo descarga el equipo proveedor, y queda registrado en la bitácora.',
+        'Las tablas que no pertenecen a ninguna empresa (catálogos globales de la plataforma) no se incluyen en el respaldo de una empresa.',
+      ],
+    },
+    {
+      slug: 'dotaciones-hub',
+      ruta: '/administracion/dotaciones',
+      titulo: 'Dotaciones (acceso a los módulos)',
+      resumen:
+        'Punto de entrada único de Dotaciones desde Administración. Desde aquí se va a Gestión de dotaciones, al Catálogo e inventario y al Seguimiento por persona.',
+      camposYBotones: [
+        { nombre: 'Gestión de dotaciones', explicacion: 'Registra las entregas de uniformes y EPP, con su acta de entrega y su confirmación de recibido. Ver el módulo Dotaciones.' },
+        { nombre: 'Catálogo e inventario', explicacion: 'Artículos, tallas y stock disponible.' },
+        { nombre: 'Seguimiento por persona', explicacion: 'Lo que tiene cada colaborador, lo que le falta y si es elegible según la normativa.' },
+      ],
+    },
+    {
+      slug: 'guias-flow-hub',
+      ruta: '/administracion/guias-flow',
+      titulo: 'Guías del Flow (acceso a los módulos)',
+      resumen:
+        'Punto de entrada desde Administración a la gestión de las Guías del Flow: invitaciones a las personas y seguimiento de sus respuestas.',
+      camposYBotones: [
+        { nombre: 'Invitaciones', explicacion: 'Envía la invitación a la Guía del Flow a una persona. Ver “Guías del Flow · Invitaciones”.' },
+        { nombre: 'Seguimiento', explicacion: 'Estado de cada guía: invitada, en curso o completada. Ver “Guías del Flow · Seguimiento”.' },
+      ],
+    },
+    {
+      slug: 'parametros-legales',
+      ruta: '/administracion/parametros-legales',
+      titulo: 'Parámetros legales',
+      resumen:
+        'Valores legales que cambian cada año, como el salario mínimo (SMLMV). El sistema los usa para calcular la elegibilidad de dotación de cada entrega.',
+      camposYBotones: [
+        { nombre: 'Año', explicacion: 'Año al que aplica el valor. Hay un valor por año.' },
+        { nombre: 'SMLMV', explicacion: 'Salario mínimo legal mensual vigente de ese año. La elegibilidad de una entrega usa el SMLMV del año de la entrega.' },
+      ],
+      notas: [
+        'Si no hay SMLMV cargado para el año de una entrega, la elegibilidad de dotación no se puede calcular: cárgalo antes de registrar entregas de ese año.',
+        'Solo admin_th puede cambiar estos valores.',
       ],
     },
     {

@@ -45,7 +45,7 @@ export const planPruebas: SeccionPlanPruebas[] = [
         ],
       },
       {
-        titulo: 'El panel Meta-Admin es exclusivo del equipo interno',
+        titulo: 'El panel del proveedor es exclusivo del equipo proveedor',
         rolNecesario: 'admin_th (para confirmar que NO entra) y una cuenta del equipo proveedor',
         pasos: [
           { paso: 'Inicia sesión como admin_th y escribe la URL /proveedor directamente en el navegador.', resultadoEsperado: 'Redirige a Inicio — admin_th no tiene acceso, aunque sea el rol más alto dentro de su empresa.' },
@@ -709,7 +709,7 @@ export const planPruebas: SeccionPlanPruebas[] = [
     ],
   },
   {
-    modulo: 'Meta-Admin (equipo interno de la alianza)',
+    modulo: 'Panel del proveedor',
     escenarios: [
       {
         titulo: 'Editar el plan y la facturación de una empresa cliente',

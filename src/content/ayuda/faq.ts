@@ -170,9 +170,9 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
       'Es un ZIP con un PDF de portada, un Excel de detalle y los archivos de evidencia adjuntos. La información sale directo de Procesos y Sistemas de Gestión (procesos, riesgos, checklist) y del módulo SST — no hay que volver a diligenciar nada aparte.',
   },
   {
-    pregunta: '¿Quién puede ver el panel de "Cuentas y membresías" (Meta-Admin)?',
+    pregunta: '¿Quién puede entrar al panel del proveedor?',
     respuesta:
-      'Solo el equipo interno de la alianza Flowando/Nexus/V&E (cuentas marcadas como superadmin). Ninguna empresa cliente lo ve, ni siquiera con el rol admin_th.',
+      'Solo las cuentas del equipo proveedor de Espiral, registradas como proveedor activo, con su propio inicio de sesión en /proveedor/login. Ninguna cuenta de empresa cliente lo ve, ni siquiera con el rol admin_th.',
   },
   {
     pregunta: '¿Cómo instalo la app en mi celular?',
@@ -257,5 +257,45 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
     pregunta: 'Cacé desperdicios en la Cacería Makigami pero no veo los puntos en Reconocimientos. ¿Por qué?',
     respuesta:
       'Es a propósito: los puntos de cazar y de proponer se entregan todos juntos cuando el facilitador cierra esa fase (al pasar a Rediseño y al cerrar el reto), para que nadie gane puntos marcando y desmarcando. Mientras tanto aparecen como "puntos en juego" en el ranking del reto. Los 40 puntos de una propuesta aprobada sí llegan al instante.',
+  },
+  {
+    pregunta: '¿Por qué no me deja entrar a la plataforma aunque mi contraseña es correcta?',
+    respuesta:
+      'Puede haber tres causas: tu cuenta no tiene un perfil activo en tu empresa, tu empresa fue desactivada por el proveedor, o estás intentando entrar al panel del proveedor con una cuenta de empresa. El mensaje de error te indica cuál es, o puedes pedir a tu administrador que lo revise.',
+  },
+  {
+    pregunta: '¿Puedo entrar con mi correo en vez de con mi usuario?',
+    respuesta:
+      'Sí. En el inicio de sesión puedes escribir tu usuario (por ejemplo, nombre.apellido) o el correo de tu cuenta; cualquiera de los dos funciona.',
+  },
+  {
+    pregunta: '¿Por qué veo el logo y los colores de mi empresa y no los de Espiral?',
+    respuesta:
+      'El encabezado muestra los dos: a la izquierda el logo y el nombre de Espiral de Crecimiento 360°, y a la derecha el logo y el nombre de tu empresa. Los colores de la barra y de los acentos son los de tu empresa.',
+  },
+  {
+    pregunta: '¿Cómo descargo un respaldo de mis datos?',
+    respuesta:
+      'Como administrador de tu empresa, entra a Administración → Respaldo de datos y pulsa “Descargar respaldo completo”. Recibirás un ZIP con un CSV por tabla y un archivo LEEME.txt. Guárdalo en un lugar con acceso restringido, porque contiene datos personales.',
+  },
+  {
+    pregunta: '¿Qué diferencia hay entre el rol de sistema y un rol personalizado?',
+    respuesta:
+      'El rol de sistema (admin_th, líder, colaborador, gerencia o auditor_externo) decide qué datos puede ver cada persona. Un rol personalizado, que creas en Administración → Roles y permisos, decide qué módulos del menú ve y qué puede escribir o borrar. No da acceso a datos que el rol de sistema no ve.',
+  },
+  {
+    pregunta: '¿Cómo creo un rol personalizado y lo asigno a alguien?',
+    respuesta:
+      'En Administración → Roles y permisos, pulsa “Nuevo rol”, escribe el nombre, marca los permisos por módulo y pulsa “Guardar cambios”. Luego, en Administración → Usuarios y roles, edita el usuario y elige el rol en “Rol personalizado”.',
+  },
+  {
+    pregunta: '¿Qué pasa si desactivan mi empresa?',
+    respuesta:
+      'Ninguno de sus usuarios puede entrar hasta que la empresa se reactive. Los datos no se borran: al reactivarla, todo vuelve a estar disponible.',
+  },
+  {
+    pregunta: '¿Por qué hay personas con cuenta que no aparecen como colaboradores?',
+    respuesta:
+      'Una cuenta puede existir sin ficha de colaborador (por ejemplo, un administrador o un auditor externo). Si la persona sí debe aparecer como colaboradora, pide a tu administrador que vincule su cuenta con su ficha en Administración → Usuarios y roles → Editar → Ficha de colaborador.',
   },
 ];
