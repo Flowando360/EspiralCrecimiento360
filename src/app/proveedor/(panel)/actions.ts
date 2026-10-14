@@ -392,3 +392,22 @@ export async function completarConfiguracionBase(empresaId: string) {
   revalidatePath(`/proveedor/empresas/${empresaId}`);
   return { ok: true as const };
 }
+
+const EstadoRequerimientoSchema = z.enum(['nuevo', 'en_revision', 'resuelto', 'descartado']);
+
+/** Cambia el estado de un requerimiento recibido desde el Centro de Ayuda. */
+export async function cambiarEstadoRequerimiento(requerimientoId: string, estado: string) {
+  const perfil = await requerirSuperadmin();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+  if (!z.string().uuid().safeParse(requerimientoId).success) return { ok: false as const, error: 'Requerimiento inválido' };
+  const parsed = EstadoRequerimientoSchema.safeParse(estado);
+  if (!parsed.success) return { ok: false as const, error: 'Estado inválido' };
+
+  const admin = createAdminClient();
+  const { error } = await admin.from('requerimientos').update({ estado: parsed.data }).eq('id', requerimientoId);
+  if (error) return { ok: false as const, error: error.message };
+
+  await registrarBitacora(perfil.id, 'cambiar_estado_requerimiento', null, { requerimientoId, estado: parsed.data });
+  revalidatePath('/proveedor/requerimientos');
+  return { ok: true as const };
+}

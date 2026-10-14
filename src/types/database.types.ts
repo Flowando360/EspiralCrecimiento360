@@ -7155,6 +7155,51 @@ export type Database = {
         }
         Relationships: []
       }
+      requerimientos: {
+        Row: {
+          correo_enviado: boolean
+          correo_usuario: string
+          creado_en: string
+          empresa_id: string
+          estado: string
+          id: string
+          nombre_usuario: string
+          pagina: string | null
+          que_esperaba: string
+          que_pasa: string
+          solucion_imaginada: string
+          usuario_id: string | null
+        }
+        Insert: {
+          correo_enviado?: boolean
+          correo_usuario: string
+          creado_en?: string
+          empresa_id: string
+          estado?: string
+          id?: string
+          nombre_usuario: string
+          pagina?: string | null
+          que_esperaba: string
+          que_pasa: string
+          solucion_imaginada: string
+          usuario_id?: string | null
+        }
+        Update: {
+          correo_enviado?: boolean
+          correo_usuario?: string
+          creado_en?: string
+          empresa_id?: string
+          estado?: string
+          id?: string
+          nombre_usuario?: string
+          pagina?: string | null
+          que_esperaba?: string
+          que_pasa?: string
+          solucion_imaginada?: string
+          usuario_id?: string | null
+        }
+        Relationships: []
+      }
       roles_empresa: {
         Row: {
           created_at: string

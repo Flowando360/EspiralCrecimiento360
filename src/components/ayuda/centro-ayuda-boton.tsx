@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { buscarPaginaPorRuta } from '@/content/ayuda';
 import { buscarEnAyuda, type ResultadoBusqueda } from '@/content/ayuda/buscador';
-import { HelpCircle, X, Search, BookOpen, HelpingHand, SpellCheck, ClipboardList } from 'lucide-react';
+import { HelpCircle, X, Search, BookOpen, HelpingHand, SpellCheck, ClipboardList, MessageSquarePlus } from 'lucide-react';
+import { FormularioRequerimiento } from './formulario-requerimiento';
 
 const ETIQUETA_TIPO: Record<ResultadoBusqueda['tipo'], string> = {
   manual: 'Manual',
@@ -17,9 +18,11 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
   const pathname = usePathname();
   const [abierto, setAbierto] = useState(false);
   const [consulta, setConsulta] = useState('');
+  const [enviandoRequerimiento, setEnviandoRequerimiento] = useState(false);
 
   const contextual = buscarPaginaPorRuta(pathname);
   const resultados = consulta.trim() ? buscarEnAyuda(consulta) : [];
+  const primero = resultados[0];
 
   return (
     <>
@@ -51,19 +54,44 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
                 <input
                   value={consulta}
                   onChange={(e) => setConsulta(e.target.value)}
-                  placeholder="Buscar en la ayuda…"
+                  placeholder="¿Cómo hago esto? Escribe lo que quieres hacer…"
                   className="w-full rounded-lg border border-marmol-200 pl-8 pr-2.5 py-2 text-sm"
                 />
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-5 space-y-5">
-              {consulta.trim() ? (
-                <div className="space-y-2">
+              {enviandoRequerimiento ? (
+                <FormularioRequerimiento
+                  pagina={pathname}
+                  onCerrar={() => setEnviandoRequerimiento(false)}
+                />
+              ) : consulta.trim() ? (
+                <div className="space-y-4">
+                  {primero?.pasos && primero.pasos.length > 0 && (
+                    <div className="rounded-lg bg-flow-50 border border-flow-100 p-3">
+                      <p className="text-[12px] uppercase tracking-wide text-flow-700 font-medium mb-1">Así se hace</p>
+                      <p className="text-sm font-medium text-marmol-800 mb-1">{primero.titulo}</p>
+                      <ol className="list-decimal list-inside text-sm text-marmol-700 space-y-1">
+                        {primero.pasos.map((p, i) => (
+                          <li key={i}>{p}</li>
+                        ))}
+                      </ol>
+                      <Link
+                        href={primero.href}
+                        onClick={() => setAbierto(false)}
+                        className="inline-block mt-2 text-sm text-flow-600 hover:text-flow-700 font-medium"
+                      >
+                        Ver en el manual →
+                      </Link>
+                    </div>
+                  )}
                   {resultados.length === 0 ? (
-                    <p className="text-sm text-marmol-400">Sin resultados para "{consulta}".</p>
+                    <p className="text-sm text-marmol-500">No encontré una respuesta para “{consulta}”.</p>
                   ) : (
-                    resultados.map((r, i) => (
+                    <p className="text-xs uppercase tracking-wide text-marmol-400">Coincidencias</p>
+                  )}
+                  {resultados.map((r, i) => (
                       <Link
                         key={i}
                         href={r.href}
@@ -76,8 +104,14 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
                         <p className="text-sm font-medium text-marmol-800">{r.titulo}</p>
                         <p className="text-xs text-marmol-500 line-clamp-2 mt-0.5">{r.texto}</p>
                       </Link>
-                    ))
-                  )}
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setEnviandoRequerimiento(true)}
+                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-flow-200 text-flow-700 hover:bg-flow-50 text-sm font-medium px-3 py-2"
+                  >
+                    <MessageSquarePlus size={15} /> ¿No encontraste lo que necesitas? Envía tu requerimiento
+                  </button>
                 </div>
               ) : (
                 <>
@@ -134,6 +168,14 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
                       Todavía no hay ayuda específica para esta pantalla. Explora el Centro de Ayuda completo abajo.
                     </p>
                   )}
+
+                  <button
+                    type="button"
+                    onClick={() => setEnviandoRequerimiento(true)}
+                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-flow-200 text-flow-700 hover:bg-flow-50 text-sm font-medium px-3 py-2"
+                  >
+                    <MessageSquarePlus size={15} /> ¿Algo que no puedes hacer? Envía tu requerimiento
+                  </button>
 
                   <div className="border-t border-marmol-100 pt-4 space-y-1">
                     <Link
