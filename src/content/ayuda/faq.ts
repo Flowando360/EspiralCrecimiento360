@@ -299,4 +299,14 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
     respuesta:
       'Una cuenta puede existir sin ficha de colaborador (por ejemplo, un administrador o un auditor externo). Si la persona sí debe aparecer como colaboradora, pide a tu administrador que vincule su cuenta con su ficha en Administración → Usuarios y roles → Editar → Ficha de colaborador.',
   },
+  {
+    pregunta: '¿Cómo hago una acción y no sé dónde está?',
+    respuesta:
+      'Abre el Centro de Ayuda (el ícono de ? en la barra superior) y escribe lo que quieres hacer, con tus palabras, por ejemplo “cómo creo un usuario”. Si la respuesta está en el manual, verás los pasos directamente. Si no la encuentras, pulsa “¿No encontraste lo que necesitas? Envía tu requerimiento” y responde tres preguntas: qué pasa, qué esperabas que pasara y cómo imaginas la solución.',
+  },
+  {
+    pregunta: '¿Qué pasa con mi requerimiento después de enviarlo?',
+    respuesta:
+      'Queda registrado para el equipo de Espiral, que lo revisa desde su panel y puede cambiar su estado (nuevo, en revisión, resuelto o descartado). Si el correo está configurado, también llega por correo al equipo.',
+  },
 ];

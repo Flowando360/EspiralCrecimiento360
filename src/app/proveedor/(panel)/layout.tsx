@@ -17,6 +17,7 @@ export default async function PanelProveedorLayout({ children }: { children: Rea
             {proveedor.rol === 'propietario' && (
               <Link href="/proveedor/equipo" className="rounded-lg px-3 py-1.5 hover:bg-white/10">Equipo</Link>
             )}
+            <Link href="/proveedor/requerimientos" className="rounded-lg px-3 py-1.5 hover:bg-white/10">Requerimientos</Link>
             <Link href="/proveedor/bitacora" className="rounded-lg px-3 py-1.5 hover:bg-white/10">Bitácora</Link>
           </nav>
           <div className="ml-auto flex items-center gap-3 text-xs text-white/80">
