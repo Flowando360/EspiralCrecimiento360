@@ -64,7 +64,7 @@ export const moduloGeneral: ModuloAyuda = {
       notas: [
         'Si tu empresa fue desactivada por el proveedor, no podrás entrar hasta que se reactive. El mensaje te pide contactar al proveedor de Espiral de Crecimiento 360°.',
         'Al cerrar sesión desde el menú, tu sesión termina en ese navegador.',
-        'Si olvidaste tu contraseña, pide a tu administrador que te restablezca una contraseña temporal, o usa el enlace de recuperación cuando esté disponible.',
+        'Si olvidaste tu contraseña, pulsa “¿Olvidaste tu contraseña?” debajo del formulario, escribe tu correo y abre el enlace que llega por correo para definir una contraseña nueva (mínimo 8 caracteres).',
       ],
     },
     {
