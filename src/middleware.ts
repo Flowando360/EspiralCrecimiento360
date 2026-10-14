@@ -63,7 +63,11 @@ export async function middleware(request: NextRequest) {
     // Política de tratamiento de datos y canal de derechos del titular: también los
     // consulta el candidato sin sesión, desde el formulario de postulación.
     request.nextUrl.pathname.startsWith('/politica-tratamiento-datos') ||
-    request.nextUrl.pathname.startsWith('/ejercer-derechos');
+    request.nextUrl.pathname.startsWith('/ejercer-derechos') ||
+    // Recuperación de contraseña: se usa sin sesión, desde el correo.
+    request.nextUrl.pathname.startsWith('/recuperar-contrasena') ||
+    request.nextUrl.pathname.startsWith('/restablecer-contrasena') ||
+    request.nextUrl.pathname.startsWith('/auth/confirmar');
 
   if (!user && !isAuthRoute && !isPublicAsset) {
     const redirectUrl = request.nextUrl.clone();

@@ -59,7 +59,8 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
   },
   {
     pregunta: 'Olvidé mi contraseña, ¿qué hago?',
-    respuesta: 'Pide a Talento Humano que te asigne una nueva contraseña temporal desde Administración → Usuarios y roles.',
+    respuesta:
+      'Pulsa “¿Olvidaste tu contraseña?” en la pantalla de inicio de sesión, escribe tu correo y abre el enlace que llega por correo. Si no llega en unos minutos, revisa la carpeta de spam. Si sigue sin llegar, pide a tu administrador que revise tu cuenta.',
   },
   {
     pregunta: '¿Tengo que iniciar sesión con mi correo?',

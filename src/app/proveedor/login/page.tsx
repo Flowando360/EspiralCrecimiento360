@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ProveedorLoginForm } from '@/components/proveedor/login-form';
 
 export default function ProveedorLoginPage() {
@@ -9,6 +10,9 @@ export default function ProveedorLoginPage() {
           <p className="text-xs text-marmol-500 mt-1">Acceso del equipo de Espiral de Crecimiento 360°. Separado de las cuentas de cada empresa.</p>
         </div>
         <ProveedorLoginForm />
+        <p className="text-center text-xs text-marmol-500">
+          <Link href="/recuperar-contrasena" className="text-flow-700 hover:underline">¿Olvidaste tu contraseña?</Link>
+        </p>
       </div>
     </main>
   );

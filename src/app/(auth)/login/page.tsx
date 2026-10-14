@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { iniciarSesion } from './actions';
 
 export default function LoginPage() {
@@ -74,6 +75,10 @@ export default function LoginPage() {
             El acceso se crea por invitación de Talento Humano. Si no tienes cuenta, contacta a tu líder.
           </p>
         </form>
+
+        <p className="text-center text-xs text-marmol-500 mt-4">
+          <Link href="/recuperar-contrasena" className="text-flow-700 hover:underline">¿Olvidaste tu contraseña?</Link>
+        </p>
       </div>
     </div>
   );
