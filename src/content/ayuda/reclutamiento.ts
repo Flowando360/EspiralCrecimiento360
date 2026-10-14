@@ -22,6 +22,12 @@ export const moduloReclutamiento: ModuloAyuda = {
       slug: 'nueva-vacante',
       ruta: '/reclutamiento/vacantes/nueva',
       titulo: 'Nueva vacante',
+      proceso: [
+        'Entra a Reclutamiento y selección → “Nueva vacante”.',
+        'Elige el Cargo (el Perfil de Cargo ya creado en Administración → Cargos).',
+        'Escribe el título de la vacante (puede ser distinto al nombre del cargo) y, si aplica, el líder solicitante.',
+        'Guarda. La vacante aparece en el listado de vacantes, con su estado y sus candidatos.',
+      ],
       resumen: 'Formulario para abrir una vacante — se vincula a un Perfil de Cargo ya creado en Administración → Cargos, así el formulario público de postulación toma el título y la información del cargo automáticamente.',
       camposYBotones: [
         { nombre: 'Cargo', explicacion: 'El Perfil de Cargo al que pertenece la vacante. Si todavía no hay ninguno creado, la pantalla lo indica y no deja continuar hasta que exista al menos uno.' },

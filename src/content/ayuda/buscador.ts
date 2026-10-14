@@ -66,6 +66,18 @@ const INDICE: EntradaIndice[] = construirIndice().map((item) => ({
 }));
 
 /**
+ * Variantes de una palabra para que "creo", "crear" o "creas" encuentren lo mismo.
+ * Solo cubre verbos regulares comunes y plurales; no es un analizador morfológico.
+ */
+function variantes(palabra: string): string[] {
+  const base = palabra.replace(/(o|as|a|es|e|amos|an|en)$/, '');
+  const raices = new Set([palabra, base]);
+  for (const fin of ['ar', 'er', 'ir']) raices.add(base + fin);
+  if (palabra.endsWith('s') && palabra.length > 3) raices.add(palabra.slice(0, -1));
+  return [...raices].filter((v) => v.length >= 3);
+}
+
+/**
  * Busca por palabras, no por frase exacta. Un resultado sirve si contiene al menos
  * el 60% de las palabras de la consulta; los que tienen más palabras y coinciden
  * en el título salen primero.
@@ -75,11 +87,14 @@ export function buscarEnAyuda(consulta: string, limite = 20): ResultadoBusqueda[
   if (todas.length === 0) return [];
   const utiles = todas.filter((p) => !PALABRAS_VACIAS.has(p));
   const palabras = utiles.length > 0 ? utiles : todas;
-  const minimo = Math.max(1, Math.ceil(palabras.length * 0.6));
+  const minimo = Math.max(1, Math.ceil(palabras.length * 0.5));
+
+  const formas = palabras.map((p) => variantes(p));
+  const contiene = (texto: string, forma: string[]) => forma.some((v) => texto.includes(v));
 
   return INDICE.map((item) => {
-    const enTitulo = palabras.filter((p) => item.tituloNormal.includes(p)).length;
-    const enTexto = palabras.filter((p) => item.textoNormal.includes(p)).length;
+    const enTitulo = formas.filter((f) => contiene(item.tituloNormal, f)).length;
+    const enTexto = formas.filter((f) => contiene(item.textoNormal, f)).length;
     return { item, coincidencias: Math.max(enTitulo, enTexto), score: enTitulo * 3 + enTexto };
   })
     .filter((r) => r.coincidencias >= minimo)
