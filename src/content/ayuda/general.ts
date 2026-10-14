@@ -45,5 +45,43 @@ export const moduloGeneral: ModuloAyuda = {
         'Cada fecha especial genera una alerta con el próximo aniversario, visible en Alertas — igual que ya pasa con cumpleaños o aniversario de bodas.',
       ],
     },
+    {
+      slug: 'inicio-sesion',
+      ruta: '/login',
+      titulo: 'Inicio de sesión',
+      resumen:
+        'Entrada a Espiral de Crecimiento 360° para las cuentas de cada empresa. Puedes entrar con tu usuario de inicio de sesión o con tu correo.',
+      camposYBotones: [
+        { nombre: 'Usuario o correo', explicacion: 'Escribe tu usuario (por ejemplo, nombre.apellido) o el correo de tu cuenta. Ambos sirven.' },
+        { nombre: 'Contraseña', explicacion: 'La contraseña que te entregó tu administrador o la que definiste al cambiarla.' },
+        { nombre: 'Entrar', explicacion: 'Valida tus datos. Si tu cuenta no tiene perfil activo, o si la empresa está desactivada, el sistema te lo indica con un mensaje y no te deja entrar.' },
+      ],
+      proceso: [
+        'Abre la dirección del aplicativo y pulsa "Entrar" o escribe /login.',
+        'Escribe tu usuario o tu correo y tu contraseña.',
+        'Al entrar verás, en la parte superior: el logo y el nombre de Espiral de Crecimiento 360°, el logo y el nombre de tu empresa, y los colores de tu empresa.',
+      ],
+      notas: [
+        'Si tu empresa fue desactivada por el proveedor, no podrás entrar hasta que se reactive. El mensaje te pide contactar al proveedor de Espiral de Crecimiento 360°.',
+        'Al cerrar sesión desde el menú, tu sesión termina en ese navegador.',
+        'Si olvidaste tu contraseña, pide a tu administrador que te restablezca una contraseña temporal, o usa el enlace de recuperación cuando esté disponible.',
+      ],
+    },
+    {
+      slug: 'encabezado',
+      ruta: '/inicio',
+      titulo: 'Encabezado: marca de Espiral y de tu empresa',
+      resumen:
+        'La barra superior muestra la marca de Espiral de Crecimiento 360° y la de tu empresa, y usa los colores que tu empresa definió.',
+      camposYBotones: [
+        { nombre: 'Logo y nombre de Espiral de Crecimiento 360°', explicacion: 'Siempre visibles a la izquierda. Al hacer clic llevan a Inicio.' },
+        { nombre: 'Logo y nombre de tu empresa', explicacion: 'A la derecha del logo de Espiral, separados por una línea. Aparecen cuando la empresa tiene logo y nombre cargados.' },
+        { nombre: 'Colores', explicacion: 'La barra toma el color secundario de tu empresa; los acentos (como el nombre de la empresa) usan su color de acento; los botones principales usan su color de marca.' },
+        { nombre: 'Menú (☰ en pantallas pequeñas)', explicacion: 'Abre la lista de módulos a los que tu rol y tu rol personalizado te dan acceso.' },
+      ],
+      notas: [
+        'Los colores y el logo de tu empresa los define el equipo proveedor. Si algo no se ve bien, avisa para revisarlo.',
+      ],
+    },
   ],
 };
