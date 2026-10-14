@@ -13,7 +13,16 @@ const RequerimientoSchema = z.object({
   quePesperaba: z.string().trim().min(10, 'Cuéntanos qué esperabas que pasara (mínimo 10 caracteres)').max(2000),
   solucion: z.string().trim().min(10, 'Cuéntanos cómo imaginas la solución (mínimo 10 caracteres)').max(2000),
   pagina: z.string().trim().max(300).optional(),
+  tipo: z.enum(['mejora', 'nueva_funcion', 'falla']),
+  consulta: z.string().trim().max(300).optional(),
+  respuestaMostrada: z.string().trim().max(300).optional(),
 });
+
+const ETIQUETA_TIPO: Record<'mejora' | 'nueva_funcion' | 'falla', string> = {
+  mejora: 'Mejora',
+  nueva_funcion: 'Requerimiento',
+  falla: 'Falla',
+};
 
 function escapar(texto: string): string {
   return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br/>');
@@ -28,6 +37,9 @@ export async function enviarRequerimiento(input: {
   quePesperaba: string;
   solucion: string;
   pagina?: string;
+  tipo: 'mejora' | 'nueva_funcion' | 'falla';
+  consulta?: string;
+  respuestaMostrada?: string;
 }) {
   const perfil = await getPerfilActual();
   if (!perfil) return { ok: false as const, error: 'Tu sesión venció. Vuelve a entrar.' };
@@ -48,6 +60,9 @@ export async function enviarRequerimiento(input: {
       nombre_usuario: perfil.nombre_completo,
       correo_usuario: perfil.email,
       pagina: datos.pagina || null,
+      tipo: datos.tipo,
+      consulta: datos.consulta || null,
+      respuesta_mostrada: datos.respuestaMostrada || null,
       que_pasa: datos.quePasa,
       que_esperaba: datos.quePesperaba,
       solucion_imaginada: datos.solucion,
@@ -65,11 +80,14 @@ export async function enviarRequerimiento(input: {
     <h3>¿Qué pasa?</h3><p>${escapar(datos.quePasa)}</p>
     <h3>¿Qué esperabas que pasara?</h3><p>${escapar(datos.quePesperaba)}</p>
     <h3>¿Cómo imaginas la solución?</h3><p>${escapar(datos.solucion)}</p>
+    <p><strong>Tipo:</strong> ${escapar(ETIQUETA_TIPO[datos.tipo])}<br/>
+    <strong>Lo que buscó:</strong> ${escapar(datos.consulta || 'No escribió búsqueda')}<br/>
+    <strong>Respuesta que vio:</strong> ${escapar(datos.respuestaMostrada || 'Ninguna')}</p>
     <p style="color:#666;font-size:12px">Id del requerimiento: ${fila.id}</p>`;
 
   const envio = await enviarEmail({
     to: CORREO_REQUERIMIENTOS,
-    subject: `Requerimiento · ${nombreEmpresa} · ${perfil.nombre_completo}`,
+    subject: `${ETIQUETA_TIPO[datos.tipo]} · ${nombreEmpresa} · ${perfil.nombre_completo}`,
     html,
   });
 

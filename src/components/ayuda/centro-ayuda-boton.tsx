@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { buscarPaginaPorRuta } from '@/content/ayuda';
 import { buscarEnAyuda, type ResultadoBusqueda } from '@/content/ayuda/buscador';
 import { HelpCircle, X, Search, BookOpen, HelpingHand, SpellCheck, ClipboardList, MessageSquarePlus } from 'lucide-react';
-import { FormularioRequerimiento } from './formulario-requerimiento';
+import { FormularioRequerimiento, type TipoRequerimiento } from './formulario-requerimiento';
 
 const ETIQUETA_TIPO: Record<ResultadoBusqueda['tipo'], string> = {
   manual: 'Manual',
@@ -18,7 +18,7 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
   const pathname = usePathname();
   const [abierto, setAbierto] = useState(false);
   const [consulta, setConsulta] = useState('');
-  const [enviandoRequerimiento, setEnviandoRequerimiento] = useState(false);
+  const [requerimiento, setRequerimiento] = useState<{ tipo: TipoRequerimiento; consulta?: string; respuesta?: string } | null>(null);
 
   const contextual = buscarPaginaPorRuta(pathname);
   const resultados = consulta.trim() ? buscarEnAyuda(consulta) : [];
@@ -61,10 +61,13 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
             </div>
 
             <div className="flex-1 overflow-y-auto p-5 space-y-5">
-              {enviandoRequerimiento ? (
+              {requerimiento ? (
                 <FormularioRequerimiento
                   pagina={pathname}
-                  onCerrar={() => setEnviandoRequerimiento(false)}
+                  tipoInicial={requerimiento.tipo}
+                  consulta={requerimiento.consulta}
+                  respuestaMostrada={requerimiento.respuesta}
+                  onCerrar={() => setRequerimiento(null)}
                 />
               ) : consulta.trim() ? (
                 <div className="space-y-4">
@@ -105,13 +108,23 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
                         <p className="text-xs text-marmol-500 line-clamp-2 mt-0.5">{r.texto}</p>
                       </Link>
                   ))}
-                  <button
-                    type="button"
-                    onClick={() => setEnviandoRequerimiento(true)}
-                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-flow-200 text-flow-700 hover:bg-flow-50 text-sm font-medium px-3 py-2"
-                  >
-                    <MessageSquarePlus size={15} /> ¿No encontraste lo que necesitas? Envía tu requerimiento
-                  </button>
+                  {primero ? (
+                    <button
+                      type="button"
+                      onClick={() => setRequerimiento({ tipo: 'mejora', consulta, respuesta: primero.titulo })}
+                      className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-flow-200 text-flow-700 hover:bg-flow-50 text-sm font-medium px-3 py-2"
+                    >
+                      <MessageSquarePlus size={15} /> ¿Quieres que esta opción se mejore? Envía tu sugerencia
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setRequerimiento({ tipo: 'nueva_funcion', consulta })}
+                      className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-flow-200 text-flow-700 hover:bg-flow-50 text-sm font-medium px-3 py-2"
+                    >
+                      <MessageSquarePlus size={15} /> No encontré cómo hacerlo. Envía tu requerimiento
+                    </button>
+                  )}
                 </div>
               ) : (
                 <>
@@ -171,7 +184,7 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
 
                   <button
                     type="button"
-                    onClick={() => setEnviandoRequerimiento(true)}
+                    onClick={() => setRequerimiento({ tipo: 'nueva_funcion' })}
                     className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-flow-200 text-flow-700 hover:bg-flow-50 text-sm font-medium px-3 py-2"
                   >
                     <MessageSquarePlus size={15} /> ¿Algo que no puedes hacer? Envía tu requerimiento
