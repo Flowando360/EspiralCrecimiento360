@@ -134,7 +134,7 @@ const NAV: NavGroup[] = [
     tituloCorto: 'Nexa',
     items: [
       { href: '/nexa/feed', label: 'Feed corporativo', icon: Rss, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },
-      { href: '/nexa/makigami', label: 'Cacería Makigami', icon: Crosshair, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },
+      { href: 'https://andre-proy.vercel.app/juegos', label: 'Ludo Retos', icon: Crosshair, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },
       { href: '/nexa/notebook', label: 'Mi cuaderno', icon: NotebookPen, roles: ['admin_th', 'lider', 'colaborador'] },
       { href: '/nexa/directorio', label: 'Directorio de aliados', icon: Handshake, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/nexa/asistente', label: 'Asistente IA', icon: Bot, roles: ['admin_th', 'lider', 'colaborador'] },
@@ -317,7 +317,7 @@ export function BarraSuperior({
             const item = primero;
             const activo = pathname.startsWith(item.href);
             return (
-              <Link
+              <Enlace
                 key={item.href}
                 href={item.href}
                 className={cn(
@@ -326,15 +326,16 @@ export function BarraSuperior({
                 )}
               >
                 {item.label}
-              </Link>
+              </Enlace>
             );
           }
 
           const activo = grupo.items.some((item) => pathname.startsWith(item.href));
           return (
             <div key={grupo.titulo} className="group relative">
-              <Link
-                href={primero.href}
+              {/* Solo despliega las opciones del módulo; no navega a ninguna pantalla. */}
+              <button
+                type="button"
                 className={cn(
                   'flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-bold whitespace-nowrap transition',
                   activo ? 'bg-white/15 text-white' : 'text-white/85 hover:bg-white/10 hover:text-white'
@@ -342,7 +343,7 @@ export function BarraSuperior({
               >
                 {grupo.tituloCorto ?? grupo.titulo}
                 <ChevronDown size={14} strokeWidth={2.5} className="opacity-70 group-hover:rotate-180 transition-transform" />
-              </Link>
+              </button>
 
               <div className="invisible absolute left-0 top-full pt-1 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 z-50">
                 <div className="w-72 rounded-xl bg-white shadow-xl ring-1 ring-black/5 p-2 max-h-[75vh] overflow-y-auto">
@@ -356,7 +357,7 @@ export function BarraSuperior({
                         const Icon = item.icon;
                         const itemActivo = pathname.startsWith(item.href);
                         return (
-                          <Link
+                          <Enlace
                             key={item.href}
                             href={item.href}
                             className={cn(
@@ -366,7 +367,7 @@ export function BarraSuperior({
                           >
                             <Icon size={16} strokeWidth={2} className="shrink-0 text-marmol-400" />
                             <span className="min-w-0 break-words">{item.label}</span>
-                          </Link>
+                          </Enlace>
                         );
                       })}
                     </div>
@@ -407,7 +408,7 @@ export function BarraSuperior({
               const Icon = item.icon;
               const activo = pathname.startsWith(item.href);
               return (
-                <Link
+                <Enlace
                   key={item.href}
                   href={item.href}
                   className={cn(
@@ -417,7 +418,7 @@ export function BarraSuperior({
                 >
                   <Icon size={17} strokeWidth={2.25} />
                   {item.label}
-                </Link>
+                </Enlace>
               );
             }
 
@@ -447,7 +448,7 @@ export function BarraSuperior({
                           const Icon = item.icon;
                           const itemActivo = pathname.startsWith(item.href);
                           return (
-                            <Link
+                            <Enlace
                               key={item.href}
                               href={item.href}
                               className={cn(
@@ -457,7 +458,7 @@ export function BarraSuperior({
                             >
                               <Icon size={15} strokeWidth={2} className="shrink-0" />
                               <span className="min-w-0 break-words">{item.label}</span>
-                            </Link>
+                            </Enlace>
                           );
                         })}
                       </div>
@@ -471,6 +472,22 @@ export function BarraSuperior({
         </nav>
       </div>
     </header>
+  );
+}
+
+/** Enlace de la navegación: las rutas internas usan Link; una URL completa abre en otra pestaña. */
+function Enlace({ href, children, ...props }: { href: string } & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>) {
+  if (/^https?:\/\//.test(href)) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} {...props}>
+      {children}
+    </Link>
   );
 }
 
