@@ -24,6 +24,19 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
   const resultados = consulta.trim() ? buscarEnAyuda(consulta) : [];
   const primero = resultados[0];
 
+  /** Cerrar el panel reinicia la búsqueda y el formulario, para que al volver se vea el Centro completo. */
+  function cerrar() {
+    cerrar();
+    setRequerimiento(null);
+    setConsulta('');
+  }
+
+  /** Vuelve a la vista completa del Centro de ayuda (todas las opciones). */
+  function volverAlCentro() {
+    setRequerimiento(null);
+    setConsulta('');
+  }
+
   return (
     <>
       <button
@@ -40,13 +53,18 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
 
       {abierto && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/20" onClick={() => setAbierto(false)} />
+          <div className="absolute inset-0 bg-black/20" onClick={() => cerrar()} />
           <div className="relative w-full max-w-md h-full bg-white shadow-xl flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-marmol-100">
-              <h2 className="font-display font-semibold text-secundario flex items-center gap-2">
+              <button
+                type="button"
+                onClick={volverAlCentro}
+                className="font-display font-semibold text-secundario flex items-center gap-2 hover:text-flow-600 transition"
+                title="Ver todas las opciones del Centro de Ayuda"
+              >
                 <HelpCircle size={18} className="text-flow-500" /> Centro de Ayuda
-              </h2>
-              <button onClick={() => setAbierto(false)} className="text-marmol-400 hover:text-marmol-700">
+              </button>
+              <button onClick={() => cerrar()} className="text-marmol-400 hover:text-marmol-700">
                 <X size={18} />
               </button>
             </div>
@@ -85,7 +103,7 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
                       </ol>
                       <Link
                         href={primero.href}
-                        onClick={() => setAbierto(false)}
+                        onClick={() => cerrar()}
                         className="inline-block mt-2 text-sm text-flow-600 hover:text-flow-700 font-medium"
                       >
                         Ver en el manual →
@@ -101,7 +119,7 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
                       <Link
                         key={i}
                         href={r.href}
-                        onClick={() => setAbierto(false)}
+                        onClick={() => cerrar()}
                         className="block rounded-lg border border-marmol-200 p-3 hover:border-flow-300 transition"
                       >
                         <span className="text-[12px] uppercase tracking-wide text-flow-600 font-medium">
@@ -173,7 +191,7 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
 
                       <Link
                         href={`/ayuda/modulo/${contextual.modulo.slug}/${contextual.pagina.slug}`}
-                        onClick={() => setAbierto(false)}
+                        onClick={() => cerrar()}
                         className="inline-block mt-4 text-sm text-flow-600 hover:text-flow-700 font-medium"
                       >
                         Ver en el manual completo →
@@ -196,28 +214,28 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
                   <div className="border-t border-marmol-100 pt-4 space-y-1">
                     <Link
                       href="/ayuda"
-                      onClick={() => setAbierto(false)}
+                      onClick={() => cerrar()}
                       className="flex items-center gap-2 text-sm text-marmol-700 hover:text-flow-600 py-1.5"
                     >
                       <BookOpen size={15} /> Centro de Ayuda completo
                     </Link>
                     <Link
                       href="/ayuda/faq"
-                      onClick={() => setAbierto(false)}
+                      onClick={() => cerrar()}
                       className="flex items-center gap-2 text-sm text-marmol-700 hover:text-flow-600 py-1.5"
                     >
                       <HelpingHand size={15} /> Preguntas frecuentes
                     </Link>
                     <Link
                       href="/ayuda/glosario"
-                      onClick={() => setAbierto(false)}
+                      onClick={() => cerrar()}
                       className="flex items-center gap-2 text-sm text-marmol-700 hover:text-flow-600 py-1.5"
                     >
                       <SpellCheck size={15} /> Glosario
                     </Link>
                     <Link
                       href="/ayuda/plan-pruebas"
-                      onClick={() => setAbierto(false)}
+                      onClick={() => cerrar()}
                       className="flex items-center gap-2 text-sm text-marmol-700 hover:text-flow-600 py-1.5"
                     >
                       <ClipboardList size={15} /> Plan de pruebas
