@@ -38,21 +38,28 @@ export function FormularioRequerimiento({
   const [solucion, setSolucion] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [resultado, setResultado] = useState<{ correoEnviado: boolean } | null>(null);
+  const [archivos, setArchivos] = useState<File[]>([]);
   const [pending, startTransition] = useTransition();
+
+  function agregarArchivos(lista: FileList | null) {
+    if (!lista) return;
+    setArchivos((actuales) => [...actuales, ...Array.from(lista)].slice(0, 5));
+  }
 
   function enviar(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    const datos = new FormData();
+    datos.set('quePasa', quePasa);
+    datos.set('quePesperaba', quePesperaba);
+    datos.set('solucion', solucion);
+    datos.set('tipo', tipo);
+    datos.set('pagina', pagina);
+    datos.set('consulta', consulta ?? '');
+    datos.set('respuestaMostrada', respuestaMostrada ?? '');
+    archivos.forEach((f) => datos.append('archivos', f));
     startTransition(async () => {
-      const res = await enviarRequerimiento({
-        quePasa,
-        quePesperaba,
-        solucion,
-        pagina,
-        tipo,
-        consulta,
-        respuestaMostrada,
-      });
+      const res = await enviarRequerimiento(datos);
       if (!res.ok) return setError(res.error);
       setResultado({ correoEnviado: res.correoEnviado });
     });
@@ -103,6 +110,31 @@ export function FormularioRequerimiento({
       <div>
         <label className="block text-xs font-medium text-marmol-700 mb-1">¿Cómo imaginas la solución?</label>
         <textarea className={AREA} value={solucion} onChange={(e) => setSolucion(e.target.value)} required />
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-marmol-700 mb-1">Archivos de apoyo (opcional)</label>
+        <input
+          type="file"
+          multiple
+          accept=".png,.jpg,.jpeg,.webp,.gif,.pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.ppt,.pptx"
+          onChange={(e) => agregarArchivos(e.target.files)}
+          className="block w-full text-xs text-marmol-600 file:mr-2 file:rounded-lg file:border-0 file:bg-flow-50 file:px-3 file:py-1.5 file:text-flow-700"
+        />
+        <p className="text-[11px] text-marmol-400 mt-1">
+          Imágenes, PDF, Word, texto, hojas de cálculo o presentaciones. Hasta 5 archivos y 4 MB en total.
+        </p>
+        {archivos.length > 0 && (
+          <ul className="mt-2 space-y-1">
+            {archivos.map((f, i) => (
+              <li key={i} className="flex items-center justify-between text-xs text-marmol-700">
+                <span className="truncate">{f.name}</span>
+                <button type="button" onClick={() => setArchivos((a) => a.filter((_, j) => j !== i))} className="text-bajo hover:underline ml-2">
+                  Quitar
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       {pagina && <p className="text-xs text-marmol-400">Pantalla: {pagina}</p>}
       {consulta && <p className="text-xs text-marmol-400">Buscaste: “{consulta}”</p>}

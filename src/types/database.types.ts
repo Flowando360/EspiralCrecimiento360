@@ -7157,6 +7157,7 @@ export type Database = {
       }
       requerimientos: {
         Row: {
+          adjuntos: Json
           consulta: string | null
           respuesta_mostrada: string | null
           tipo: string
@@ -7174,6 +7175,7 @@ export type Database = {
           usuario_id: string | null
         }
         Insert: {
+          adjuntos?: Json
           consulta?: string | null
           respuesta_mostrada?: string | null
           tipo?: string
@@ -7191,6 +7193,7 @@ export type Database = {
           usuario_id?: string | null
         }
         Update: {
+          adjuntos?: Json
           consulta?: string | null
           respuesta_mostrada?: string | null
           tipo?: string

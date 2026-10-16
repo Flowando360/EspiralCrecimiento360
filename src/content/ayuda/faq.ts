@@ -307,6 +307,6 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
   {
     pregunta: '¿Qué pasa con mi requerimiento después de enviarlo?',
     respuesta:
-      'Queda registrado para el equipo de Espiral, que lo revisa desde su panel y puede cambiar su estado (nuevo, en revisión, resuelto o descartado). Si el correo está configurado, también llega por correo al equipo.',
+      'Queda registrado para el equipo de Espiral, que lo revisa desde su panel y puede cambiar su estado (nuevo, en revisión, resuelto o descartado). Si el correo está configurado, también llega por correo al equipo. Puedes adjuntar capturas, PDF, Word, texto u hojas de cálculo que ayuden a explicar la idea (hasta 5 archivos y 4 MB en total).',
   },
 ];

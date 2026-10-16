@@ -6,7 +6,17 @@ import { Resend } from 'resend';
  * notificación como "no enviada" para que se reintente sola cuando se
  * configure la clave, en vez de romper el cron completo.
  */
-export async function enviarEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
+export async function enviarEmail({
+  to,
+  subject,
+  html,
+  adjuntos,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+  adjuntos?: { nombre: string; contenido: Buffer }[];
+}) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.NOTIFICACIONES_EMAIL_FROM || 'Espiral de Crecimiento <notificaciones@flowando.com>';
 
@@ -16,7 +26,13 @@ export async function enviarEmail({ to, subject, html }: { to: string; subject: 
 
   try {
     const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({ from, to, subject, html });
+    const { error } = await resend.emails.send({
+      from,
+      to,
+      subject,
+      html,
+      attachments: adjuntos?.map((a) => ({ filename: a.nombre, content: a.contenido })),
+    });
     if (error) return { ok: false as const, motivo: error.message };
     return { ok: true as const };
   } catch (e: any) {

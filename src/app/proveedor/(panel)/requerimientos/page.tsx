@@ -10,10 +10,24 @@ const ETIQUETA_TIPO: Record<string, string> = {
 export default async function RequerimientosPage() {
   const admin = createAdminClient();
   const [{ data: requerimientos }, { data: empresas }] = await Promise.all([
-    admin.from('requerimientos').select('id, empresa_id, nombre_usuario, correo_usuario, pagina, tipo, consulta, respuesta_mostrada, que_pasa, que_esperaba, solucion_imaginada, estado, correo_enviado, creado_en').order('creado_en', { ascending: false }).limit(200),
+    admin.from('requerimientos').select('id, empresa_id, nombre_usuario, correo_usuario, pagina, tipo, consulta, respuesta_mostrada, que_pasa, que_esperaba, solucion_imaginada, estado, correo_enviado, creado_en, adjuntos').order('creado_en', { ascending: false }).limit(200),
     admin.from('empresas').select('id, nombre'),
   ]);
   const nombreEmpresa = new Map((empresas ?? []).map((e) => [e.id, e.nombre]));
+
+  // Enlaces temporales (1 hora) para descargar los adjuntos desde el bucket privado.
+  const adjuntosPorRequerimiento = new Map<string, { nombre: string; url: string | null }[]>();
+  for (const r of requerimientos ?? []) {
+    const lista = (Array.isArray(r.adjuntos) ? r.adjuntos : []) as { nombre: string; ruta: string }[];
+    if (lista.length === 0) continue;
+    const conUrl = await Promise.all(
+      lista.map(async (a) => {
+        const { data } = await admin.storage.from('requerimientos').createSignedUrl(a.ruta, 3600);
+        return { nombre: a.nombre, url: data?.signedUrl ?? null };
+      })
+    );
+    adjuntosPorRequerimiento.set(r.id, conUrl);
+  }
 
   return (
     <div className="space-y-6">
@@ -49,6 +63,22 @@ export default async function RequerimientosPage() {
               </div>
               <CambiarEstadoRequerimiento requerimientoId={r.id} estado={r.estado} />
             </div>
+            {(adjuntosPorRequerimiento.get(r.id) ?? []).length > 0 && (
+              <div className="text-sm">
+                <p className="text-xs font-medium text-marmol-500 mb-1">Archivos adjuntos</p>
+                <ul className="space-y-1">
+                  {(adjuntosPorRequerimiento.get(r.id) ?? []).map((a, i) => (
+                    <li key={i}>
+                      {a.url ? (
+                        <a href={a.url} target="_blank" rel="noreferrer" className="text-flow-700 hover:underline">{a.nombre}</a>
+                      ) : (
+                        <span className="text-marmol-500">{a.nombre} (no disponible)</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="grid gap-3 md:grid-cols-3 text-sm">
               <div><p className="text-xs font-medium text-marmol-500">¿Qué pasa?</p><p className="text-marmol-800 whitespace-pre-wrap">{r.que_pasa}</p></div>
               <div><p className="text-xs font-medium text-marmol-500">¿Qué esperabas que pasara?</p><p className="text-marmol-800 whitespace-pre-wrap">{r.que_esperaba}</p></div>
