@@ -7,6 +7,10 @@
     {
       "path": "/api/guia-flow/generar-informes-pendientes",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/reclutamiento/procesar-pendientes",
+      "schedule": "30 11 * * *"
     }
   ]
 }

@@ -7,9 +7,22 @@ import { EnlacePostulacion } from '@/components/reclutamiento/enlace-postulacion
 import { SelectorEstadoVacante } from '@/components/reclutamiento/selector-estado-vacante';
 import { EditarVacante } from '@/components/reclutamiento/editar-vacante';
 import { EnviarALider } from '@/components/reclutamiento/enviar-a-lider';
+import { PanelCriterios, type CriterioFila } from '@/components/reclutamiento/panel-criterios';
+import { RankingMatch, type EvaluacionFila, type SinEvaluacion } from '@/components/reclutamiento/ranking-match';
 import { ArrowLeft, Briefcase, Wallet, UserCog } from 'lucide-react';
 
 const ESTADO_LABEL: Record<string, string> = { abierta: 'Abierta', pausada: 'En pausa', cancelada: 'Cancelada', cubierta: 'Cubierto', cerrada: 'Cerrada' };
+const ETAPA_LABEL: Record<string, string> = {
+  recibido: 'Recibido',
+  preseleccionado: 'Preseleccionado',
+  evaluacion_lider: 'Evaluación del líder',
+  devuelto_th: 'Devuelto a Talento Humano',
+  entrevista: 'Entrevista',
+  prueba: 'Prueba',
+  oferta: 'Oferta',
+  contratado: 'Contratado',
+  descartado: 'Descartado',
+};
 const ESTADO_CLASE: Record<string, string> = {
   abierta: 'bg-alto/10 text-alto',
   pausada: 'bg-medio/10 text-medio',
@@ -35,7 +48,7 @@ export default async function DetalleVacantePage({ params }: { params: { id: str
 
   if (!vacante || vacante.empresa_id !== perfil.empresa_id) notFound();
 
-  const [{ data: postulaciones }, { data: colaboradores }, { data: candidatosEmpresa }, { data: cargos }, { data: lideres }] = await Promise.all([
+  const [{ data: postulaciones }, { data: colaboradores }, { data: candidatosEmpresa }, { data: cargos }, { data: lideres }, { data: criterios }, { data: evaluaciones }] = await Promise.all([
     supabase
       .from('postulaciones')
       .select(
@@ -64,9 +77,58 @@ export default async function DetalleVacantePage({ params }: { params: { id: str
       .eq('empresa_id', perfil.empresa_id)
       .in('estado', ['activo', 'periodo_prueba'])
       .order('nombre_completo'),
+    supabase
+      .from('criterios_evaluacion')
+      .select('id, origen, categoria, tipo, descripcion, valor_requerido, nivel_requerido, meses_requeridos, peso, activo')
+      .eq('vacante_id', params.id)
+      .order('created_at', { ascending: true }),
+    // Solo las evaluaciones vigentes; las anteriores quedan como historial en la base.
+    supabase
+      .from('match_evaluaciones')
+      .select(
+        `id, postulacion_id, puntaje, cobertura, clasificacion, provisional, obligatorios_estado, fortalezas, brechas, version_reglas,
+         detalles:match_evaluacion_detalles(descripcion_criterio, categoria, tipo, resultado, puntaje, evidencia, motivo)`
+      )
+      .eq('vacante_id', params.id)
+      .eq('vigente', true),
   ]);
 
   const idsYaPostulados = new Set((postulaciones ?? []).map((p: any) => p.candidato.id));
+
+  // Ranking: una fila por postulación con evaluación vigente; el resto queda pendiente de calcular.
+  const postulacionesPorId = new Map((postulaciones ?? []).map((p: any) => [p.id, p]));
+  const filasRanking: EvaluacionFila[] = (evaluaciones ?? []).flatMap((ev: any) => {
+    const p: any = postulacionesPorId.get(ev.postulacion_id);
+    if (!p) return [];
+    return [
+      {
+        postulacion_id: ev.postulacion_id,
+        candidato: p.candidato?.nombre_completo ?? 'Sin nombre',
+        etapa: ETAPA_LABEL[p.etapa] ?? p.etapa,
+        puntaje: ev.puntaje === null ? null : Number(ev.puntaje),
+        cobertura: Number(ev.cobertura),
+        clasificacion: ev.clasificacion,
+        provisional: ev.provisional,
+        obligatorios_estado: ev.obligatorios_estado,
+        fortalezas: (ev.fortalezas as string[]) ?? [],
+        brechas: (ev.brechas as string[]) ?? [],
+        version_reglas: ev.version_reglas,
+        detalles: (ev.detalles ?? []).map((d: any) => ({
+          descripcion: d.descripcion_criterio,
+          categoria: d.categoria,
+          tipo: d.tipo,
+          resultado: d.resultado,
+          puntaje: d.puntaje === null ? null : Number(d.puntaje),
+          evidencia: d.evidencia,
+          motivo: d.motivo ?? '',
+        })),
+      },
+    ];
+  });
+  const conEvaluacion = new Set(filasRanking.map((f) => f.postulacion_id));
+  const sinEvaluacion: SinEvaluacion[] = (postulaciones ?? [])
+    .filter((p: any) => !conEvaluacion.has(p.id))
+    .map((p: any) => ({ postulacion_id: p.id, candidato: p.candidato?.nombre_completo ?? 'Sin nombre' }));
   const candidatosDisponibles = (candidatosEmpresa ?? []).filter((c) => !idsYaPostulados.has(c.id));
 
   return (
@@ -128,6 +190,15 @@ export default async function DetalleVacantePage({ params }: { params: { id: str
         candidatosDisponibles={candidatosDisponibles}
         puedeAdministrar={perfil.rol === 'admin_th'}
         miColaboradorId={perfil.colaborador_id}
+      />
+
+      <PanelCriterios vacanteId={vacante.id} criterios={(criterios ?? []) as CriterioFila[]} puedeAdministrar={perfil.rol === 'admin_th'} />
+
+      <RankingMatch
+        vacanteId={vacante.id}
+        evaluaciones={filasRanking}
+        sinEvaluacion={sinEvaluacion}
+        puedeCalcular={perfil.rol === 'admin_th'}
       />
 
       {perfil.rol === 'admin_th' && (

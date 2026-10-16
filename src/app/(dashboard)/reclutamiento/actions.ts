@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { registrarHojaVida } from '@/lib/reclutamiento/registrar-hoja-vida';
 
 const RUTA = '/reclutamiento';
 
@@ -316,7 +317,7 @@ export async function crearReferencia(input: z.infer<typeof ReferenciaSchema>) {
   return { ok: true as const };
 }
 
-/** Sube (o reemplaza) la hoja de vida de un candidato ya existente en el banco (admin_th) — para cuando se agregó a mano, sin pasar por la postulación pública. */
+/** Sube una hoja de vida a un candidato ya existente (admin_th): guarda el original y encola su extracción con IA. */
 export async function subirHojaVidaCandidato(formData: FormData) {
   const perfil = await requerirAdminTh();
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
@@ -324,24 +325,21 @@ export async function subirHojaVidaCandidato(formData: FormData) {
   const candidatoId = formData.get('candidatoId') as string;
   const archivo = formData.get('archivo') as File | null;
   if (!archivo || archivo.size === 0) return { ok: false as const, error: 'Selecciona un archivo' };
-  if (archivo.size > 8 * 1024 * 1024) return { ok: false as const, error: 'La hoja de vida no puede pesar más de 8 MB.' };
 
   const supabase = createClient();
   const { data: candidato } = await supabase.from('candidatos').select('empresa_id').eq('id', candidatoId).maybeSingle();
   if (!candidato || candidato.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'Candidato no encontrado' };
 
-  const extension = archivo.name.split('.').pop() || 'pdf';
-  const ruta = `${perfil.empresa_id}/${crypto.randomUUID()}.${extension}`;
-  const { error: errorSubida } = await supabase.storage
-    .from('hojas-vida-candidatos')
-    .upload(ruta, archivo, { contentType: archivo.type || undefined });
-  if (errorSubida) return { ok: false as const, error: 'No se pudo subir la hoja de vida: ' + errorSubida.message };
-
-  const { error } = await supabase.from('candidatos').update({ hoja_vida_url: ruta }).eq('id', candidatoId);
-  if (error) return { ok: false as const, error: error.message };
+  const registro = await registrarHojaVida(supabase, {
+    empresaId: perfil.empresa_id,
+    candidatoId,
+    postulacionId: null,
+    archivo,
+  });
+  if (!registro.ok) return { ok: false as const, error: registro.error };
 
   revalidatePath(`${RUTA}/candidatos/${candidatoId}`);
-  return { ok: true as const };
+  return { ok: true as const, jobId: registro.jobId };
 }
 
 /** Edita nombre de contacto/LinkedIn/notas del candidato (admin_th) — la ficha técnica completa. */

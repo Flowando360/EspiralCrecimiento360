@@ -57,6 +57,16 @@ export const moduloReclutamiento: ModuloAyuda = {
         { nombre: 'Agendar entrevista', explicacion: 'Disponible cuando el candidato está en la columna "En Entrevista": fecha y hora, modalidad (presencial/virtual/telefónica) y entrevistador. El entrevistador asignado puede registrar el estado (Programada/Realizada/Cancelada) y sus notas, aunque no sea admin_th.' },
         { nombre: 'Contratar', explicacion: 'Marca al candidato como Contratado y muestra un enlace directo a "Nuevo colaborador" con nombre, correo, teléfono y cargo ya pre-llenados — no hay que volver a digitarlos.' },
         { nombre: 'Descartar', explicacion: 'Marca al candidato como Descartado, con un motivo opcional de texto libre.' },
+        {
+          nombre: 'Criterios de evaluación (admin_th)',
+          explicacion:
+            '"Tomar del perfil de cargo" copia los requisitos del Perfil de Cargo a esta vacante (formación, experiencia, competencias). Cada criterio puede ser Obligatorio, Deseable o Informativo, tener un peso y desactivarse para esta vacante. Los criterios propios se agregan con "Criterio propio". El perfil de cargo nunca se modifica desde aquí.',
+        },
+        {
+          nombre: 'Ranking de correspondencia',
+          explicacion:
+            'Ordena a los candidatos por puntaje (0 a 100), con cobertura (qué parte del puntaje tiene evidencia), clasificación y estado de los obligatorios. Al abrir una fila se ven las fortalezas, las brechas y la evidencia de cada criterio. "Provisional" indica poca evidencia. Un criterio sin información aparece como "Pendiente de validación", no como "No cumple". Recalcula después de corregir datos o cambiar criterios.',
+        },
       ],
       notas: [
         'Pueden ver este tablero: admin_th y líder. Arrastrar tarjetas, agregar candidatos, calificar, contratar/descartar y administrar entrevistas es exclusivo de admin_th (salvo que el líder sea justo el entrevistador asignado, en cuyo caso puede registrar esa entrevista puntual).',
@@ -98,6 +108,16 @@ export const moduloReclutamiento: ModuloAyuda = {
         { nombre: 'Editar candidato (admin_th)', explicacion: 'Nombre, correo, teléfono, LinkedIn y notas internas.' },
         { nombre: 'Postulaciones', explicacion: 'Todas las vacantes a las que se ha postulado esta persona, con su etapa y calificación en cada una — clic lleva al tablero de esa vacante.' },
         { nombre: 'Verificación de referencias (admin_th)', explicacion: 'Agrega referencias (nombre, relación, teléfono) y las marca como "Verificada" una vez se confirmaron por fuera de la plataforma (llamada, correo, etc.).' },
+        {
+          nombre: 'Lectura con IA (admin_th)',
+          explicacion:
+            'Muestra el estado de la lectura de la hoja de vida: en cola, leyendo, completada, con datos por revisar o con error. "Procesar con IA" la lee en ese momento; "Reintentar" aplica solo si hubo un error. Las inconsistencias (por ejemplo, un nombre distinto al del formulario) y los datos que no aparecen se listan debajo.',
+        },
+        {
+          nombre: 'Ficha estructurada',
+          explicacion:
+            'Formación, experiencia, competencias, idiomas y certificaciones, separados en bloques. Cada dato indica su procedencia (Extraído, Inferido, Verificado…) y, cuando existe, el fragmento de la hoja de vida que lo sustenta. Los datos marcados como "Revisar" tienen botones para Aceptar, marcar como No verificable o Corregir; cada acción queda registrada con su usuario y fecha.',
+        },
       ],
       notas: ['Pueden ver esta ficha: admin_th y líder. Editar candidato, subir hoja de vida y administrar referencias es exclusivo de admin_th.'],
     },

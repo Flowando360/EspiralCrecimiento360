@@ -690,8 +690,20 @@ export type Database = {
           autorizacion_banco: boolean
           conservar_hasta: string | null
           disponible_otros_cargos: boolean
+          ciudad: string | null
+          pais: string | null
+          profesion: string | null
+          resumen_profesional: string | null
+          anios_experiencia_total: number | null
+          anios_experiencia_relevante: number | null
         }
         Insert: {
+          ciudad?: string | null
+          pais?: string | null
+          profesion?: string | null
+          resumen_profesional?: string | null
+          anios_experiencia_total?: number | null
+          anios_experiencia_relevante?: number | null
           correo?: string | null
           created_at?: string
           empresa_id: string
@@ -708,6 +720,12 @@ export type Database = {
           disponible_otros_cargos?: boolean
         }
         Update: {
+          ciudad?: string | null
+          pais?: string | null
+          profesion?: string | null
+          resumen_profesional?: string | null
+          anios_experiencia_total?: number | null
+          anios_experiencia_relevante?: number | null
           correo?: string | null
           created_at?: string
           empresa_id?: string
@@ -7090,6 +7108,661 @@ export type Database = {
           { foreignKeyName: "autorizaciones_tratamiento_vacante_id_fkey"; columns: ["vacante_id"]; isOneToOne: false; referencedRelation: "vacantes"; referencedColumns: ["id"] },
         ]
       }
+      candidato_documentos: {
+        Row: {
+          id: string
+          empresa_id: string
+          candidato_id: string
+          postulacion_id: string | null
+          version: number
+          storage_path: string
+          nombre_original: string
+          mime_type: string | null
+          tamano_bytes: number
+          sha256: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          candidato_id: string
+          postulacion_id?: string | null
+          version?: number
+          storage_path: string
+          nombre_original: string
+          mime_type?: string | null
+          tamano_bytes: number
+          sha256: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          candidato_id?: string
+          postulacion_id?: string | null
+          version?: number
+          storage_path?: string
+          nombre_original?: string
+          mime_type?: string | null
+          tamano_bytes?: number
+          sha256?: string
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "candidato_documentos_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_documentos_candidato_id_fkey"; columns: ["candidato_id"]; isOneToOne: false; referencedRelation: "candidatos"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_documentos_postulacion_id_fkey"; columns: ["postulacion_id"]; isOneToOne: false; referencedRelation: "postulaciones"; referencedColumns: ["id"] },
+        ]
+      }
+      ai_processing_jobs: {
+        Row: {
+          id: string
+          empresa_id: string
+          candidato_id: string
+          documento_id: string
+          estado: Database["public"]["Enums"]["estado_procesamiento_ia"]
+          intentos: number
+          max_intentos: number
+          clave_idempotencia: string
+          esquema_version: string
+          modelo: string | null
+          prompt_version: string | null
+          ultimo_error: string | null
+          iniciado_en: string | null
+          terminado_en: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          candidato_id: string
+          documento_id: string
+          estado?: Database["public"]["Enums"]["estado_procesamiento_ia"]
+          intentos?: number
+          max_intentos?: number
+          clave_idempotencia: string
+          esquema_version: string
+          modelo?: string | null
+          prompt_version?: string | null
+          ultimo_error?: string | null
+          iniciado_en?: string | null
+          terminado_en?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          candidato_id?: string
+          documento_id?: string
+          estado?: Database["public"]["Enums"]["estado_procesamiento_ia"]
+          intentos?: number
+          max_intentos?: number
+          clave_idempotencia?: string
+          esquema_version?: string
+          modelo?: string | null
+          prompt_version?: string | null
+          ultimo_error?: string | null
+          iniciado_en?: string | null
+          terminado_en?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "ai_processing_jobs_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "ai_processing_jobs_candidato_id_fkey"; columns: ["candidato_id"]; isOneToOne: false; referencedRelation: "candidatos"; referencedColumns: ["id"] },
+          { foreignKeyName: "ai_processing_jobs_documento_id_fkey"; columns: ["documento_id"]; isOneToOne: false; referencedRelation: "candidato_documentos"; referencedColumns: ["id"] },
+        ]
+      }
+      ai_extraction_results: {
+        Row: {
+          id: string
+          empresa_id: string
+          job_id: string
+          candidato_id: string
+          documento_id: string
+          esquema_version: string
+          payload: Json
+          campos_confianza: Json
+          campos_faltantes: string[]
+          conflictos: Json
+          revision_requerida: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          job_id: string
+          candidato_id: string
+          documento_id: string
+          esquema_version: string
+          payload: Json
+          campos_confianza?: Json
+          campos_faltantes?: string[]
+          conflictos?: Json
+          revision_requerida?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          job_id?: string
+          candidato_id?: string
+          documento_id?: string
+          esquema_version?: string
+          payload?: Json
+          campos_confianza?: Json
+          campos_faltantes?: string[]
+          conflictos?: Json
+          revision_requerida?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "ai_extraction_results_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "ai_extraction_results_job_id_fkey"; columns: ["job_id"]; isOneToOne: false; referencedRelation: "ai_processing_jobs"; referencedColumns: ["id"] },
+          { foreignKeyName: "ai_extraction_results_candidato_id_fkey"; columns: ["candidato_id"]; isOneToOne: false; referencedRelation: "candidatos"; referencedColumns: ["id"] },
+          { foreignKeyName: "ai_extraction_results_documento_id_fkey"; columns: ["documento_id"]; isOneToOne: false; referencedRelation: "candidato_documentos"; referencedColumns: ["id"] },
+        ]
+      }
+      candidato_educacion: {
+        Row: {
+          id: string
+          empresa_id: string
+          candidato_id: string
+          resultado_id: string | null
+          nivel: string | null
+          titulo: string
+          area: string | null
+          institucion: string | null
+          fecha_inicio: string | null
+          fecha_fin: string | null
+          precision_fecha: string | null
+          estado: string
+          procedencia: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia: string | null
+          requiere_revision: boolean
+          activo: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          candidato_id: string
+          resultado_id?: string | null
+          nivel?: string | null
+          titulo: string
+          area?: string | null
+          institucion?: string | null
+          fecha_inicio?: string | null
+          fecha_fin?: string | null
+          precision_fecha?: string | null
+          estado?: string
+          procedencia?: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia?: string | null
+          requiere_revision?: boolean
+          activo?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          candidato_id?: string
+          resultado_id?: string | null
+          nivel?: string | null
+          titulo?: string
+          area?: string | null
+          institucion?: string | null
+          fecha_inicio?: string | null
+          fecha_fin?: string | null
+          precision_fecha?: string | null
+          estado?: string
+          procedencia?: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia?: string | null
+          requiere_revision?: boolean
+          activo?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "candidato_educacion_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_educacion_candidato_id_fkey"; columns: ["candidato_id"]; isOneToOne: false; referencedRelation: "candidatos"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_educacion_resultado_id_fkey"; columns: ["resultado_id"]; isOneToOne: false; referencedRelation: "ai_extraction_results"; referencedColumns: ["id"] },
+        ]
+      }
+      candidato_experiencia: {
+        Row: {
+          id: string
+          empresa_id: string
+          candidato_id: string
+          resultado_id: string | null
+          organizacion: string | null
+          cargo: string | null
+          sector: string | null
+          fecha_inicio: string | null
+          fecha_fin: string | null
+          precision_fecha: string | null
+          en_curso: boolean
+          funciones: string | null
+          logros: string | null
+          herramientas: string[]
+          competencias: string[]
+          procedencia: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia: string | null
+          requiere_revision: boolean
+          activo: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          candidato_id: string
+          resultado_id?: string | null
+          organizacion?: string | null
+          cargo?: string | null
+          sector?: string | null
+          fecha_inicio?: string | null
+          fecha_fin?: string | null
+          precision_fecha?: string | null
+          en_curso?: boolean
+          funciones?: string | null
+          logros?: string | null
+          herramientas?: string[]
+          competencias?: string[]
+          procedencia?: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia?: string | null
+          requiere_revision?: boolean
+          activo?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          candidato_id?: string
+          resultado_id?: string | null
+          organizacion?: string | null
+          cargo?: string | null
+          sector?: string | null
+          fecha_inicio?: string | null
+          fecha_fin?: string | null
+          precision_fecha?: string | null
+          en_curso?: boolean
+          funciones?: string | null
+          logros?: string | null
+          herramientas?: string[]
+          competencias?: string[]
+          procedencia?: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia?: string | null
+          requiere_revision?: boolean
+          activo?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "candidato_experiencia_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_experiencia_candidato_id_fkey"; columns: ["candidato_id"]; isOneToOne: false; referencedRelation: "candidatos"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_experiencia_resultado_id_fkey"; columns: ["resultado_id"]; isOneToOne: false; referencedRelation: "ai_extraction_results"; referencedColumns: ["id"] },
+        ]
+      }
+      candidato_competencias: {
+        Row: {
+          id: string
+          empresa_id: string
+          candidato_id: string
+          resultado_id: string | null
+          tipo: string
+          nombre: string
+          nivel: string | null
+          procedencia: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia: string | null
+          requiere_revision: boolean
+          activo: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          candidato_id: string
+          resultado_id?: string | null
+          tipo: string
+          nombre: string
+          nivel?: string | null
+          procedencia?: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia?: string | null
+          requiere_revision?: boolean
+          activo?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          candidato_id?: string
+          resultado_id?: string | null
+          tipo?: string
+          nombre?: string
+          nivel?: string | null
+          procedencia?: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia?: string | null
+          requiere_revision?: boolean
+          activo?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "candidato_competencias_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_competencias_candidato_id_fkey"; columns: ["candidato_id"]; isOneToOne: false; referencedRelation: "candidatos"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_competencias_resultado_id_fkey"; columns: ["resultado_id"]; isOneToOne: false; referencedRelation: "ai_extraction_results"; referencedColumns: ["id"] },
+        ]
+      }
+      candidato_idiomas: {
+        Row: {
+          id: string
+          empresa_id: string
+          candidato_id: string
+          resultado_id: string | null
+          idioma: string
+          nivel: string | null
+          procedencia: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia: string | null
+          requiere_revision: boolean
+          activo: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          candidato_id: string
+          resultado_id?: string | null
+          idioma: string
+          nivel?: string | null
+          procedencia?: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia?: string | null
+          requiere_revision?: boolean
+          activo?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          candidato_id?: string
+          resultado_id?: string | null
+          idioma?: string
+          nivel?: string | null
+          procedencia?: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia?: string | null
+          requiere_revision?: boolean
+          activo?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "candidato_idiomas_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_idiomas_candidato_id_fkey"; columns: ["candidato_id"]; isOneToOne: false; referencedRelation: "candidatos"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_idiomas_resultado_id_fkey"; columns: ["resultado_id"]; isOneToOne: false; referencedRelation: "ai_extraction_results"; referencedColumns: ["id"] },
+        ]
+      }
+      candidato_certificaciones: {
+        Row: {
+          id: string
+          empresa_id: string
+          candidato_id: string
+          resultado_id: string | null
+          nombre: string
+          entidad: string | null
+          fecha_expedicion: string | null
+          vigente_hasta: string | null
+          procedencia: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia: string | null
+          requiere_revision: boolean
+          activo: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          candidato_id: string
+          resultado_id?: string | null
+          nombre: string
+          entidad?: string | null
+          fecha_expedicion?: string | null
+          vigente_hasta?: string | null
+          procedencia?: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia?: string | null
+          requiere_revision?: boolean
+          activo?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          candidato_id?: string
+          resultado_id?: string | null
+          nombre?: string
+          entidad?: string | null
+          fecha_expedicion?: string | null
+          vigente_hasta?: string | null
+          procedencia?: Database["public"]["Enums"]["procedencia_dato"]
+          evidencia?: string | null
+          requiere_revision?: boolean
+          activo?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "candidato_certificaciones_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_certificaciones_candidato_id_fkey"; columns: ["candidato_id"]; isOneToOne: false; referencedRelation: "candidatos"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_certificaciones_resultado_id_fkey"; columns: ["resultado_id"]; isOneToOne: false; referencedRelation: "ai_extraction_results"; referencedColumns: ["id"] },
+        ]
+      }
+      candidato_validaciones: {
+        Row: {
+          id: string
+          empresa_id: string
+          candidato_id: string
+          tabla: string
+          registro_id: string
+          campo: string
+          valor_anterior: Json | null
+          valor_nuevo: Json | null
+          accion: string
+          usuario_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          candidato_id: string
+          tabla: string
+          registro_id: string
+          campo: string
+          valor_anterior?: Json | null
+          valor_nuevo?: Json | null
+          accion: string
+          usuario_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          candidato_id?: string
+          tabla?: string
+          registro_id?: string
+          campo?: string
+          valor_anterior?: Json | null
+          valor_nuevo?: Json | null
+          accion?: string
+          usuario_id?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "candidato_validaciones_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_validaciones_candidato_id_fkey"; columns: ["candidato_id"]; isOneToOne: false; referencedRelation: "candidatos"; referencedColumns: ["id"] },
+          { foreignKeyName: "candidato_validaciones_usuario_id_fkey"; columns: ["usuario_id"]; isOneToOne: false; referencedRelation: "perfiles_usuario"; referencedColumns: ["id"] },
+        ]
+      }
+      criterios_evaluacion: {
+        Row: {
+          id: string
+          empresa_id: string
+          vacante_id: string
+          origen: string
+          cargo_habilidad_id: string | null
+          categoria: Database["public"]["Enums"]["categoria_criterio"]
+          tipo: Database["public"]["Enums"]["tipo_criterio"]
+          descripcion: string
+          valor_requerido: string | null
+          nivel_requerido: string | null
+          meses_requeridos: number | null
+          peso: number
+          activo: boolean
+          perfil_version: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          vacante_id: string
+          origen?: string
+          cargo_habilidad_id?: string | null
+          categoria: Database["public"]["Enums"]["categoria_criterio"]
+          tipo?: Database["public"]["Enums"]["tipo_criterio"]
+          descripcion: string
+          valor_requerido?: string | null
+          nivel_requerido?: string | null
+          meses_requeridos?: number | null
+          peso?: number
+          activo?: boolean
+          perfil_version?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          vacante_id?: string
+          origen?: string
+          cargo_habilidad_id?: string | null
+          categoria?: Database["public"]["Enums"]["categoria_criterio"]
+          tipo?: Database["public"]["Enums"]["tipo_criterio"]
+          descripcion?: string
+          valor_requerido?: string | null
+          nivel_requerido?: string | null
+          meses_requeridos?: number | null
+          peso?: number
+          activo?: boolean
+          perfil_version?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "criterios_evaluacion_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "criterios_evaluacion_vacante_id_fkey"; columns: ["vacante_id"]; isOneToOne: false; referencedRelation: "vacantes"; referencedColumns: ["id"] },
+          { foreignKeyName: "criterios_evaluacion_cargo_habilidad_id_fkey"; columns: ["cargo_habilidad_id"]; isOneToOne: false; referencedRelation: "cargo_habilidades"; referencedColumns: ["id"] },
+        ]
+      }
+      match_evaluaciones: {
+        Row: {
+          id: string
+          empresa_id: string
+          postulacion_id: string
+          vacante_id: string
+          puntaje: number | null
+          cobertura: number
+          clasificacion: string
+          provisional: boolean
+          obligatorios_estado: string
+          fortalezas: Json
+          brechas: Json
+          version_reglas: string
+          version_perfil: string | null
+          vigente: boolean
+          calculada_por: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          postulacion_id: string
+          vacante_id: string
+          puntaje?: number | null
+          cobertura: number
+          clasificacion: string
+          provisional?: boolean
+          obligatorios_estado: string
+          fortalezas?: Json
+          brechas?: Json
+          version_reglas: string
+          version_perfil?: string | null
+          vigente?: boolean
+          calculada_por?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          postulacion_id?: string
+          vacante_id?: string
+          puntaje?: number | null
+          cobertura?: number
+          clasificacion?: string
+          provisional?: boolean
+          obligatorios_estado?: string
+          fortalezas?: Json
+          brechas?: Json
+          version_reglas?: string
+          version_perfil?: string | null
+          vigente?: boolean
+          calculada_por?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "match_evaluaciones_empresa_id_fkey"; columns: ["empresa_id"]; isOneToOne: false; referencedRelation: "empresas"; referencedColumns: ["id"] },
+          { foreignKeyName: "match_evaluaciones_postulacion_id_fkey"; columns: ["postulacion_id"]; isOneToOne: false; referencedRelation: "postulaciones"; referencedColumns: ["id"] },
+          { foreignKeyName: "match_evaluaciones_vacante_id_fkey"; columns: ["vacante_id"]; isOneToOne: false; referencedRelation: "vacantes"; referencedColumns: ["id"] },
+          { foreignKeyName: "match_evaluaciones_calculada_por_fkey"; columns: ["calculada_por"]; isOneToOne: false; referencedRelation: "perfiles_usuario"; referencedColumns: ["id"] },
+        ]
+      }
+      match_evaluacion_detalles: {
+        Row: {
+          id: string
+          evaluacion_id: string
+          criterio_id: string | null
+          descripcion_criterio: string
+          categoria: Database["public"]["Enums"]["categoria_criterio"]
+          tipo: Database["public"]["Enums"]["tipo_criterio"]
+          peso: number
+          resultado: Database["public"]["Enums"]["resultado_criterio"]
+          puntaje: number | null
+          evidencia: string | null
+          motivo: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          evaluacion_id: string
+          criterio_id?: string | null
+          descripcion_criterio: string
+          categoria: Database["public"]["Enums"]["categoria_criterio"]
+          tipo: Database["public"]["Enums"]["tipo_criterio"]
+          peso: number
+          resultado: Database["public"]["Enums"]["resultado_criterio"]
+          puntaje?: number | null
+          evidencia?: string | null
+          motivo?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          evaluacion_id?: string
+          criterio_id?: string | null
+          descripcion_criterio?: string
+          categoria?: Database["public"]["Enums"]["categoria_criterio"]
+          tipo?: Database["public"]["Enums"]["tipo_criterio"]
+          peso?: number
+          resultado?: Database["public"]["Enums"]["resultado_criterio"]
+          puntaje?: number | null
+          evidencia?: string | null
+          motivo?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "match_evaluacion_detalles_evaluacion_id_fkey"; columns: ["evaluacion_id"]; isOneToOne: false; referencedRelation: "match_evaluaciones"; referencedColumns: ["id"] },
+          { foreignKeyName: "match_evaluacion_detalles_criterio_id_fkey"; columns: ["criterio_id"]; isOneToOne: false; referencedRelation: "criterios_evaluacion"; referencedColumns: ["id"] },
+        ]
+      }
       solicitudes_titular: {
         Row: { atendida_en: string | null; correo: string | null; detalle: string; empresa_id: string; estado: string; id: string; nombre_titular: string; numero_documento: string | null; recibida_en: string; tipo: string }
         Insert: { atendida_en?: string | null; correo?: string | null; detalle: string; empresa_id: string; estado?: string; id?: string; nombre_titular: string; numero_documento?: string | null; recibida_en?: string; tipo: string }
@@ -8798,6 +9471,7 @@ export type Database = {
           fecha_cierre: string | null
           id: string
           lider_solicitante_id: string | null
+          perfil_version: string | null
           presupuesto_salarial: number | null
           titulo: string
         }
@@ -8812,6 +9486,7 @@ export type Database = {
           fecha_cierre?: string | null
           id?: string
           lider_solicitante_id?: string | null
+          perfil_version?: string | null
           presupuesto_salarial?: number | null
           titulo: string
         }
@@ -8826,6 +9501,7 @@ export type Database = {
           fecha_cierre?: string | null
           id?: string
           lider_solicitante_id?: string | null
+          perfil_version?: string | null
           presupuesto_salarial?: number | null
           titulo?: string
         }
@@ -9715,6 +10391,11 @@ export type Database = {
       estado_entrevista: "programada" | "realizada" | "cancelada"
       estado_pdi: "pendiente" | "en_curso" | "cumplido" | "vencido"
       estado_ronda_clima: "abierta" | "cerrada"
+      estado_procesamiento_ia: "pendiente" | "procesando" | "completado" | "requiere_revision" | "error"
+      procedencia_dato: "extraido" | "normalizado" | "inferido" | "declarado" | "verificado" | "no_informado" | "en_conflicto"
+      categoria_criterio: "formacion" | "experiencia" | "competencia_tecnica" | "competencia_conductual" | "certificacion_idioma" | "requisito_adicional"
+      tipo_criterio: "obligatorio" | "deseable" | "informativo"
+      resultado_criterio: "cumple" | "cumple_parcialmente" | "no_cumple" | "no_informado" | "contradictorio" | "pendiente_validacion"
       estado_vacante:
         | "abierta"
         | "pausada"
