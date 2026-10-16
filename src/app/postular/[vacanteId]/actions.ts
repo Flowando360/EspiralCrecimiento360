@@ -11,6 +11,8 @@ import { z } from 'zod';
 // una policy de base de datos.
 
 import { VERSION_POLITICA } from '@/lib/reclutamiento/politica';
+import { registrarHojaVida } from '@/lib/reclutamiento/registrar-hoja-vida';
+import { validarHojaVida } from '@/lib/reclutamiento/documento';
 
 const PostulacionSchema = z.object({
   vacanteId: z.string().uuid(),
@@ -55,22 +57,12 @@ export async function enviarPostulacion(formData: FormData) {
   if (errorVacante || !vacante) return { ok: false as const, error: 'Vacante no encontrada.' };
   if (vacante.estado !== 'abierta') return { ok: false as const, error: 'Esta vacante ya no está recibiendo postulaciones.' };
 
-  // Hoja de vida (opcional): se sube antes de crear el candidato, a
-  // <empresa_id>/<archivo> para que la policy de lectura de admin_th
-  // (segmentada por carpeta = empresa) pueda encontrarlo.
-  let hojaVidaUrl: string | null = null;
+  // Hoja de vida (opcional). Se valida por contenido antes de crear nada; se guarda después, ya con el candidato.
   const archivo = formData.get('hojaVida');
-  if (archivo instanceof File && archivo.size > 0) {
-    if (archivo.size > 8 * 1024 * 1024) {
-      return { ok: false as const, error: 'La hoja de vida no puede pesar más de 8 MB.' };
-    }
-    const extension = archivo.name.split('.').pop() || 'pdf';
-    const ruta = `${vacante.empresa_id}/${crypto.randomUUID()}.${extension}`;
-    const { error: errorSubida } = await supabase.storage
-      .from('hojas-vida-candidatos')
-      .upload(ruta, archivo, { contentType: archivo.type || undefined });
-    if (errorSubida) return { ok: false as const, error: 'No se pudo subir la hoja de vida: ' + errorSubida.message };
-    hojaVidaUrl = ruta;
+  const hojaVida = archivo instanceof File && archivo.size > 0 ? archivo : null;
+  if (hojaVida) {
+    const validacion = await validarHojaVida(new Uint8Array(await hojaVida.arrayBuffer()));
+    if (!validacion.ok) return { ok: false as const, error: validacion.error ?? 'Archivo no válido.' };
   }
 
   // Plazo de conservación: 6 meses para el proceso; 12 meses solo si acepta el banco de talento.
@@ -78,28 +70,55 @@ export async function enviarPostulacion(formData: FormData) {
   const conservarHasta = new Date();
   conservarHasta.setMonth(conservarHasta.getMonth() + (autorizaBanco ? 12 : 6));
 
-  const { data: candidato, error: errorCandidato } = await supabase
-    .from('candidatos')
-    .insert({
-      empresa_id: vacante.empresa_id,
-      nombre_completo: parsed.data.nombreCompleto,
-      numero_documento: parsed.data.numeroDocumento || null,
-      correo: parsed.data.correo || null,
-      telefono: parsed.data.telefono || null,
-      linkedin_url: parsed.data.linkedinUrl || null,
-      hoja_vida_url: hojaVidaUrl,
-      origen: 'postulacion_publica',
-      autorizacion_banco: autorizaBanco,
-      conservar_hasta: conservarHasta.toISOString().slice(0, 10),
-    })
-    .select('id')
-    .single();
+  // Candidato repetido (§7.4): mismo correo dentro de la empresa → la postulación se vincula al
+  // registro existente. No se sobrescriben sus datos; cada postulación y autorización queda aparte.
+  const correo = parsed.data.correo ? parsed.data.correo.toLowerCase() : null;
+  const patronCorreo = correo ? correo.replace(/[\\%_]/g, (c) => `\\${c}`) : null;
+  const { data: existente } = patronCorreo
+    ? await supabase
+        .from('candidatos')
+        .select('id, autorizacion_banco')
+        .eq('empresa_id', vacante.empresa_id)
+        .ilike('correo', patronCorreo)
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
 
-  if (errorCandidato) return { ok: false as const, error: errorCandidato.message };
+  let candidatoId: string;
+  const creado = !existente;
+  if (existente) {
+    candidatoId = existente.id;
+    if (autorizaBanco && !existente.autorizacion_banco) {
+      await supabase.from('candidatos').update({ autorizacion_banco: true, conservar_hasta: conservarHasta.toISOString().slice(0, 10) }).eq('id', candidatoId);
+    }
+  } else {
+    const { data: nuevo, error: errorCandidato } = await supabase
+      .from('candidatos')
+      .insert({
+        empresa_id: vacante.empresa_id,
+        nombre_completo: parsed.data.nombreCompleto,
+        numero_documento: parsed.data.numeroDocumento || null,
+        correo: parsed.data.correo || null,
+        telefono: parsed.data.telefono || null,
+        linkedin_url: parsed.data.linkedinUrl || null,
+        origen: 'postulacion_publica',
+        autorizacion_banco: autorizaBanco,
+        conservar_hasta: conservarHasta.toISOString().slice(0, 10),
+      })
+      .select('id')
+      .single();
+    if (errorCandidato) return { ok: false as const, error: errorCandidato.message };
+    candidatoId = nuevo.id;
+  }
+
+  // Si algo falla después, se revierte solo lo que esta postulación creó.
+  const revertir = async () => {
+    if (creado) await supabase.from('candidatos').delete().eq('id', candidatoId);
+  };
 
   const { error: errorAutorizacion } = await supabase.from('autorizaciones_tratamiento').insert({
     empresa_id: vacante.empresa_id,
-    candidato_id: candidato.id,
+    candidato_id: candidatoId,
     vacante_id: vacante.id,
     version_politica: VERSION_POLITICA,
     finalidades: autorizaBanco
@@ -109,16 +128,37 @@ export async function enviarPostulacion(formData: FormData) {
     canal: 'formulario_publico',
   });
   if (errorAutorizacion) {
-    // Sin evidencia de autorización no puede quedar el candidato guardado.
-    await supabase.from('candidatos').delete().eq('id', candidato.id);
+    // Sin evidencia de autorización no puede quedar el registro guardado.
+    await revertir();
     return { ok: false as const, error: 'No se pudo registrar tu autorización: ' + errorAutorizacion.message };
   }
 
-  const { error: errorPostulacion } = await supabase
+  const { data: postulacion, error: errorPostulacion } = await supabase
     .from('postulaciones')
-    .insert({ vacante_id: vacante.id, candidato_id: candidato.id });
+    .insert({ vacante_id: vacante.id, candidato_id: candidatoId })
+    .select('id')
+    .single();
 
-  if (errorPostulacion) return { ok: false as const, error: errorPostulacion.message };
+  if (errorPostulacion) {
+    await revertir();
+    return {
+      ok: false as const,
+      error: errorPostulacion.code === '23505' ? 'Ya registraste una postulación para esta vacante.' : errorPostulacion.message,
+    };
+  }
+
+  if (hojaVida) {
+    const registro = await registrarHojaVida(supabase, {
+      empresaId: vacante.empresa_id,
+      candidatoId,
+      postulacionId: postulacion.id,
+      archivo: hojaVida,
+    });
+    if (!registro.ok) {
+      await revertir();
+      return { ok: false as const, error: registro.error };
+    }
+  }
 
   return { ok: true as const };
 }

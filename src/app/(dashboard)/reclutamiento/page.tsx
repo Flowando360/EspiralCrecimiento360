@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { Briefcase, Plus, Users } from 'lucide-react';
 import { EvaluacionesLider } from '@/components/reclutamiento/evaluaciones-lider';
+import { BotonProcesarPendientes } from '@/components/reclutamiento/boton-procesar-pendientes';
 
 const ESTADO_LABEL: Record<string, string> = { abierta: 'Abierta', pausada: 'En pausa', cancelada: 'Cancelada', cubierta: 'Cubierto', cerrada: 'Cerrada' };
 const ESTADO_CLASE: Record<string, string> = {
@@ -37,6 +38,9 @@ export default async function ReclutamientoPage() {
       : { data: [] };
   const evaluaciones = (evaluacionesRaw ?? []).map((e: any) => ({ id: e.id, candidato: e.candidato?.nombre_completo ?? '', vacante: e.vacante?.titulo ?? '' }));
 
+  // Panel de control (requerimiento §4): indicadores de Talento Humano. El líder no ve estas cifras.
+  const indicadores = perfil.rol === 'admin_th' ? await cargarIndicadores(supabase, perfil.empresa_id, (vacantes ?? []) as { id: string; estado: string; fecha_cierre: string | null }[]) : null;
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-3">
@@ -66,6 +70,27 @@ export default async function ReclutamientoPage() {
           )}
         </div>
       </div>
+
+      {indicadores && (
+        <section className="space-y-3">
+          <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+            {indicadores.tarjetas.map((t) => (
+              <div key={t.titulo} className="card p-4">
+                <p className="text-xs text-marmol-400">{t.titulo}</p>
+                <p className="font-display text-2xl font-semibold text-secundario mt-1">{t.valor}</p>
+                {t.detalle && <p className="text-[11px] text-marmol-400 mt-0.5">{t.detalle}</p>}
+              </div>
+            ))}
+          </div>
+          <div className="card p-4 flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <p className="text-sm font-medium text-marmol-800">Hojas de vida por procesar</p>
+              <p className="text-xs text-marmol-400">Lectura automática de los documentos que llegaron y aún no se han estructurado.</p>
+            </div>
+            <BotonProcesarPendientes pendientes={indicadores.porProcesar} />
+          </div>
+        </section>
+      )}
 
       {!vacantes || vacantes.length === 0 ? (
         <div className="card p-6 text-sm text-marmol-500">
@@ -111,4 +136,52 @@ export default async function ReclutamientoPage() {
       )}
     </div>
   );
+}
+
+type Supa = ReturnType<typeof createClient>;
+
+async function cargarIndicadores(supabase: Supa, empresaId: string, vacantes: { id: string; estado: string; fecha_cierre: string | null }[]) {
+  const hoy = new Date();
+  const en7Dias = new Date(hoy.getTime() + 7 * 86400000).toISOString();
+  const en14Dias = new Date(hoy.getTime() + 14 * 86400000).toISOString().slice(0, 10);
+  const idsVacantes = vacantes.map((v) => v.id);
+  const abiertas = vacantes.filter((v) => v.estado === 'abierta');
+  const proximasACerrar = abiertas.filter((v) => v.fecha_cierre && v.fecha_cierre <= en14Dias && v.fecha_cierre >= hoy.toISOString().slice(0, 10));
+
+  const contar = async (consulta: PromiseLike<{ count: number | null }>) => (await consulta).count ?? 0;
+  const [candidatos, postulaciones, porProcesar, validaciones, recomendados, entrevistas] = await Promise.all([
+    contar(supabase.from('candidatos').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId)),
+    idsVacantes.length
+      ? contar(supabase.from('postulaciones').select('id', { count: 'exact', head: true }).in('vacante_id', idsVacantes))
+      : Promise.resolve(0),
+    contar(supabase.from('ai_processing_jobs').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).in('estado', ['pendiente', 'procesando'])),
+    Promise.all(
+      ['candidato_educacion', 'candidato_experiencia', 'candidato_competencias', 'candidato_idiomas', 'candidato_certificaciones'].map((t) =>
+        contar(supabase.from(t as 'candidato_educacion').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('activo', true).eq('requiere_revision', true))
+      )
+    ).then((n) => n.reduce((a, b) => a + b, 0)),
+    contar(supabase.from('match_evaluaciones').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('vigente', true).in('clasificacion', ['alta', 'buena'])),
+    contar(
+      supabase
+        .from('entrevistas')
+        .select('id', { count: 'exact', head: true })
+        .eq('estado', 'programada')
+        .gte('fecha_hora', hoy.toISOString())
+        .lte('fecha_hora', en7Dias)
+    ),
+  ]);
+
+  return {
+    porProcesar,
+    tarjetas: [
+      { titulo: 'Vacantes abiertas', valor: abiertas.length, detalle: `${vacantes.length} en total` },
+      { titulo: 'Candidatos registrados', valor: candidatos, detalle: 'Banco de la empresa' },
+      { titulo: 'Postulaciones', valor: postulaciones, detalle: 'A todas las vacantes' },
+      { titulo: 'Hojas por procesar', valor: porProcesar, detalle: 'En cola o leyendo' },
+      { titulo: 'Validaciones pendientes', valor: validaciones, detalle: 'Datos extraídos por revisar' },
+      { titulo: 'Candidatos recomendados', valor: recomendados, detalle: 'Correspondencia alta o buena' },
+      { titulo: 'Entrevistas próximas', valor: entrevistas, detalle: 'Próximos 7 días' },
+      { titulo: 'Próximas a cerrar', valor: proximasACerrar.length, detalle: 'Cierre en 14 días' },
+    ],
+  };
 }

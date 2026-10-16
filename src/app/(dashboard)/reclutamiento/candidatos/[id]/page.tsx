@@ -6,6 +6,8 @@ import { notFound } from 'next/navigation';
 import { PanelReferencias } from '@/components/reclutamiento/panel-referencias';
 import { EditarCandidato, SubirHojaVidaCandidato } from '@/components/reclutamiento/editar-candidato';
 import { CalificacionEstrellas } from '@/components/reclutamiento/calificacion-estrellas';
+import { PanelHojaVidaIA } from '@/components/reclutamiento/panel-hoja-vida-ia';
+import { DatosEstructurados } from '@/components/reclutamiento/datos-estructurados';
 import { ArrowLeft, User, FileText, Briefcase } from 'lucide-react';
 
 const ETAPA_LABEL: Record<string, string> = {
@@ -26,13 +28,25 @@ export default async function FichaCandidatoPage({ params }: { params: { id: str
   const supabase = createClient();
   const { data: candidato } = await supabase
     .from('candidatos')
-    .select('id, empresa_id, nombre_completo, numero_documento, correo, telefono, hoja_vida_url, linkedin_url, notas, origen, created_at')
+    .select('id, empresa_id, nombre_completo, numero_documento, correo, telefono, hoja_vida_url, linkedin_url, notas, origen, created_at, ciudad, pais, profesion, resumen_profesional, anios_experiencia_total')
     .eq('id', params.id)
     .maybeSingle();
 
   if (!candidato || candidato.empresa_id !== perfil.empresa_id) notFound();
 
-  const [{ data: postulaciones }, { data: referencias }, urlHojaVida] = await Promise.all([
+  const esAdmin = perfil.rol === 'admin_th';
+  const [
+    { data: postulaciones },
+    { data: referencias },
+    urlHojaVida,
+    { data: trabajo },
+    { data: resultado },
+    { data: educacion },
+    { data: experiencia },
+    { data: competencias },
+    { data: idiomas },
+    { data: certificaciones },
+  ] = await Promise.all([
     supabase
       .from('postulaciones')
       .select('id, etapa, calificacion, created_at, vacante:vacantes(id, titulo)')
@@ -44,6 +58,26 @@ export default async function FichaCandidatoPage({ params }: { params: { id: str
       .eq('candidato_id', params.id)
       .order('created_at', { ascending: false }),
     obtenerUrlFirmadaHojaVidaCandidato(candidato.hoja_vida_url),
+    // La lectura con IA es información interna de Talento Humano (RLS la limita a admin_th).
+    supabase
+      .from('ai_processing_jobs')
+      .select('id, estado, intentos, max_intentos, ultimo_error')
+      .eq('candidato_id', params.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('ai_extraction_results')
+      .select('campos_faltantes, conflictos, revision_requerida')
+      .eq('candidato_id', params.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase.from('candidato_educacion').select('*').eq('candidato_id', params.id).eq('activo', true).order('fecha_inicio', { ascending: false }),
+    supabase.from('candidato_experiencia').select('*').eq('candidato_id', params.id).eq('activo', true).order('fecha_inicio', { ascending: false }),
+    supabase.from('candidato_competencias').select('*').eq('candidato_id', params.id).eq('activo', true).order('nombre'),
+    supabase.from('candidato_idiomas').select('*').eq('candidato_id', params.id).eq('activo', true).order('idioma'),
+    supabase.from('candidato_certificaciones').select('*').eq('candidato_id', params.id).eq('activo', true).order('nombre'),
   ]);
 
   return (
@@ -58,6 +92,13 @@ export default async function FichaCandidatoPage({ params }: { params: { id: str
         <p className="text-sm text-marmol-500 mt-1">
           {[candidato.correo, candidato.telefono, candidato.numero_documento].filter(Boolean).join(' · ') || 'Sin datos de contacto'}
         </p>
+        {(candidato.profesion || candidato.anios_experiencia_total != null || candidato.ciudad) && (
+          <p className="text-sm text-marmol-600 mt-1">
+            {[candidato.profesion, candidato.ciudad, candidato.pais].filter(Boolean).join(' · ')}
+            {candidato.anios_experiencia_total != null && ` · ${Number(candidato.anios_experiencia_total)} años de experiencia documentados`}
+          </p>
+        )}
+        {candidato.resumen_profesional && <p className="text-sm text-marmol-500 mt-2 max-w-2xl">{candidato.resumen_profesional}</p>}
       </div>
 
       <div className="card p-5 space-y-2">
@@ -96,6 +137,26 @@ export default async function FichaCandidatoPage({ params }: { params: { id: str
           </div>
         )}
       </div>
+
+      {esAdmin && (
+        <PanelHojaVidaIA
+          candidatoId={candidato.id}
+          trabajo={trabajo}
+          resultado={resultado ? { ...resultado, conflictos: (resultado.conflictos as unknown as { campo: string; descripcion: string }[]) ?? [], campos_faltantes: resultado.campos_faltantes ?? [] } : null}
+          puedeAdministrar={esAdmin}
+          tieneHojaVida={!!candidato.hoja_vida_url}
+        />
+      )}
+
+      <DatosEstructurados
+        candidatoId={candidato.id}
+        puedeRevisar={esAdmin}
+        educacion={(educacion ?? []) as any}
+        experiencia={(experiencia ?? []) as any}
+        competencias={(competencias ?? []) as any}
+        idiomas={(idiomas ?? []) as any}
+        certificaciones={(certificaciones ?? []) as any}
+      />
 
       <div className="card p-5">
         <h2 className="font-display font-semibold text-secundario mb-3 flex items-center gap-1.5">
