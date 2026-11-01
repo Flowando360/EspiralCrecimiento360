@@ -107,3 +107,13 @@ export const etiquetaSemaforo: Record<string, string> = {
   medio: 'Medio',
   bajo: 'Bajo',
 };
+
+/**
+ * Supabase devuelve un objeto (no una lista) cuando la relación es uno a uno, como
+ * resultados_evaluacion (su llave primaria es el id de la evaluación). Esta función acepta
+ * ambos formatos para no depender de cómo PostgREST infiera la relación.
+ */
+export function primero<T>(valor: T | T[] | null | undefined): T | undefined {
+  if (valor == null) return undefined;
+  return Array.isArray(valor) ? valor[0] : valor;
+}

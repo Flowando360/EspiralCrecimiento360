@@ -66,6 +66,7 @@ export function FormularioEvaluacion({
   );
   const [, startTransition] = useTransition();
   const [guardados, setGuardados] = useState<Record<string, boolean>>({});
+  const [errores, setErrores] = useState<Record<string, string>>({});
   const [expandido, setExpandido] = useState<string | null>(null);
 
   function guardar(itemId: string, nota: number) {
@@ -78,7 +79,16 @@ export function FormularioEvaluacion({
         observacion: observaciones[itemId],
         resultadoReal: resultadosReales[itemId],
       });
-      if (res.ok) setGuardados((prev) => ({ ...prev, [itemId]: true }));
+      if (res.ok) {
+        setGuardados((prev) => ({ ...prev, [itemId]: true }));
+        setErrores((prev) => {
+          const { [itemId]: _quitado, ...resto } = prev;
+          return resto;
+        });
+      } else {
+        setGuardados((prev) => ({ ...prev, [itemId]: false }));
+        setErrores((prev) => ({ ...prev, [itemId]: res.error ?? 'No se pudo guardar' }));
+      }
     });
   }
 
@@ -125,7 +135,7 @@ export function FormularioEvaluacion({
               <p className={cn('text-xs font-medium', ETIQUETA_BLOQUE[bloque].color)}>{ETIQUETA_BLOQUE[bloque].titulo}</p>
               <p className="text-sm font-display font-semibold text-marmol-800">
                 {subtotalesPorBloque[bloque] ?? '—'}
-                <span className="text-xs font-normal text-marmol-400"> /{itemsBloque.length}</span>
+                <span className="text-xs font-normal text-marmol-400"> · {itemsBloque.length} {itemsBloque.length === 1 ? 'ítem' : 'ítems'}</span>
               </p>
             </div>
           ))}
@@ -212,6 +222,9 @@ export function FormularioEvaluacion({
                     >
                       {estaExpandido ? 'Ocultar observación' : 'Agregar observación'}
                     </button>
+                    {errores[item.id] && (
+                      <span className="text-xs text-bajo">No se guardó: {errores[item.id]}. Vuelve a intentarlo.</span>
+                    )}
                     {guardados[item.id] && (
                       <span className="text-xs text-alto flex items-center gap-1">
                         <Check size={11} /> Guardado

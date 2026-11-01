@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { BotonGenerarChecklistSaber } from '@/components/espiral-crecimiento/boton-generar-checklist-saber';
 import { ChecklistSaber } from '@/components/espiral-crecimiento/checklist-saber';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, GraduationCap } from 'lucide-react';
@@ -75,6 +76,8 @@ export default async function SaberColaboradorPage({ params }: { params: { id: s
         <p className="text-sm text-marmol-500 mt-1">{colaborador.nombre_completo}</p>
       </div>
 
+      {puedeEditar && <BotonGenerarChecklistSaber colaboradorId={params.id} />}
+
       {BLOQUES.map(({ valor, titulo }) => (
         <div key={valor} className="card p-5 space-y-3">
           <h2 className="font-display font-semibold text-secundario">{titulo}</h2>
@@ -105,6 +108,7 @@ export default async function SaberColaboradorPage({ params }: { params: { id: s
           )}
 
           <ChecklistSaber
+            key={`${valor}-${verificacionesPorBloque(valor).length}`}
             colaboradorId={params.id}
             bloque={valor}
             itemsIniciales={verificacionesPorBloque(valor)}

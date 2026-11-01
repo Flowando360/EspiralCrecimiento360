@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { parsearPerfilCargo, type PerfilCargoParseado } from '@/lib/importador-perfil-cargo';
 import type { Database } from '@/types/database.types';
 
@@ -184,4 +185,42 @@ export async function guardarPerfilCargoImportado(datos: PerfilCargoParseado) {
 
   revalidatePath('/administracion/cargos');
   return { ok: true as const, cargoId, esNuevo: !existente };
+}
+
+
+/**
+ * Crea un cargo desde cero (sin importar el Excel FORSST 61) y lleva a su
+ * pantalla de edición, donde se completan funciones, habilidades, riesgos,
+ * exámenes y EPP. Solo admin_th.
+ */
+export async function crearCargoNuevo(input: { nombre: string; procesoArea?: string; tienePersonalACargo: boolean }) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+
+  const nombre = input.nombre?.trim();
+  if (!nombre) return { ok: false as const, error: 'El nombre del cargo es requerido' };
+
+  const supabase = createClient();
+  const { data: existente } = await supabase
+    .from('cargos')
+    .select('id')
+    .eq('empresa_id', perfil.empresa_id)
+    .ilike('nombre', nombre)
+    .maybeSingle();
+  if (existente) return { ok: false as const, error: 'Ya existe un cargo con ese nombre' };
+
+  const { data, error } = await supabase
+    .from('cargos')
+    .insert({
+      empresa_id: perfil.empresa_id,
+      nombre,
+      proceso_area: input.procesoArea?.trim() || null,
+      tiene_personal_a_cargo: input.tienePersonalACargo,
+    })
+    .select('id')
+    .single();
+  if (error) return { ok: false as const, error: error.message };
+
+  revalidatePath('/administracion/cargos');
+  redirect(`/administracion/cargos/${data.id}/editar`);
 }

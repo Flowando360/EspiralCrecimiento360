@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { formatearFecha } from '@/lib/utils';
@@ -33,6 +33,16 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
     (perfil.rol === 'lider' && (colaborador.lider_id === perfil.colaborador_id || colaborador.id === perfil.colaborador_id)) ||
     (perfil.rol === 'colaborador' && perfil.colaborador_id === colaborador.id);
   if (!puedeVer) notFound();
+
+  // Manual de funciones del cargo (lo que se le asignó al colaborador): se muestra
+  // en "Perfil de cargo" para que TH, el líder y la propia persona lo vean.
+  const { data: funcionesCargo } = colaborador.cargo?.id
+    ? await supabase
+        .from('cargo_funciones_principales')
+        .select('id, funcion, proceso, periodicidad')
+        .eq('cargo_id', colaborador.cargo.id)
+        .order('orden')
+    : { data: [] as { id: string; funcion: string; proceso: string | null; periodicidad: string | null }[] };
 
   // El historial (movimientos + entrevista de salida) es de manejo exclusivo
   // de Talento Humano y del líder directo — sin policy de RLS para gerencia
@@ -94,7 +104,12 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
     ]);
 
   const cargo = colaborador.cargo as any;
-  const lider = colaborador.lider as any;
+  let lider = colaborador.lider as any;
+  // El propio colaborador no puede leer la fila de su líder (privacidad), pero sí ver su nombre.
+  if (!lider?.nombre_completo && colaborador.lider_id && perfil.rol === 'colaborador') {
+    const { data: nombreLider } = await createAdminClient().from('colaboradores').select('id, nombre_completo').eq('id', colaborador.lider_id).maybeSingle();
+    lider = nombreLider ?? lider;
+  }
   const totalInduccion = induccionItems?.length ?? 0;
   const completadosInduccion = induccionItems?.filter((i) => i.completado).length ?? 0;
   const pctInduccion = totalInduccion > 0 ? Math.round((completadosInduccion / totalInduccion) * 100) : null;
@@ -202,6 +217,23 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
               <dd className="text-marmol-800 font-medium">{cargo?.tiene_personal_a_cargo ? 'Sí' : 'No'}</dd>
             </div>
           </dl>
+          <div className="pt-3 mt-3 border-t border-marmol-100">
+            <h3 className="text-xs uppercase tracking-wide text-marmol-400 mb-2">Manual de funciones</h3>
+            {funcionesCargo && funcionesCargo.length > 0 ? (
+              <ul className="space-y-1.5 text-sm text-marmol-700 list-disc pl-4">
+                {funcionesCargo.map((f) => (
+                  <li key={f.id}>
+                    {f.funcion}
+                    {(f.proceso || f.periodicidad) && (
+                      <span className="text-xs text-marmol-400"> · {[f.proceso, f.periodicidad].filter(Boolean).join(' · ')}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-marmol-400">Este cargo aún no tiene funciones definidas.</p>
+            )}
+          </div>
         </div>
 
         {/* Inducción */}
@@ -241,7 +273,9 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
                 <li key={h.id} className="flex justify-between border-b border-marmol-100 pb-2 last:border-0">
                   <div>
                     <p className="font-medium text-marmol-800">{h.titulo}</p>
-                    <p className="text-xs text-marmol-400 capitalize">{h.tipo?.replace(/_/g, ' ')}</p>
+                    <p className="text-xs text-marmol-400">
+                      {({ academica: 'Formación académica', certificacion: 'Certificación', curso: 'Curso', experiencia_laboral: 'Experiencia laboral' } as Record<string, string>)[h.tipo ?? ""] ?? h.tipo?.replace(/_/g, ' ')}
+                    </p>
                   </div>
                   {h.fecha_vencimiento && (
                     <span className="text-xs text-medio">Vence: {formatearFecha(h.fecha_vencimiento)}</span>

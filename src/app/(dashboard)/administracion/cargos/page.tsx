@@ -28,7 +28,12 @@ export default async function AdminCargosPage() {
             destrezas y experiencia mínima por cargo.
           </p>
         </div>
-        <ImportadorPerfilCargo />
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link href="/administracion/cargos/nuevo" className="rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-sm font-medium px-4 py-2">
+            + Nuevo cargo
+          </Link>
+          <ImportadorPerfilCargo />
+        </div>
       </div>
 
       {!cargos || cargos.length === 0 ? (

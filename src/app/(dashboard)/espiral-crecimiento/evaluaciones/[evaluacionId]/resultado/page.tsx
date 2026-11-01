@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { FormularioAccionPdi, type SugerenciaPdi } from '@/components/espiral-crecimiento/formulario-accion-pdi';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, FileText, HandshakeIcon, Target } from 'lucide-react';
-import { formatearFecha, cn } from '@/lib/utils';
+import { formatearFecha, cn, primero } from '@/lib/utils';
 
 type Bloque = 'competencias_organizacionales' | 'competencias_funcionales' | 'competencias_liderazgo' | 'roles_y_funciones' | 'cultura';
 
@@ -62,7 +63,7 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
     (perfil.rol === 'colaborador' && perfil.colaborador_id === colaborador.id);
   if (!puedeVer) notFound();
 
-  const resultado = (evaluacion.resultado as any)?.[0];
+  const resultado = primero(evaluacion.resultado as any) as any;
 
   const [{ data: ciclo }, { data: lider }, { data: tareas }, { data: brief }, { data: planes }] = await Promise.all([
     supabase.from('ciclos_evaluacion').select('nombre, fecha_apertura, fecha_cierre_respuestas').eq('id', evaluacion.ciclo_id).maybeSingle(),
@@ -117,6 +118,16 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
       .filter((i) => i.bloque === bloque)
       .sort((a, b) => a.orden - b.orden),
   })).filter((g) => g.items.length > 0);
+
+  // Brechas sugeridas para el PDI: ítems que el líder calificó en 2 o menos.
+  const sugerenciasPdi: SugerenciaPdi[] = Array.from(porItem.values())
+    .filter((i) => i.lider != null && i.lider <= 2)
+    .map((i) => ({
+      origen: i.bloque === 'cultura' ? 'deber' : 'hacer',
+      brecha: `${i.titulo}: el líder calificó ${i.lider}${i.auto != null ? ` (autoevaluación ${i.auto})` : ''}`,
+    }));
+  const puedeGestionarPdi =
+    perfil.rol === 'admin_th' || (perfil.rol === 'lider' && colaborador.lider_id === perfil.colaborador_id);
 
   const puedeEditarRetro =
     perfil.rol === 'admin_th' || (perfil.rol === 'lider' && colaborador.lider_id === perfil.colaborador_id);
@@ -312,6 +323,9 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
               ))}
             </tbody>
           </table>
+        )}
+        {puedeGestionarPdi && (
+          <FormularioAccionPdi colaboradorId={colaborador.id} cicloId={evaluacion.ciclo_id} sugerencias={sugerenciasPdi} />
         )}
       </div>
     </div>

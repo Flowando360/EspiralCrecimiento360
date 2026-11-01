@@ -6,7 +6,7 @@ import { GenerarEvaluacionesPanel } from '@/components/espiral-crecimiento/gener
 import { EditarCiclo } from '@/components/espiral-crecimiento/editar-ciclo';
 import { notFound } from 'next/navigation';
 import { FileText, HandshakeIcon } from 'lucide-react';
-import { cn, formatearFecha } from '@/lib/utils';
+import { cn, formatearFecha, primero } from '@/lib/utils';
 
 // Etapa de cada evaluación dentro del ciclo, derivada de datos que ya
 // existen (porcentaje_avance, si tiene brief guardado, si está publicada)
@@ -170,10 +170,10 @@ export default async function CicloDetallePage({ params }: { params: { id: strin
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <SemaforoBadge nivel={e.resultado?.[0]?.semaforo_hacer} />
+                  <SemaforoBadge nivel={primero(e.resultado as any)?.semaforo_hacer} />
                 </td>
                 <td className="px-4 py-3">
-                  <SemaforoBadge nivel={e.resultado?.[0]?.semaforo_deber} />
+                  <SemaforoBadge nivel={primero(e.resultado as any)?.semaforo_deber} />
                 </td>
                 <td className="px-4 py-3">
                   <Link
