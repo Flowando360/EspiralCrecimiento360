@@ -34,6 +34,16 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
     (perfil.rol === 'colaborador' && perfil.colaborador_id === colaborador.id);
   if (!puedeVer) notFound();
 
+  // Manual de funciones del cargo (lo que se le asignó al colaborador): se muestra
+  // en "Perfil de cargo" para que TH, el líder y la propia persona lo vean.
+  const { data: funcionesCargo } = colaborador.cargo?.id
+    ? await supabase
+        .from('cargo_funciones_principales')
+        .select('id, funcion, proceso, periodicidad')
+        .eq('cargo_id', colaborador.cargo.id)
+        .order('orden')
+    : { data: [] as { id: string; funcion: string; proceso: string | null; periodicidad: string | null }[] };
+
   // El historial (movimientos + entrevista de salida) es de manejo exclusivo
   // de Talento Humano y del líder directo — sin policy de RLS para gerencia
   // ni para el propio colaborador, así que tampoco se enlaza para ellos aquí.
@@ -202,6 +212,23 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
               <dd className="text-marmol-800 font-medium">{cargo?.tiene_personal_a_cargo ? 'Sí' : 'No'}</dd>
             </div>
           </dl>
+          <div className="pt-3 mt-3 border-t border-marmol-100">
+            <h3 className="text-xs uppercase tracking-wide text-marmol-400 mb-2">Manual de funciones</h3>
+            {funcionesCargo && funcionesCargo.length > 0 ? (
+              <ul className="space-y-1.5 text-sm text-marmol-700 list-disc pl-4">
+                {funcionesCargo.map((f) => (
+                  <li key={f.id}>
+                    {f.funcion}
+                    {(f.proceso || f.periodicidad) && (
+                      <span className="text-xs text-marmol-400"> · {[f.proceso, f.periodicidad].filter(Boolean).join(' · ')}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-marmol-400">Este cargo aún no tiene funciones definidas.</p>
+            )}
+          </div>
         </div>
 
         {/* Inducción */}

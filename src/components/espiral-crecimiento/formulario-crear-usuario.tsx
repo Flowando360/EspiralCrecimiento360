@@ -217,7 +217,7 @@ export function FormularioCrearUsuario({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="correo@marmolesyservicios.com"
+              placeholder="correo@empresa.com"
               className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
             />
           </div>

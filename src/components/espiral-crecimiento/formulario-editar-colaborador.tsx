@@ -122,7 +122,7 @@ export function FormularioEditarColaborador({
           </div>
           <div className="sm:col-span-2">
             <label className={label}>Correo</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@marmolesyservicios.com" className={campo} />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@empresa.com" className={campo} />
             <p className="text-[13px] text-marmol-400 mt-1">
               Este es el correo de contacto de la persona. La cuenta para iniciar sesión se edita aparte, en Usuarios y roles.
             </p>
