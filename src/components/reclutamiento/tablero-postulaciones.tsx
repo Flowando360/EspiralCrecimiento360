@@ -43,12 +43,25 @@ type Postulacion = {
   descartado_motivo: string | null;
   candidato: { id: string; nombre_completo: string; correo: string | null; telefono: string | null; hoja_vida_url: string | null; numero_documento?: string | null };
   entrevistas: Entrevista[];
+  historico?: { titulo: string; etapa: string; motivo: string | null; fecha: string }[];
 };
 
 // Las 5 columnas visibles del tablero, en el orden pedido. "Contratado" y
 // "Descartado" son estados finales del proceso: se manejan con botones
 // dentro de la tarjeta (no como columnas aparte) y se listan compactos
 // debajo del tablero para no perder el historial.
+const ETIQUETA_ETAPA_HISTORICO: Record<string, string> = {
+  recibido: 'Recibido',
+  preseleccionado: 'Preseleccionado',
+  evaluacion_lider: 'En evaluación del líder',
+  devuelto_th: 'Devuelto por el líder',
+  entrevista: 'Llegó a entrevista',
+  prueba: 'Llegó a pruebas',
+  oferta: 'Recibió oferta',
+  contratado: 'Contratado',
+  descartado: 'Descartado',
+};
+
 const COLUMNAS: { etapa: string; titulo: string }[] = [
   { etapa: 'recibido', titulo: 'Postulados' },
   { etapa: 'preseleccionado', titulo: 'Filtrados / Preseleccionados' },
@@ -356,6 +369,18 @@ function TarjetaPostulacion({
         </Link>
         <p className="text-xs text-marmol-400">{[candidato.correo, candidato.telefono].filter(Boolean).join(' · ') || 'Sin datos de contacto'}</p>
       </div>
+
+      {postulacion.historico && postulacion.historico.length > 0 && (
+        <Link
+          href={`/reclutamiento/candidatos/${candidato.id}`}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="block rounded-lg bg-amber-50 border border-amber-200 px-2 py-1.5 text-[12px] text-amber-900 hover:bg-amber-100"
+        >
+          <span className="font-medium">Ya participó antes ({postulacion.historico.length}):</span>{' '}
+          {ETIQUETA_ETAPA_HISTORICO[postulacion.historico[0]!.etapa] ?? postulacion.historico[0]!.etapa} en «{postulacion.historico[0]!.titulo}»
+          {postulacion.historico[0]!.motivo ? ` — ${postulacion.historico[0]!.motivo}` : ''}. Ver histórico
+        </Link>
+      )}
 
       <CalificacionEstrellas
         valor={postulacion.calificacion}

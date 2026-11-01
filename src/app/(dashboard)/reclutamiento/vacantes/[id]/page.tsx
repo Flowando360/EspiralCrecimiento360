@@ -77,6 +77,24 @@ export default async function DetalleVacantePage({ params }: { params: { id: str
       .order('nombre_completo'),
   ]);
 
+  // Procesos anteriores de cada candidato (en otras vacantes): TH ve de un vistazo si ya participó antes.
+  const idsCandidatosVacante = (postulaciones ?? []).map((p: any) => p.candidato.id);
+  const { data: previas } = idsCandidatosVacante.length
+    ? await supabase
+        .from('postulaciones')
+        .select('candidato_id, etapa, descartado_motivo, created_at, vacante:vacantes(titulo)')
+        .in('candidato_id', idsCandidatosVacante)
+        .neq('vacante_id', params.id)
+        .order('created_at', { ascending: false })
+    : { data: [] as any[] };
+  const historicoPorCandidato = new Map<string, { titulo: string; etapa: string; motivo: string | null; fecha: string }[]>();
+  for (const x of (previas ?? []) as any[]) {
+    const lista = historicoPorCandidato.get(x.candidato_id) ?? [];
+    lista.push({ titulo: x.vacante?.titulo ?? 'Otra vacante', etapa: x.etapa, motivo: x.descartado_motivo, fecha: x.created_at });
+    historicoPorCandidato.set(x.candidato_id, lista);
+  }
+  const postulacionesConHistorico = (postulaciones ?? []).map((p: any) => ({ ...p, historico: historicoPorCandidato.get(p.candidato.id) ?? [] }));
+
   const idsYaPostulados = new Set((postulaciones ?? []).map((p: any) => p.candidato.id));
   const candidatosDisponibles = (candidatosEmpresa ?? []).filter((c) => !idsYaPostulados.has(c.id));
 
@@ -134,7 +152,7 @@ export default async function DetalleVacantePage({ params }: { params: { id: str
       <TableroPostulaciones
         vacanteId={vacante.id}
         cargoId={(vacante.cargo as any)?.id ?? ''}
-        postulaciones={(postulaciones ?? []) as any}
+        postulaciones={postulacionesConHistorico as any}
         colaboradores={colaboradores ?? []}
         candidatosDisponibles={candidatosDisponibles}
         puedeAdministrar={perfil.rol === 'admin_th'}

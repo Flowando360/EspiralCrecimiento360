@@ -6,6 +6,7 @@ import { notFound, redirect } from 'next/navigation';
 import { PanelReferencias } from '@/components/reclutamiento/panel-referencias';
 import { EditarCandidato, SubirHojaVidaCandidato } from '@/components/reclutamiento/editar-candidato';
 import { CalificacionEstrellas } from '@/components/reclutamiento/calificacion-estrellas';
+import { formatearFecha } from '@/lib/utils';
 import { ArrowLeft, User, FileText, Briefcase } from 'lucide-react';
 
 const ETAPA_LABEL: Record<string, string> = {
@@ -35,7 +36,7 @@ export default async function FichaCandidatoPage({ params }: { params: { id: str
   const [{ data: postulaciones }, { data: referencias }, urlHojaVida] = await Promise.all([
     supabase
       .from('postulaciones')
-      .select('id, etapa, calificacion, created_at, vacante:vacantes(id, titulo)')
+      .select('id, etapa, calificacion, created_at, updated_at, descartado_motivo, evaluacion_lider, notas, vacante:vacantes(id, titulo)')
       .eq('candidato_id', params.id)
       .order('created_at', { ascending: false }),
     supabase
@@ -99,21 +100,40 @@ export default async function FichaCandidatoPage({ params }: { params: { id: str
 
       <div className="card p-5">
         <h2 className="font-display font-semibold text-secundario mb-3 flex items-center gap-1.5">
-          <Briefcase size={16} /> Postulaciones
+          <Briefcase size={16} /> Histórico de procesos de selección{postulaciones && postulaciones.length > 0 ? ` (${postulaciones.length})` : ''}
         </h2>
         {!postulaciones || postulaciones.length === 0 ? (
           <p className="text-sm text-marmol-400">Sin postulaciones registradas.</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {postulaciones.map((p: any) => (
-              <li key={p.id}>
-                <Link href={`/reclutamiento/vacantes/${p.vacante.id}`} className="flex items-center justify-between text-sm hover:text-flow-600">
-                  <span>{p.vacante.titulo}</span>
-                  <span className="flex items-center gap-2 text-xs text-marmol-400">
+              <li key={p.id} className="rounded-lg border border-marmol-100 p-3 space-y-1.5">
+                <Link href={`/reclutamiento/vacantes/${p.vacante.id}`} className="flex items-center justify-between gap-3 text-sm hover:text-flow-600">
+                  <span className="font-medium text-marmol-800">{p.vacante.titulo}</span>
+                  <span className="flex items-center gap-2 text-xs text-marmol-500 shrink-0">
                     {ETAPA_LABEL[p.etapa]}
                     {p.calificacion != null && <CalificacionEstrellas valor={p.calificacion} soloLectura tamano={12} />}
                   </span>
                 </Link>
+                <p className="text-xs text-marmol-400">
+                  Se postuló el {formatearFecha(p.created_at)}
+                  {p.etapa === 'contratado' || p.etapa === 'descartado' ? ` · cerrado el ${formatearFecha(p.updated_at)}` : ''}
+                </p>
+                {p.descartado_motivo && (
+                  <p className="text-xs text-marmol-600">
+                    <span className="font-medium">Motivo del descarte:</span> {p.descartado_motivo}
+                  </p>
+                )}
+                {p.evaluacion_lider && (
+                  <p className="text-xs text-marmol-600">
+                    <span className="font-medium">Apreciación del líder:</span> {p.evaluacion_lider}
+                  </p>
+                )}
+                {p.notas && (
+                  <p className="text-xs text-marmol-600">
+                    <span className="font-medium">Notas:</span> {p.notas}
+                  </p>
+                )}
               </li>
             ))}
           </ul>

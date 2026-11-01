@@ -11,6 +11,7 @@ import { z } from 'zod';
 // una policy de base de datos.
 
 import { VERSION_POLITICA } from '@/lib/reclutamiento/politica';
+import { buscarCandidatoExistente } from '@/lib/reclutamiento/duplicados';
 
 const PostulacionSchema = z.object({
   vacanteId: z.string().uuid(),
@@ -78,28 +79,55 @@ export async function enviarPostulacion(formData: FormData) {
   const conservarHasta = new Date();
   conservarHasta.setMonth(conservarHasta.getMonth() + (autorizaBanco ? 12 : 6));
 
-  const { data: candidato, error: errorCandidato } = await supabase
-    .from('candidatos')
-    .insert({
-      empresa_id: vacante.empresa_id,
-      nombre_completo: parsed.data.nombreCompleto,
-      numero_documento: parsed.data.numeroDocumento || null,
-      correo: parsed.data.correo || null,
-      telefono: parsed.data.telefono || null,
-      linkedin_url: parsed.data.linkedinUrl || null,
-      hoja_vida_url: hojaVidaUrl,
-      origen: 'postulacion_publica',
-      autorizacion_banco: autorizaBanco,
-      conservar_hasta: conservarHasta.toISOString().slice(0, 10),
-    })
-    .select('id')
-    .single();
+  // ¿Ya existe esta persona? (mismo documento o correo). Si ya está, se reutiliza su registro para no
+  // perder el histórico de procesos anteriores; nunca se acorta su plazo de conservación.
+  const existente = await buscarCandidatoExistente(supabase, vacante.empresa_id, parsed.data.numeroDocumento, parsed.data.correo);
+  const fechaConservar = conservarHasta.toISOString().slice(0, 10);
+  let candidatoId: string;
+  const esNuevo = !existente;
 
-  if (errorCandidato) return { ok: false as const, error: errorCandidato.message };
+  if (existente) {
+    const { data: yaPostulado } = await supabase
+      .from('postulaciones')
+      .select('id')
+      .eq('vacante_id', vacante.id)
+      .eq('candidato_id', existente.id)
+      .maybeSingle();
+    if (yaPostulado) return { ok: false as const, error: 'Ya tenemos tu postulación para esta vacante.' };
+
+    candidatoId = existente.id;
+    const actualizar: { autorizacion_banco: boolean; conservar_hasta: string; telefono?: string; linkedin_url?: string; hoja_vida_url?: string } = {
+      autorizacion_banco: Boolean(existente.autorizacion_banco) || autorizaBanco,
+      conservar_hasta: existente.conservar_hasta && existente.conservar_hasta > fechaConservar ? existente.conservar_hasta : fechaConservar,
+    };
+    if (parsed.data.telefono) actualizar.telefono = parsed.data.telefono;
+    if (parsed.data.linkedinUrl) actualizar.linkedin_url = parsed.data.linkedinUrl;
+    if (hojaVidaUrl) actualizar.hoja_vida_url = hojaVidaUrl; // la versión anterior queda en el almacenamiento
+    await supabase.from('candidatos').update(actualizar).eq('id', existente.id);
+  } else {
+    const { data: candidato, error: errorCandidato } = await supabase
+      .from('candidatos')
+      .insert({
+        empresa_id: vacante.empresa_id,
+        nombre_completo: parsed.data.nombreCompleto,
+        numero_documento: parsed.data.numeroDocumento || null,
+        correo: parsed.data.correo || null,
+        telefono: parsed.data.telefono || null,
+        linkedin_url: parsed.data.linkedinUrl || null,
+        hoja_vida_url: hojaVidaUrl,
+        origen: 'postulacion_publica',
+        autorizacion_banco: autorizaBanco,
+        conservar_hasta: fechaConservar,
+      })
+      .select('id')
+      .single();
+    if (errorCandidato) return { ok: false as const, error: errorCandidato.message };
+    candidatoId = candidato.id;
+  }
 
   const { error: errorAutorizacion } = await supabase.from('autorizaciones_tratamiento').insert({
     empresa_id: vacante.empresa_id,
-    candidato_id: candidato.id,
+    candidato_id: candidatoId,
     vacante_id: vacante.id,
     version_politica: VERSION_POLITICA,
     finalidades: autorizaBanco
@@ -109,14 +137,14 @@ export async function enviarPostulacion(formData: FormData) {
     canal: 'formulario_publico',
   });
   if (errorAutorizacion) {
-    // Sin evidencia de autorización no puede quedar el candidato guardado.
-    await supabase.from('candidatos').delete().eq('id', candidato.id);
+    // Sin evidencia de autorización no puede quedar un candidato NUEVO guardado (uno existente conserva su histórico).
+    if (esNuevo) await supabase.from('candidatos').delete().eq('id', candidatoId);
     return { ok: false as const, error: 'No se pudo registrar tu autorización: ' + errorAutorizacion.message };
   }
 
   const { error: errorPostulacion } = await supabase
     .from('postulaciones')
-    .insert({ vacante_id: vacante.id, candidato_id: candidato.id });
+    .insert({ vacante_id: vacante.id, candidato_id: candidatoId });
 
   if (errorPostulacion) return { ok: false as const, error: errorPostulacion.message };
 

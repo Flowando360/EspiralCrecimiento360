@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { buscarCandidatoExistente } from '@/lib/reclutamiento/duplicados';
 
 const RUTA = '/reclutamiento';
 
@@ -51,7 +52,7 @@ export async function crearVacante(input: z.infer<typeof VacanteSchema>) {
 
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(RUTA);
-  return { ok: true as const, id: data.id as string };
+  return { ok: true as const, id: data.id as string, yaExistia: false as const };
 }
 
 const ESTADOS_VACANTE = ['abierta', 'pausada', 'cancelada', 'cubierta'] as const;
@@ -134,6 +135,21 @@ export async function crearCandidato(input: z.infer<typeof CandidatoSchema>, vac
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
 
   const supabase = createClient();
+
+  // Si la persona ya está en el banco (mismo documento o correo) se usa ese registro: así conserva su histórico.
+  const existente = await buscarCandidatoExistente(supabase, perfil.empresa_id, parsed.data.numeroDocumento, parsed.data.correo);
+  if (existente) {
+    if (vacanteId) {
+      const { error: errorPostulacion } = await supabase.from('postulaciones').insert({ vacante_id: vacanteId, candidato_id: existente.id });
+      if (errorPostulacion) {
+        return { ok: false as const, error: errorPostulacion.code === '23505' ? 'Esta persona ya está postulada a esta vacante' : errorPostulacion.message };
+      }
+      revalidatePath(`${RUTA}/vacantes/${vacanteId}`);
+    }
+    revalidatePath(`${RUTA}/candidatos`);
+    return { ok: true as const, id: existente.id as string, yaExistia: true as const };
+  }
+
   const { data, error } = await supabase
     .from('candidatos')
     .insert({

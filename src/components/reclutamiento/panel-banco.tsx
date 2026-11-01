@@ -86,7 +86,7 @@ export function PanelBanco({ candidatos, solicitudes }: { candidatos: CandidatoB
       <section className="card p-4 space-y-3">
         <div>
           <h2 className="font-display font-semibold text-secundario text-sm">Disponibilidad para otros cargos</h2>
-          <p className="text-xs text-marmol-400">Marca a quienes autorizaron el banco de talento y siguen disponibles para otra vacante.</p>
+          <p className="text-xs text-marmol-400">Marca a quienes autorizaron el banco de talento y siguen disponibles para otra vacante. El histórico de cada persona se conserva siempre: nada se borra solo, y la supresión de datos es una decisión manual de Talento Humano.</p>
         </div>
         {lista.length === 0 ? (
           <p className="text-sm text-marmol-500">Todavía no hay candidatos.</p>
@@ -96,7 +96,7 @@ export function PanelBanco({ candidatos, solicitudes }: { candidatos: CandidatoB
               <tr className="text-left text-xs text-marmol-400 border-b border-marmol-100">
                 <th className="font-medium py-1.5">Candidato</th>
                 <th className="font-medium py-1.5">Origen</th>
-                <th className="font-medium py-1.5">Conservar hasta</th>
+                <th className="font-medium py-1.5">Revisar conservación desde</th>
                 <th className="font-medium py-1.5">Disponible</th>
               </tr>
             </thead>

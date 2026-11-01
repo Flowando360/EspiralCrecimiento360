@@ -16,10 +16,11 @@ Reglas: se prueba solo en **CONVERGIA**; todo registro de prueba lleva el prefij
 4. **Migración 0107** (índice único de `respuestas_evaluacion`): ya aplicada en Supabase.
 
 ## Registros PRU adicionales (Reclutamiento)
-Vacante "PRU Analista de Nómina — convocatoria" (cubierta), candidatos "PRU Ana Candidata" y "PRU Pedro Candidato" (ambos contratados y ya creados como colaboradores), entrevista, referencia "PRU Jefe Anterior" y una solicitud de supresión de datos (marcada atendida).
+Vacantes "PRU Analista de Nómina — convocatoria" (cubierta), "… segunda convocatoria" y "… tercera convocatoria"; candidata "PRU Rosa Rechazada" (descartada y luego repostulada), candidatos "PRU Ana Candidata" y "PRU Pedro Candidato" (ambos contratados y ya creados como colaboradores), entrevista, referencia "PRU Jefe Anterior" y una solicitud de supresión de datos (marcada atendida).
 
-## Decisión tuya pendiente (Reclutamiento)
-- **Supresión de datos del titular:** hoy "Marcar atendida" solo registra la respuesta; **no borra** los datos del candidato. Define si debe suprimirse automáticamente o seguir siendo un paso manual de TH.
+## Decisión tomada (Reclutamiento)
+- **Supresión de datos del titular:** sigue siendo un paso **manual de TH**; "Marcar atendida" solo registra la respuesta.
+- **Histórico de candidatos:** se conserva siempre. Una persona rechazada puede volver a postularse: el sistema la reconoce por documento o correo (sin duplicarla), muestra «Ya participó antes» en el tablero y deja todos sus procesos, motivos de descarte y apreciaciones del líder en su ficha. Nada se borra solo.
 
 ## Hallazgos corregidos en Reclutamiento
 - Evaluadores: solo líderes con usuario de acceso (antes se ofrecía a cualquiera, que luego no veía al candidato).
