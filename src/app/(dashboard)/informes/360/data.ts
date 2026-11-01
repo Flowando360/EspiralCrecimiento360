@@ -1,3 +1,4 @@
+import { primero } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual, type PerfilActual } from '@/lib/supabase/get-perfil-actual';
 
@@ -103,10 +104,10 @@ export async function obtenerInforme360(colaboradorId: string) {
 
   // La más reciente con resultado calculado (no necesariamente la primera del arreglo).
   const evalConResultado = ((evaluacion ?? []) as any[])
-    .filter((e) => e.resultado?.[0])
+    .filter((e) => primero(e.resultado))
     .sort(
       (a, b) =>
-        new Date(b.resultado[0].actualizado_en).getTime() - new Date(a.resultado[0].actualizado_en).getTime()
+        new Date(primero<any>(b.resultado).actualizado_en).getTime() - new Date(primero<any>(a.resultado).actualizado_en).getTime()
     )[0];
 
   let detallePorEvaluador: DetalleEvaluador[] = [];
@@ -128,7 +129,7 @@ export async function obtenerInforme360(colaboradorId: string) {
       fecha_ingreso: co.fecha_ingreso,
     },
     ciclo_nombre: evalConResultado?.ciclo?.nombre ?? null,
-    resultado: evalConResultado?.resultado?.[0] ?? null,
+    resultado: (primero(evalConResultado?.resultado) as any) ?? null,
     detallePorEvaluador,
     saber: saber
       ? {

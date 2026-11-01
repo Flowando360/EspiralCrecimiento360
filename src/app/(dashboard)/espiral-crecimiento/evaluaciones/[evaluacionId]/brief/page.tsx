@@ -1,3 +1,4 @@
+import { primero } from '@/lib/utils';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
@@ -25,7 +26,7 @@ export default async function BriefPage({ params }: { params: { evaluacionId: st
   if (!evaluacion) notFound();
 
   const colaborador = evaluacion.colaborador as any;
-  const resultado = (evaluacion.resultado as any)?.[0];
+  const resultado = primero(evaluacion.resultado as any) as any;
 
   if (!colaborador || colaborador.empresa_id !== perfil.empresa_id) notFound();
 
