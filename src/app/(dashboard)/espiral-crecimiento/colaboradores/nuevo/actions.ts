@@ -97,5 +97,16 @@ export async function crearColaborador(input: z.infer<typeof CrearColaboradorSch
 
   if (error) return { ok: false as const, error: error.message };
 
+  // El ciclo laboral empieza aquí: se deja el ingreso en la línea de tiempo del historial.
+  const { data: cargoIngreso } = await supabase.from('cargos').select('nombre').eq('id', d.cargoId).maybeSingle();
+  await supabase.from('historial_movimientos').insert({
+    colaborador_id: data.id,
+    tipo: 'ingreso',
+    cargo_nuevo_id: d.cargoId,
+    descripcion: `Ingreso como ${cargoIngreso?.nombre ?? 'el cargo asignado'}`,
+    fecha: d.fechaIngreso,
+    registrado_por: perfil.usuario_id,
+  });
+
   redirect(`/espiral-crecimiento/colaboradores/${data.id}`);
 }

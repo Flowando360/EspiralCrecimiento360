@@ -268,7 +268,9 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
                 <li key={h.id} className="flex justify-between border-b border-marmol-100 pb-2 last:border-0">
                   <div>
                     <p className="font-medium text-marmol-800">{h.titulo}</p>
-                    <p className="text-xs text-marmol-400 capitalize">{h.tipo?.replace(/_/g, ' ')}</p>
+                    <p className="text-xs text-marmol-400">
+                      {({ academica: 'Formación académica', certificacion: 'Certificación', curso: 'Curso', experiencia_laboral: 'Experiencia laboral' } as Record<string, string>)[h.tipo ?? ""] ?? h.tipo?.replace(/_/g, ' ')}
+                    </p>
                   </div>
                   {h.fecha_vencimiento && (
                     <span className="text-xs text-medio">Vence: {formatearFecha(h.fecha_vencimiento)}</span>
