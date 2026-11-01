@@ -46,3 +46,10 @@ Servidor local con puente a Supabase (el proxy de la nube no deja salir al servi
 - **Cuentas:** las 41 personas de Mármoles reutilizaron su cuenta (conservan contraseña); 33 cuentas nuevas de la Guía del Flow con contraseña aleatoria (deben usar "olvidé mi contraseña"); usuario de Diana en Mármoles: `diana.said.mys`.
 - **Pendiente:** (1) habilitar `api.vercel.com` y guardar `VERCEL_TOKEN`; (2) en Supabase de Espiral, Authentication → URL Configuration: agregar `https://guia-del-flow.vercel.app`; (3) apuntar el proyecto GuiaDelFlow de Vercel a Espiral y prueba punta a punta con una invitación PRU; (4) copia final (delta) justo antes del cambio; (5) solo entonces borrar Círculo.
 - **Nota:** el origen no tenía respuestas de evaluación (Hacer/Deber en blanco para Mármoles); el Ser sí migró completo.
+
+## Estado de producción (2026-11-01, tarde)
+- La Guía del Flow ya escribe en la base de Espiral (despliegue nuevo). El secreto compartido `GUIA_FLOW_PANEL_SECRET` se rotó en ambos proyectos y `NEXT_PUBLIC_SITE_URL` de la Guía quedó en `https://guia-del-flow.vercel.app`.
+- `ANTHROPIC_API_KEY` configurada en Espiral (Vercel); el asistente de Nexa responde en producción. Límite de gasto en Anthropic: US$ 20.
+- Correo de Supabase Auth por Resend (smtp.resend.com, remitente notificaciones@flowando.com): prueba de "restablecer contraseña" con un gmail externo OK.
+- Rollback disponible: Espiral `dpl_FiuPqXUgcLxSe8GcoJy32zN6JJ5K`, Guía del Flow `dpl_8ptzUa6rWSzZXVjN99vc3CSw1eHc`. Círculo sigue desplegado y NO se ha tocado.
+- Pendiente: límite de 60 s al generar Guía + Carta; prueba limpia de invitación; módulos sin probar (Nexa, Procesos, Informes, Administración, Dotación, Proveedor, auditor externo, cron); desactivar cuentas PRU antes de gente real; apagar Círculo (respaldo final antes); plan Pro de Supabase y Vercel.
