@@ -61,3 +61,6 @@ Documentos/
 
 # Captura suelta de otro proyecto, no subir
 Captura de pantalla*.png
+
+# migración Círculo → Espiral: archivos temporales con identificadores, nunca se suben
+scripts/migracion-circulo/f3_*.json
