@@ -40,3 +40,9 @@ Vacantes "PRU Analista de Nómina — convocatoria" (cubierta), "… segunda con
 
 ## Cómo se prueba (para repetirlo)
 Servidor local con puente a Supabase (el proxy de la nube no deja salir al servidor Next), Playwright con usuarios PRU por rol. Variables de entorno de Supabase configuradas en el entorno de la sesión.
+
+## Migración Círculo → Espiral (Mármoles y Servicios)
+- **Hecho (2026-11-01):** carga de Mármoles (43 colaboradores, 41 cargos, 26 competencias, 2 ciclos, 102 alertas, 41 perfiles) y de la Guía del Flow (75 perfiles, 37 cuestionarios, 30 resultados, 60 documentos, 66 archivos). CONVERGIA verificada sin cambios; aislamiento entre empresas comprobado; 68 pantallas recorridas como administrador de Mármoles sin errores.
+- **Cuentas:** las 41 personas de Mármoles reutilizaron su cuenta (conservan contraseña); 33 cuentas nuevas de la Guía del Flow con contraseña aleatoria (deben usar "olvidé mi contraseña"); usuario de Diana en Mármoles: `diana.said.mys`.
+- **Pendiente:** (1) habilitar `api.vercel.com` y guardar `VERCEL_TOKEN`; (2) en Supabase de Espiral, Authentication → URL Configuration: agregar `https://guia-del-flow.vercel.app`; (3) apuntar el proyecto GuiaDelFlow de Vercel a Espiral y prueba punta a punta con una invitación PRU; (4) copia final (delta) justo antes del cambio; (5) solo entonces borrar Círculo.
+- **Nota:** el origen no tenía respuestas de evaluación (Hacer/Deber en blanco para Mármoles); el Ser sí migró completo.
