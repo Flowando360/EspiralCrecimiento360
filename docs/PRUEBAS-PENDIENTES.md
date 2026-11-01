@@ -53,3 +53,10 @@ Servidor local con puente a Supabase (el proxy de la nube no deja salir al servi
 - Correo de Supabase Auth por Resend (smtp.resend.com, remitente notificaciones@flowando.com): prueba de "restablecer contraseña" con un gmail externo OK.
 - Rollback disponible: Espiral `dpl_FiuPqXUgcLxSe8GcoJy32zN6JJ5K`, Guía del Flow `dpl_8ptzUa6rWSzZXVjN99vc3CSw1eHc`. Círculo sigue desplegado y NO se ha tocado.
 - Pendiente: límite de 60 s al generar Guía + Carta; prueba limpia de invitación; módulos sin probar (Nexa, Procesos, Informes, Administración, Dotación, Proveedor, auditor externo, cron); desactivar cuentas PRU antes de gente real; apagar Círculo (respaldo final antes); plan Pro de Supabase y Vercel.
+
+## Actualización (2026-11-01, noche)
+- **Manual en línea** (`src/content/ayuda/`) actualizado: Reclutamiento reescrito; páginas nuevas (resultado de evaluación, nuevo cargo, editar cargo, derechos del titular); preguntas frecuentes y glosario ampliados. **Guía pública del líder de TH** en `/guia-lider-th` (archivos en `public/guia-lider-th/`), con tarjeta en el Centro de Ayuda.
+- **Usuario de pruebas para una persona de Talento Humano** (Luisa) en CONVERGIA, rol `admin_th`, usuario `luisa`. Su correo es provisional y debe cambiarse por el real en Administración → Usuarios y roles. En CONVERGIA no hace falta el prefijo PRU para personas.
+- **Correo de Supabase Auth por Resend** configurado y probado con un correo externo.
+- **Siguiente módulo a probar: Nexa**, luego Procesos y Cumplimiento, Informes, Administración, Dotación, Proveedor, auditor externo y cron. Trabajar con un tope de costo que fije Diana (leer `cost_usd` con `get_session`).
+- **Memoria del proyecto:** `CLAUDE.md` en la raíz resume reglas, arquitectura y estado; se carga sola en cada sesión (nube o PowerShell).
