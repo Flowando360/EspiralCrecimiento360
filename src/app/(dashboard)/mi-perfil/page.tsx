@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { obtenerUrlFirmadaDocumentoColaborador } from '@/lib/supabase/storage';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { formatearFecha } from '@/lib/utils';
@@ -99,7 +99,16 @@ export default async function MiPerfilPage() {
     .order('fecha_entrega', { ascending: false });
 
   const cargo = colaborador?.cargo as any;
-  const lider = colaborador?.lider as any;
+  let lider = colaborador?.lider as any;
+  // Por privacidad el colaborador no puede leer la fila de su líder, pero sí debe saber quién es:
+  // se consulta solo su nombre (el de SU líder directo, ya determinado por su propia ficha).
+  if (!lider?.nombre_completo && perfil.colaborador_id) {
+    const { data: propio } = await supabase.from('colaboradores').select('lider_id').eq('id', perfil.colaborador_id).maybeSingle();
+    if (propio?.lider_id) {
+      const { data: nombreLider } = await createAdminClient().from('colaboradores').select('nombre_completo').eq('id', propio.lider_id).maybeSingle();
+      lider = nombreLider ?? lider;
+    }
+  }
   const evaluacionResultadoId = (resultado?.evaluacion as any)?.id as string | undefined;
 
   return (

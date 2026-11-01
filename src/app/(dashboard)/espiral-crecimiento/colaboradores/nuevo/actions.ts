@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { redirect } from 'next/navigation';
+import { asignarItemsInduccion } from '@/lib/induccion/asignar';
 import { z } from 'zod';
 
 const CrearColaboradorSchema = z.object({
@@ -107,6 +108,14 @@ export async function crearColaborador(input: z.infer<typeof CrearColaboradorSch
     fecha: d.fechaIngreso,
     registrado_por: perfil.usuario_id,
   });
+
+  // Plan de inducción: puntos comunes de la empresa + los específicos del cargo.
+  // Si falla no se bloquea el alta; TH puede completarlo luego.
+  try {
+    await asignarItemsInduccion(supabase, data.id, perfil.empresa_id, d.cargoId, true);
+  } catch {
+    /* el colaborador ya quedó creado */
+  }
 
   redirect(`/espiral-crecimiento/colaboradores/${data.id}`);
 }

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { formatearFecha } from '@/lib/utils';
@@ -104,7 +104,12 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
     ]);
 
   const cargo = colaborador.cargo as any;
-  const lider = colaborador.lider as any;
+  let lider = colaborador.lider as any;
+  // El propio colaborador no puede leer la fila de su líder (privacidad), pero sí ver su nombre.
+  if (!lider?.nombre_completo && colaborador.lider_id && perfil.rol === 'colaborador') {
+    const { data: nombreLider } = await createAdminClient().from('colaboradores').select('id, nombre_completo').eq('id', colaborador.lider_id).maybeSingle();
+    lider = nombreLider ?? lider;
+  }
   const totalInduccion = induccionItems?.length ?? 0;
   const completadosInduccion = induccionItems?.filter((i) => i.completado).length ?? 0;
   const pctInduccion = totalInduccion > 0 ? Math.round((completadosInduccion / totalInduccion) * 100) : null;
