@@ -1,0 +1,27 @@
+# Pruebas exhaustivas — estado y pendientes
+
+Reglas: se prueba solo en **CONVERGIA**; todo registro de prueba lleva el prefijo **PRU**; Mármoles recibirá datos reales después de comprobar que todo está OK.
+
+## Módulos
+| Módulo | Estado |
+|---|---|
+| Espiral 360° (ficha, hoja de vida, Saber, Ser, ciclos, evaluaciones, PDI, organigrama, indicadores) | Probado y corregido (publicado en `main`) |
+| Reclutamiento | En curso |
+| Nexa, Procesos y Cumplimiento, Informes, Administración, Dotación, Proveedor | Pendiente |
+
+## Decisiones tuyas pendientes (dejar así por ahora)
+1. **Registros PRU** creados en CONVERGIA (siguen en la base): cargo "PRU Analista de Nómina", colaboradores "PRU Laura Gómez", "PRU Líder Área Administrativa" y "PRU Carlos Pérez" (inactivo), ciclo "PRU 2026 - Semestre 2", PDI, historial, incapacidad y fecha especial de Laura. Usuarios de acceso: pru.admin, pru.lider, pru.colaborador, pru.gerencia, pru.auditor, pru.proveedor (contraseña de pruebas en la sesión). Mientras existan, la autoevaluación de Laura (notas altas) cuenta en los indicadores de CONVERGIA.
+2. **Texto de Mármoles dentro de CONVERGIA:** 2 puntos de inducción (`induccion_items`) mencionan "piedra natural".
+3. **Habilidades duplicadas:** el cargo no impide repetir una habilidad con el mismo nombre (mejora opcional).
+4. **Migración 0107** (índice único de `respuestas_evaluacion`): ya aplicada en Supabase.
+
+## Hallazgos corregidos en Espiral 360°
+- Crear cargo desde cero; manual de funciones visible en la ficha.
+- Guardado de evaluaciones (índice parcial) y aviso de errores.
+- Índices/semáforo/brecha leídos como objeto (salían "Sin datos").
+- Checklist de Saber generado desde cargo + hoja de vida.
+- PDI manual con brechas sugeridas.
+- Ingreso en historial e inducción asignada al dar de alta; la colaboradora ve a su líder.
+
+## Cómo se prueba (para repetirlo)
+Servidor local con puente a Supabase (el proxy de la nube no deja salir al servidor Next), Playwright con usuarios PRU por rol. Variables de entorno de Supabase configuradas en el entorno de la sesión.
