@@ -35,6 +35,16 @@ export default async function DetalleVacantePage({ params }: { params: { id: str
 
   if (!vacante || vacante.empresa_id !== perfil.empresa_id) notFound();
 
+  // Solo pueden evaluar candidatos quienes tienen usuario con rol de líder: las reglas de
+  // seguridad no dejan ver al candidato a nadie más, así que no se ofrecen otras personas.
+  const { data: cuentasLider } = await supabase
+    .from('perfiles_usuario')
+    .select('id')
+    .eq('empresa_id', perfil.empresa_id)
+    .eq('rol', 'lider')
+    .eq('activo', true);
+  const idsCuentasLider = (cuentasLider ?? []).map((c) => c.id);
+
   const [{ data: postulaciones }, { data: colaboradores }, { data: candidatosEmpresa }, { data: cargos }, { data: lideres }] = await Promise.all([
     supabase
       .from('postulaciones')
@@ -63,6 +73,7 @@ export default async function DetalleVacantePage({ params }: { params: { id: str
       .select('id, nombre_completo')
       .eq('empresa_id', perfil.empresa_id)
       .in('estado', ['activo', 'periodo_prueba'])
+      .in('usuario_id', idsCuentasLider.length > 0 ? idsCuentasLider : ['00000000-0000-0000-0000-000000000000'])
       .order('nombre_completo'),
   ]);
 

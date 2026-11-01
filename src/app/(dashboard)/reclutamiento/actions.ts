@@ -208,6 +208,14 @@ export async function moverPostulacion(vacanteId: string, etapaDestino: EtapaPos
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
   const supabase = createClient();
+
+  // Nadie entra a "En evaluación del líder" sin asignación (el líder no lo vería y nadie le avisaría).
+  if (etapaDestino === 'evaluacion_lider') {
+    const { data: previos } = await supabase.from('postulaciones').select('id, etapa').in('id', idsEnOrdenDestino);
+    const nuevos = (previos ?? []).filter((x) => x.etapa !== 'evaluacion_lider').map((x) => x.id);
+    if (nuevos.length > 0) return { ok: false as const, error: 'Para evaluación del líder usa "Enviar al líder", así queda asignado y avisado.' };
+  }
+
   const actualizaciones = idsEnOrdenDestino.map((id, orden) =>
     supabase.from('postulaciones').update({ etapa: etapaDestino, orden }).eq('id', id).eq('vacante_id', vacanteId)
   );
@@ -428,6 +436,31 @@ export async function enviarAEvaluacionLider(postulacionId: string, liderId: str
 
   const { error } = await supabase.from('postulaciones').update({ etapa: 'evaluacion_lider' }).eq('id', postulacionId);
   if (error) return { ok: false as const, error: error.message };
+
+  // Aviso dentro del aplicativo al líder, para que no tenga que adivinar que le llegó un candidato.
+  // Si falla, la asignación ya quedó hecha y no se bloquea el envío.
+  try {
+    const [{ data: lider }, { data: detalle }] = await Promise.all([
+      supabase.from('colaboradores').select('usuario_id').eq('id', liderId).maybeSingle(),
+      supabase
+        .from('postulaciones')
+        .select('candidato:candidatos(nombre_completo), vacante:vacantes(titulo)')
+        .eq('id', postulacionId)
+        .maybeSingle(),
+    ]);
+    if (lider?.usuario_id) {
+      await supabase.from('notificaciones').insert({
+        destinatario_usuario_id: lider.usuario_id,
+        canal: 'in_app',
+        asunto: 'Candidato por evaluar',
+        cuerpo: `Talento Humano te envió a ${(detalle?.candidato as any)?.nombre_completo ?? 'un candidato'} para la vacante "${(detalle?.vacante as any)?.titulo ?? ''}". Entra a Reclutamiento y selección para dejar tus apreciaciones (disponible hasta ${vence.toISOString().slice(0, 10)}).`,
+        enviado: true,
+        enviado_en: new Date().toISOString(),
+      });
+    }
+  } catch {
+    /* sin aviso, pero con asignación */
+  }
 
   revalidatePath(RUTA);
   return { ok: true as const };
