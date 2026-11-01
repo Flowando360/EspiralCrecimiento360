@@ -41,7 +41,7 @@ type Postulacion = {
   calificacion: number | null;
   notas: string | null;
   descartado_motivo: string | null;
-  candidato: { id: string; nombre_completo: string; correo: string | null; telefono: string | null; hoja_vida_url: string | null };
+  candidato: { id: string; nombre_completo: string; correo: string | null; telefono: string | null; hoja_vida_url: string | null; numero_documento?: string | null };
   entrevistas: Entrevista[];
 };
 
@@ -208,6 +208,8 @@ export function TableroPostulaciones({
                         nombre: p.candidato.nombre_completo,
                         correo: p.candidato.correo ?? '',
                         telefono: p.candidato.telefono ?? '',
+                        documento: p.candidato.numero_documento ?? '',
+                        candidatoId: p.candidato.id,
                         cargoId,
                       }).toString()}`}
                       className="text-xs text-alto hover:underline"

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { obtenerUrlFirmadaHojaVidaCandidato } from '@/lib/supabase/storage';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { PanelReferencias } from '@/components/reclutamiento/panel-referencias';
 import { EditarCandidato, SubirHojaVidaCandidato } from '@/components/reclutamiento/editar-candidato';
 import { CalificacionEstrellas } from '@/components/reclutamiento/calificacion-estrellas';
@@ -21,7 +21,7 @@ const ETAPA_LABEL: Record<string, string> = {
 export default async function FichaCandidatoPage({ params }: { params: { id: string } }) {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
-  if (!['admin_th', 'lider'].includes(perfil.rol)) return null;
+  if (!['admin_th', 'lider'].includes(perfil.rol)) redirect('/inicio');
 
   const supabase = createClient();
   const { data: candidato } = await supabase

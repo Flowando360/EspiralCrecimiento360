@@ -8,7 +8,7 @@ import { ArrowLeft, UserPlus } from 'lucide-react';
 export default async function NuevoColaboradorPage({
   searchParams,
 }: {
-  searchParams?: { nombre?: string; correo?: string; telefono?: string; cargoId?: string };
+  searchParams?: { nombre?: string; correo?: string; telefono?: string; cargoId?: string; documento?: string; candidatoId?: string };
 }) {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
@@ -94,6 +94,8 @@ export default async function NuevoColaboradorPage({
                   nombreCompleto: searchParams.nombre,
                   correo: searchParams.correo ?? '',
                   telefono: searchParams.telefono ?? '',
+                  documento: searchParams.documento ?? '',
+                  candidatoId: searchParams.candidatoId ?? '',
                   cargoId: searchParams.cargoId ?? '',
                 }
               : undefined

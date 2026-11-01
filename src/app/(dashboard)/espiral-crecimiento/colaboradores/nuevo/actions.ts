@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 const CrearColaboradorSchema = z.object({
   usuarioId: z.string().uuid().optional(),
+  candidatoId: z.string().uuid().optional().or(z.literal('')),
   nombreCompleto: z.string().trim().min(1, 'El nombre es requerido'),
   numeroDocumento: z.string().trim().optional(),
   email: z.string().trim().email('Correo inválido').optional().or(z.literal('')),
@@ -108,6 +109,31 @@ export async function crearColaborador(input: z.infer<typeof CrearColaboradorSch
     fecha: d.fechaIngreso,
     registrado_por: perfil.usuario_id,
   });
+
+  // Si viene de Reclutamiento, la hoja de vida del candidato pasa a los documentos del colaborador
+  // (así Talento Humano no tiene que volver a subirla). Si algo falla, el alta no se bloquea.
+  if (d.candidatoId) {
+    try {
+      const { data: cand } = await supabase
+        .from('candidatos')
+        .select('hoja_vida_url, empresa_id')
+        .eq('id', d.candidatoId)
+        .maybeSingle();
+      if (cand?.hoja_vida_url && cand.empresa_id === perfil.empresa_id) {
+        const { data: archivo } = await supabase.storage.from('hojas-vida-candidatos').download(cand.hoja_vida_url);
+        if (archivo) {
+          const ext = cand.hoja_vida_url.split('.').pop() || 'pdf';
+          const destino = `${perfil.empresa_id}/${data.id}/hoja-vida/hoja-vida-${Date.now()}.${ext}`;
+          const { error: errSubida } = await supabase.storage
+            .from('documentos-colaborador')
+            .upload(destino, archivo, { contentType: archivo.type || 'application/pdf', upsert: true });
+          if (!errSubida) await supabase.from('colaboradores').update({ hoja_vida_url: destino }).eq('id', data.id);
+        }
+      }
+    } catch {
+      /* se puede subir luego desde Documentos */
+    }
+  }
 
   // Plan de inducción: puntos comunes de la empresa + los específicos del cargo.
   // Si falla no se bloquea el alta; TH puede completarlo luego.

@@ -2,6 +2,9 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { FormularioPostulacionPublica } from '@/components/reclutamiento/formulario-postulacion-publica';
 import { Briefcase } from 'lucide-react';
 
+// Siempre se lee el estado actual de la vacante: si se cubre o se cierra, el enlace público debe dejar de aceptar postulaciones al instante.
+export const dynamic = 'force-dynamic';
+
 export default async function PostularPage({ params }: { params: { vacanteId: string } }) {
   const supabase = createAdminClient();
   const { data: vacante } = await supabase

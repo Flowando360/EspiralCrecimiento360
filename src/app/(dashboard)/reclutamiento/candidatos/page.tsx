@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
@@ -7,7 +8,7 @@ import { PanelBanco } from '@/components/reclutamiento/panel-banco';
 export default async function BancoCandidatosPage() {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
-  if (!['admin_th', 'lider'].includes(perfil.rol)) return null;
+  if (!['admin_th', 'lider'].includes(perfil.rol)) redirect('/inicio');
 
   const supabase = createClient();
   const { data: candidatos } = await supabase
