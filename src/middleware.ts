@@ -60,6 +60,8 @@ export async function middleware(request: NextRequest) {
     // un candidato externo que nunca ha iniciado sesión, así que no puede
     // exigir usuario autenticado como el resto del dashboard.
     request.nextUrl.pathname.startsWith('/postular') ||
+    // Guía paso a paso del líder de TH (página pública de ayuda, sin datos reales): se abre desde el Centro de Ayuda y se puede compartir.
+    request.nextUrl.pathname.startsWith('/guia-lider-th') ||
     // Política de tratamiento de datos y canal de derechos del titular: también los
     // consulta el candidato sin sesión, desde el formulario de postulación.
     request.nextUrl.pathname.startsWith('/politica-tratamiento-datos') ||

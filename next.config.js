@@ -16,6 +16,10 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Dirección limpia de la guía del líder de TH (el archivo vive en public/guia-lider-th/).
+  async rewrites() {
+    return [{ source: '/guia-lider-th', destination: '/guia-lider-th/index.html' }];
+  },
   images: {
     remotePatterns: [
       {

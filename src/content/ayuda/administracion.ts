@@ -12,15 +12,47 @@ export const moduloAdministracion: ModuloAyuda = {
       resumen:
         'Plantilla estándar de la dimensión Saber por cargo: formación, habilidades funcionales y técnicas, destrezas y experiencia mínima.',
       camposYBotones: [
+        { nombre: '+ Nuevo cargo', explicacion: 'Crea un cargo desde cero, sin necesidad de un Excel. Pide nombre, proceso o área y si tiene personal a cargo; al crearlo te lleva a su edición para completar el manual de funciones, las habilidades, los riesgos, los exámenes y el EPP.' },
         { nombre: 'Importar desde Excel', explicacion: 'Sube el archivo con el formato FORSST-61 del perfil de cargo; el sistema previsualiza los datos leídos (con advertencias si algo no se pudo interpretar) antes de guardarlos.' },
         { nombre: 'Nombre del cargo', explicacion: 'Clic para ver el detalle completo del perfil.' },
       ],
       proceso: [
-        'Abre "Importar desde Excel" y sube el archivo del cargo (mismo formato que la plantilla FORSST-61).',
+        'Para crear un cargo desde cero: pulsa "+ Nuevo cargo", escribe el nombre y el área, "Crear cargo y continuar", y completa sus datos en la pantalla de edición (guarda los datos generales con "Guardar cambios"; cada lista de funciones, habilidades, decisiones, riesgos, exámenes y EPP se agrega con su propio botón "Agregar").',
+        'Para traer un cargo que ya tienes en Excel: abre "Importar desde Excel" y sube el archivo del cargo (mismo formato que la plantilla FORSST-61).',
         'Revisa la vista previa: cuenta de campos leídos y advertencias si algo quedó vacío o no se reconoció.',
         'Confirma para guardar — si el cargo ya existe (por nombre), se actualiza; si no, se crea uno nuevo.',
       ],
       notas: ['Al importar, los campos no definidos en el Excel no se sobrescriben (se conserva lo que ya había).'],
+    },
+    {
+      slug: 'nuevo-cargo',
+      ruta: '/administracion/cargos/nuevo',
+      titulo: 'Nuevo cargo',
+      resumen: 'Formulario corto para crear un cargo desde cero. Al crearlo te lleva a la edición completa del perfil.',
+      camposYBotones: [
+        { nombre: 'Nombre del cargo (obligatorio)', explicacion: 'No puede repetirse dentro de la empresa.' },
+        { nombre: 'Proceso o área', explicacion: 'Opcional, por ejemplo "Administrativo" o "Producción".' },
+        { nombre: 'Tiene personal a cargo', explicacion: 'Marca si el cargo dirige personas; cambia la ponderación y los bloques de su evaluación.' },
+        { nombre: 'Crear cargo y continuar', explicacion: 'Crea el cargo y abre su pantalla de edición.' },
+      ],
+      notas: ['Exclusivo de admin_th.'],
+    },
+    {
+      slug: 'editar-cargo',
+      ruta: '/administracion/cargos/*/editar',
+      titulo: 'Editar un cargo y su manual de funciones',
+      resumen:
+        'Todo el perfil del cargo en una sola pantalla: datos generales, formación y competencias, niveles de autoridad, responsabilidades, SG-SST y las listas de habilidades, funciones, decisiones, riesgos, exámenes y EPP.',
+      camposYBotones: [
+        { nombre: 'Identificación, Formación y competencias, Niveles de autoridad, Responsabilidades, SG-SST', explicacion: 'Campos del perfil (objetivo, formación requerida, experiencia mínima en meses, a quién reporta, etc.). Se guardan juntos con "Guardar cambios".' },
+        { nombre: 'Habilidades funcionales y técnicas', explicacion: 'Cada habilidad con su tipo y su nivel esperado (bajo, medio o alto). Alimentan el checklist de Saber de quienes ocupan el cargo.' },
+        { nombre: 'Funciones principales', explicacion: 'Cada función con su proceso y su periodicidad. Es el manual de funciones: lo ve cada colaborador en su ficha y es la base del bloque "Roles y funciones" de su evaluación de Hacer.' },
+        { nombre: 'Decisiones, factores de riesgo, exámenes médicos y EPP', explicacion: 'Listas que se agregan una por una. Los riesgos, exámenes y EPP también alimentan el plan de inducción del cargo.' },
+      ],
+      notas: [
+        'Cualquier cambio se refleja de inmediato en la ficha de cada colaborador con ese cargo, en el organigrama y en los informes: todos leen el cargo en vivo, no una copia.',
+        'Cada lista agrega un elemento por vez. Si agregas dos veces la misma habilidad con el mismo nombre, queda repetida; elimina la sobrante con el ícono de papelera.',
+      ],
     },
     {
       slug: 'detalle-cargo',

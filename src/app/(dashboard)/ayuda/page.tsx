@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { MODULOS } from '@/content/ayuda';
 import { buscarEnAyuda } from '@/content/ayuda/buscador';
-import { HelpCircle, Search, HelpingHand, SpellCheck, ClipboardList } from 'lucide-react';
+import { HelpCircle, Search, HelpingHand, SpellCheck, ClipboardList, BookOpenCheck } from 'lucide-react';
 
 export default function AyudaHomePage() {
   const [consulta, setConsulta] = useState('');
@@ -47,6 +47,22 @@ export default function AyudaHomePage() {
         </div>
       ) : (
         <>
+          <a
+            href="/guia-lider-th"
+            target="_blank"
+            rel="noopener"
+            className="block rounded-xl p-5 text-white bg-gradient-to-br from-secundario to-flow-800 hover:opacity-95 transition shadow-sm"
+          >
+            <span className="inline-flex items-center gap-2 text-[13px] uppercase tracking-wide text-flow-200 font-medium">
+              <BookOpenCheck size={16} /> Guía paso a paso
+            </span>
+            <h2 className="font-display text-lg font-semibold mt-1">Guía del líder de Talento Humano</h2>
+            <p className="text-sm text-white/80 mt-1">
+              Del primer candidato a la salida de una persona, con capturas reales: cargos, reclutamiento, ficha 360°, evaluación y seguimiento.
+              Se abre en una pestaña nueva.
+            </p>
+          </a>
+
           <div className="grid sm:grid-cols-2 gap-4">
             {MODULOS.map((m) => (
               <Link key={m.slug} href={`/ayuda/modulo/${m.slug}`} className="card p-5 hover:border-flow-300 transition">
