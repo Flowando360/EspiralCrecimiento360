@@ -41,7 +41,7 @@ type Postulacion = {
   calificacion: number | null;
   notas: string | null;
   descartado_motivo: string | null;
-  candidato: { id: string; nombre_completo: string; correo: string | null; telefono: string | null; hoja_vida_url: string | null };
+  candidato: { id: string; nombre_completo: string; correo: string | null; telefono: string | null; hoja_vida_url: string | null; numero_documento?: string | null };
   entrevistas: Entrevista[];
 };
 
@@ -111,8 +111,22 @@ export function TableroPostulaciones({
 
     const p = postulaciones.find((x) => x.id === active.id);
     if (!p || p.etapa === etapaDestino) return;
+    // A "En evaluación del líder" solo se llega con "Enviar al líder" (así queda asignado y avisado).
+    if (etapaDestino === 'evaluacion_lider') return;
 
     const nuevas = postulaciones.map((x) => (x.id === p.id ? { ...x, etapa: etapaDestino } : x));
+    setPostulaciones(nuevas);
+    const idsDestino = nuevas.filter((x) => x.etapa === etapaDestino).map((x) => x.id);
+    startTransition(() => {
+      moverPostulacion(vacanteId, etapaDestino as any, idsDestino);
+    });
+  }
+
+  // Alternativa al arrastre (útil en celular y con muchas columnas): mueve la tarjeta con un selector.
+  function moverA(id: string, etapaDestino: string) {
+    const p = postulaciones.find((x) => x.id === id);
+    if (!p || p.etapa === etapaDestino || etapaDestino === 'evaluacion_lider' || !COLUMNAS.some((c) => c.etapa === etapaDestino)) return;
+    const nuevas = postulaciones.map((x) => (x.id === id ? { ...x, etapa: etapaDestino } : x));
     setPostulaciones(nuevas);
     const idsDestino = nuevas.filter((x) => x.etapa === etapaDestino).map((x) => x.id);
     startTransition(() => {
@@ -156,6 +170,7 @@ export function TableroPostulaciones({
                 miColaboradorId={miColaboradorId}
                 onMarcarFinal={marcarFinal}
                 onCambiarCalificacion={cambiarCalificacion}
+                onMover={moverA}
               />
             ))}
           </div>
@@ -170,6 +185,7 @@ export function TableroPostulaciones({
                 miColaboradorId={miColaboradorId}
                 onMarcarFinal={() => {}}
                 onCambiarCalificacion={() => {}}
+                onMover={() => {}}
               />
             )}
           </DragOverlay>
@@ -192,6 +208,8 @@ export function TableroPostulaciones({
                         nombre: p.candidato.nombre_completo,
                         correo: p.candidato.correo ?? '',
                         telefono: p.candidato.telefono ?? '',
+                        documento: p.candidato.numero_documento ?? '',
+                        candidatoId: p.candidato.id,
                         cargoId,
                       }).toString()}`}
                       className="text-xs text-alto hover:underline"
@@ -220,6 +238,7 @@ function Columna({
   miColaboradorId,
   onMarcarFinal,
   onCambiarCalificacion,
+  onMover,
 }: {
   columna: { etapa: string; titulo: string; items: Postulacion[] };
   vacanteId: string;
@@ -229,6 +248,7 @@ function Columna({
   miColaboradorId: string | null;
   onMarcarFinal: (id: string, etapa: 'contratado' | 'descartado', motivo?: string) => void;
   onCambiarCalificacion: (id: string, calificacion: number) => void;
+  onMover: (id: string, etapaDestino: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: columna.etapa });
 
@@ -256,6 +276,7 @@ function Columna({
             miColaboradorId={miColaboradorId}
             onMarcarFinal={onMarcarFinal}
             onCambiarCalificacion={onCambiarCalificacion}
+            onMover={onMover}
           />
         ))}
         {columna.items.length === 0 && <p className="text-xs text-marmol-400 text-center py-4">Sin candidatos</p>}
@@ -277,6 +298,7 @@ function TarjetaArrastrable({
   miColaboradorId: string | null;
   onMarcarFinal: (id: string, etapa: 'contratado' | 'descartado', motivo?: string) => void;
   onCambiarCalificacion: (id: string, calificacion: number) => void;
+  onMover: (id: string, etapaDestino: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: postulacion.id,
@@ -302,6 +324,7 @@ function TarjetaPostulacion({
   miColaboradorId,
   onMarcarFinal,
   onCambiarCalificacion,
+  onMover,
 }: {
   postulacion: Postulacion;
   vacanteId: string;
@@ -311,6 +334,7 @@ function TarjetaPostulacion({
   miColaboradorId: string | null;
   onMarcarFinal: (id: string, etapa: 'contratado' | 'descartado', motivo?: string) => void;
   onCambiarCalificacion: (id: string, calificacion: number) => void;
+  onMover: (id: string, etapaDestino: string) => void;
 }) {
   const { candidato } = postulacion;
   const [mostrarEntrevista, setMostrarEntrevista] = useState(false);
@@ -338,6 +362,22 @@ function TarjetaPostulacion({
         onCambiar={(v) => onCambiarCalificacion(postulacion.id, v)}
         soloLectura={!puedeAdministrar}
       />
+
+      {puedeAdministrar && postulacion.etapa !== 'contratado' && postulacion.etapa !== 'descartado' && (
+        <select
+          aria-label="Mover a otra etapa"
+          value={postulacion.etapa}
+          onPointerDown={(e) => e.stopPropagation()}
+          onChange={(e) => onMover(postulacion.id, e.target.value)}
+          className="w-full rounded-lg border border-marmol-200 bg-white px-2 py-1 text-[13px] text-marmol-600"
+        >
+          {COLUMNAS.filter((c) => c.etapa !== 'evaluacion_lider' || c.etapa === postulacion.etapa).map((c) => (
+            <option key={c.etapa} value={c.etapa}>
+              Mover a: {c.titulo}
+            </option>
+          ))}
+        </select>
+      )}
 
       {postulacion.etapa === 'entrevista' && (
         <div className="pt-2 border-t border-marmol-100" onPointerDown={(e) => e.stopPropagation()}>

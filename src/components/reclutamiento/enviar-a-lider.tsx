@@ -23,6 +23,14 @@ export function EnviarALider({ postulacionId, lideres }: { postulacionId: string
 
   if (enviado) return <p className="text-xs text-alto">Enviado al líder para evaluación.</p>;
 
+  if (lideres.length === 0) {
+    return (
+      <p className="text-xs text-marmol-500">
+        No hay líderes con usuario de acceso. Crea el usuario con rol Líder en Administración → Usuarios y roles para poder enviarle candidatos.
+      </p>
+    );
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-2">
       <select value={liderId} onChange={(e) => setLiderId(e.target.value)} className="rounded-lg border border-marmol-200 px-2 py-1 text-xs">

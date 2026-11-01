@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
@@ -16,7 +17,7 @@ const ESTADO_CLASE: Record<string, string> = {
 export default async function ReclutamientoPage() {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
-  if (!['admin_th', 'lider'].includes(perfil.rol)) return null;
+  if (!['admin_th', 'lider'].includes(perfil.rol)) redirect('/inicio');
 
   const supabase = createClient();
   const { data: vacantes } = await supabase

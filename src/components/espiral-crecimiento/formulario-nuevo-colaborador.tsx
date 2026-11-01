@@ -31,11 +31,11 @@ export function FormularioNuevoColaborador({
   posiblesLideres: { id: string; nombre_completo: string }[];
   cuentasSinFicha: { id: string; nombre_completo: string; email: string | null }[];
   /** Prellenado al llegar desde Reclutamiento y Selección (candidato ya contratado) — evita recapturar los datos. */
-  datosIniciales?: { nombreCompleto: string; correo: string; telefono: string; cargoId: string };
+  datosIniciales?: { nombreCompleto: string; correo: string; telefono: string; cargoId: string; documento?: string; candidatoId?: string };
 }) {
   const [usuarioVinculadoId, setUsuarioVinculadoId] = useState('');
   const [nombreCompleto, setNombreCompleto] = useState(datosIniciales?.nombreCompleto ?? '');
-  const [numeroDocumento, setNumeroDocumento] = useState('');
+  const [numeroDocumento, setNumeroDocumento] = useState(datosIniciales?.documento ?? '');
   const [email, setEmail] = useState(datosIniciales?.correo ?? '');
   const [telefono, setTelefono] = useState(datosIniciales?.telefono ?? '');
   const [cargoId, setCargoId] = useState(datosIniciales?.cargoId ?? '');
@@ -69,6 +69,7 @@ export function FormularioNuevoColaborador({
     startTransition(async () => {
       const res = await crearColaborador({
         usuarioId: usuarioVinculadoId || undefined,
+        candidatoId: datosIniciales?.candidatoId,
         nombreCompleto,
         numeroDocumento,
         email,
