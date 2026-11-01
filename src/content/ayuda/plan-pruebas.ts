@@ -11,7 +11,7 @@ export const planPruebas: SeccionPlanPruebas[] = [
           { paso: 'Entra a la URL del aplicativo sin haber iniciado sesión.', resultadoEsperado: 'Redirige a la pantalla de login.' },
           { paso: 'Ingresa un identificador válido (usuario o correo) con la contraseña equivocada.', resultadoEsperado: 'Muestra "Correo o contraseña incorrectos. Verifica con Talento Humano si no tienes acceso." y te deja en la misma pantalla.' },
           { paso: 'Ingresa tu usuario (ej. "juan.perez", sin @dominio) y tu contraseña correctos.', resultadoEsperado: 'Entra a Inicio, con el menú superior acorde a tu rol — no hizo falta escribir el correo completo.' },
-          { paso: 'Cierra sesión y vuelve a entrar, esta vez con el correo completo (ej. "juan.perez@marmolesyservicios.com") y la misma contraseña.', resultadoEsperado: 'También entra correctamente — usuario y correo llevan al mismo lugar.' },
+          { paso: 'Cierra sesión y vuelve a entrar, esta vez con el correo completo (ej. "juan.perez@empresa.com") y la misma contraseña.', resultadoEsperado: 'También entra correctamente — usuario y correo llevan al mismo lugar.' },
           { paso: 'Escribe un usuario que no existe, con cualquier contraseña.', resultadoEsperado: 'Muestra el mismo mensaje genérico de error — no revela si el usuario existe o no.' },
           { paso: 'Presiona el botón de cerrar sesión (ícono de salida, arriba a la derecha).', resultadoEsperado: 'Vuelve a la pantalla de login.' },
         ],

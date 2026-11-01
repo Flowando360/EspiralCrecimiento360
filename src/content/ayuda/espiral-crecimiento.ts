@@ -14,7 +14,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         'Listado de personas de la empresa. Un líder ve solo su equipo (por eso el título cambia a "Mi equipo"); admin_th y gerencia ven a todos.',
       camposYBotones: [
         { nombre: 'Fila de la tabla', explicacion: 'Foto, nombre, cargo, área, estado y fecha de ingreso. Clic en una fila abre la ficha 360° de esa persona.' },
-        { nombre: 'Nuevo colaborador', explicacion: 'Solo admin_th. Lleva a Administración → Usuarios para crear cuenta y ficha.' },
+        { nombre: 'Nuevo colaborador', explicacion: 'Solo admin_th. Abre el alta de la ficha: datos personales, cargo, líder directo, fecha de ingreso, contrato, salario y afiliaciones (también puedes cargar la hoja de vida en PDF para prellenar los datos con IA). Al crearla, el ingreso queda en el historial y se asigna el plan de inducción. También llegas aquí desde "Contratado — crear colaborador" en Reclutamiento, con los datos del candidato ya llenos. El acceso para iniciar sesión se crea aparte, en Administración → Usuarios y roles.' },
       ],
     },
     {
@@ -39,10 +39,10 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       resumen:
         'La vista 360° de una persona: sus cuatro dimensiones de un vistazo (Ser, Saber, Hacer, Deber), su perfil de cargo, su hoja de vida y su Plan de Desarrollo.',
       camposYBotones: [
-        { nombre: 'Tarjeta SER', explicacion: 'Indica si la Guía del Flow está completa. Lleva a la pantalla de Guía del Flow.' },
+        { nombre: 'Tarjeta SER', explicacion: 'Promedio de 1 a 5 de los 18 aspectos de la Guía del Flow con relevancia laboral, o "Pendiente por completar" si la persona aún no la ha completado. Lleva a la pantalla de Guía del Flow.' },
         { nombre: 'Tarjeta SABER', explicacion: '% de cumplimiento del perfil de cargo (formación, habilidades, certificaciones, experiencia). Lleva a Verificación de Saber.' },
         { nombre: 'Tarjetas HACER / DEBER', explicacion: 'Último índice calculado y su semáforo (Alto/Medio/Bajo), según el Encuentro de Crecimiento más reciente.' },
-        { nombre: 'Perfil de cargo', explicacion: 'Objetivo del cargo y si tiene personal a cargo (definido en Administración → Cargos).' },
+        { nombre: 'Perfil de cargo', explicacion: 'Objetivo del cargo, si tiene personal a cargo y su manual de funciones: la lista de funciones principales que se le asignaron, con su proceso y su periodicidad. Todo se define en Administración → Cargos y perfiles y se ve aquí en vivo.' },
         { nombre: 'Hoja de vida y certificaciones', explicacion: 'Formación, cursos y certificaciones cargadas, con fecha de vencimiento si aplica.' },
         { nombre: 'Inducción', explicacion: '% de avance del plan de inducción de la persona (comunes + específicos del cargo). Lleva al checklist completo.' },
         { nombre: 'Plan de Desarrollo Individual', explicacion: 'Las acciones de desarrollo activas de la persona, con su origen (Hacer/Deber/Saber/Ser) y estado.' },
@@ -64,6 +64,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       camposYBotones: [
         { nombre: 'Recuadro "Exige el cargo"', explicacion: 'Lo que quedó definido en el perfil del cargo (Administración → Cargos), como referencia para verificar.' },
         { nombre: 'Checklist por bloque', explicacion: 'Formación académica, habilidades funcionales/técnicas, certificaciones y experiencia. Cada ítem se marca como Cumple, Parcial o No cumple.' },
+        { nombre: 'Generar checklist desde cargo y hoja de vida', explicacion: 'Arma el checklist cruzando lo que exige el cargo con lo que la persona ya acreditó en su hoja de vida: la formación mínima (cumple si hay formación académica registrada), cada habilidad del cargo (queda pendiente de verificar), cada certificación o curso (cumple si tiene soporte o está verificada, parcial si no tiene soporte, no cumple si está vencida) y los meses de experiencia (se suman los de experiencia laboral). No duplica ítems que ya existan, así que puedes pulsarlo de nuevo cuando agregues algo a la hoja de vida.' },
       ],
       notas: [
         'Puede editar: admin_th y el líder directo de la persona. El propio colaborador y gerencia solo consultan.',
@@ -108,7 +109,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         { nombre: 'Entrevista de salida', explicacion: 'Solo visible y editable por admin_th. Se diligencia cuando la persona sale de la empresa — es un formulario aparte de solo registrar el movimiento "Salida".' },
       ],
       notas: [
-        'Acceso exclusivo: admin_th (toda la empresa) y el líder directo (su equipo, sin ver la entrevista de salida). Gerencia y el propio colaborador no tienen acceso a esta pantalla.',
+        'Al crear la ficha del colaborador, su ingreso queda registrado aquí automáticamente. Acceso exclusivo: admin_th (toda la empresa) y el líder directo (su equipo, sin ver la entrevista de salida). Gerencia y el propio colaborador no tienen acceso a esta pantalla.',
       ],
     },
     {
@@ -156,7 +157,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       ],
       notas: [
         'Puede marcar puntos como cumplidos: admin_th o el líder directo de la persona. El propio colaborador y gerencia solo consultan.',
-        'Al registrar un ingreso en el Historial, se asignan automáticamente los puntos comunes + los del cargo. Al registrar un cambio de cargo, solo se agregan los puntos del cargo nuevo (no se repiten los comunes).',
+        'El plan se asigna automáticamente (puntos comunes + los del cargo) al crear la ficha del colaborador y también al registrar un ingreso en el Historial. Al registrar un cambio de cargo, solo se agregan los puntos del cargo nuevo (no se repiten los comunes).',
       ],
     },
     {
@@ -195,7 +196,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       resumen:
         'Muestra las ponderaciones vigentes del ciclo y el avance de cada colaborador en crecimiento, con acceso directo a su Brief y su Acuerdo de crecimiento.',
       camposYBotones: [
-        { nombre: 'Panel de generación de Encuentros de Crecimiento', explicacion: 'Solo admin_th. Genera las tareas de valoración (autoevaluación, líder, pares, colaboradores a cargo) para todo el equipo de un líder o para personas específicas.' },
+        { nombre: 'Panel de generación de Encuentros de Crecimiento', explicacion: 'Solo admin_th. Genera los Encuentros de Crecimiento para "Todos los colaboradores", "Un equipo" (el de un líder) o "Un colaborador". Cada encuentro trae cinco bloques (competencias organizacionales, funcionales, de liderazgo si aplica, Roles y funciones y cultura) y sus tareas de valoración: autoevaluación, líder, pares y colaboradores a cargo, según el organigrama del momento. El bloque Roles y funciones sale del manual de funciones del cargo.' },
         { nombre: 'Tabla de Encuentros de Crecimiento', explicacion: 'Por persona: % de avance, resultado de Hacer y Deber con semáforo, y enlaces a Brief y Acuerdo (admin_th y líder).' },
       ],
       proceso: [
@@ -214,9 +215,34 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         'El formulario donde cada acompañante (autoevaluación, líder, par, o colaborador a cargo) valora los comportamientos observables del colaborador en crecimiento durante el período.',
       camposYBotones: [
         { nombre: 'Ítems por bloque (Hacer/Deber)', explicacion: 'Cada ítem tiene una nota y, opcionalmente, una observación en texto libre.' },
-        { nombre: 'Guardado automático', explicacion: 'Cada respuesta se guarda al instante y recalcula el resultado — no hace falta un botón de "enviar todo" al final.' },
+        { nombre: 'Guardado automático', explicacion: 'Cada respuesta se guarda al instante (aparece "Guardado" junto al ítem) y recalcula el resultado; no hace falta un botón de "enviar todo" al final. Si una respuesta no se pudo guardar, el formulario lo avisa en ese ítem y debes pulsar la nota otra vez. Los encabezados de cada bloque muestran su promedio y cuántos ítems tiene.' },
       ],
       notas: ['Si el Encuentro de Crecimiento no tiene ítems generados, pide a Talento Humano que la regenere desde el detalle del ciclo.'],
+    },
+    {
+      slug: 'resultado-evaluacion',
+      ruta: '/espiral-crecimiento/evaluaciones/*/resultado',
+      titulo: 'Resultado de un Encuentro de Crecimiento',
+      resumen:
+        'El resultado de Hacer y Deber de una persona en un ciclo: autoevaluación, índice final, brecha y semáforo, el detalle ítem por ítem (autoevaluación frente al líder), la retroalimentación cualitativa y su plan de desarrollo.',
+      camposYBotones: [
+        { nombre: 'Hacer y Deber', explicacion: 'Para cada dimensión: la autoevaluación, el índice final (de 1 a 5), la brecha (lo que valoraron los demás menos la autoevaluación) y el semáforo Alto, Medio o Bajo.' },
+        { nombre: 'Tablas por bloque (Auto / Líder)', explicacion: 'Cada ítem con la nota de la autoevaluación y la del líder, y el subtotal de cada bloque. Las respuestas de pares y de colaboradores a cargo cuentan en el índice pero no se muestran una por una, para proteger a quien califica.' },
+        { nombre: 'Brief y Acuerdo', explicacion: 'Botones arriba para preparar la retroalimentación (Brief) y registrar los compromisos firmados (Acuerdo).' },
+        { nombre: 'Retroalimentación cualitativa', explicacion: 'Lo que el líder escribió en el Brief: talento central, resumen de Hacer, resumen de Deber y sugerencias de enfoque.' },
+        { nombre: 'Plan de Desarrollo → Nueva acción de desarrollo', explicacion: 'Disponible para admin_th y para el líder directo. Muestra como sugerencias los ítems que el líder calificó con 2 o menos; al tocar una, se llena la brecha. Elige la dimensión de origen, escribe la acción y la fecha compromiso y pulsa "Guardar acción".' },
+      ],
+      proceso: [
+        'Abre el detalle del ciclo y entra a "Ver ficha" de la persona.',
+        'Lee los índices, la brecha y el semáforo de Hacer y Deber.',
+        'Revisa los ítems donde la autoevaluación y el líder difieren más.',
+        'Prepara el Brief y, tras la conversación, registra el Acuerdo.',
+        'Convierte las brechas en acciones con "Nueva acción de desarrollo".',
+      ],
+      notas: [
+        'Pueden ver esta pantalla: admin_th, el líder directo y la propia persona. Si Hacer o Deber aparecen "Sin datos", todavía no hay respuestas del líder en ese ciclo.',
+        'El plan de desarrollo se crea solo cuando una dimensión queda en semáforo bajo; las acciones manuales sirven para el resto de brechas que detecte el líder.',
+      ],
     },
     {
       slug: 'brief',
@@ -275,6 +301,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         { nombre: 'Columnas del tablero', explicacion: 'Pendiente, En curso, Cumplido y Vencido — son fijas (no configurables, a diferencia del tablero de Procesos y Sistemas de Gestión).' },
         { nombre: 'Arrastrar tarjeta', explicacion: 'Mueve el PDI a otra columna para cambiar su estado. Al soltarlo en "Cumplido" se guarda automáticamente la fecha de cumplimiento.' },
         { nombre: 'Origen (badge de color)', explicacion: 'De qué dimensión viene la brecha detectada (Hacer/Deber/Saber/Ser/Mixto).' },
+        { nombre: 'Nueva acción de desarrollo', explicacion: 'Las acciones manuales se crean desde el resultado de cada Encuentro de Crecimiento (admin_th y líder directo), con la brecha, la acción y la fecha compromiso. Aquí aparecen en el tablero junto con las automáticas.' },
         { nombre: 'Insignia "Automático"', explicacion: 'Marca los PDI que generó solo el sistema (ver nota siguiente), para distinguirlos de los que redactó admin_th o el líder a mano.' },
         { nombre: 'Fecha de compromiso en rojo', explicacion: 'Se resalta en rojo cuando ya venció y la tarjeta todavía no está en la columna "Cumplido".' },
       ],

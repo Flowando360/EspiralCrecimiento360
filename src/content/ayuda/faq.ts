@@ -309,4 +309,54 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
     respuesta:
       'Queda registrado para el equipo de Espiral, que lo revisa desde su panel y puede cambiar su estado (nuevo, en revisión, resuelto o descartado). Si el correo está configurado, también llega por correo al equipo. Puedes adjuntar capturas, PDF, Word, texto u hojas de cálculo que ayuden a explicar la idea (hasta 5 archivos y 4 MB en total).',
   },
+  {
+    pregunta: '¿Cómo creo un cargo nuevo si no tengo el perfil en Excel?',
+    respuesta:
+      'Entra a Administración → Cargos y perfiles y pulsa "+ Nuevo cargo". Escribe el nombre y el área, pulsa "Crear cargo y continuar" y completa su manual de funciones, sus habilidades, los riesgos, los exámenes y el EPP. También puedes importar un Excel en formato FORSST 61.',
+  },
+  {
+    pregunta: '¿Cómo armo el Saber de una persona sin digitar todo a mano?',
+    respuesta:
+      'Carga primero su hoja de vida (formación, certificaciones, cursos y experiencia) en su ficha. Luego entra a Saber y pulsa "Generar checklist desde cargo y hoja de vida": el aplicativo cruza lo que exige el cargo con lo que la persona acreditó y te deja cada ítem listo para revisar como Cumple, Parcial o No cumple.',
+  },
+  {
+    pregunta: '¿Por qué el Hacer y el Deber de una persona salen en blanco?',
+    respuesta:
+      'Porque todavía no hay respuestas del líder en ese ciclo. Apenas el líder guarda sus notas, el índice, la brecha y el semáforo aparecen solos. Verifica que el Encuentro de Crecimiento esté generado y que el líder lo tenga pendiente en su Inicio.',
+  },
+  {
+    pregunta: '¿Cómo registro una acción de desarrollo para una brecha que detecté?',
+    respuesta:
+      'Abre el resultado del Encuentro de Crecimiento de la persona y pulsa "Nueva acción de desarrollo", en Plan de Desarrollo. Te sugiere los ítems que el líder calificó con 2 o menos; toca uno, escribe la acción y la fecha compromiso y guarda. Puede hacerlo Talento Humano o el líder directo.',
+  },
+  {
+    pregunta: '¿Cómo envío un candidato al líder para que lo evalúe?',
+    respuesta:
+      'En el tablero de la vacante, debajo de las columnas, está "Evaluación por el líder". Elige al líder evaluador, los días que podrá ver al candidato y pulsa "Enviar al líder". El líder recibe un aviso en Notificaciones y deja sus apreciaciones en Reclutamiento.',
+  },
+  {
+    pregunta: 'El líder que busco no aparece al enviar un candidato. ¿Qué pasa?',
+    respuesta:
+      'Solo aparecen líderes que tienen usuario con rol Líder vinculado a su ficha de colaborador. Créalo o corrígelo en Administración → Usuarios y roles.',
+  },
+  {
+    pregunta: 'Una persona descartada vuelve a postularse. ¿Se crea otro registro?',
+    respuesta:
+      'No. El aplicativo la reconoce por su documento o su correo y suma el proceso nuevo a su misma ficha. En el tablero verás "Ya participó antes" con el resultado y el motivo del descarte anterior, y en su ficha queda todo el histórico.',
+  },
+  {
+    pregunta: '¿Se borran los datos de un candidato rechazado?',
+    respuesta:
+      'No. Nada se borra automáticamente: el histórico se conserva. Si una persona pide suprimir sus datos, la solicitud llega al Banco de candidatos, tú la respondes y decides manualmente si los eliminas. Marcarla como atendida solo registra tu respuesta.',
+  },
+  {
+    pregunta: '¿Qué pasa con la hoja de vida de un candidato al contratarlo?',
+    respuesta:
+      'Al pulsar "Contratado — crear colaborador" el alta trae el nombre, el correo, el teléfono, el documento y el cargo, y la hoja de vida del candidato pasa sola a los documentos del colaborador.',
+  },
+  {
+    pregunta: '¿Cómo registro la salida de una persona?',
+    respuesta:
+      'En su ficha entra a Historial → Agregar movimiento y elige "Salida" con la fecha y el motivo. En un solo paso la ficha queda Inactiva y, si tenía cuenta de acceso, se retira. Después puedes llenar la entrevista de salida. La rotación se actualiza sola en Indicadores.',
+  },
 ];
