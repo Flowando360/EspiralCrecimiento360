@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { buscarPaginaPorRuta } from '@/content/ayuda';
@@ -26,10 +26,24 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
 
   /** Cerrar el panel reinicia la búsqueda y el formulario, para que al volver se vea el Centro completo. */
   function cerrar() {
-    cerrar();
+    setAbierto(false);
     setRequerimiento(null);
     setConsulta('');
   }
+
+  /** Esc también cierra el panel. */
+  useEffect(() => {
+    if (!abierto) return;
+    const alTeclear = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setAbierto(false);
+        setRequerimiento(null);
+        setConsulta('');
+      }
+    };
+    window.addEventListener('keydown', alTeclear);
+    return () => window.removeEventListener('keydown', alTeclear);
+  }, [abierto]);
 
   /** Vuelve a la vista completa del Centro de ayuda (todas las opciones). */
   function volverAlCentro() {
@@ -64,7 +78,7 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
               >
                 <HelpCircle size={18} className="text-flow-500" /> Centro de Ayuda
               </button>
-              <button onClick={() => cerrar()} className="text-marmol-400 hover:text-marmol-700">
+              <button type="button" onClick={() => cerrar()} aria-label="Cerrar Centro de Ayuda" title="Cerrar" className="text-marmol-400 hover:text-marmol-700">
                 <X size={18} />
               </button>
             </div>
