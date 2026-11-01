@@ -210,7 +210,7 @@ export async function moverPostulacion(vacanteId: string, etapaDestino: EtapaPos
   const supabase = createClient();
 
   // Nadie entra a "En evaluación del líder" sin asignación (el líder no lo vería y nadie le avisaría).
-  if (etapaDestino === 'evaluacion_lider') {
+  if ((etapaDestino as string) === 'evaluacion_lider') {
     const { data: previos } = await supabase.from('postulaciones').select('id, etapa').in('id', idsEnOrdenDestino);
     const nuevos = (previos ?? []).filter((x) => x.etapa !== 'evaluacion_lider').map((x) => x.id);
     if (nuevos.length > 0) return { ok: false as const, error: 'Para evaluación del líder usa "Enviar al líder", así queda asignado y avisado.' };
