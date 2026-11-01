@@ -280,12 +280,12 @@ export function BarraSuperior({
               <span className="hidden sm:block h-7 w-px bg-white/25 shrink-0" aria-hidden="true" />
               <div className="flex items-center gap-2 min-w-0">
                 {marca.logoUrl && (
-                  <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center overflow-hidden shrink-0">
+                  <div className="h-9 rounded-lg bg-white flex items-center justify-center overflow-hidden shrink-0 px-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={marca.logoUrl} alt={marca.nombre} className="h-7 w-7 object-contain" />
+                    <img src={marca.logoUrl} alt={marca.nombre ?? ''} className="h-7 w-auto max-w-[9rem] object-contain" />
                   </div>
                 )}
-                <p className="hidden sm:block font-display text-sm font-semibold text-acento truncate">{marca.nombre}</p>
+                {!marca.logoUrl && <p className="hidden sm:block font-display text-sm font-semibold text-acento truncate">{marca.nombre}</p>}
               </div>
             </>
           )}
