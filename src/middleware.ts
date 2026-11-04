@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { moduloDeRuta, rutaPermitida } from '@/lib/permisos/rutas';
 
 /**
  * ⚠️ BYPASS TEMPORAL — quitar cuando se resuelva el login.
@@ -86,6 +87,27 @@ export async function middleware(request: NextRequest) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/inicio';
     return NextResponse.redirect(redirectUrl);
+  }
+
+  // Rol personalizado: si el módulo de esta pantalla no tiene lectura, no se abre
+  // (ocultar el menú no basta: también se puede escribir la dirección a mano).
+  // Solo consulta la base cuando la ruta pertenece a un módulo y hay sesión.
+  if (user && !isProveedor && !isAuthRoute && !isPublicAsset && moduloDeRuta(request.nextUrl.pathname) !== null) {
+    const { data: perfil } = await supabase
+      .from('perfiles_usuario')
+      .select('rol_personalizado_id, rol:roles_empresa(permisos:permisos_rol(modulo, leer))')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (perfil?.rol_personalizado_id) {
+      const rol: any = Array.isArray(perfil.rol) ? perfil.rol[0] : perfil.rol;
+      const conLectura = new Set<string>(((rol?.permisos ?? []) as { modulo: string; leer: boolean }[]).filter((p) => p.leer).map((p) => p.modulo));
+      if (!rutaPermitida(request.nextUrl.pathname, conLectura)) {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = '/inicio';
+        redirectUrl.search = '';
+        return NextResponse.redirect(redirectUrl);
+      }
+    }
   }
 
   return response;

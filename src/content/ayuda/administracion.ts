@@ -182,7 +182,9 @@ export const moduloAdministracion: ModuloAyuda = {
       ],
       notas: [
         'Un rol personalizado no da acceso a datos que el rol de sistema del usuario no ve. Por ejemplo, un colaborador con un rol personalizado no puede ver la información de todo el equipo, aunque la matriz lo permita.',
-        'Hoy, la lectura controla qué módulos aparecen en el menú. Escribir y Borrar se guardan para aplicarlos en cada acción; mientras esa parte esté pendiente, no los uses como única protección de información sensible.',
+        'La lectura controla qué módulos aparecen en el menú y también bloquea sus pantallas: si alguien sin lectura en Nexa escribe la dirección de una pantalla de Nexa, vuelve al Inicio. Gino (el chat con IA), la ayuda, las alertas, los mensajes y el cambio de contraseña están disponibles para todos.',
+        'Escribir y Borrar se guardan para aplicarlos en cada acción; mientras esa parte esté pendiente, no los uses como única protección de información sensible.',
+        'Las pantallas que el menú agrupa bajo otro módulo siguen a ese módulo: por ejemplo, Formación individual, Reconocimientos y Clima Organizacional pertenecen a Espiral 360°, y Simulacros pertenece a Procesos.',
         'Solo el administrador de la empresa (admin_th) ve y edita los roles de su empresa.',
       ],
     },
