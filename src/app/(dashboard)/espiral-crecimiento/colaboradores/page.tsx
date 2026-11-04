@@ -3,7 +3,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Users, Plus } from 'lucide-react';
-import { FilaColaborador } from '@/components/espiral-crecimiento/fila-colaborador';
+import { ListaColaboradores } from '@/components/espiral-crecimiento/lista-colaboradores';
 
 export default async function ColaboradoresPage() {
   const perfil = await getPerfilActual();
@@ -13,7 +13,7 @@ export default async function ColaboradoresPage() {
 
   let query = supabase
     .from('colaboradores')
-    .select('id, nombre_completo, estado, fecha_ingreso, foto_url, cargo:cargos(nombre, proceso_area)')
+    .select('id, nombre_completo, estado, fecha_ingreso, foto_url, lider_id, cargo:cargos(nombre, proceso_area, tiene_personal_a_cargo)')
     .eq('empresa_id', perfil.empresa_id)
     .eq('es_externo', false)
     .order('nombre_completo');
@@ -26,6 +26,7 @@ export default async function ColaboradoresPage() {
 
   const { data: colaboradores } = await query;
   const puedeEliminar = perfil.rol === 'admin_th';
+  const idsLideres = new Set((colaboradores ?? []).map((c: any) => c.lider_id).filter(Boolean));
 
   return (
     <div className="space-y-6">
@@ -55,35 +56,18 @@ export default async function ColaboradoresPage() {
           descripcion="Carga el organigrama desde Administración o corre el seed inicial de Mármoles y Servicios."
         />
       ) : (
-        <div className="card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
-                <th className="px-4 py-3 font-medium">Nombre</th>
-                <th className="px-4 py-3 font-medium">Cargo</th>
-                <th className="px-4 py-3 font-medium">Área</th>
-                <th className="px-4 py-3 font-medium">Ingreso</th>
-                <th className="px-4 py-3 font-medium">Estado</th>
-                {puedeEliminar && <th className="px-4 py-3 font-medium">Acciones</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {colaboradores.map((c) => (
-                <FilaColaborador
-                  key={c.id as string}
-                  colaborador={{
-                    id: c.id as string,
-                    nombre_completo: c.nombre_completo as string,
-                    estado: c.estado as string,
-                    fecha_ingreso: c.fecha_ingreso as string,
-                    cargo: c.cargo as { nombre: string; proceso_area: string | null } | null,
-                  }}
-                  puedeEliminar={puedeEliminar}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ListaColaboradores
+          puedeEliminar={puedeEliminar}
+          colaboradores={colaboradores.map((c: any) => ({
+            id: c.id as string,
+            nombre_completo: c.nombre_completo as string,
+            estado: c.estado as string,
+            fecha_ingreso: c.fecha_ingreso as string,
+            cargo: c.cargo ? { nombre: c.cargo.nombre, proceso_area: c.cargo.proceso_area } : null,
+            // Líder de área: tiene un cargo con personal a cargo o alguien lo tiene como líder directo
+            esLider: Boolean(c.cargo?.tiene_personal_a_cargo) || idsLideres.has(c.id),
+          }))}
+        />
       )}
     </div>
   );

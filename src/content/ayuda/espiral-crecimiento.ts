@@ -14,6 +14,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         'Listado de personas de la empresa. Un líder ve solo su equipo (por eso el título cambia a "Mi equipo"); admin_th y gerencia ven a todos.',
       camposYBotones: [
         { nombre: 'Fila de la tabla', explicacion: 'Foto, nombre, cargo, área, estado y fecha de ingreso. Clic en una fila abre la ficha 360° de esa persona.' },
+        { nombre: 'Filtros de la lista', explicacion: 'Encima de la tabla puedes buscar por nombre (sin importar tildes), filtrar por cargo y marcar «Solo líderes de área» para ver únicamente a quienes tienen personas a cargo (llevan la etiqueta «Líder de área»). «Limpiar filtros» vuelve a mostrar a todos.' },
         { nombre: 'Nuevo colaborador', explicacion: 'Solo admin_th. Abre el alta de la ficha: datos personales, cargo, líder directo, fecha de ingreso, contrato, salario y afiliaciones (también puedes cargar la hoja de vida en PDF para prellenar los datos con IA). Al crearla, el ingreso queda en el historial y se asigna el plan de inducción. También llegas aquí desde "Contratado — crear colaborador" en Reclutamiento, con los datos del candidato ya llenos. El acceso para iniciar sesión se crea aparte, en Administración → Usuarios y roles.' },
       ],
     },

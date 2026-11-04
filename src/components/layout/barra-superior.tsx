@@ -58,6 +58,7 @@ import {
   Menu,
   ChevronDown,
   LogOut,
+  KeyRound,
   DatabaseBackup,
 } from 'lucide-react';
 import type { Modulo, PermisosModulo } from '@/lib/supabase/get-perfil-actual';
@@ -300,6 +301,9 @@ export function BarraSuperior({
             <p className="text-sm font-medium text-white truncate">{nombre}</p>
             <p className="text-xs text-white/60 truncate">{etiquetaRol[rol] ?? rol}</p>
           </div>
+          <Link href="/cambiar-contrasena" className="rounded-lg p-2 text-white/85 hover:bg-white/10 hover:text-white transition" title="Cambiar mi contraseña" aria-label="Cambiar mi contraseña">
+            <KeyRound size={18} />
+          </Link>
           <button onClick={cerrarSesion} className="rounded-lg p-2 text-white/85 hover:bg-white/10 hover:text-white transition" title="Cerrar sesión">
             <LogOut size={18} />
           </button>

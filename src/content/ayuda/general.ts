@@ -6,6 +6,18 @@ export const moduloGeneral: ModuloAyuda = {
   descripcion: 'La pantalla de bienvenida y tu propia ficha personal.',
   paginas: [
     {
+      slug: 'cambiar-contrasena',
+      ruta: '/cambiar-contrasena',
+      titulo: 'Cambiar mi contraseña',
+      resumen: 'Cualquier persona con usuario puede cambiar su propia contraseña. Úsala si te dieron una clave inicial: cámbiala por una que solo tú conozcas.',
+      camposYBotones: [
+        { nombre: 'Llave en la barra superior', explicacion: 'El icono de llave, junto a «Cerrar sesión», abre esta pantalla desde cualquier lugar.' },
+        { nombre: 'Contraseña actual', explicacion: 'La que usaste para entrar. Se comprueba antes de guardar la nueva.' },
+        { nombre: 'Contraseña nueva y repetición', explicacion: 'Mínimo 8 caracteres y distinta de la actual. Deben coincidir las dos casillas.' },
+      ],
+      notas: ['Si olvidaste la actual, cierra sesión y usa «Olvidé mi contraseña» en la pantalla de inicio de sesión: te llega un enlace por correo.'],
+    },
+    {
       slug: 'inicio',
       ruta: '/inicio',
       titulo: 'Inicio',
