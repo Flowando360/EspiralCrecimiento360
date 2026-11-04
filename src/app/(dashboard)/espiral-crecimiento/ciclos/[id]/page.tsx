@@ -107,7 +107,7 @@ export default async function CicloDetallePage({ params }: { params: { id: strin
         <GenerarEvaluacionesPanel
           cicloId={ciclo.id}
           lideres={lideres}
-          colaboradores={(todosColaboradores ?? []).map((c) => ({ id: c.id, nombre: c.nombre_completo }))}
+          colaboradores={(todosColaboradores ?? []).map((c) => ({ id: c.id, nombre: c.nombre_completo, liderId: c.lider_id }))}
         />
       )}
 

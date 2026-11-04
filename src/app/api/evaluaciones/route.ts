@@ -22,6 +22,8 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
  * Los evaluacion_items quedan editables después (agregar/quitar) sin tocar
  * el catálogo general ni otras evaluaciones — ver PATCH más abajo.
  */
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   const perfil = await getPerfilActual();
   if (!perfil || perfil.rol !== 'admin_th') {
@@ -60,15 +62,31 @@ export async function POST(req: NextRequest) {
   let tareasCreadas = 0;
   let itemsCreados = 0;
 
+  // Catálogo de competencias: igual para todas las personas, se lee una sola vez.
+  const { data: competencias } = await supabase
+    .from('competencias')
+    .select('id, nombre, descripcion_que_evalua, bloque, solo_con_personal_a_cargo, orden')
+    .eq('empresa_id', perfil.empresa_id)
+    .eq('activo', true)
+    .not('bloque', 'is', null);
+
+  // Exclusiones y funciones por cargo: se leen una vez por cargo, no una vez por persona.
+  const cacheExcluidos = new Map<string, { competencia_id: string | null; cargo_funcion_id: string | null }[]>();
+  const cacheFunciones = new Map<string, { id: string; funcion: string; resultado_esperado: string | null; orden: number | null }[]>();
+
   for (const colaborador of colaboradores ?? []) {
     const tenePersonalACargo = Boolean((colaborador.cargo as any)?.tiene_personal_a_cargo);
 
     // Ítems que TH decidió NO incluir para el cargo de esta persona (ver
     // /administracion/cargos/[id]/items-evaluacion). Vacío = se incluye todo.
-    const { data: excluidos } = await supabase
-      .from('cargo_items_evaluacion_excluidos')
-      .select('competencia_id, cargo_funcion_id')
-      .eq('cargo_id', colaborador.cargo_id);
+    if (!cacheExcluidos.has(colaborador.cargo_id)) {
+      const { data } = await supabase
+        .from('cargo_items_evaluacion_excluidos')
+        .select('competencia_id, cargo_funcion_id')
+        .eq('cargo_id', colaborador.cargo_id);
+      cacheExcluidos.set(colaborador.cargo_id, data ?? []);
+    }
+    const excluidos = cacheExcluidos.get(colaborador.cargo_id);
     const competenciasExcluidas = new Set((excluidos ?? []).map((e) => e.competencia_id).filter(Boolean));
     const funcionesExcluidas = new Set((excluidos ?? []).map((e) => e.cargo_funcion_id).filter(Boolean));
 
@@ -86,56 +104,55 @@ export async function POST(req: NextRequest) {
     evaluacionesCreadas++;
 
     const asignaciones = (evaluadores ?? []).filter((e: any) => e.colaborador_id === colaborador.id);
-    for (const asignacion of asignaciones) {
-      const { error: errTarea } = await supabase.from('evaluacion_tareas').upsert(
-        {
+    if (asignaciones.length > 0) {
+      const { error: errTareas } = await supabase.from('evaluacion_tareas').upsert(
+        asignaciones.map((a: any) => ({
           evaluacion_id: evaluacion.id,
-          evaluador_colaborador_id: (asignacion as any).evaluador_id,
-          tipo_evaluador: (asignacion as any).tipo_evaluador,
-        },
+          evaluador_colaborador_id: a.evaluador_id,
+          tipo_evaluador: a.tipo_evaluador,
+        })),
         { onConflict: 'evaluacion_id,evaluador_colaborador_id' }
       );
-      if (!errTarea) tareasCreadas++;
+      if (!errTareas) tareasCreadas += asignaciones.length;
     }
 
     // ── 2. Ítems de evaluación: catálogo de competencias aplicables ──
-    const { data: competencias } = await supabase
-      .from('competencias')
-      .select('id, nombre, descripcion_que_evalua, bloque, solo_con_personal_a_cargo, orden')
-      .eq('empresa_id', perfil.empresa_id)
-      .eq('activo', true)
-      .not('bloque', 'is', null);
-
     const competenciasAplicables = (competencias ?? []).filter(
       (c: any) => (!c.solo_con_personal_a_cargo || tenePersonalACargo) && !competenciasExcluidas.has(c.id)
     );
 
-    for (const comp of competenciasAplicables) {
+    if (competenciasAplicables.length > 0) {
       const { error } = await supabase.from('evaluacion_items').upsert(
-        {
+        competenciasAplicables.map((comp: any) => ({
           evaluacion_id: evaluacion.id,
-          bloque: (comp as any).bloque,
+          bloque: comp.bloque,
           origen: 'competencia',
           competencia_id: comp.id,
           titulo: comp.nombre,
           descripcion: comp.descripcion_que_evalua,
           orden: comp.orden ?? 0,
-        },
+        })),
         { onConflict: 'evaluacion_id,competencia_id' }
       );
-      if (!error) itemsCreados++;
+      if (!error) itemsCreados += competenciasAplicables.length;
     }
 
     // ── 3. Ítems del bloque "Roles y Funciones": desde el perfil de cargo ──
-    const { data: funciones } = await supabase
-      .from('cargo_funciones_principales')
-      .select('id, funcion, resultado_esperado, orden')
-      .eq('cargo_id', colaborador.cargo_id)
-      .order('orden');
+    if (!cacheFunciones.has(colaborador.cargo_id)) {
+      const { data } = await supabase
+        .from('cargo_funciones_principales')
+        .select('id, funcion, resultado_esperado, orden')
+        .eq('cargo_id', colaborador.cargo_id)
+        .order('orden');
+      cacheFunciones.set(colaborador.cargo_id, data ?? []);
+    }
+    const funcionesAplicables = (cacheFunciones.get(colaborador.cargo_id) ?? []).filter(
+      (f) => !funcionesExcluidas.has(f.id)
+    );
 
-    for (const fn of (funciones ?? []).filter((f) => !funcionesExcluidas.has(f.id))) {
+    if (funcionesAplicables.length > 0) {
       const { error } = await supabase.from('evaluacion_items').upsert(
-        {
+        funcionesAplicables.map((fn) => ({
           evaluacion_id: evaluacion.id,
           bloque: 'roles_y_funciones',
           origen: 'funcion_cargo',
@@ -143,10 +160,10 @@ export async function POST(req: NextRequest) {
           titulo: fn.funcion,
           descripcion: fn.resultado_esperado,
           orden: fn.orden ?? 0,
-        },
+        })),
         { onConflict: 'evaluacion_id,cargo_funcion_id' }
       );
-      if (!error) itemsCreados++;
+      if (!error) itemsCreados += funcionesAplicables.length;
     }
 
     // Si TH excluyó un ítem DESPUÉS de que esta evaluación ya se había

@@ -60,3 +60,8 @@ Servidor local con puente a Supabase (el proxy de la nube no deja salir al servi
 - **Correo de Supabase Auth por Resend** configurado y probado con un correo externo.
 - **Siguiente módulo a probar: Nexa**, luego Procesos y Cumplimiento, Informes, Administración, Dotación, Proveedor, auditor externo y cron. Trabajar con un tope de costo que fije Diana (leer `cost_usd` con `get_session`).
 - **Memoria del proyecto:** `CLAUDE.md` en la raíz resume reglas, arquitectura y estado; se carga sola en cada sesión (nube o PowerShell).
+
+## Actualización (2026-11-04)
+- **Generar Encuentros de Crecimiento:** ahora muestra aviso de espera con indicador animado; el servidor lee el catálogo una sola vez y guarda ítems/tareas por lotes (mucho más rápido, tope de 60 s declarado). En «Un colaborador» hay un filtro previo por líder que reduce la lista a su equipo; en «Un equipo» se muestra cuántas personas lo componen.
+- **CONVERGIA:** las 39 cuentas ligadas a colaboradores recibieron una clave inicial común (se la dio Diana por el chat; no se guarda aquí). Quedaron sin tocar 10 cuentas que no son colaboradores (p. ej. proveedor, auditores).
+- **Pendiente:** el aplicativo aún no tiene pantalla de «Cambiar mi contraseña» dentro de la sesión (solo «Olvidé mi contraseña» por correo). Falta decidir si se agrega, junto con obligar el cambio en el primer ingreso.
