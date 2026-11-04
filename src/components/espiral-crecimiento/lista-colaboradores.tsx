@@ -6,6 +6,7 @@ import { FilaColaborador, type ColaboradorFila } from './fila-colaborador';
 
 export interface ColaboradorLista extends ColaboradorFila {
   esLider: boolean;
+  liderId: string | null;
 }
 
 function sinTildes(t: string) {
@@ -15,26 +16,40 @@ function sinTildes(t: string) {
 export function ListaColaboradores({
   colaboradores,
   puedeEliminar,
+  nombresPorId,
 }: {
   colaboradores: ColaboradorLista[];
   puedeEliminar: boolean;
+  /** nombre de cada colaborador por id, para rotular a los líderes del selector */
+  nombresPorId: Record<string, string>;
 }) {
   const [texto, setTexto] = useState('');
   const [cargo, setCargo] = useState('');
   const [soloLideres, setSoloLideres] = useState(false);
+  const [liderId, setLiderId] = useState('');
 
   const cargos = useMemo(
     () => Array.from(new Set(colaboradores.map((c) => c.cargo?.nombre).filter(Boolean) as string[])).sort((a, b) => a.localeCompare(b, 'es')),
     [colaboradores]
   );
 
+  // Líderes que tienen al menos una persona a cargo en esta lista
+  const lideres = useMemo(
+    () =>
+      Array.from(new Set(colaboradores.map((c) => c.liderId).filter(Boolean) as string[]))
+        .map((id) => ({ id, nombre: nombresPorId[id] ?? 'Sin nombre' }))
+        .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+    [colaboradores, nombresPorId]
+  );
+
   const visibles = colaboradores.filter((c) => {
+    if (liderId && c.liderId !== liderId) return false;
     if (texto && !sinTildes(c.nombre_completo).includes(sinTildes(texto.trim()))) return false;
     if (cargo && c.cargo?.nombre !== cargo) return false;
     if (soloLideres && !c.esLider) return false;
     return true;
   });
-  const hayFiltro = Boolean(texto || cargo || soloLideres);
+  const hayFiltro = Boolean(texto || cargo || soloLideres || liderId);
 
   return (
     <div className="space-y-3">
@@ -61,6 +76,17 @@ export function ListaColaboradores({
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
+        <select
+          value={liderId}
+          onChange={(e) => setLiderId(e.target.value)}
+          aria-label="Filtrar por líder"
+          className="rounded-lg border border-marmol-200 px-3 py-2 text-sm min-w-[12rem]"
+        >
+          <option value="">Todos los líderes</option>
+          {lideres.map((l) => (
+            <option key={l.id} value={l.id}>Equipo de {l.nombre}</option>
+          ))}
+        </select>
         <label className="inline-flex items-center gap-2 text-sm text-marmol-700 cursor-pointer">
           <input type="checkbox" checked={soloLideres} onChange={(e) => setSoloLideres(e.target.checked)} />
           <Crown size={14} className="text-flow-600" /> Solo líderes de área
@@ -68,7 +94,7 @@ export function ListaColaboradores({
         {hayFiltro && (
           <button
             type="button"
-            onClick={() => { setTexto(''); setCargo(''); setSoloLideres(false); }}
+            onClick={() => { setTexto(''); setCargo(''); setSoloLideres(false); setLiderId(''); }}
             className="text-xs text-flow-600 hover:text-flow-700"
           >
             Limpiar filtros
@@ -76,7 +102,9 @@ export function ListaColaboradores({
         )}
       </div>
       <p className="text-xs text-marmol-500">
-        Mostrando {visibles.length} de {colaboradores.length} {colaboradores.length === 1 ? 'persona' : 'personas'}.
+        {liderId
+          ? `Equipo de ${nombresPorId[liderId] ?? 'este líder'}: ${visibles.length} ${visibles.length === 1 ? 'persona' : 'personas'}.`
+          : `Mostrando ${visibles.length} de ${colaboradores.length} ${colaboradores.length === 1 ? 'persona' : 'personas'}.`}
       </p>
 
       <div className="card overflow-hidden">

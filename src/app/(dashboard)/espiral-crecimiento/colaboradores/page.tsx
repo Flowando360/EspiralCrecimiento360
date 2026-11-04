@@ -58,6 +58,7 @@ export default async function ColaboradoresPage() {
       ) : (
         <ListaColaboradores
           puedeEliminar={puedeEliminar}
+          nombresPorId={Object.fromEntries(colaboradores.map((c: any) => [c.id, c.nombre_completo]))}
           colaboradores={colaboradores.map((c: any) => ({
             id: c.id as string,
             nombre_completo: c.nombre_completo as string,
@@ -65,6 +66,7 @@ export default async function ColaboradoresPage() {
             fecha_ingreso: c.fecha_ingreso as string,
             cargo: c.cargo ? { nombre: c.cargo.nombre, proceso_area: c.cargo.proceso_area } : null,
             // Líder de área: tiene un cargo con personal a cargo o alguien lo tiene como líder directo
+            liderId: (c.lider_id as string | null) ?? null,
             esLider: Boolean(c.cargo?.tiene_personal_a_cargo) || idsLideres.has(c.id),
           }))}
         />
