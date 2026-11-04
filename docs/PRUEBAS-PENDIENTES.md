@@ -95,11 +95,11 @@ Servidor local con puente a Supabase (el proxy de la nube no deja salir al servi
 - **Regenerar un ciclo** ahora retira las tareas de acompañantes que ya no corresponden (solo las no enviadas y sin respuestas).
 - **Eliminar colaborador deja histórico** (`colaboradores_historico`, página `/espiral-crecimiento/colaboradores/historico`). Si la tabla no existe (migración sin aplicar) NO borra nada y lo explica.
 - **⚠️ Requiere aplicar `supabase/migrations/0110_organigrama_periodo_prueba_y_historico.sql` en Supabase (SQL Editor) ANTES de fusionar a `main`.** Probado con Playwright en CONVERGIA (datos PRU): ciclos (lista, detalle, con evaluaciones), editor de equipo, alta con líder, organigrama, y el rechazo seguro de eliminar sin la migración. Falta probar el histórico completo y las vistas nuevas después de aplicar la 0110.
-- **Pendientes que salieron de la reunión (sin hacer, por tamaño o por decidir):**
-  1. **Matriz de permisos por usuario** (prometida a Alexandra): hoy los permisos son por rol (Roles y permisos). Falta permitir ajustes punto a punto por persona; tocar cómo se valida cada módulo.
-  2. **Terceros/freelance** (p. ej. una persona externa con Guía del Flow): retroalimentación sin evaluación por cargo, con variables más subjetivas. Hay que definir el diseño con Diana.
-  3. **Cambio reciente de líder:** que evalúen tanto el líder saliente como el entrante. Hoy solo cuenta el líder actual; se puede resolver con un evaluador adicional por persona.
-  4. «Editar» colaborador debe dejar registro automático en el Historial (cambio de cargo/líder/salario) — ya propuesto antes.
-  5. Filtrar procesos, simulacros y reclutamiento por área del líder (Tatiana solo vería lo comercial): hoy se ve todo; se limitará cuando entren con datos reales.
-  6. Alexandra (TH de Mármoles) debe revisar que cada líder tenga su equipo (Dilson Restrepo y los nuevos de producción) y luego abrir el ciclo oct–dic **por equipo** (no «todos») para no dejar vacíos.
+- **Decisiones de Diana sobre los pendientes de la reunión (2026-11-04):**
+  1. Matriz de permisos por usuario y 2. terceros/freelance: **nada por ahora**.
+  3. Cambio de líder (saliente y entrante): **no hacer nada**.
+  4. Limitar procesos y simulacros por área: será una **opción adicional**, definida según los roles del líder dentro del SG-SST de la empresa (no por área del organigrama). Sin hacer.
+  5. Histórico de colaboradores eliminados con opción de consultarlo: **ya hecho** (Colaboradores → «Histórico de eliminados»); queda por probar tras aplicar la 0110.
+  - Sigue propuesto de antes: «Editar» colaborador deja registro automático en el Historial.
+  - Alexandra (TH de Mármoles) debe revisar que cada líder tenga su equipo (Dilson Restrepo y los nuevos de producción) y luego abrir el ciclo oct–dic **por equipo** (no «todos») para no dejar vacíos.
 - **Lección de pruebas locales:** con `BYPASS_AUTH=true` el servidor no lee cookies y Next cachea las lecturas de Supabase (se ven datos viejos). Para probar, enviar `cache: 'no-store'` en el cliente de ese modo (solo local, no subirlo).
