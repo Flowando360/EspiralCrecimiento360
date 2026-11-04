@@ -107,6 +107,7 @@ export default async function CicloDetallePage({ params }: { params: { id: strin
         <GenerarEvaluacionesPanel
           cicloId={ciclo.id}
           lideres={lideres}
+          yaGenerados={(evaluaciones ?? []).map((e: any) => primero(e.colaborador)?.id).filter(Boolean) as string[]}
           colaboradores={(todosColaboradores ?? []).map((c) => ({ id: c.id, nombre: c.nombre_completo, liderId: c.lider_id }))}
         />
       )}

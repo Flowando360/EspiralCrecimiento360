@@ -13,10 +13,13 @@ export function GenerarEvaluacionesPanel({
   cicloId,
   lideres,
   colaboradores,
+  yaGenerados,
 }: {
   cicloId: string;
   lideres: Opcion[];
   colaboradores: Opcion[];
+  /** ids de colaboradores que ya tienen su Encuentro de Crecimiento en este ciclo */
+  yaGenerados: string[];
 }) {
   const router = useRouter();
   const [scope, setScope] = useState<'todos' | 'equipo' | 'colaborador'>('todos');
@@ -28,6 +31,10 @@ export function GenerarEvaluacionesPanel({
   const [resultado, setResultado] = useState<string | null>(null);
 
   async function generar() {
+    if (yaTieneEncuentros) {
+      setResultado(mensajeYaGenerado);
+      return;
+    }
     setCargando(true);
     setResultado(null);
     try {
@@ -55,7 +62,19 @@ export function GenerarEvaluacionesPanel({
   const colaboradoresVisibles = liderFiltro
     ? colaboradores.filter((c) => c.liderId === liderFiltro)
     : colaboradores;
-  const integrantesEquipo = liderId ? colaboradores.filter((c) => c.liderId === liderId).length : 0;
+  const generados = new Set(yaGenerados);
+  const integrantes = liderId ? colaboradores.filter((c) => c.liderId === liderId) : [];
+  const pendientesEquipo = integrantes.filter((c) => !generados.has(c.id));
+  const equipoCompleto = scope === 'equipo' && !!liderId && integrantes.length > 0 && pendientesEquipo.length === 0;
+  const colaboradorCompleto = scope === 'colaborador' && !!colaboradorId && generados.has(colaboradorId);
+  const todosCompleto =
+    scope === 'todos' && colaboradores.length > 0 && colaboradores.every((c) => generados.has(c.id));
+  const yaTieneEncuentros = equipoCompleto || colaboradorCompleto || todosCompleto;
+  const mensajeYaGenerado = equipoCompleto
+    ? 'Este equipo ya tiene todos sus Encuentros de Crecimiento generados en este ciclo.'
+    : colaboradorCompleto
+      ? 'Esta persona ya tiene su Encuentro de Crecimiento generado en este ciclo.'
+      : 'Todos los colaboradores ya tienen su Encuentro de Crecimiento generado en este ciclo.';
 
   return (
     <div className="card p-5 space-y-4">
@@ -91,9 +110,30 @@ export function GenerarEvaluacionesPanel({
       )}
 
       {scope === 'equipo' && liderId && (
-        <p className="text-xs text-marmol-500">
-          Este equipo tiene {integrantesEquipo} {integrantesEquipo === 1 ? 'persona' : 'personas'}.
-        </p>
+        <div className="rounded-lg border border-marmol-200 p-3 space-y-2">
+          <p className="text-xs font-medium text-marmol-600">
+            Equipo: {integrantes.length} {integrantes.length === 1 ? 'persona' : 'personas'}
+            {integrantes.length > 0 && ` · ${pendientesEquipo.length} por generar`}
+          </p>
+          {integrantes.length === 0 ? (
+            <p className="text-xs text-marmol-500">Este líder no tiene personas a cargo registradas.</p>
+          ) : (
+            <ul className="space-y-1">
+              {integrantes.map((c) => (
+                <li key={c.id} className="flex items-center justify-between text-sm text-marmol-700">
+                  <span>{c.nombre}</span>
+                  <span
+                    className={`text-xs rounded-full px-2 py-0.5 ${
+                      generados.has(c.id) ? 'bg-flow-50 text-flow-700' : 'bg-marmol-100 text-marmol-500'
+                    }`}
+                  >
+                    {generados.has(c.id) ? 'Ya generado' : 'Por generar'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
 
       {scope === 'colaborador' && (
@@ -135,7 +175,7 @@ export function GenerarEvaluacionesPanel({
 
       <button
         onClick={generar}
-        disabled={cargando || (scope === 'equipo' && !liderId) || (scope === 'colaborador' && !colaboradorId)}
+        disabled={cargando || yaTieneEncuentros || (scope === 'equipo' && !liderId) || (scope === 'colaborador' && !colaboradorId)}
         className="rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-sm font-medium px-4 py-2 transition disabled:opacity-50"
       >
         {cargando ? (
@@ -150,6 +190,10 @@ export function GenerarEvaluacionesPanel({
           'Generar Encuentros de Crecimiento'
         )}
       </button>
+
+      {yaTieneEncuentros && !cargando && (
+        <p className="text-xs font-medium text-flow-700">{mensajeYaGenerado}</p>
+      )}
 
       {cargando && (
         <div role="status" aria-live="polite" className="rounded-lg border border-flow-200 bg-flow-50 p-3 space-y-2">
