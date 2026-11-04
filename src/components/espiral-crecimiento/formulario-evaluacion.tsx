@@ -1,9 +1,9 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
-import { guardarRespuesta } from '@/app/(dashboard)/espiral-crecimiento/evaluar/actions';
+import { guardarRespuesta, guardarBorrador, enviarValoracion } from '@/app/(dashboard)/espiral-crecimiento/evaluar/actions';
 import { cn } from '@/lib/utils';
-import { Check } from 'lucide-react';
+import { Check, Lock, Save, Send } from 'lucide-react';
 
 interface Criterio {
   nivel: number;
@@ -50,10 +50,13 @@ export function FormularioEvaluacion({
   evaluacionTareaId,
   items,
   respuestasIniciales,
+  enviadaEn,
 }: {
   evaluacionTareaId: string;
   items: ItemEvaluacion[];
   respuestasIniciales: Record<string, { nota: number; observacion?: string; resultadoReal?: string }>;
+  /** Fecha de envío si la valoración ya fue enviada (solo lectura); null si sigue en borrador */
+  enviadaEn: string | null;
 }) {
   const [notas, setNotas] = useState<Record<string, number>>(
     Object.fromEntries(Object.entries(respuestasIniciales).map(([k, v]) => [k, v.nota]))
@@ -68,8 +71,73 @@ export function FormularioEvaluacion({
   const [guardados, setGuardados] = useState<Record<string, boolean>>({});
   const [errores, setErrores] = useState<Record<string, string>>({});
   const [expandido, setExpandido] = useState<string | null>(null);
+  const [enviada, setEnviada] = useState(Boolean(enviadaEn));
+  const [fechaEnvio, setFechaEnvio] = useState<string | null>(enviadaEn);
+  const [mensaje, setMensaje] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
+  const [accion, setAccion] = useState<'guardando' | 'enviando' | null>(null);
+
+  function respuestasActuales() {
+    return items
+      .filter((i) => typeof notas[i.id] === 'number')
+      .map((i) => ({
+        evaluacionItemId: i.id,
+        nota: notas[i.id] as number,
+        observacion: observaciones[i.id] || undefined,
+        resultadoReal: resultadosReales[i.id] || undefined,
+      }));
+  }
+
+  async function guardarAvance() {
+    setMensaje(null);
+    setAccion('guardando');
+    try {
+      const res = await guardarBorrador({ evaluacionTareaId, respuestas: respuestasActuales() });
+      if (res.ok) {
+        const hora = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+        setMensaje({ tipo: 'ok', texto: `Avance guardado a las ${hora}. Puedes seguir después: aún no se ha enviado.` });
+      } else {
+        setMensaje({ tipo: 'error', texto: `No se pudo guardar: ${res.error}` });
+      }
+    } catch {
+      setMensaje({ tipo: 'error', texto: 'No se pudo guardar. Revisa tu conexión y vuelve a intentar.' });
+    } finally {
+      setAccion(null);
+    }
+  }
+
+  async function enviar() {
+    if (
+      !confirm(
+        'Vas a enviar tu valoración. Una vez enviada ya no podrás cambiar ninguna respuesta. ¿Quieres enviarla ahora?'
+      )
+    )
+      return;
+    setMensaje(null);
+    setAccion('enviando');
+    try {
+      const guardado = await guardarBorrador({ evaluacionTareaId, respuestas: respuestasActuales() });
+      if (!guardado.ok) {
+        setMensaje({ tipo: 'error', texto: `No se pudo guardar antes de enviar: ${guardado.error}` });
+        return;
+      }
+      const res = await enviarValoracion({ evaluacionTareaId });
+      if (res.ok) {
+        setEnviada(true);
+        setFechaEnvio(new Date().toISOString());
+        setMensaje(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        setMensaje({ tipo: 'error', texto: res.error });
+      }
+    } catch {
+      setMensaje({ tipo: 'error', texto: 'No se pudo enviar. Revisa tu conexión y vuelve a intentar.' });
+    } finally {
+      setAccion(null);
+    }
+  }
 
   function guardar(itemId: string, nota: number) {
+    if (enviada) return;
     setNotas((prev) => ({ ...prev, [itemId]: nota }));
     startTransition(async () => {
       const res = await guardarRespuesta({
@@ -114,32 +182,97 @@ export function FormularioEvaluacion({
   );
   const totalRespondidos = Object.keys(notas).filter((id) => items.some((i) => i.id === id)).length;
 
+  const faltan = items.length - totalRespondidos;
+
   return (
     <div className="space-y-6">
-      {/* ── Barra de avance y total ── */}
-      <div className="card p-4 sticky top-16 sm:top-[4.5rem] z-10 backdrop-blur bg-white/90 flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-flow-50 flex items-center justify-center">
-            <span className="font-display text-sm font-bold text-flow-700">{totalGeneral ?? '—'}</span>
-          </div>
+      {enviada && (
+        <div role="status" className="rounded-lg border border-flow-200 bg-flow-50 p-4 flex items-start gap-2">
+          <Lock size={16} className="text-flow-700 mt-0.5 shrink-0" />
           <div>
-            <p className="text-sm font-medium text-marmol-800">Promedio general</p>
-            <p className="text-xs text-marmol-400">
-              {totalRespondidos} de {items.length} ítems respondidos
+            <p className="text-sm font-medium text-flow-700">
+              Valoración enviada
+              {fechaEnvio && !isNaN(Date.parse(fechaEnvio)) &&
+                ` el ${new Date(fechaEnvio).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+              .
             </p>
+            <p className="text-xs text-marmol-600">Ya no se pueden hacer cambios. Aquí puedes consultar lo que respondiste.</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 flex-wrap">
+      )}
+
+      {/* ── Barra fija: avance, subtotales y acciones (se queda arriba al hacer scroll) ── */}
+      <div className="card p-4 sticky top-16 sm:top-[4.5rem] z-10 backdrop-blur bg-white/95 space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-11 w-11 shrink-0 rounded-full bg-flow-50 flex items-center justify-center">
+              <span className="font-display text-base font-bold text-flow-700">{totalGeneral ?? '—'}</span>
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-marmol-800">Promedio general</p>
+              <p className="text-xs text-marmol-500">
+                {totalRespondidos} de {items.length} ítems respondidos
+              </p>
+              <div className="mt-1 h-1.5 w-40 max-w-full overflow-hidden rounded-full bg-marmol-100">
+                <div
+                  className="h-full bg-crecimiento transition-all"
+                  style={{ width: `${items.length ? Math.round((100 * totalRespondidos) / items.length) : 0}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {!enviada && (
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={guardarAvance}
+                disabled={accion !== null}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-flow-500 text-flow-700 hover:bg-flow-50 disabled:opacity-50 text-sm font-medium px-3.5 py-2 transition"
+              >
+                <Save size={14} /> {accion === 'guardando' ? 'Guardando…' : 'Guardar avance'}
+              </button>
+              <button
+                type="button"
+                onClick={enviar}
+                disabled={accion !== null || faltan > 0}
+                title={faltan > 0 ? `Faltan ${faltan} ítems por responder` : undefined}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-flow-500 hover:bg-flow-600 text-white disabled:opacity-50 text-sm font-medium px-3.5 py-2 transition"
+              >
+                <Send size={14} /> {accion === 'enviando' ? 'Enviando…' : 'Enviar valoración'}
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {itemsPorBloque.map(({ bloque, items: itemsBloque }) => (
-            <div key={bloque} className="text-right">
-              <p className={cn('text-xs font-medium', ETIQUETA_BLOQUE[bloque].color)}>{ETIQUETA_BLOQUE[bloque].titulo}</p>
-              <p className="text-sm font-display font-semibold text-marmol-800">
+            <div key={bloque} className="rounded-lg bg-marmol-50 px-3 py-2">
+              <p className={cn('text-[11px] font-medium leading-tight', ETIQUETA_BLOQUE[bloque].color)}>
+                {ETIQUETA_BLOQUE[bloque].titulo}
+              </p>
+              <p className="mt-0.5 font-display text-base font-semibold text-marmol-800">
                 {subtotalesPorBloque[bloque] ?? '—'}
-                <span className="text-xs font-normal text-marmol-400"> · {itemsBloque.length} {itemsBloque.length === 1 ? 'ítem' : 'ítems'}</span>
+                <span className="text-xs font-normal text-marmol-400">
+                  {' '}· {itemsBloque.length} {itemsBloque.length === 1 ? 'ítem' : 'ítems'}
+                </span>
               </p>
             </div>
           ))}
         </div>
+
+        {!enviada && (
+          <p className="text-xs text-marmol-500">
+            {faltan > 0
+              ? `Puedes guardar tu avance y terminar después. Para enviar necesitas responder todos los ítems (faltan ${faltan}).`
+              : 'Respondiste todos los ítems. Cuando estés lista o listo, envía tu valoración: después no podrás cambiarla.'}
+          </p>
+        )}
+        {mensaje && (
+          <p role={mensaje.tipo === 'error' ? 'alert' : 'status'} className={cn('text-sm', mensaje.tipo === 'error' ? 'text-bajo' : 'text-alto')}>
+            {mensaje.texto}
+          </p>
+        )}
       </div>
 
       {itemsPorBloque.map(({ bloque, items: itemsBloque }) => (
@@ -176,6 +309,7 @@ export function FormularioEvaluacion({
                         <button
                           key={n}
                           type="button"
+                          disabled={enviada}
                           onClick={() => {
                             guardar(item.id, n);
                             if (item.criterios) setExpandido(item.id);
@@ -202,7 +336,8 @@ export function FormularioEvaluacion({
                       onBlur={() => {
                         if (nota) guardar(item.id, nota);
                       }}
-                      className="mt-2.5 w-full rounded-lg border border-marmol-200 px-3 py-1.5 text-sm"
+                      readOnly={enviada}
+                      className="mt-2.5 w-full rounded-lg border border-marmol-200 px-3 py-1.5 text-sm read-only:bg-marmol-50"
                     />
                   )}
 
@@ -220,7 +355,7 @@ export function FormularioEvaluacion({
                       onClick={() => setExpandido(estaExpandido ? null : item.id)}
                       className="text-xs text-marmol-400 hover:text-flow-600"
                     >
-                      {estaExpandido ? 'Ocultar observación' : 'Agregar observación'}
+                      {estaExpandido ? 'Ocultar observación' : enviada ? 'Ver observación' : 'Agregar observación'}
                     </button>
                     {errores[item.id] && (
                       <span className="text-xs text-bajo">No se guardó: {errores[item.id]}. Vuelve a intentarlo.</span>
@@ -240,7 +375,8 @@ export function FormularioEvaluacion({
                       onBlur={() => {
                         if (nota) guardar(item.id, nota);
                       }}
-                      className="mt-2 w-full rounded-lg border border-marmol-200 p-2.5 text-sm"
+                      readOnly={enviada}
+                      className="mt-2 w-full rounded-lg border border-marmol-200 p-2.5 text-sm read-only:bg-marmol-50"
                       rows={2}
                       autoFocus
                     />

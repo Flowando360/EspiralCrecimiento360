@@ -1,8 +1,16 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+
+const MENSAJE_ENVIADA = 'Esta valoración ya fue enviada y no se puede modificar';
+
+async function tareaYaEnviada(supabase: ReturnType<typeof createClient>, tareaId: string) {
+  const { data } = await supabase.from('evaluacion_tareas').select('completada').eq('id', tareaId).maybeSingle();
+  return Boolean(data?.completada);
+}
 
 const RespuestaSchema = z.object({
   evaluacionTareaId: z.string().uuid(),
@@ -25,6 +33,10 @@ const RespuestaSchema = z.object({
 export async function guardarRespuesta(input: z.infer<typeof RespuestaSchema>) {
   const parsed = RespuestaSchema.parse(input);
   const supabase = createClient();
+
+  if (await tareaYaEnviada(supabase, parsed.evaluacionTareaId)) {
+    return { ok: false, error: MENSAJE_ENVIADA };
+  }
 
   // Se busca la respuesta y se actualiza o inserta, en vez de usar upsert/ON CONFLICT:
   // el índice único de (tarea, ítem) es PARCIAL en la base de datos y PostgreSQL no lo
@@ -67,4 +79,95 @@ export async function guardarRespuesta(input: z.infer<typeof RespuestaSchema>) {
 
   revalidatePath('/espiral-crecimiento/ciclos');
   return { ok: true };
+}
+
+const BorradorSchema = z.object({
+  evaluacionTareaId: z.string().uuid(),
+  respuestas: z
+    .array(
+      z.object({
+        evaluacionItemId: z.string().uuid(),
+        nota: z.number().int().min(1).max(5),
+        observacion: z.string().optional(),
+        resultadoReal: z.string().optional(),
+      })
+    )
+    .max(500),
+});
+
+/** Guarda de una vez todas las respuestas que la persona lleva (guardado parcial / borrador). */
+export async function guardarBorrador(input: z.infer<typeof BorradorSchema>) {
+  const parsed = BorradorSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: 'Datos inválidos' };
+  const supabase = createClient();
+
+  if (await tareaYaEnviada(supabase, parsed.data.evaluacionTareaId)) {
+    return { ok: false as const, error: MENSAJE_ENVIADA };
+  }
+  if (parsed.data.respuestas.length === 0) return { ok: true as const, guardadas: 0 };
+
+  const { error } = await supabase.from('respuestas_evaluacion').upsert(
+    parsed.data.respuestas.map((r) => ({
+      evaluacion_tarea_id: parsed.data.evaluacionTareaId,
+      evaluacion_item_id: r.evaluacionItemId,
+      nota: r.nota,
+      observacion: r.observacion || null,
+      resultado_real: r.resultadoReal || null,
+    })),
+    { onConflict: 'evaluacion_tarea_id,evaluacion_item_id' }
+  );
+  if (error) return { ok: false as const, error: error.message };
+  return { ok: true as const, guardadas: parsed.data.respuestas.length };
+}
+
+/**
+ * Envía la valoración: exige que todos los ítems activos estén respondidos y
+ * la marca como enviada. Desde ese momento ya no admite cambios (también lo
+ * impide un candado en la base de datos) y empieza a contar en los resultados.
+ */
+export async function enviarValoracion(input: { evaluacionTareaId: string }) {
+  const perfil = await getPerfilActual();
+  if (!perfil?.colaborador_id) return { ok: false as const, error: 'No autorizado' };
+  const tareaId = z.string().uuid().safeParse(input.evaluacionTareaId);
+  if (!tareaId.success) return { ok: false as const, error: 'Datos inválidos' };
+
+  const supabase = createClient();
+  const { data: tarea } = await supabase
+    .from('evaluacion_tareas')
+    .select('id, evaluacion_id, completada, evaluador_colaborador_id')
+    .eq('id', tareaId.data)
+    .maybeSingle();
+  if (!tarea || tarea.evaluador_colaborador_id !== perfil.colaborador_id) {
+    return { ok: false as const, error: 'No encontramos esta valoración entre tus tareas' };
+  }
+  if (tarea.completada) return { ok: false as const, error: MENSAJE_ENVIADA };
+
+  const { data: items } = await supabase
+    .from('evaluacion_items')
+    .select('id')
+    .eq('evaluacion_id', tarea.evaluacion_id)
+    .eq('activo', true);
+  const idsActivos = new Set((items ?? []).map((i) => i.id));
+  const { data: respuestas } = await supabase
+    .from('respuestas_evaluacion')
+    .select('evaluacion_item_id')
+    .eq('evaluacion_tarea_id', tarea.id);
+  const respondidos = new Set((respuestas ?? []).map((r) => r.evaluacion_item_id).filter((id): id is string => id != null && idsActivos.has(id)));
+  const faltan = idsActivos.size - respondidos.size;
+  if (idsActivos.size === 0) return { ok: false as const, error: 'Esta valoración no tiene ítems para enviar' };
+  if (faltan > 0) {
+    return { ok: false as const, error: `Aún faltan ${faltan} ${faltan === 1 ? 'ítem' : 'ítems'} por responder. Complétalos y vuelve a enviar.` };
+  }
+
+  const { error } = await supabase
+    .from('evaluacion_tareas')
+    .update({ completada: true, fecha_completada: new Date().toISOString() })
+    .eq('id', tarea.id)
+    .eq('completada', false);
+  if (error) return { ok: false as const, error: error.message };
+
+  revalidatePath('/espiral-crecimiento/ciclos');
+  revalidatePath('/inicio');
+  revalidatePath(`/espiral-crecimiento/evaluar/${tarea.evaluacion_id}`);
+  return { ok: true as const };
 }

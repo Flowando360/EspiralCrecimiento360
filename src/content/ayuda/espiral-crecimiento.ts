@@ -216,7 +216,9 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         'El formulario donde cada acompañante (autoevaluación, líder, par, o colaborador a cargo) valora los comportamientos observables del colaborador en crecimiento durante el período.',
       camposYBotones: [
         { nombre: 'Ítems por bloque (Hacer/Deber)', explicacion: 'Cada ítem tiene una nota y, opcionalmente, una observación en texto libre.' },
-        { nombre: 'Guardado automático', explicacion: 'Cada respuesta se guarda al instante (aparece "Guardado" junto al ítem) y recalcula el resultado; no hace falta un botón de "enviar todo" al final. Si una respuesta no se pudo guardar, el formulario lo avisa en ese ítem y debes pulsar la nota otra vez. Los encabezados de cada bloque muestran su promedio y cuántos ítems tiene.' },
+        { nombre: 'Barra fija de arriba', explicacion: 'Se queda visible aunque bajes por la pantalla. Muestra el promedio general, cuántos ítems llevas, el promedio de cada bloque y los botones «Guardar avance» y «Enviar valoración».' },
+        { nombre: 'Guardar avance (borrador)', explicacion: 'Cada nota también se guarda al instante (aparece "Guardado" junto al ítem), pero «Guardar avance» asegura todo lo que llevas, incluidas las observaciones. Mientras no envíes, puedes salir, volver y cambiar lo que quieras. Un borrador todavía no cuenta en los resultados.' },
+        { nombre: 'Enviar valoración', explicacion: 'Se activa cuando respondiste todos los ítems. Pide confirmación porque, una vez enviada, ya no se puede modificar nada: queda en solo lectura y empieza a contar en los resultados (índices, semáforo y brecha). Un Encuentro de Crecimiento sin enviar sigue apareciendo como pendiente en tu Inicio.' },
       ],
       notas: ['Si el Encuentro de Crecimiento no tiene ítems generados, pide a Talento Humano que la regenere desde el detalle del ciclo.'],
     },

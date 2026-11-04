@@ -19,7 +19,7 @@ export default async function EvaluarPage({ params }: { params: { evaluacionId: 
 
   const { data: tarea } = await supabase
     .from('evaluacion_tareas')
-    .select('id, tipo_evaluador')
+    .select('id, tipo_evaluador, completada, fecha_completada')
     .eq('evaluacion_id', params.evaluacionId)
     .eq('evaluador_colaborador_id', perfil.colaborador_id)
     .maybeSingle();
@@ -75,8 +75,8 @@ export default async function EvaluarPage({ params }: { params: { evaluacionId: 
           Valorando a {(evaluacion.colaborador as any)?.nombre_completo}
         </h1>
         <p className="text-sm text-marmol-500 mt-1">
-          Valora comportamientos observables del período completo. Cada respuesta se guarda y
-          recalcula el resultado de inmediato. Puedes agregar una observación en cualquier ítem.
+          Valora comportamientos observables del período completo. Puedes guardar tu avance y volver después:
+          mientras no pulses «Enviar valoración», puedes cambiar lo que quieras. Al enviarla ya no se puede modificar.
         </p>
       </div>
 
@@ -90,6 +90,7 @@ export default async function EvaluarPage({ params }: { params: { evaluacionId: 
           evaluacionTareaId={tarea.id}
           items={itemsFormateados}
           respuestasIniciales={respuestasIniciales as any}
+          enviadaEn={tarea.completada ? (tarea.fecha_completada ?? 'enviada') : null}
         />
       )}
     </div>

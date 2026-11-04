@@ -67,3 +67,9 @@ Servidor local con puente a Supabase (el proxy de la nube no deja salir al servi
 - **Cambiar mi contraseña** (`/cambiar-contrasena`, icono de llave en la barra superior, para todo usuario): pide la actual, valida y guarda la nueva. Probado con Playwright (actual incorrecta, no coinciden, éxito). Falta decidir si se obliga el cambio en el primer ingreso.
 - **Colaboradores:** filtros por nombre, por cargo y «Solo líderes de área» (cargo con personal a cargo o alguien lo tiene como líder), con etiqueta «Líder de área». Probado como administrador de CONVERGIA.
 - Nota: las cuentas `pru.*` no están ligadas a colaboradores, por eso NO recibieron la clave inicial común.
+
+## Actualización (2026-11-04, valoración con borrador y envío)
+- La pantalla de valoración tiene «Guardar avance» y «Enviar valoración» en la barra fija de arriba. Mientras no se envía se puede cambiar; enviada queda en solo lectura (candado también en la base). Los resultados solo cuentan valoraciones enviadas.
+- **Requiere aplicar `supabase/migrations/0109_valoracion_borrador_y_envio.sql` en Supabase (SQL Editor)** ANTES de fusionar a `main`: sin ella el disparador antiguo marca la valoración como enviada al responder el último ítem.
+- Las valoraciones que ya estaban completas antes del cambio quedan como enviadas (bloqueadas).
+- La clave inicial no se obliga a cambiar: cada quien la cambia cuando quiera.
