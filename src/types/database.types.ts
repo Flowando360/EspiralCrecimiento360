@@ -638,6 +638,9 @@ export type Database = {
       }
       briefs_retroalimentacion: {
         Row: {
+          resumen_ser: string | null
+          resumen_saber: string | null
+          fuente_borrador: string | null
           evaluacion_id: string
           generado_en: string
           id: string
@@ -647,6 +650,9 @@ export type Database = {
           talento_central: string | null
         }
         Insert: {
+          resumen_ser?: string | null
+          resumen_saber?: string | null
+          fuente_borrador?: string | null
           evaluacion_id: string
           generado_en?: string
           id?: string
@@ -656,6 +662,9 @@ export type Database = {
           talento_central?: string | null
         }
         Update: {
+          resumen_ser?: string | null
+          resumen_saber?: string | null
+          fuente_borrador?: string | null
           evaluacion_id?: string
           generado_en?: string
           id?: string

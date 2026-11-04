@@ -2,6 +2,11 @@ import type { PreguntaFrecuente } from '@/types/ayuda';
 
 export const preguntasFrecuentes: PreguntaFrecuente[] = [
   {
+    pregunta: '¿El Brief se llena solo?',
+    respuesta:
+      'Sí, como borrador. Al abrir el Brief de una persona, el sistema cruza su Guía del Flow (Ser), su hoja de vida, los cursos que ha hecho y el cumplimiento de su cargo (Saber) y la valoración del ciclo (Hacer y Deber), y te deja escritas las seis secciones. Tú lo lees, lo ajustas con lo que ves en el día a día y pulsas Guardar. Puedes rehacerlo con los datos más recientes o mejorar la redacción con IA. De la Guía del Flow solo se usan los aspectos de relevancia laboral.',
+  },
+  {
     pregunta: '¿Qué es Espiral de Crecimiento 360°?',
     respuesta:
       'Es la plataforma de Talento Humano para acompañar el crecimiento de cada persona y de la empresa. Mira a cada persona en cuatro dimensiones (Ser, Saber, Hacer y Deber), reúne la valoración del líder, los pares, los colaboradores a cargo y la propia persona, y convierte lo que se encuentra en conversaciones, acuerdos y planes de desarrollo. Se llama «espiral» porque cuando un ciclo de acompañamiento se cierra, empieza otro: no se da vueltas sobre lo mismo, se va creciendo hacia arriba. Lee más en Centro de Ayuda → Inicio y Mi Perfil → «Qué es Espiral de Crecimiento 360°».',

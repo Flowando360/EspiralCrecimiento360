@@ -122,3 +122,10 @@ Servidor local con puente a Supabase (el proxy de la nube no deja salir al servi
 - Probado con Playwright en CONVERGIA (escritorio y móvil). La rama también incluye el módulo Externos: **no fusionar a `main` hasta aplicar `0111_externos.sql`**.
 
 - **Igual para toda empresa (pedido de Diana):** Gino, Externos, ciclos y organigrama no tienen nada atado a una empresa (todo por `empresa_id`; el ícono de Gino es de la plataforma y se ve igual en todas; solo su prompt de IA usa el nombre de la empresa). Una empresa nueva los tiene desde el primer día, sin datos de ejemplo.
+
+## Actualización (2026-11-04, Brief que cruza Ser, Saber, Hacer y Deber)
+- **Pedido de la reunión:** el Brief debe llenarse con el cruce de Guía del Flow (Ser), hoja de vida y cursos (Saber) y valoración (Hacer y Deber). Antes era 4 cuadros vacíos y manuales.
+- **Qué hay:** al abrir el Brief (`/espiral-crecimiento/evaluaciones/[id]/brief`) salen cuatro tarjetas «Lo que dicen los datos» y seis secciones ya escritas (talento central, Ser, Saber, Hacer, Deber, sugerencias). Borrador automático sin costo (`src/lib/brief/contexto.ts` + `borrador.ts`), «Rehacer borrador con los datos» y «Mejorar la redacción con IA» (`src/lib/brief/ia.ts`, usa `ANTHROPIC_API_KEY`, 60 s de tope; si falla deja el automático). Editor `brief-editor.tsx` con cajas que crecen y aviso de cambios sin guardar. El resultado de la evaluación también muestra Ser y Saber del Brief.
+- **Privacidad:** del Ser solo los 18 aspectos no sensibles y `informe_lider`; de pares y colaboradores a cargo solo el promedio agrupado; el colaborador evaluado no ve el Brief.
+- **⚠️ Requiere aplicar `supabase/migrations/0112_brief_ser_saber.sql`** (columnas `resumen_ser`, `resumen_saber`, `fuente_borrador`) ANTES de fusionar a `main`: sin ella «Guardar» falla.
+- **Probado** con Playwright en CONVERGIA (evaluación de PRU Laura Gómez): tarjetas, borrador automático con datos reales, «Mejorar con IA» (corregido: la API devuelve un bloque de pensamiento antes del texto). **Falta probar «Guardar» y recargar** tras aplicar la 0112. Ayuda, glosario, FAQ y guía del líder de TH ya actualizados (paso 5-5).

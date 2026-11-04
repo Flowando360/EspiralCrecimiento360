@@ -4,8 +4,16 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, FileText } from 'lucide-react';
-import { guardarBriefForm } from './actions';
+import { ArrowLeft, FileText, Sparkles, GraduationCap, Hammer, HeartHandshake } from 'lucide-react';
+import { recopilarContextoBrief } from '@/lib/brief/contexto';
+import { redactarBorrador } from '@/lib/brief/borrador';
+import { IA_BRIEF_DISPONIBLE } from '@/lib/brief/ia';
+import { BriefEditor, type CamposBriefUI } from '@/components/espiral-crecimiento/brief-editor';
+import { formatearFecha } from '@/lib/utils';
+
+// Generar con IA puede tardar: se declara el tope de 60 s del plan.
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
 
 export default async function BriefPage({ params }: { params: { evaluacionId: string } }) {
   const perfil = await getPerfilActual();
@@ -42,8 +50,20 @@ export default async function BriefPage({ params }: { params: { evaluacionId: st
     .eq('evaluacion_id', params.evaluacionId)
     .maybeSingle();
 
+  // Cruce de Ser, Saber, Hacer y Deber. Si todavía no hay Brief guardado, el borrador sale armado.
+  const ctx = await recopilarContextoBrief(supabase, params.evaluacionId);
+  const borrador = ctx ? redactarBorrador(ctx) : null;
+  const campos: CamposBriefUI = {
+    talento_central: brief?.talento_central ?? borrador?.talento_central ?? '',
+    resumen_ser: brief?.resumen_ser ?? borrador?.resumen_ser ?? '',
+    resumen_saber: brief?.resumen_saber ?? borrador?.resumen_saber ?? '',
+    resumen_hacer: brief?.resumen_hacer ?? borrador?.resumen_hacer ?? '',
+    resumen_deber: brief?.resumen_deber ?? borrador?.resumen_deber ?? '',
+    sugerencias_enfoque: brief?.sugerencias_enfoque ?? borrador?.sugerencias_enfoque ?? '',
+  };
+
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6 max-w-3xl">
       <div>
         <Link
           href={`/espiral-crecimiento/ciclos/${evaluacion.ciclo_id}`}
@@ -59,81 +79,80 @@ export default async function BriefPage({ params }: { params: { evaluacionId: st
         </p>
       </div>
 
-      <div className="card p-4 flex items-center gap-8">
-        <div>
-          <p className="text-xs text-marmol-500 mb-1">Hacer</p>
-          <div className="flex items-center gap-2">
-            <span className="font-display text-lg font-semibold text-secundario">
-              {resultado?.indice_hacer ?? '—'}
-            </span>
-            <SemaforoBadge nivel={resultado?.semaforo_hacer} />
+      {ctx && (
+        <section>
+          <h2 className="font-display font-semibold text-secundario mb-2">Lo que dicen los datos</h2>
+          <p className="text-xs text-marmol-400 mb-3">
+            Se cruzan solos, con lo más reciente: la Guía del Flow (Ser), la hoja de vida, los cursos y el cargo (Saber) y la valoración de este ciclo (Hacer y Deber).
+          </p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="card p-4">
+              <p className="text-xs font-medium text-marmol-500 mb-1 flex items-center gap-1.5">
+                <Sparkles size={13} className="text-ser" /> SER · Guía del Flow
+              </p>
+              {ctx.ser.disponible ? (
+                <>
+                  <p className="text-sm text-marmol-700">Aplicada el {formatearFecha(ctx.ser.fecha as string)}</p>
+                  {ctx.ser.fortalezas.length > 0 && (
+                    <p className="text-xs text-marmol-500 mt-1">Fuertes: {ctx.ser.fortalezas.map((f) => `${f.nombre} (${f.puntaje})`).join(' · ')}</p>
+                  )}
+                  {ctx.ser.aAcompanar.length > 0 && (
+                    <p className="text-xs text-marmol-500">A acompañar: {ctx.ser.aAcompanar.map((f) => `${f.nombre} (${f.puntaje})`).join(' · ')}</p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-marmol-400">Sin Guía del Flow todavía.</p>
+              )}
+            </div>
+            <div className="card p-4">
+              <p className="text-xs font-medium text-marmol-500 mb-1 flex items-center gap-1.5">
+                <GraduationCap size={13} className="text-saber" /> SABER · cargo, hoja de vida y cursos
+              </p>
+              <p className="font-display text-lg font-semibold text-secundario">{ctx.saber.cumplimiento != null ? `${ctx.saber.cumplimiento}%` : '—'}</p>
+              <p className="text-xs text-marmol-500">
+                {ctx.saber.cumple} cumplen · {ctx.saber.parcial} parcial · {ctx.saber.pendiente} pendientes
+              </p>
+              <p className="text-xs text-marmol-500">
+                Cursos: {ctx.saber.cursosCompletados.length} completados · {ctx.saber.cursosEnCurso.length} en curso
+                {ctx.saber.certificaciones.length > 0 && ` · ${ctx.saber.certificaciones.length} certificación(es) por vencer o vencidas`}
+              </p>
+            </div>
+            <div className="card p-4">
+              <p className="text-xs font-medium text-marmol-500 mb-1 flex items-center gap-1.5">
+                <Hammer size={13} className="text-hacer" /> HACER
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="font-display text-lg font-semibold text-secundario">{resultado?.indice_hacer ?? '—'}</span>
+                <SemaforoBadge nivel={resultado?.semaforo_hacer} />
+              </div>
+              {ctx.desempeno.brechaHacer != null && (
+                <p className="text-xs text-marmol-500">Diferencia con su autoevaluación: {ctx.desempeno.brechaHacer > 0 ? '+' : ''}{ctx.desempeno.brechaHacer}</p>
+              )}
+            </div>
+            <div className="card p-4">
+              <p className="text-xs font-medium text-marmol-500 mb-1 flex items-center gap-1.5">
+                <HeartHandshake size={13} className="text-deber" /> DEBER
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="font-display text-lg font-semibold text-secundario">{resultado?.indice_deber ?? '—'}</span>
+                <SemaforoBadge nivel={resultado?.semaforo_deber} />
+              </div>
+              {ctx.desempeno.brechaDeber != null && (
+                <p className="text-xs text-marmol-500">Diferencia con su autoevaluación: {ctx.desempeno.brechaDeber > 0 ? '+' : ''}{ctx.desempeno.brechaDeber}</p>
+              )}
+            </div>
           </div>
-        </div>
-        <div>
-          <p className="text-xs text-marmol-500 mb-1">Deber</p>
-          <div className="flex items-center gap-2">
-            <span className="font-display text-lg font-semibold text-secundario">
-              {resultado?.indice_deber ?? '—'}
-            </span>
-            <SemaforoBadge nivel={resultado?.semaforo_deber} />
-          </div>
-        </div>
-      </div>
+        </section>
+      )}
 
-      <form action={guardarBriefForm} className="card p-5 space-y-4">
-        <input type="hidden" name="evaluacionId" value={params.evaluacionId} />
-
-        <div>
-          <label className="block text-sm font-medium text-marmol-700 mb-1">Talento central</label>
-          <textarea
-            name="talento_central"
-            defaultValue={brief?.talento_central ?? ''}
-            rows={2}
-            className="w-full rounded-lg border border-marmol-200 px-3 py-2 text-sm"
-            placeholder="Lo más fuerte de esta persona, para partir la conversación desde ahí…"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-marmol-700 mb-1">Resumen de Hacer</label>
-          <textarea
-            name="resumen_hacer"
-            defaultValue={brief?.resumen_hacer ?? ''}
-            rows={3}
-            className="w-full rounded-lg border border-marmol-200 px-3 py-2 text-sm"
-            placeholder="Lo más relevante del resultado en Hacer…"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-marmol-700 mb-1">Resumen de Deber</label>
-          <textarea
-            name="resumen_deber"
-            defaultValue={brief?.resumen_deber ?? ''}
-            rows={3}
-            className="w-full rounded-lg border border-marmol-200 px-3 py-2 text-sm"
-            placeholder="Lo más relevante del resultado en Deber…"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-marmol-700 mb-1">Sugerencias de enfoque</label>
-          <textarea
-            name="sugerencias_enfoque"
-            defaultValue={brief?.sugerencias_enfoque ?? ''}
-            rows={3}
-            className="w-full rounded-lg border border-marmol-200 px-3 py-2 text-sm"
-            placeholder="Cómo abordar la conversación, qué priorizar…"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-sm font-medium px-4 py-2 transition"
-        >
-          Guardar
-        </button>
-      </form>
+      <BriefEditor
+        evaluacionId={params.evaluacionId}
+        inicial={campos}
+        fuenteInicial={(brief?.fuente_borrador as 'manual' | 'automatico' | 'ia' | null) ?? (brief ? 'manual' : 'automatico')}
+        esBorradorAutomatico={!brief}
+        faltaSerSaber={Boolean(brief && (!brief.resumen_ser || !brief.resumen_saber))}
+        iaDisponible={IA_BRIEF_DISPONIBLE()}
+      />
     </div>
   );
 }

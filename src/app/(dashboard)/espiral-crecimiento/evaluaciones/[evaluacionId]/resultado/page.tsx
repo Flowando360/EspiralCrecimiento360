@@ -260,7 +260,7 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
       })}
 
       {/* ── Retroalimentación cualitativa ── */}
-      {brief && (brief.talento_central || brief.resumen_hacer || brief.resumen_deber || brief.sugerencias_enfoque) && (
+      {brief && (brief.talento_central || brief.resumen_ser || brief.resumen_saber || brief.resumen_hacer || brief.resumen_deber || brief.sugerencias_enfoque) && (
         <div className="card p-5">
           <h2 className="font-display font-semibold text-secundario mb-3">Retroalimentación Cualitativa</h2>
           <div className="grid sm:grid-cols-2 gap-4 text-sm">
@@ -271,6 +271,14 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
             <div>
               <p className="text-xs font-medium text-marmol-500 uppercase tracking-wide mb-1">Sugerencias de enfoque</p>
               <p className="text-marmol-700">{brief.sugerencias_enfoque || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-marmol-500 uppercase tracking-wide mb-1">Resumen de Ser</p>
+              <p className="text-marmol-700">{brief.resumen_ser || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-marmol-500 uppercase tracking-wide mb-1">Resumen de Saber</p>
+              <p className="text-marmol-700">{brief.resumen_saber || '—'}</p>
             </div>
             <div>
               <p className="text-xs font-medium text-marmol-500 uppercase tracking-wide mb-1">Resumen de Hacer</p>

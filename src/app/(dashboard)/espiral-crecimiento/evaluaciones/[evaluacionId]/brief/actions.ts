@@ -4,6 +4,9 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { recopilarContextoBrief } from '@/lib/brief/contexto';
+import { redactarBorrador, type CamposBrief } from '@/lib/brief/borrador';
+import { mejorarBorradorConIA } from '@/lib/brief/ia';
 
 /**
  * Replica en el servidor la misma regla que ya aplica RLS: admin_th prepara
@@ -78,3 +81,76 @@ export async function guardarBrief(formData: FormData) {
 export async function guardarBriefForm(formData: FormData) {
   await guardarBrief(formData);
 }
+
+/**
+ * Arma el borrador del Brief cruzando Ser (Guía del Flow), Saber (hoja de vida,
+ * verificaciones y cursos) y Hacer/Deber (valoración del ciclo). No guarda nada:
+ * devuelve los textos para que el líder los revise, los edite y los guarde.
+ * Con `conIA` mejora además la redacción con IA (si está configurada).
+ */
+export async function generarBorradorBrief(evaluacionId: string, conIA: boolean) {
+  const permiso = await puedePrepararBrief(evaluacionId);
+  if (!permiso.ok) return permiso;
+
+  const supabase = createClient();
+  const ctx = await recopilarContextoBrief(supabase, evaluacionId);
+  if (!ctx) return { ok: false as const, error: 'No se encontró la evaluación' };
+
+  const automatico = redactarBorrador(ctx);
+  if (!conIA) return { ok: true as const, campos: automatico, fuente: 'automatico' as const };
+
+  const mejorado = await mejorarBorradorConIA(ctx, automatico);
+  if (!mejorado) {
+    return {
+      ok: true as const,
+      campos: automatico,
+      fuente: 'automatico' as const,
+      aviso: 'No se pudo mejorar la redacción con IA en este momento; te dejé el borrador automático.',
+    };
+  }
+  return { ok: true as const, campos: mejorado, fuente: 'ia' as const };
+}
+
+const CamposSchema = z.object({
+  evaluacionId: z.string().uuid(),
+  talento_central: z.string().trim().max(4000),
+  resumen_ser: z.string().trim().max(4000),
+  resumen_saber: z.string().trim().max(4000),
+  resumen_hacer: z.string().trim().max(4000),
+  resumen_deber: z.string().trim().max(4000),
+  sugerencias_enfoque: z.string().trim().max(4000),
+  fuente: z.enum(['manual', 'automatico', 'ia']),
+});
+
+/** Guarda el Brief completo (las seis secciones) y de dónde salió el borrador. */
+export async function guardarBriefCampos(input: z.infer<typeof CamposSchema>) {
+  const parsed = CamposSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+  const d = parsed.data;
+
+  const permiso = await puedePrepararBrief(d.evaluacionId);
+  if (!permiso.ok) return permiso;
+
+  const supabase = createClient();
+  const { error } = await supabase.from('briefs_retroalimentacion').upsert(
+    {
+      evaluacion_id: d.evaluacionId,
+      talento_central: d.talento_central || null,
+      resumen_ser: d.resumen_ser || null,
+      resumen_saber: d.resumen_saber || null,
+      resumen_hacer: d.resumen_hacer || null,
+      resumen_deber: d.resumen_deber || null,
+      sugerencias_enfoque: d.sugerencias_enfoque || null,
+      fuente_borrador: d.fuente,
+      generado_en: new Date().toISOString(),
+    },
+    { onConflict: 'evaluacion_id' }
+  );
+  if (error) return { ok: false as const, error: error.message };
+
+  revalidatePath(`/espiral-crecimiento/evaluaciones/${d.evaluacionId}/brief`);
+  revalidatePath(`/espiral-crecimiento/evaluaciones/${d.evaluacionId}/resultado`);
+  return { ok: true as const };
+}
+
+export type { CamposBrief };
