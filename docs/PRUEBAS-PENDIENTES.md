@@ -78,3 +78,10 @@ Servidor local con puente a Supabase (el proxy de la nube no deja salir al servi
 - Valoración con borrador/envío: migración 0109 aplicada por Diana; probado con Playwright en CONVERGIA (guardar, recargar, enviar, solo lectura, candado en la base); valoración de prueba devuelta a pendiente.
 - Búsqueda y filtros nuevos: Usuarios (texto, rol, estado, ficha), Roles (roles y módulos), Banco de candidatos, y un componente reutilizable `FiltroTabla` (`src/components/ui/filtro-tabla.tsx`) aplicado a Cargos, Organigrama, Dimensiones, Informes PDI/Formación/SST/Cultura, Nexa Directorio/Formación, Seguimiento de Guías del Flow, Sincronizaciones y detalle de ciclo.
 - Para agregar el filtro a otra tabla servida desde el servidor: envolverla en `<FiltroTabla columnas={['Estado']}>`; los nombres deben coincidir con los `<th>`.
+
+## Actualización (2026-11-04, documentación)
+- **Manual en línea** (`src/content/ayuda/`): páginas nuevas en «Inicio y Mi Perfil» (Mapa del menú con todas las opciones, ¿Dónde hago…?, Cómo evalúa un líder paso a paso, Cómo se combinan varias valoraciones), detalle de ciclo (generar, equipo, ya generados, aviso de espera), valoración con borrador/envío, ficha (Editar y que NO deja historial), Usuarios (vincular ficha), preguntas frecuentes y glosario ampliados.
+- **Guía pública** `/guia-lider-th`: pasos 5-2/5-3 ampliados, paso nuevo 5-7 (varias valoraciones), capítulos nuevos 9 «Todas las opciones del menú» y 10 «¿Dónde hago…?», y 8 preguntas frecuentes nuevas.
+- Corregido: la página «Buscar y filtrar» del manual tapaba la ayuda contextual de Colaboradores (las páginas informativas ahora usan rutas `/ayuda-general/...`, que no existen en la app).
+- **Pendiente decidido por Diana:** que «Editar» colaborador deje registro automático en el Historial (cambio de cargo/líder/salario). Propuesto, sin hacer.
+- Al agregar menús o pantallas nuevas, actualizar también el capítulo 9 de la guía y la página «Mapa del menú» del manual.

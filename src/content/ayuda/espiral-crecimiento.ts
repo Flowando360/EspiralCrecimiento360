@@ -14,7 +14,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         'Listado de personas de la empresa. Un líder ve solo su equipo (por eso el título cambia a "Mi equipo"); admin_th y gerencia ven a todos.',
       camposYBotones: [
         { nombre: 'Fila de la tabla', explicacion: 'Foto, nombre, cargo, área, estado y fecha de ingreso. Clic en una fila abre la ficha 360° de esa persona.' },
-        { nombre: 'Filtros de la lista', explicacion: 'Encima de la tabla puedes buscar por nombre (sin importar tildes), filtrar por cargo y elegir un líder en «Todos los líderes» para ver solo a las personas que tiene a cargo (el contador dice «Equipo de [nombre]: N personas»), marcar «Solo líderes de área» para ver únicamente a quienes tienen personas a cargo (llevan la etiqueta «Líder de área»). «Limpiar filtros» vuelve a mostrar a todos.' },
+        { nombre: 'Filtros de la lista', explicacion: 'Encima de la tabla hay cuatro herramientas: (1) una casilla para buscar por nombre, sin importar tildes ni mayúsculas; (2) «Todos los cargos», para ver solo a quienes tienen un cargo; (3) «Todos los líderes», para elegir el nombre de un líder y ver únicamente a las personas que tiene a cargo (el contador dice «Equipo de [nombre]: N personas»); y (4) la casilla «Solo líderes de área», que muestra a quienes tienen un cargo con personal a cargo o a quienes alguien tiene como líder directo (llevan la etiqueta «Líder de área»). Se pueden combinar. «Limpiar filtros» vuelve a mostrar a todos y debajo dice «Mostrando X de Y personas».' },
         { nombre: 'Nuevo colaborador', explicacion: 'Solo admin_th. Abre el alta de la ficha: datos personales, cargo, líder directo, fecha de ingreso, contrato, salario y afiliaciones (también puedes cargar la hoja de vida en PDF para prellenar los datos con IA). Al crearla, el ingreso queda en el historial y se asigna el plan de inducción. También llegas aquí desde "Contratado — crear colaborador" en Reclutamiento, con los datos del candidato ya llenos. El acceso para iniciar sesión se crea aparte, en Administración → Usuarios y roles.' },
       ],
     },
@@ -49,6 +49,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         { nombre: 'Plan de Desarrollo Individual', explicacion: 'Las acciones de desarrollo activas de la persona, con su origen (Hacer/Deber/Saber/Ser) y estado.' },
         { nombre: 'Documentos y certificado laboral', explicacion: 'Solo visible para admin_th y el propio colaborador. Lleva a la hoja de vida, el contrato, las afiliaciones (EPS/ARL/AFP/caja de compensación) y el generador del certificado laboral.' },
         { nombre: 'Incapacidades', explicacion: 'Solo visible para admin_th y el propio colaborador. Incapacidades y licencias registradas (enfermedad, accidente laboral, maternidad/paternidad), con su soporte adjunto.' },
+        { nombre: 'Editar (modificar al colaborador)', explicacion: 'Solo Talento Humano (admin_th). Botón con lápiz arriba a la derecha de la ficha, junto al estado. Abre el formulario para cambiar nombre, documento, correo, teléfono, cargo, líder directo, fecha de ingreso, tipo de contrato, estado, salario y afiliaciones (EPS, ARL, AFP y caja). Importante: «Editar» NO deja registro en el Historial. Si cambias el cargo o el líder, anótalo además en Historial → movimiento (promoción, cambio de área, cambio de líder), para conservar el cargo anterior. La salida de una persona tampoco se hace aquí: se registra desde Historial.' },
         { nombre: 'Ver historial y línea de tiempo', explicacion: 'Solo visible para admin_th y el líder directo. Lleva a movimientos de cargo, sanciones y, si aplica, entrevista de salida.' },
         { nombre: 'Fechas especiales', explicacion: 'Solo visible para admin_th y el líder directo. Cumpleaños, día de la profesión o cualquier otra fecha que valga la pena celebrar de esta persona — la propia persona también puede agregar las suyas desde Mi Perfil.' },
       ],
@@ -197,7 +198,11 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       resumen:
         'Muestra las ponderaciones vigentes del ciclo y el avance de cada colaborador en crecimiento, con acceso directo a su Brief y su Acuerdo de crecimiento.',
       camposYBotones: [
-        { nombre: 'Panel de generación de Encuentros de Crecimiento', explicacion: 'Solo admin_th. Genera los Encuentros de Crecimiento para "Todos los colaboradores", "Un equipo" (el de un líder) o "Un colaborador". Cada encuentro trae cinco bloques (competencias organizacionales, funcionales, de liderazgo si aplica, Roles y funciones y cultura) y sus tareas de valoración: autoevaluación, líder, pares y colaboradores a cargo, según el organigrama del momento. El bloque Roles y funciones sale del manual de funciones del cargo.' },
+        { nombre: 'Panel de generación de Encuentros de Crecimiento', explicacion: 'Solo admin_th. Se elige el alcance con tres botones: «Todos los colaboradores», «Un equipo» o «Un colaborador», y se pulsa «Generar Encuentros de Crecimiento». Cada encuentro trae cinco bloques (competencias organizacionales, funcionales, de liderazgo si aplica, Roles y funciones y cultura) y sus tareas de valoración: autoevaluación, líder, pares y colaboradores a cargo, según el organigrama del momento. El bloque Roles y funciones sale del manual de funciones del cargo.' },
+        { nombre: 'Un equipo', explicacion: 'Eliges el nombre de un líder y debajo aparece la lista de sus personas, cada una con la etiqueta «Ya generado» o «Por generar», y cuántas faltan. Si todas ya tienen su encuentro en este ciclo, el botón queda deshabilitado y el panel lo dice; si alguien lo pulsa de todos modos, responde que ya están generados en lugar de repetirlos.' },
+        { nombre: 'Un colaborador', explicacion: 'Primero puedes elegir un líder en el selector «Equipo de…» para que la lista de colaboradores muestre solo a su equipo, y luego eliges a la persona. Si esa persona ya tiene su encuentro en este ciclo, el botón se deshabilita y lo avisa. Si no eliges líder, la lista muestra a todos.' },
+        { nombre: 'Aviso de espera', explicacion: 'Generar puede tardar uno o dos minutos. Mientras corre, el botón muestra un círculo girando con «Generando…» y aparece un recuadro con una barra animada que pide no cerrar ni recargar la página hasta ver «Listo: N Encuentros de Crecimiento, N tareas de acompañante y N ítems generados». Si falla, el mensaje de error aparece ahí mismo. Volver a generar un ciclo no duplica lo que ya existe.' },
+        { nombre: 'Filtros de la tabla del ciclo', explicacion: 'Encima de la tabla de Encuentros: busca por persona y filtra por cargo o por etapa (En evaluación, Evaluación completa, Con retroalimentación, Cerrada).' },
         { nombre: 'Tabla de Encuentros de Crecimiento', explicacion: 'Por persona: % de avance, resultado de Hacer y Deber con semáforo, y enlaces a Brief y Acuerdo (admin_th y líder).' },
       ],
       proceso: [
@@ -220,7 +225,18 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         { nombre: 'Guardar avance (borrador)', explicacion: 'Cada nota también se guarda al instante (aparece "Guardado" junto al ítem), pero «Guardar avance» asegura todo lo que llevas, incluidas las observaciones. Mientras no envíes, puedes salir, volver y cambiar lo que quieras. Un borrador todavía no cuenta en los resultados.' },
         { nombre: 'Enviar valoración', explicacion: 'Se activa cuando respondiste todos los ítems. Pide confirmación porque, una vez enviada, ya no se puede modificar nada: queda en solo lectura y empieza a contar en los resultados (índices, semáforo y brecha). Un Encuentro de Crecimiento sin enviar sigue apareciendo como pendiente en tu Inicio.' },
       ],
-      notas: ['Si el Encuentro de Crecimiento no tiene ítems generados, pide a Talento Humano que la regenere desde el detalle del ciclo.'],
+      proceso: [
+        'Entra a Inicio: en «Encuentros de Crecimiento pendientes» aparece cada valoración que te toca (autoevaluación, líder, par o colaborador a cargo). Pulsa la que quieras.',
+        'Arriba hay una barra fija (se queda visible aunque bajes) con tu promedio, cuántos ítems llevas y los botones «Guardar avance» y «Enviar valoración».',
+        'Para cada ítem pulsa una nota de 1 a 5. Si el ítem tiene guía de valoración, verás el criterio del nivel que elegiste. En Roles y funciones puedes escribir además el «resultado real observado», y en cualquier ítem una observación.',
+        'Puedes parar cuando quieras: pulsa «Guardar avance» y vuelve después. Mientras no envíes, puedes cambiar cualquier respuesta.',
+        'Cuando hayas respondido todos los ítems se activa «Enviar valoración». Confirma el aviso: una vez enviada, la pantalla queda en solo lectura (con el aviso «Valoración enviada el…») y ya no se puede modificar.',
+        'Tu valoración enviada empieza a contar en el índice de Hacer y Deber, el semáforo y la brecha de la persona. Luego prepara el Brief y registra el Acuerdo (ver «Resultado de un Encuentro de Crecimiento»).',
+      ],
+      notas: [
+        'Un borrador (valoración sin enviar) todavía no cuenta en los resultados ni se muestra a nadie. En tu Inicio sigue apareciendo como pendiente hasta que la envíes.',
+        'Si el Encuentro de Crecimiento no tiene ítems generados, pide a Talento Humano que la regenere desde el detalle del ciclo.',
+      ],
     },
     {
       slug: 'resultado-evaluacion',
@@ -245,6 +261,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       notas: [
         'Pueden ver esta pantalla: admin_th, el líder directo y la propia persona. Si Hacer o Deber aparecen "Sin datos", todavía no hay respuestas del líder en ese ciclo.',
         'El plan de desarrollo se crea solo cuando una dimensión queda en semáforo bajo; las acciones manuales sirven para el resto de brechas que detecte el líder.',
+        'Cómo se combinan varias valoraciones: dentro de cada grupo se promedia (si 4 pares valoran a una persona, cuentan como una sola fuente «pares»; el líder es una sola persona). Luego los grupos se ponderan: con personal a cargo, líder 40 %, pares 30 %, colaboradores a cargo 30 %; sin personal a cargo, líder 60 % y pares 40 %. Son valores por defecto y se cambian por ciclo en Administración → Configuración. La autoevaluación no entra en el índice: solo se usa para calcular la brecha. Solo cuentan valoraciones enviadas; si un grupo aún no ha enviado nada, el índice se calcula con los grupos que sí enviaron. Cada evaluador pesa igual dentro de su grupo y no hay un mínimo de evaluadores.',
       ],
     },
     {
@@ -275,6 +292,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       titulo: 'Organigrama',
       resumen: 'Vista jerárquica de la empresa, en árbol. Explica la regla automática de quién acompaña a quién.',
       notas: [
+        'Para ver quiénes dependen de un líder, el camino más directo es Espiral 360° → Colaboradores → selector «Todos los líderes» (lista a sus subalternos con cargo, área y estado). En Administración → Organigrama (editar) también puedes filtrar por «Líder directo».',
         'Regla de acompañantes: el líder es quien está justo arriba en el organigrama; los pares comparten el mismo líder; los colaboradores a cargo son quienes reportan directamente al colaborador en crecimiento.',
       ],
     },

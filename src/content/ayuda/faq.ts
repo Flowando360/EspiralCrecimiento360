@@ -359,4 +359,49 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
     respuesta:
       'En su ficha entra a Historial → Agregar movimiento y elige "Salida" con la fecha y el motivo. En un solo paso la ficha queda Inactiva y, si tenía cuenta de acceso, se retira. Después puedes llenar la entrevista de salida. La rotación se actualiza sola en Indicadores.',
   },
+  {
+    pregunta: '¿Dónde modifico los datos de un colaborador?',
+    respuesta:
+      'Solo Talento Humano: Espiral 360° → Colaboradores → clic en el nombre → botón «Editar» (lápiz) arriba a la derecha de la ficha. Allí cambias datos personales, cargo, líder directo, fecha de ingreso, contrato, estado, salario y afiliaciones. «Editar» no deja registro en el Historial: si cambias cargo o líder, anótalo también en Historial → Agregar movimiento.',
+  },
+  {
+    pregunta: '¿Dónde le asigno cargo, líder y ficha a una persona que solo tiene cuenta?',
+    respuesta:
+      'La cuenta (usuario y contraseña) y la ficha (cargo, líder, evaluaciones) son distintas. Crea la ficha en Espiral 360° → Colaboradores → Nuevo colaborador eligiendo su cargo y líder y vinculando su cuenta, o créala y luego vincúlala en Administración → Usuarios y roles → Editar con el selector de ficha. Ese selector solo lista fichas activas que todavía no tienen cuenta; si ninguna es de la persona, déjalo en «Sin ficha».',
+  },
+  {
+    pregunta: '¿Dónde veo qué personas tiene a cargo un líder?',
+    respuesta:
+      'En Espiral 360° → Colaboradores, elige el nombre del líder en el selector «Todos los líderes»: se listan sus subalternos con cargo, área y estado. También en Administración → Organigrama (filtro «Líder directo») y, al generar encuentros, en Ciclos → «Un equipo».',
+  },
+  {
+    pregunta: '¿Cómo cambio mi contraseña? ¿Es obligatorio cambiar la clave inicial?',
+    respuesta:
+      'No es obligatorio, pero es lo recomendable. Pulsa el icono de llave de la barra superior (Cambiar mi contraseña): escribe tu contraseña actual, la nueva (mínimo 8 caracteres) y repítela. Cualquier persona con usuario puede hacerlo. Si olvidaste la actual, usa «Olvidé mi contraseña» en el inicio de sesión.',
+  },
+  {
+    pregunta: '¿Por qué no puedo generar los Encuentros de Crecimiento de un equipo?',
+    respuesta:
+      'Si el botón aparece deshabilitado es porque todas las personas de ese equipo (o esa persona) ya tienen su encuentro en este ciclo; la lista «Ya generado / Por generar» lo muestra. Generar puede tardar uno o dos minutos: espera el mensaje «Listo» sin cerrar la página.',
+  },
+  {
+    pregunta: '¿Qué diferencia hay entre «Guardar avance» y «Enviar valoración»?',
+    respuesta:
+      '«Guardar avance» guarda tu borrador: puedes salir, volver y cambiar lo que quieras. «Enviar valoración» (se activa al responder todos los ítems) la entrega de forma definitiva: queda en solo lectura, ya no se puede modificar y recién ahí cuenta en los resultados. En tu Inicio sigue como pendiente hasta que la envíes.',
+  },
+  {
+    pregunta: 'Una persona es valorada por su líder y por varios pares. ¿Cómo se combinan?',
+    respuesta:
+      'Dentro de cada grupo se promedia (4 pares cuentan como una sola fuente «pares»). Luego se ponderan los grupos: con personal a cargo, líder 40 %, pares 30 % y colaboradores a cargo 30 %; sin personal a cargo, líder 60 % y pares 40 %. La autoevaluación no entra en el índice, solo sirve para la brecha. Solo cuentan valoraciones enviadas.',
+  },
+  {
+    pregunta: '¿Cómo busco a una persona o filtro una lista?',
+    respuesta:
+      'Encima de las tablas hay una casilla de búsqueda (sin importar tildes) y filtros desplegables. En Colaboradores filtras por nombre, cargo, líder directo y «Solo líderes de área»; en Usuarios y roles, por rol, estado y ficha; también en Cargos, Organigrama, Banco de candidatos, informes de PDI, Formación, SST y Cultura, y en el detalle de un ciclo. «Limpiar filtros» vuelve a mostrar todo.',
+  },
+  {
+    pregunta: '¿La operación es igual para todas las empresas?',
+    respuesta:
+      'Sí: el aplicativo funciona igual para cualquier empresa. Los datos (personas, cargos, ciclos, usuarios) son independientes por empresa y nada de una se ve en otra.',
+  },
 ];

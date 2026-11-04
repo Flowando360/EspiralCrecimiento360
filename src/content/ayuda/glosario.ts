@@ -72,6 +72,11 @@ const TERMINOS: TerminoGlosario[] = [
   { termino: 'Acción de desarrollo', definicion: 'Cada compromiso del Plan de Desarrollo Individual: la brecha detectada, lo que se va a hacer, quién responde y la fecha. Puede crearla el sistema (semáforo bajo) o a mano Talento Humano o el líder desde el resultado del Encuentro de Crecimiento.' },
   { termino: 'Pionero (Makigami)', definicion: 'La primera persona que caza un desperdicio en un paso. Si luego 2 personas más lo confirman (hallazgo validado), el pionero gana 15 puntos extra.' },
   { termino: 'Traspaso', definicion: 'En el tablero Makigami, cuando el trabajo pasa de un área a otra (flecha naranja punteada). Cada traspaso suele traer espera, así que es un buen lugar para buscar desperdicios.' },
+  { termino: 'Borrador (de una valoración)', definicion: 'Valoración guardada con «Guardar avance» pero todavía no enviada. Se puede cambiar libremente y no cuenta en los resultados. Sigue apareciendo como pendiente en Inicio.' },
+  { termino: 'Enviar valoración', definicion: 'Entrega definitiva de una valoración (se activa al responder todos los ítems). Después queda en solo lectura, no se puede modificar y empieza a contar en el índice, el semáforo y la brecha.' },
+  { termino: 'Ficha de colaborador', definicion: 'El registro de una persona dentro de la empresa: cargo, líder, hoja de vida, evaluaciones, etc. Es distinto de su cuenta de acceso (usuario y contraseña); ambas se unen en Administración → Usuarios y roles. Sin ficha, la persona no aparece en el organigrama ni en las evaluaciones.' },
+  { termino: 'Líder de área', definicion: 'Persona con un cargo que tiene personal a cargo, o a quien alguien tiene como líder directo. En Colaboradores se ve con la etiqueta «Líder de área» y se puede filtrar con «Solo líderes de área».' },
+  { termino: 'Ponderación de fuentes', definicion: 'Peso de cada grupo de acompañantes en el índice: con personal a cargo, líder 40 %, pares 30 %, colaboradores a cargo 30 %; sin personal a cargo, líder 60 % y pares 40 % (ajustable por ciclo en Administración → Configuración). Dentro de cada grupo se promedia.' },
 ];
 
 /** Siempre en orden alfabético, sin importar dónde se agregue un término nuevo. */
