@@ -4,6 +4,7 @@ interface NodoColaborador {
   lider_id: string | null;
   es_externo: boolean;
   estado?: string;
+  tipo_externo?: string | null;
   cargo: { nombre: string } | null;
 }
 
@@ -13,6 +14,7 @@ function construirArbol(colaboradores: NodoColaborador[], liderId: string | null
 
 function NodoArbol({ nodo, colaboradores }: { nodo: NodoColaborador; colaboradores: NodoColaborador[] }) {
   const hijos = construirArbol(colaboradores, nodo.id);
+  const externos = colaboradores.filter((c) => c.lider_id === nodo.id && c.es_externo);
 
   return (
     <div className="flex flex-col items-center">
@@ -21,6 +23,15 @@ function NodoArbol({ nodo, colaboradores }: { nodo: NodoColaborador; colaborador
         <p className="text-[13px] text-marmol-400">{nodo.cargo?.nombre}</p>
         {nodo.estado === 'periodo_prueba' && <p className="text-[11px] text-medio">Período de prueba</p>}
       </div>
+      {externos.length > 0 && (
+        <div className="mt-2 max-w-[220px] rounded-lg border border-dashed border-marmol-300 bg-marmol-50 px-2 py-1.5 text-center">
+          <p className="text-[11px] font-medium text-marmol-500">Externos ({externos.length})</p>
+          <p className="text-[11px] text-marmol-400 leading-snug">
+            {externos.slice(0, 4).map((x) => x.nombre_completo).join(' · ')}
+            {externos.length > 4 ? ` · +${externos.length - 4} más` : ''}
+          </p>
+        </div>
+      )}
       {hijos.length > 0 && (
         <>
           <div className="w-px h-4 bg-marmol-300" />

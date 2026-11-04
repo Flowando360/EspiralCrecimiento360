@@ -3,7 +3,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { formatearFecha } from '@/lib/utils';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { GraduationCap, Briefcase, Sparkles, ShieldCheck, Target, Clock, History, FolderLock, CalendarHeart, HeartPulse, Shirt, Pencil } from 'lucide-react';
 
 export default async function FichaColaboradorPage({ params }: { params: { id: string } }) {
@@ -15,7 +15,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
   const { data: colaborador } = await supabase
     .from('colaboradores')
     .select(
-      `id, empresa_id, nombre_completo, email, telefono, fecha_ingreso, estado, tipo_contrato, lider_id,
+      `id, empresa_id, nombre_completo, email, telefono, fecha_ingreso, estado, tipo_contrato, lider_id, es_externo,
        cargo:cargos(id, nombre, proceso_area, objetivo_cargo, tiene_personal_a_cargo),
        lider:lider_id(id, nombre_completo)`
     )
@@ -23,6 +23,8 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
     .maybeSingle();
 
   if (!colaborador || colaborador.empresa_id !== perfil.empresa_id) notFound();
+  // Los externos tienen su propia pantalla (vínculo, seguimiento, documentos)
+  if (colaborador.es_externo) redirect(`/espiral-crecimiento/externos/${params.id}`);
 
   // Misma regla que ya autoriza RLS en colaboradores: admin_th y gerencia
   // leen toda la empresa, líder solo su equipo directo, colaborador solo

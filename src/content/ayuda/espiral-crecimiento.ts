@@ -292,6 +292,25 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       ],
     },
     {
+      slug: 'externos',
+      ruta: '/espiral-crecimiento/externos',
+      titulo: 'Externos',
+      resumen:
+        'Registro de contratistas, transportadores, asesores, freelance y proveedores: personas o firmas que prestan servicios sin ser empleadas. No se evalúan en los Ciclos de Crecimiento, pero quedan con su vínculo, documentos, vencimiento y seguimiento.',
+      camposYBotones: [
+        { nombre: 'Tarjetas de resumen', explicacion: 'Cuántos externos activos hay, cuántos vencen en 30 días o ya vencieron, y cuántos hay por tipo.' },
+        { nombre: 'Tabla y filtros', explicacion: 'Busca por nombre, empresa o servicio y filtra por tipo, estado y responsable. «Vigencia» muestra la fecha de fin del contrato o servicio y avisa cuando está por vencer.' },
+        { nombre: 'Nuevo externo', explicacion: 'Solo admin_th. Pestaña «Una persona» (datos, tipo de vínculo, servicio, empresa o firma, responsable interno, fechas y notas) o «Varias a la vez»: pegas una persona por línea («Nombre ; documento ; correo ; teléfono», puedes copiar columnas de Excel) y todas comparten el mismo vínculo. Si el documento ya existe, esa línea se omite y te lo dice.' },
+        { nombre: 'Detalle del externo', explicacion: 'Datos del vínculo, acceso a Documentos (contrato, RUT, ARL…) y a la Guía del Flow, «Seguimiento del servicio» (fecha, calificación opcional de 1 a 5 y comentario; lo registran Talento Humano y el responsable interno) y, para Talento Humano, Editar, «Pasar a colaborador vinculado» y Eliminar (deja registro en el Histórico de eliminados).' },
+      ],
+      notas: [
+        'Responsable interno: es quien lo contrata o coordina. El externo aparece con línea punteada bajo esa persona en el organigrama.',
+        'Si llenas «Fin del contrato o servicio», el sistema crea una alerta que avisa 30 días antes del vencimiento.',
+        'Los externos no entran a Ciclos de Crecimiento, indicadores, dotación ni inducción. Si una persona pasa a ser empleada, usa «Pasar a colaborador vinculado»: queda en período de prueba y con su responsable como líder.',
+        'Para dejar de trabajar con un externo sin perder su historia, márcalo «Inactivo» en Editar.',
+      ],
+    },
+    {
       slug: 'organigrama-consulta',
       ruta: '/espiral-crecimiento/organigrama',
       titulo: 'Organigrama',

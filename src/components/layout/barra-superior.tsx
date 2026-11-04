@@ -60,6 +60,7 @@ import {
   LogOut,
   KeyRound,
   DatabaseBackup,
+  UserRoundCog,
 } from 'lucide-react';
 import type { Modulo, PermisosModulo } from '@/lib/supabase/get-perfil-actual';
 
@@ -109,6 +110,7 @@ const NAV: NavGroup[] = [
     tituloCorto: 'Espiral 360°',
     items: [
       { href: '/espiral-crecimiento/colaboradores', label: 'Colaboradores', icon: Users, roles: ['admin_th', 'lider', 'gerencia'] },
+      { href: '/espiral-crecimiento/externos', label: 'Externos', icon: UserRoundCog, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/espiral-crecimiento/dimensiones', label: 'Dimensiones', icon: LayoutGrid, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/espiral-crecimiento/ciclos', label: 'Ciclos de Crecimiento', icon: CalendarClock, roles: ['admin_th', 'lider'] },
       { href: '/espiral-crecimiento/pdi', label: 'Planes de Desarrollo', icon: Target, roles: ['admin_th', 'lider', 'colaborador'] },

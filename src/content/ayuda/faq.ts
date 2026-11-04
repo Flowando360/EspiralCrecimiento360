@@ -415,6 +415,11 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
       'La ficha y todo lo asociado se borran, pero antes queda un registro en Colaboradores → «Histórico de eliminados» (cargo, líder, fechas, motivo y movimientos). Si la persona solo dejó la empresa, es mejor «Salida» desde su Historial: queda inactiva y conserva toda su información.',
   },
   {
+    pregunta: '¿Cómo registro a contratistas, transportadores o asesores que no son empleados?',
+    respuesta:
+      'En Espiral 360° → Externos → «Nuevo externo». Puedes registrar uno solo o pegar una lista («Varias a la vez»). Eliges el tipo de vínculo, el servicio, la empresa o firma, el responsable interno y la fecha de fin del contrato (el sistema avisa 30 días antes). No se evalúan en los ciclos, pero tienen documentos y seguimiento del servicio.',
+  },
+  {
     pregunta: '¿La operación es igual para todas las empresas?',
     respuesta:
       'Sí: el aplicativo funciona igual para cualquier empresa. Los datos (personas, cargos, ciclos, usuarios) son independientes por empresa y nada de una se ve en otra.',

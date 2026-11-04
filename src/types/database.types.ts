@@ -1790,6 +1790,11 @@ export type Database = {
       }
       colaboradores: {
         Row: {
+          tipo_externo: string | null
+          entidad_externa: string | null
+          servicio: string | null
+          fecha_fin_vinculo: string | null
+          notas_externo: string | null
           afp: string | null
           arl: string | null
           caja_compensacion: string | null
@@ -1817,6 +1822,11 @@ export type Database = {
           usuario_id: string | null
         }
         Insert: {
+          tipo_externo?: string | null
+          entidad_externa?: string | null
+          servicio?: string | null
+          fecha_fin_vinculo?: string | null
+          notas_externo?: string | null
           afp?: string | null
           arl?: string | null
           caja_compensacion?: string | null
@@ -1844,6 +1854,11 @@ export type Database = {
           usuario_id?: string | null
         }
         Update: {
+          tipo_externo?: string | null
+          entidad_externa?: string | null
+          servicio?: string | null
+          fecha_fin_vinculo?: string | null
+          notas_externo?: string | null
           afp?: string | null
           arl?: string | null
           caja_compensacion?: string | null
@@ -4801,6 +4816,47 @@ export type Database = {
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      externos_seguimiento: {
+        Row: {
+          calificacion: number | null
+          colaborador_id: string
+          comentario: string
+          created_at: string
+          empresa_id: string
+          fecha: string
+          id: string
+          registrado_por: string | null
+        }
+        Insert: {
+          calificacion?: number | null
+          colaborador_id: string
+          comentario: string
+          created_at?: string
+          empresa_id: string
+          fecha?: string
+          id?: string
+          registrado_por?: string | null
+        }
+        Update: {
+          calificacion?: number | null
+          colaborador_id?: string
+          comentario?: string
+          created_at?: string
+          empresa_id?: string
+          fecha?: string
+          id?: string
+          registrado_por?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "externos_seguimiento_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
             referencedColumns: ["id"]
           },
         ]
