@@ -85,3 +85,21 @@ Servidor local con puente a Supabase (el proxy de la nube no deja salir al servi
 - Corregido: la página «Buscar y filtrar» del manual tapaba la ayuda contextual de Colaboradores (las páginas informativas ahora usan rutas `/ayuda-general/...`, que no existen en la app).
 - **Pendiente decidido por Diana:** que «Editar» colaborador deje registro automático en el Historial (cambio de cargo/líder/salario). Propuesto, sin hacer.
 - Al agregar menús o pantallas nuevas, actualizar también el capítulo 9 de la guía y la página «Mapa del menú» del manual.
+
+## Actualización (2026-11-04, inducción con Mármoles: organigrama, ciclos e histórico)
+- **Círculo de Crecimiento DESACTIVADO** (no borrado): proyecto `circulo-crecimiento` en Vercel pausado (responde 503). Su Supabase sigue activo con los datos. Reactivar: Vercel → proyecto → Settings → Resume Service. Se borra solo cuando Diana lo confirme y tras un último respaldo.
+- **Causa raíz de «no aparece en el organigrama» (Dilson y los nuevos):** el formulario crea a todos en «período de prueba» y las pantallas/vistas solo contaban `activo`. Ahora «vigente» = activo + período de prueba (`src/lib/colaboradores/estados.ts`) en organigrama (ambos), detalle de ciclo y generación de encuentros; migración 0110 hace lo mismo en las vistas `v_organigrama_*`. Quedan aún con filtro solo `activo` (a propósito, son métricas): informes, dotación y selectores de Procesos.
+- **Borrar ciclos** (admin_th): «Eliminar ciclo» en la tarjeta y en el detalle; avisa cuántas evaluaciones se pierden y exige escribir ELIMINAR. Los PDI y verificaciones del Saber se desvinculan, no se borran.
+- **Equipo a cargo de un líder:** Administración → Organigrama ahora tiene «Para revisar» (líderes sin equipo, personas sin líder), «Por líder» (marcar su equipo; evita ciclos) y «Por persona». Botón «Equipo a cargo» en la ficha.
+- **Nuevo colaborador → organigrama al instante:** líder obligatorio (o casilla «sin líder / nivel 1») y lista opcional «Personas que tendrá a cargo».
+- **Regenerar un ciclo** ahora retira las tareas de acompañantes que ya no corresponden (solo las no enviadas y sin respuestas).
+- **Eliminar colaborador deja histórico** (`colaboradores_historico`, página `/espiral-crecimiento/colaboradores/historico`). Si la tabla no existe (migración sin aplicar) NO borra nada y lo explica.
+- **⚠️ Requiere aplicar `supabase/migrations/0110_organigrama_periodo_prueba_y_historico.sql` en Supabase (SQL Editor) ANTES de fusionar a `main`.** Probado con Playwright en CONVERGIA (datos PRU): ciclos (lista, detalle, con evaluaciones), editor de equipo, alta con líder, organigrama, y el rechazo seguro de eliminar sin la migración. Falta probar el histórico completo y las vistas nuevas después de aplicar la 0110.
+- **Pendientes que salieron de la reunión (sin hacer, por tamaño o por decidir):**
+  1. **Matriz de permisos por usuario** (prometida a Alexandra): hoy los permisos son por rol (Roles y permisos). Falta permitir ajustes punto a punto por persona; tocar cómo se valida cada módulo.
+  2. **Terceros/freelance** (p. ej. una persona externa con Guía del Flow): retroalimentación sin evaluación por cargo, con variables más subjetivas. Hay que definir el diseño con Diana.
+  3. **Cambio reciente de líder:** que evalúen tanto el líder saliente como el entrante. Hoy solo cuenta el líder actual; se puede resolver con un evaluador adicional por persona.
+  4. «Editar» colaborador debe dejar registro automático en el Historial (cambio de cargo/líder/salario) — ya propuesto antes.
+  5. Filtrar procesos, simulacros y reclutamiento por área del líder (Tatiana solo vería lo comercial): hoy se ve todo; se limitará cuando entren con datos reales.
+  6. Alexandra (TH de Mármoles) debe revisar que cada líder tenga su equipo (Dilson Restrepo y los nuevos de producción) y luego abrir el ciclo oct–dic **por equipo** (no «todos») para no dejar vacíos.
+- **Lección de pruebas locales:** con `BYPASS_AUTH=true` el servidor no lee cookies y Next cachea las lecturas de Supabase (se ven datos viejos). Para probar, enviar `cache: 'no-store'` en el cliente de ese modo (solo local, no subirlo).

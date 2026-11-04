@@ -21,15 +21,17 @@ export function FilaColaborador({ colaborador, puedeEliminar }: { colaborador: C
 
   function eliminar() {
     const mensaje =
-      `¿Eliminar definitivamente a ${colaborador.nombre_completo}? Esto NO se puede deshacer: se borra ` +
-      'su ficha junto con todo su historial asociado (evaluaciones, SER, hoja de vida, inducción, ' +
-      'alertas, incapacidades, fechas especiales, dotación, Guía del Flow). Úsalo solo para corregir ' +
-      'errores (ej. una ficha duplicada) — si la persona ya dejó la empresa, usa "Salida" desde su ' +
-      'Historial en vez de esto, para conservar su registro.';
+      `¿Eliminar la ficha de ${colaborador.nombre_completo}? Esto NO se puede deshacer: se borra ` +
+      'su ficha con todo lo asociado (evaluaciones, SER, hoja de vida, inducción, alertas, ' +
+      'incapacidades, fechas especiales, dotación, Guía del Flow).\n\n' +
+      'Antes de borrar se guarda un registro en el "Histórico de colaboradores" (nombre, documento, cargo, ' +
+      'líder, fechas y su historial de movimientos), para saber quién pasó por la empresa.\n\n' +
+      'Si la persona solo dejó la empresa, es mejor dejarla inactiva con "Salida" desde su Historial.';
     if (!confirm(mensaje)) return;
+    const motivo = window.prompt('Motivo de la eliminación (opcional, queda en el histórico):', '') ?? '';
     setError(null);
     startTransition(async () => {
-      const res = await eliminarColaborador(colaborador.id);
+      const res = await eliminarColaborador(colaborador.id, motivo);
       if (!res.ok) setError(res.error);
     });
   }

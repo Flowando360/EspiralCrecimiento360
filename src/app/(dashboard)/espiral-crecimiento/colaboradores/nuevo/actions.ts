@@ -15,6 +15,7 @@ const CrearColaboradorSchema = z.object({
   telefono: z.string().trim().optional(),
   cargoId: z.string().uuid('Selecciona un cargo'),
   liderId: z.string().uuid().optional().or(z.literal('')),
+  equipoIds: z.array(z.string().uuid()).optional(),
   fechaIngreso: z.string().min(1, 'La fecha de ingreso es requerida'),
   tipoContrato: z.enum(['indefinido', 'fijo', 'obra_labor', 'prestacion_servicios', 'aprendizaje', 'externo']),
   estado: z.enum(['activo', 'periodo_prueba', 'inactivo', 'en_proceso_salida']),
@@ -98,6 +99,26 @@ export async function crearColaborador(input: z.infer<typeof CrearColaboradorSch
     .single();
 
   if (error) return { ok: false as const, error: error.message };
+
+  // Equipo a cargo (opcional): quienes se marcaron pasan a reportarle a la persona recién creada.
+  // Se descartan los que serían jefes del nuevo líder para no crear un ciclo en el organigrama.
+  const equipo = Array.from(new Set(d.equipoIds ?? []));
+  if (equipo.length > 0) {
+    const jefes = new Set<string>();
+    let actual: string | null = d.liderId || null;
+    if (actual) {
+      const { data: todos } = await supabase.from('colaboradores').select('id, lider_id').eq('empresa_id', perfil.empresa_id);
+      const liderDe = new Map((todos ?? []).map((c: any) => [c.id as string, c.lider_id as string | null]));
+      while (actual && !jefes.has(actual)) {
+        jefes.add(actual);
+        actual = liderDe.get(actual) ?? null;
+      }
+    }
+    const validos = equipo.filter((id) => !jefes.has(id));
+    if (validos.length > 0) {
+      await supabase.from('colaboradores').update({ lider_id: data.id }).in('id', validos).eq('empresa_id', perfil.empresa_id);
+    }
+  }
 
   // El ciclo laboral empieza aquí: se deja el ingreso en la línea de tiempo del historial.
   const { data: cargoIngreso } = await supabase.from('cargos').select('nombre').eq('id', d.cargoId).maybeSingle();

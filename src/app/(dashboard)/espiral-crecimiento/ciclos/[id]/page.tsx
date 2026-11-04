@@ -5,9 +5,11 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { GenerarEvaluacionesPanel } from '@/components/espiral-crecimiento/generar-evaluaciones-panel';
 import { EditarCiclo } from '@/components/espiral-crecimiento/editar-ciclo';
+import { BotonEliminarCiclo } from '@/components/espiral-crecimiento/boton-eliminar-ciclo';
 import { notFound } from 'next/navigation';
 import { FileText, HandshakeIcon } from 'lucide-react';
 import { cn, formatearFecha, primero } from '@/lib/utils';
+import { ESTADOS_VIGENTES } from '@/lib/colaboradores/estados';
 
 // Etapa de cada evaluación dentro del ciclo, derivada de datos que ya
 // existen (porcentaje_avance, si tiene brief guardado, si está publicada)
@@ -71,7 +73,7 @@ export default async function CicloDetallePage({ params }: { params: { id: strin
     .from('colaboradores')
     .select('id, nombre_completo, lider_id')
     .eq('empresa_id', perfil?.empresa_id ?? '')
-    .eq('estado', 'activo');
+    .in('estado', ESTADOS_VIGENTES);
 
   const idsConEquipo = new Set((todosColaboradores ?? []).filter((c) => c.lider_id).map((c) => c.lider_id));
   const lideres = (todosColaboradores ?? [])
@@ -91,7 +93,7 @@ export default async function CicloDetallePage({ params }: { params: { id: strin
           {ciclo.peso_colaboradores_con_equipo * 100}% (cargos con equipo)
         </p>
         {perfil?.rol === 'admin_th' && (
-          <div className="mt-2">
+          <div className="mt-2 space-y-3">
             <EditarCiclo
               cicloId={ciclo.id}
               datosIniciales={{
@@ -99,6 +101,13 @@ export default async function CicloDetallePage({ params }: { params: { id: strin
                 fechaApertura: ciclo.fecha_apertura,
                 fechaCierreRespuestas: ciclo.fecha_cierre_respuestas,
               }}
+            />
+            <BotonEliminarCiclo
+              cicloId={ciclo.id}
+              nombre={ciclo.nombre}
+              totalEvaluaciones={evaluacionesConEtapa.length}
+              conAvance={evaluacionesConEtapa.filter((e: any) => (e.porcentaje_avance ?? 0) > 0).length}
+              irALista
             />
           </div>
         )}

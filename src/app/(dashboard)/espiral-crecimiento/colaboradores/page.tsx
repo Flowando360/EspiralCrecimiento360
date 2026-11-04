@@ -40,12 +40,26 @@ export default async function ColaboradoresPage() {
           </p>
         </div>
         {perfil.rol === 'admin_th' && (
+          <div className="flex items-center gap-3 flex-wrap">
+          <Link
+            href="/espiral-crecimiento/colaboradores/historico"
+            className="text-xs text-marmol-500 hover:text-flow-600 underline"
+          >
+            Histórico de eliminados
+          </Link>
+          <Link
+            href="/administracion/organigrama"
+            className="text-xs text-marmol-500 hover:text-flow-600 underline"
+          >
+            Asignar equipos (organigrama)
+          </Link>
           <Link
             href="/espiral-crecimiento/colaboradores/nuevo"
             className="inline-flex items-center gap-1.5 rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-sm font-medium px-3.5 py-2 transition"
           >
             <Plus size={16} /> Nuevo colaborador
           </Link>
+          </div>
         )}
       </div>
 

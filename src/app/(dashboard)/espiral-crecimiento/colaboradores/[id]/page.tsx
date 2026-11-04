@@ -144,6 +144,14 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
           </span>
           {perfil.rol === 'admin_th' && (
             <Link
+              href={`/administracion/organigrama?lider=${params.id}#equipo`}
+              className="inline-flex items-center gap-1 rounded-lg border border-marmol-200 hover:border-flow-300 text-marmol-600 hover:text-flow-600 text-xs font-medium px-2.5 py-1.5 transition"
+            >
+              Equipo a cargo
+            </Link>
+          )}
+          {perfil.rol === 'admin_th' && (
+            <Link
               href={`/espiral-crecimiento/colaboradores/${params.id}/editar`}
               className="inline-flex items-center gap-1 rounded-lg border border-marmol-200 hover:border-flow-300 text-marmol-600 hover:text-flow-600 text-xs font-medium px-2.5 py-1.5 transition"
             >

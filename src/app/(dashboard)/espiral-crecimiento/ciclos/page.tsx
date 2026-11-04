@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FormularioCrearCiclo } from '@/components/espiral-crecimiento/formulario-crear-ciclo';
 import { formatearFecha } from '@/lib/utils';
+import { BotonEliminarCiclo } from '@/components/espiral-crecimiento/boton-eliminar-ciclo';
 import { CalendarClock } from 'lucide-react';
 
 const ETIQUETA_ESTADO: Record<string, string> = {
@@ -24,6 +25,21 @@ export default async function CiclosPage() {
     .select('id, nombre, fecha_apertura, fecha_cierre_respuestas, estado')
     .eq('empresa_id', perfil.empresa_id)
     .order('fecha_apertura', { ascending: false });
+
+  // Cuántas evaluaciones tiene cada ciclo (para avisar qué se pierde al eliminarlo)
+  const conteo = new Map<string, { total: number; conAvance: number }>();
+  if (perfil.rol === 'admin_th' && ciclos && ciclos.length > 0) {
+    const { data: evals } = await supabase
+      .from('evaluaciones')
+      .select('ciclo_id, porcentaje_avance')
+      .in('ciclo_id', ciclos.map((c) => c.id));
+    for (const e of evals ?? []) {
+      const actual = conteo.get(e.ciclo_id as string) ?? { total: 0, conAvance: 0 };
+      actual.total++;
+      if ((e.porcentaje_avance ?? 0) > 0) actual.conAvance++;
+      conteo.set(e.ciclo_id as string, actual);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -50,21 +66,27 @@ export default async function CiclosPage() {
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {ciclos.map((c) => (
-            <Link
-              key={c.id}
-              href={`/espiral-crecimiento/ciclos/${c.id}`}
-              className="card p-5 hover:border-flow-300 transition"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-display font-semibold text-secundario">{c.nombre}</h3>
-                <span className="text-xs rounded-full bg-flow-50 text-flow-700 px-2.5 py-0.5 font-medium">
-                  {ETIQUETA_ESTADO[c.estado] ?? c.estado}
-                </span>
-              </div>
-              <p className="text-xs text-marmol-500">
-                {formatearFecha(c.fecha_apertura)} → {formatearFecha(c.fecha_cierre_respuestas)}
-              </p>
-            </Link>
+            <div key={c.id} className="card p-5 hover:border-flow-300 transition space-y-3">
+              <Link href={`/espiral-crecimiento/ciclos/${c.id}`} className="block">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-display font-semibold text-secundario">{c.nombre}</h3>
+                  <span className="text-xs rounded-full bg-flow-50 text-flow-700 px-2.5 py-0.5 font-medium">
+                    {ETIQUETA_ESTADO[c.estado] ?? c.estado}
+                  </span>
+                </div>
+                <p className="text-xs text-marmol-500">
+                  {formatearFecha(c.fecha_apertura)} → {formatearFecha(c.fecha_cierre_respuestas)}
+                </p>
+              </Link>
+              {perfil.rol === 'admin_th' && (
+                <BotonEliminarCiclo
+                  cicloId={c.id}
+                  nombre={c.nombre}
+                  totalEvaluaciones={conteo.get(c.id)?.total ?? 0}
+                  conAvance={conteo.get(c.id)?.conAvance ?? 0}
+                />
+              )}
+            </div>
           ))}
         </div>
       )}

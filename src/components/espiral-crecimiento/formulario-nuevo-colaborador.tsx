@@ -40,6 +40,9 @@ export function FormularioNuevoColaborador({
   const [telefono, setTelefono] = useState(datosIniciales?.telefono ?? '');
   const [cargoId, setCargoId] = useState(datosIniciales?.cargoId ?? '');
   const [liderId, setLiderId] = useState('');
+  const [sinLiderConfirmado, setSinLiderConfirmado] = useState(false);
+  const [equipoIds, setEquipoIds] = useState<string[]>([]);
+  const [filtroEquipo, setFiltroEquipo] = useState('');
   const [fechaIngreso, setFechaIngreso] = useState(() => new Date().toISOString().slice(0, 10));
   const [tipoContrato, setTipoContrato] = useState<TipoContrato>('indefinido');
   const [estado, setEstado] = useState<EstadoColaborador>('periodo_prueba');
@@ -64,8 +67,16 @@ export function FormularioNuevoColaborador({
     }
   }
 
+  function alternarEquipo(id: string) {
+    setEquipoIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
   function crear() {
     setError(null);
+    if (!liderId && !sinLiderConfirmado) {
+      setError('Elige el líder directo para que la persona quede en el organigrama, o marca que no tiene líder (gerencia / nivel 1).');
+      return;
+    }
     startTransition(async () => {
       const res = await crearColaborador({
         usuarioId: usuarioVinculadoId || undefined,
@@ -76,6 +87,7 @@ export function FormularioNuevoColaborador({
         telefono,
         cargoId,
         liderId,
+        equipoIds,
         fechaIngreso,
         tipoContrato,
         estado,
@@ -169,17 +181,60 @@ export function FormularioNuevoColaborador({
             </select>
           </div>
           <div>
-            <label className={label}>Líder directo</label>
-            <select value={liderId} onChange={(e) => setLiderId(e.target.value)} className={campo}>
-              <option value="">Sin líder asignado (o es gerencia)</option>
+            <label className={label}>Líder directo *</label>
+            <select
+              value={liderId}
+              onChange={(e) => {
+                setLiderId(e.target.value);
+                if (e.target.value) setSinLiderConfirmado(false);
+              }}
+              className={campo}
+            >
+              <option value="">— Elige el líder —</option>
               {posiblesLideres.map((l) => (
                 <option key={l.id} value={l.id}>
                   {l.nombre_completo}
                 </option>
               ))}
             </select>
+            {liderId ? (
+              <p className="text-[12px] text-alto mt-1">Quedará en el organigrama bajo este líder apenas lo crees.</p>
+            ) : (
+              <label className="flex items-center gap-2 text-[12px] text-marmol-500 mt-1">
+                <input type="checkbox" checked={sinLiderConfirmado} onChange={(e) => setSinLiderConfirmado(e.target.checked)} />
+                Esta persona no tiene líder (gerencia / nivel 1)
+              </label>
+            )}
           </div>
         </div>
+
+        <details className="rounded-lg border border-marmol-200 p-3">
+          <summary className="cursor-pointer text-sm text-marmol-700 font-medium">
+            Personas que tendrá a cargo (opcional){equipoIds.length > 0 ? ` · ${equipoIds.length} elegida(s)` : ''}
+          </summary>
+          <p className="text-[12px] text-marmol-400 mt-2">
+            Si esta persona es líder, marca a quienes pasan a reportarle. Quien ya tenga otro líder cambiará a este.
+            También lo puedes hacer después en Administración → Organigrama.
+          </p>
+          <input
+            value={filtroEquipo}
+            onChange={(e) => setFiltroEquipo(e.target.value)}
+            placeholder="Buscar persona…"
+            className={`${campo} mt-2`}
+          />
+          <ul className="mt-2 max-h-48 overflow-y-auto divide-y divide-marmol-100 rounded-lg border border-marmol-100">
+            {posiblesLideres
+              .filter((p) => p.id !== liderId && p.nombre_completo.toLowerCase().includes(filtroEquipo.trim().toLowerCase()))
+              .map((p) => (
+                <li key={p.id}>
+                  <label className="flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer hover:bg-marmol-50">
+                    <input type="checkbox" checked={equipoIds.includes(p.id)} onChange={() => alternarEquipo(p.id)} />
+                    {p.nombre_completo}
+                  </label>
+                </li>
+              ))}
+          </ul>
+        </details>
       </section>
 
       <section className="space-y-4 pt-4 border-t border-marmol-100">

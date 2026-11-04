@@ -51,5 +51,74 @@ export async function actualizarLiderDirecto(colaboradorId: string, liderId: str
   if (error) return { ok: false as const, error: error.message };
 
   revalidatePath('/administracion/organigrama');
+  revalidatePath('/espiral-crecimiento/organigrama');
   return { ok: true as const };
+}
+
+/**
+ * Define el EQUIPO A CARGO de un líder de una sola vez (admin_th): las personas
+ * marcadas pasan a tener a este líder como líder directo; las que ya estaban a
+ * su cargo y se desmarcan quedan sin líder (hay que reubicarlas).
+ *
+ * Es la vista inversa de actualizarLiderDirecto: allí se elige el líder de una
+ * persona; aquí se eligen las personas de un líder. Las dos escriben el mismo
+ * dato (colaboradores.lider_id), así que siempre quedan consistentes.
+ */
+export async function asignarEquipoLider(liderId: string, idsEquipo: string[]) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { data: todos } = await supabase
+    .from('colaboradores')
+    .select('id, lider_id, nombre_completo')
+    .eq('empresa_id', perfil.empresa_id);
+
+  const porId = new Map((todos ?? []).map((c: any) => [c.id as string, c]));
+  if (!porId.has(liderId)) return { ok: false as const, error: 'Líder no encontrado' };
+
+  const nuevos = Array.from(new Set(idsEquipo));
+  if (nuevos.some((id) => !porId.has(id))) return { ok: false as const, error: 'Hay personas que no pertenecen a tu empresa' };
+  if (nuevos.includes(liderId)) return { ok: false as const, error: 'Una persona no puede ser su propio líder' };
+
+  // Evitar ciclos: nadie de la lista puede ser jefe (directo o indirecto) de este líder.
+  const jefes = new Set<string>();
+  let actual: string | null = (porId.get(liderId) as any).lider_id ?? null;
+  while (actual && !jefes.has(actual)) {
+    jefes.add(actual);
+    actual = (porId.get(actual) as any)?.lider_id ?? null;
+  }
+  const cicloCon = nuevos.find((id) => jefes.has(id));
+  if (cicloCon) {
+    return {
+      ok: false as const,
+      error: `${(porId.get(cicloCon) as any).nombre_completo} es jefe de este líder (directo o indirecto); no puede quedar a su cargo.`,
+    };
+  }
+
+  const actuales = (todos ?? []).filter((c: any) => c.lider_id === liderId).map((c: any) => c.id as string);
+  const aAgregar = nuevos.filter((id) => !actuales.includes(id));
+  const aQuitar = actuales.filter((id) => !nuevos.includes(id));
+
+  if (aAgregar.length > 0) {
+    const { error } = await supabase
+      .from('colaboradores')
+      .update({ lider_id: liderId })
+      .in('id', aAgregar)
+      .eq('empresa_id', perfil.empresa_id);
+    if (error) return { ok: false as const, error: error.message };
+  }
+  if (aQuitar.length > 0) {
+    const { error } = await supabase
+      .from('colaboradores')
+      .update({ lider_id: null })
+      .in('id', aQuitar)
+      .eq('empresa_id', perfil.empresa_id);
+    if (error) return { ok: false as const, error: error.message };
+  }
+
+  revalidatePath('/administracion/organigrama');
+  revalidatePath('/espiral-crecimiento/organigrama');
+  revalidatePath('/espiral-crecimiento/colaboradores');
+  return { ok: true as const, agregados: aAgregar.length, quitados: aQuitar.length };
 }

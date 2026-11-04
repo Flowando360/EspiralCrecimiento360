@@ -16,6 +16,10 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         { nombre: 'Fila de la tabla', explicacion: 'Foto, nombre, cargo, área, estado y fecha de ingreso. Clic en una fila abre la ficha 360° de esa persona.' },
         { nombre: 'Filtros de la lista', explicacion: 'Encima de la tabla hay cuatro herramientas: (1) una casilla para buscar por nombre, sin importar tildes ni mayúsculas; (2) «Todos los cargos», para ver solo a quienes tienen un cargo; (3) «Todos los líderes», para elegir el nombre de un líder y ver únicamente a las personas que tiene a cargo (el contador dice «Equipo de [nombre]: N personas»); y (4) la casilla «Solo líderes de área», que muestra a quienes tienen un cargo con personal a cargo o a quienes alguien tiene como líder directo (llevan la etiqueta «Líder de área»). Se pueden combinar. «Limpiar filtros» vuelve a mostrar a todos y debajo dice «Mostrando X de Y personas».' },
         { nombre: 'Nuevo colaborador', explicacion: 'Solo admin_th. Abre el alta de la ficha: datos personales, cargo, líder directo, fecha de ingreso, contrato, salario y afiliaciones (también puedes cargar la hoja de vida en PDF para prellenar los datos con IA). Al crearla, el ingreso queda en el historial y se asigna el plan de inducción. También llegas aquí desde "Contratado — crear colaborador" en Reclutamiento, con los datos del candidato ya llenos. El acceso para iniciar sesión se crea aparte, en Administración → Usuarios y roles.' },
+        { nombre: 'Líder directo y equipo (en Nuevo colaborador)', explicacion: 'El líder es obligatorio para que la persona quede en el organigrama al instante; si no tiene líder (gerencia / nivel 1) marca la casilla que lo indica. Si la persona es líder, en «Personas que tendrá a cargo» marcas a quienes pasan a reportarle.' },
+        { nombre: 'Equipo a cargo (en la ficha)', explicacion: 'Solo admin_th. Botón de la ficha que abre el editor de equipo de esa persona en Administración → Organigrama.' },
+        { nombre: 'Eliminar', explicacion: 'Solo admin_th. Borra la ficha con todo lo asociado y es solo para corregir errores (ficha duplicada). Antes de borrar pide un motivo (opcional) y guarda un registro en «Histórico de eliminados» con nombre, documento, cargo, líder, fechas y su línea de tiempo. Si la persona aún lidera a alguien, no se deja eliminar hasta reasignar su equipo. Para quien simplemente dejó la empresa usa «Salida» desde su Historial.' },
+        { nombre: 'Histórico de eliminados', explicacion: 'Solo admin_th. Lista de quienes pasaron por la empresa y cuya ficha se eliminó, con motivo y trayectoria. No se borra sola.' },
       ],
     },
     {
@@ -189,6 +193,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       camposYBotones: [
         { nombre: 'Abrir nuevo ciclo', explicacion: 'Solo admin_th. Crea un ciclo con nombre, fechas de apertura/cierre y las ponderaciones vigentes (definidas en Administración → Configuración).' },
         { nombre: 'Tarjeta de ciclo', explicacion: 'Nombre, estado (Planeado/Abierto/En consolidación/Publicado/Cerrado) y rango de fechas. Clic para entrar al detalle.' },
+        { nombre: 'Eliminar ciclo', explicacion: 'Solo admin_th, para quitar ciclos creados por error o de pruebas. Avisa cuántas evaluaciones se perderán (y cuántas ya tenían avance) y exige escribir ELIMINAR para confirmar. Se borran las evaluaciones, valoraciones, briefs y acuerdos de ese ciclo; los planes de desarrollo que nacieron de él se conservan. No se puede deshacer: no lo uses con un ciclo real que ya tiene valoraciones.' },
       ],
     },
     {

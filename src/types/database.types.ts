@@ -4743,6 +4743,68 @@ export type Database = {
           },
         ]
       }
+      colaboradores_historico: {
+        Row: {
+          cargo_nombre: string | null
+          colaborador_id_original: string | null
+          eliminado_en: string
+          eliminado_por: string | null
+          email: string | null
+          empresa_id: string
+          estado_al_eliminar: string | null
+          fecha_ingreso: string | null
+          fecha_salida: string | null
+          id: string
+          lider_nombre: string | null
+          motivo: string | null
+          nombre_completo: string
+          numero_documento: string | null
+          resumen: Json
+        }
+        Insert: {
+          cargo_nombre?: string | null
+          colaborador_id_original?: string | null
+          eliminado_en?: string
+          eliminado_por?: string | null
+          email?: string | null
+          empresa_id: string
+          estado_al_eliminar?: string | null
+          fecha_ingreso?: string | null
+          fecha_salida?: string | null
+          id?: string
+          lider_nombre?: string | null
+          motivo?: string | null
+          nombre_completo: string
+          numero_documento?: string | null
+          resumen?: Json
+        }
+        Update: {
+          cargo_nombre?: string | null
+          colaborador_id_original?: string | null
+          eliminado_en?: string
+          eliminado_por?: string | null
+          email?: string | null
+          empresa_id?: string
+          estado_al_eliminar?: string | null
+          fecha_ingreso?: string | null
+          fecha_salida?: string | null
+          id?: string
+          lider_nombre?: string | null
+          motivo?: string | null
+          nombre_completo?: string
+          numero_documento?: string | null
+          resumen?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "colaboradores_historico_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       historial_movimientos: {
         Row: {
           cargo_anterior_id: string | null

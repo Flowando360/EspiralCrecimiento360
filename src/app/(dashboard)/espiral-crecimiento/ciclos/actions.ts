@@ -85,3 +85,35 @@ export async function actualizarCiclo(input: z.infer<typeof EditarCicloSchema>) 
   revalidatePath(`/espiral-crecimiento/ciclos/${parsed.data.cicloId}`);
   return { ok: true as const };
 }
+
+/**
+ * Elimina un ciclo creado por error o de pruebas (admin_th). Borra con él las
+ * evaluaciones, valoraciones, briefs y acuerdos de ese ciclo (todo cae en
+ * cascada). Lo que NO se pierde: los planes de desarrollo y las verificaciones
+ * del Saber que nacieron de ese ciclo se conservan, solo se desvinculan de él.
+ */
+export async function eliminarCiclo(cicloId: string) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+
+  const supabase = createClient();
+  const { data: ciclo } = await supabase
+    .from('ciclos_evaluacion')
+    .select('id, empresa_id')
+    .eq('id', cicloId)
+    .maybeSingle();
+  if (!ciclo || ciclo.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'Ciclo no encontrado' };
+
+  // Estas dos tablas apuntan al ciclo sin "borrar en cascada": se desvinculan para no perder esos registros.
+  const { error: e1 } = await supabase.from('verificaciones_saber').update({ ciclo_id: null }).eq('ciclo_id', cicloId);
+  if (e1) return { ok: false as const, error: e1.message };
+  const { error: e2 } = await supabase.from('planes_desarrollo').update({ ciclo_origen_id: null }).eq('ciclo_origen_id', cicloId);
+  if (e2) return { ok: false as const, error: e2.message };
+
+  const { error } = await supabase.from('ciclos_evaluacion').delete().eq('id', cicloId).eq('empresa_id', perfil.empresa_id);
+  if (error) return { ok: false as const, error: error.message };
+
+  revalidatePath('/espiral-crecimiento/ciclos');
+  revalidatePath('/inicio');
+  return { ok: true as const };
+}

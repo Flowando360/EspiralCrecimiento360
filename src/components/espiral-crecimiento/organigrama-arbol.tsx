@@ -3,6 +3,7 @@ interface NodoColaborador {
   nombre_completo: string;
   lider_id: string | null;
   es_externo: boolean;
+  estado?: string;
   cargo: { nombre: string } | null;
 }
 
@@ -18,6 +19,7 @@ function NodoArbol({ nodo, colaboradores }: { nodo: NodoColaborador; colaborador
       <div className="rounded-lg border border-marmol-200 bg-white px-3 py-2 text-center shadow-sm min-w-[150px]">
         <p className="text-xs font-semibold text-marmol-900">{nodo.nombre_completo}</p>
         <p className="text-[13px] text-marmol-400">{nodo.cargo?.nombre}</p>
+        {nodo.estado === 'periodo_prueba' && <p className="text-[11px] text-medio">Período de prueba</p>}
       </div>
       {hijos.length > 0 && (
         <>

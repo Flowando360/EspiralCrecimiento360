@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { ESTADOS_VIGENTES } from '@/lib/colaboradores/estados';
 
 /**
  * Abre un ciclo de evaluación y genera las evaluaciones de las personas
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
     .from('colaboradores')
     .select('id, cargo_id, cargo:cargos(tiene_personal_a_cargo)')
     .eq('empresa_id', perfil.empresa_id)
-    .eq('estado', 'activo')
+    .in('estado', ESTADOS_VIGENTES)
     .eq('es_externo', false);
 
   if (scope === 'equipo') {
@@ -60,6 +61,7 @@ export async function POST(req: NextRequest) {
 
   let evaluacionesCreadas = 0;
   let tareasCreadas = 0;
+  let tareasQuitadas = 0;
   let itemsCreados = 0;
 
   // Catálogo de competencias: igual para todas las personas, se lee una sola vez.
@@ -114,6 +116,30 @@ export async function POST(req: NextRequest) {
         { onConflict: 'evaluacion_id,evaluador_colaborador_id' }
       );
       if (!errTareas) tareasCreadas += asignaciones.length;
+    }
+
+    // Si el organigrama cambió después de generar (p. ej. se corrigió el líder), quitar las tareas
+    // de quienes ya no deben evaluar a esta persona. Solo se quitan las que NO se han enviado y no
+    // tienen ninguna respuesta guardada: nunca se pierde trabajo de nadie.
+    const evaluadoresVigentes = new Set(asignaciones.map((a: any) => a.evaluador_id as string));
+    const { data: tareasExistentes } = await supabase
+      .from('evaluacion_tareas')
+      .select('id, evaluador_colaborador_id, completada')
+      .eq('evaluacion_id', evaluacion.id);
+    const obsoletas = (tareasExistentes ?? []).filter(
+      (t: any) => !t.completada && !evaluadoresVigentes.has(t.evaluador_colaborador_id)
+    );
+    if (obsoletas.length > 0) {
+      const { data: conRespuestas } = await supabase
+        .from('respuestas_evaluacion')
+        .select('evaluacion_tarea_id')
+        .in('evaluacion_tarea_id', obsoletas.map((t: any) => t.id));
+      const idsConRespuestas = new Set((conRespuestas ?? []).map((r: any) => r.evaluacion_tarea_id));
+      const idsAQuitar = obsoletas.map((t: any) => t.id).filter((id: string) => !idsConRespuestas.has(id));
+      if (idsAQuitar.length > 0) {
+        await supabase.from('evaluacion_tareas').delete().in('id', idsAQuitar);
+        tareasQuitadas += idsAQuitar.length;
+      }
     }
 
     // ── 2. Ítems de evaluación: catálogo de competencias aplicables ──
@@ -190,7 +216,7 @@ export async function POST(req: NextRequest) {
 
   await supabase.from('ciclos_evaluacion').update({ estado: 'abierto' }).eq('id', cicloId);
 
-  return NextResponse.json({ ok: true, evaluacionesCreadas, tareasCreadas, itemsCreados });
+  return NextResponse.json({ ok: true, evaluacionesCreadas, tareasCreadas, tareasQuitadas, itemsCreados });
 }
 
 /**

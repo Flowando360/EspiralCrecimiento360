@@ -400,6 +400,21 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
       'Encima de las tablas hay una casilla de búsqueda (sin importar tildes) y filtros desplegables. En Colaboradores filtras por nombre, cargo, líder directo y «Solo líderes de área»; en Usuarios y roles, por rol, estado y ficha; también en Cargos, Organigrama, Banco de candidatos, informes de PDI, Formación, SST y Cultura, y en el detalle de un ciclo. «Limpiar filtros» vuelve a mostrar todo.',
   },
   {
+    pregunta: 'Un líder no ve a todo su equipo o una persona nueva no sale en el organigrama. ¿Qué hago?',
+    respuesta:
+      'Entra a Administración → Editar organigrama. En «Para revisar» ves los líderes sin equipo y las personas sin líder. Elige al líder en «Por líder», marca las personas que le reportan y pulsa «Guardar equipo». Luego, en el ciclo, vuelve a pulsar «Generar Encuentros de Crecimiento»: agrega lo nuevo sin tocar lo que ya se generó.',
+  },
+  {
+    pregunta: '¿Cómo elimino un ciclo que creé por error o de pruebas?',
+    respuesta:
+      'En Espiral 360° → Ciclos de Crecimiento, pulsa «Eliminar ciclo» en su tarjeta (o dentro de su detalle), revisa el aviso de lo que se perderá y escribe ELIMINAR. Es definitivo, así que úsalo solo con ciclos de prueba o sin valoraciones reales.',
+  },
+  {
+    pregunta: '¿Eliminar a un colaborador borra su historia?',
+    respuesta:
+      'La ficha y todo lo asociado se borran, pero antes queda un registro en Colaboradores → «Histórico de eliminados» (cargo, líder, fechas, motivo y movimientos). Si la persona solo dejó la empresa, es mejor «Salida» desde su Historial: queda inactiva y conserva toda su información.',
+  },
+  {
     pregunta: '¿La operación es igual para todas las empresas?',
     respuesta:
       'Sí: el aplicativo funciona igual para cualquier empresa. Los datos (personas, cargos, ciclos, usuarios) son independientes por empresa y nada de una se ve en otra.',

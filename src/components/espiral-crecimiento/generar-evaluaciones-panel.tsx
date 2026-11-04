@@ -48,7 +48,7 @@ export function GenerarEvaluacionesPanel({
         setResultado(`Error: ${data.error}`);
       } else {
         setResultado(
-          `Listo: ${data.evaluacionesCreadas} Encuentros de Crecimiento, ${data.tareasCreadas} tareas de acompañante y ${data.itemsCreados} ítems generados.`
+          `Listo: ${data.evaluacionesCreadas} Encuentros de Crecimiento, ${data.tareasCreadas} tareas de acompañante y ${data.itemsCreados} ítems generados.${data.tareasQuitadas ? ` Se retiraron ${data.tareasQuitadas} tarea(s) de acompañantes que ya no corresponden según el organigrama.` : ''}`
         );
         router.refresh();
       }

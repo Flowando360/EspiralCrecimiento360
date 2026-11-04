@@ -5,6 +5,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { primero } from '@/lib/utils';
 
 const EditarColaboradorSchema = z.object({
   colaboradorId: z.string().uuid(),
@@ -96,19 +97,19 @@ export async function actualizarColaborador(input: z.infer<typeof EditarColabora
 /**
  * Elimina definitivamente la ficha de un colaborador (admin_th únicamente).
  * A diferencia de registrar una "Salida" en su Historial (que solo la deja
- * inactiva), esto borra la fila por completo — pensado para corregir errores
- * de captura (ficha duplicada, persona equivocada), no para el retiro normal
- * de alguien que deja la empresa.
+ * inactiva), esto borra la fila por completo.
+ *
+ * ANTES de borrar se guarda un registro en `colaboradores_historico` (migración
+ * 0110): nombre, documento, cargo, líder, fechas, motivo y su línea de tiempo
+ * de movimientos. Así queda constancia de quién pasó por la empresa aunque la
+ * ficha ya no exista. Si ese registro no se puede guardar, NO se borra nada.
  *
  * La mayoría de tablas relacionadas (evaluaciones, SER, hoja de vida,
- * inducción, alertas, dotación, incapacidades, fechas especiales, Guía del
- * Flow...) tienen "on delete cascade" contra colaboradores — es decir, borrar
- * la ficha borra también todo ese historial sin avisar aparte, por eso el
- * mensaje de confirmación en pantalla lo explicita. Solo se bloquea (con
- * error de Postgres) si esta persona sigue siendo el líder de alguien más
- * en `colaboradores.lider_id` — ahí se sugiere "Salida" en su lugar.
+ * inducción, alertas...) caen en cascada con la ficha. Solo se bloquea si esta
+ * persona sigue siendo el líder de alguien: primero hay que reasignar su equipo
+ * (Administración → Organigrama).
  */
-export async function eliminarColaborador(colaboradorId: string) {
+export async function eliminarColaborador(colaboradorId: string, motivo?: string) {
   const perfil = await getPerfilActual();
   if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
 
@@ -116,12 +117,57 @@ export async function eliminarColaborador(colaboradorId: string) {
 
   const { data: colaborador } = await supabase
     .from('colaboradores')
-    .select('id, empresa_id')
+    .select(
+      'id, empresa_id, nombre_completo, numero_documento, email, estado, fecha_ingreso, fecha_salida, motivo_salida, cargo:cargos(nombre), lider:lider_id(nombre_completo)'
+    )
     .eq('id', colaboradorId)
     .maybeSingle();
 
   if (!colaborador || colaborador.empresa_id !== perfil.empresa_id) {
     return { ok: false as const, error: 'Colaborador no encontrado' };
+  }
+
+  // Si todavía lidera a alguien, avisar antes de intentar nada.
+  const { count: aCargo } = await supabase
+    .from('colaboradores')
+    .select('id', { count: 'exact', head: true })
+    .eq('lider_id', colaboradorId);
+  if ((aCargo ?? 0) > 0) {
+    return {
+      ok: false as const,
+      error: `Esta persona es líder de ${aCargo} colaborador(es). Reasigna primero ese equipo a otro líder en Administración → Organigrama, o usa "Salida" desde su Historial para dejarla inactiva.`,
+    };
+  }
+
+  const { data: movimientos } = await supabase
+    .from('historial_movimientos')
+    .select('tipo, descripcion, fecha')
+    .eq('colaborador_id', colaboradorId)
+    .order('fecha');
+
+  const cargo = primero(colaborador.cargo as any) as { nombre?: string } | null;
+  const lider = primero(colaborador.lider as any) as { nombre_completo?: string } | null;
+
+  const { error: errHist } = await supabase.from('colaboradores_historico').insert({
+    empresa_id: perfil.empresa_id,
+    colaborador_id_original: colaboradorId,
+    nombre_completo: colaborador.nombre_completo,
+    numero_documento: colaborador.numero_documento,
+    email: colaborador.email,
+    cargo_nombre: cargo?.nombre ?? null,
+    lider_nombre: lider?.nombre_completo ?? null,
+    fecha_ingreso: colaborador.fecha_ingreso,
+    fecha_salida: colaborador.fecha_salida,
+    estado_al_eliminar: colaborador.estado,
+    motivo: motivo?.trim() || colaborador.motivo_salida || null,
+    resumen: { movimientos: movimientos ?? [] },
+    eliminado_por: perfil.usuario_id,
+  });
+  if (errHist) {
+    return {
+      ok: false as const,
+      error: `No se eliminó: no se pudo guardar el registro en el histórico (${errHist.message}). Verifica que la migración 0110 esté aplicada en Supabase.`,
+    };
   }
 
   const { error } = await supabase.from('colaboradores').delete().eq('id', colaboradorId);
@@ -131,11 +177,13 @@ export async function eliminarColaborador(colaboradorId: string) {
     return {
       ok: false as const,
       error: esConflictoDeReferencias
-        ? 'No se pudo eliminar: esta persona sigue registrada como líder de alguien más. Reasigna primero ese equipo a otro líder, o usa "Salida" desde su Historial para dejarla inactiva en su lugar.'
+        ? 'No se pudo eliminar: esta persona sigue referenciada en otros registros. Usa "Salida" desde su Historial para dejarla inactiva en su lugar.'
         : error.message,
     };
   }
 
   revalidatePath('/espiral-crecimiento/colaboradores');
+  revalidatePath('/espiral-crecimiento/colaboradores/historico');
+  revalidatePath('/espiral-crecimiento/organigrama');
   return { ok: true as const };
 }

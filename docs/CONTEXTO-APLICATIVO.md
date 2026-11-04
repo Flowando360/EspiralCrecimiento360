@@ -8,7 +8,7 @@ Sin claves ni datos personales: este repositorio es público. Última revisión:
 | Aplicativo Espiral (Next.js 14, React, Tailwind, Supabase) | GitHub `Flowando360/EspiralCrecimiento360` · Vercel `espiral-crecimiento-360` (equipo `flow-ando360`) · `https://espiral-crecimiento-360.vercel.app` | Despliega desde `main`. |
 | Base de datos y accesos de Espiral | Supabase, proyecto `dsunoydgabtfdypmnana` | Plan gratuito: sin respaldos, se pausa tras 7 días sin uso. 106 migraciones en `supabase/migrations/`. |
 | Guía del Flow (aplicativo aparte, el Ser) | GitHub `Flowando360/GuiaDelFlow` · Vercel `guia-del-flow` · `https://guia-del-flow.vercel.app` | **Una sola aplicación para todas las empresas.** Escribe directo en la base de Espiral. |
-| Círculo de Crecimiento (versión inicial) | GitHub `Flowando360/CirculoCrecimiento` · Vercel `circulo-crecimiento` · Supabase `zmpggzrmsuudxyjtobzy` | **Va a borrarse** cuando Diana lo confirme. Ya se migró de allí todo lo de Mármoles y la Guía del Flow. |
+| Círculo de Crecimiento (versión inicial) | GitHub `Flowando360/CirculoCrecimiento` · Vercel `circulo-crecimiento` (**pausado desde 2026-11-04**, responde 503) · Supabase `zmpggzrmsuudxyjtobzy` | **Va a borrarse** cuando Diana lo confirme. Ya se migró de allí todo lo de Mármoles y la Guía del Flow. |
 | Correos | Resend (remitente `notificaciones@flowando.com`) | La app envía por Resend; Supabase Auth también usa Resend por SMTP. |
 | IA | Anthropic (variable `ANTHROPIC_API_KEY` en Vercel de Espiral y de la Guía) | Límite de gasto en la consola de Anthropic: US$ 20. |
 
@@ -54,6 +54,7 @@ Existen cuentas `pru.*` en CONVERGIA (admin, líder, colaborador, gerencia, audi
 - Migración Círculo → Espiral: `scripts/migracion-circulo/` (ver su `LEEME.md`). Es idempotente; para una copia final se repite `datos` y `archivos` sin `borrar`, y se borran las alertas duplicadas que generan los disparadores.
 
 ## Lecciones técnicas (errores ya encontrados)
+- «Persona vigente» = estado `activo` **o** `periodo_prueba` (`src/lib/colaboradores/estados.ts` y vistas `v_organigrama_*`, migración 0110). Filtrar solo `activo` deja fuera a los recién ingresados.
 - `respuestas_evaluacion` necesita restricción única completa (migración 0107): con índice parcial no se guardaban las notas.
 - `resultados_evaluacion` es relación uno a uno: PostgREST la devuelve como **objeto**; usa `primero()` de `src/lib/utils.ts`.
 - Páginas públicas que leen estado de la base necesitan `export const dynamic = 'force-dynamic'` (se quedaban en caché).

@@ -68,9 +68,17 @@ export const moduloAdministracion: ModuloAyuda = {
       slug: 'organigrama-editar',
       ruta: '/administracion/organigrama',
       titulo: 'Editar organigrama',
-      resumen: 'Define el líder directo de cada persona — la única fuente de verdad de la que se deduce automáticamente quiénes son pares y quiénes son colaboradores a cargo.',
-      camposYBotones: [{ nombre: 'Selector de líder directo', explicacion: 'Por cada colaborador, elige quién es su líder (o "Sin líder" si es nivel 1).' }],
-      notas: ['Cambiar el líder aquí afecta de inmediato la arquitectura de acompañantes del próximo ciclo.'],
+      resumen: 'Define quién reporta a quién — la única fuente de la que se deduce automáticamente quiénes son pares y quiénes son colaboradores a cargo. Se puede armar por líder (eliges un líder y marcas su equipo) o por persona (eliges el líder de cada una).',
+      camposYBotones: [
+        { nombre: 'Para revisar', explicacion: 'Panel de vacíos: líderes cuyo cargo tiene personal a cargo pero todavía no tienen equipo (pulsa su nombre para asignarlo) y personas sin líder y sin equipo. Aparece solo si hay algo que revisar.' },
+        { nombre: 'Por líder: asignar su equipo', explicacion: 'Elige un líder en la lista (o llega desde el botón «Equipo a cargo» de su ficha). Marca las personas que le reportan y pulsa «Guardar equipo». Quien ya tenía otro líder pasará a este (se ve «Pasará de …»); quien desmarques queda sin líder hasta que lo asignes a otro. No deja marcar a un jefe del líder (evita ciclos en el organigrama).' },
+        { nombre: 'Por persona: elegir su líder directo', explicacion: 'Tabla con un selector de líder por cada colaborador (o «Sin líder (nivel 1)» para gerencia). Es el mismo dato que el editor por líder: los dos caminos quedan siempre consistentes.' },
+      ],
+      notas: [
+        'Aparecen las personas activas y las que están en período de prueba (antes estas últimas no salían y por eso algunos líderes nuevos «no aparecían»).',
+        'Un ciclo ya generado no cambia solo. Cuando termines de ordenar el equipo, entra al ciclo y vuelve a pulsar «Generar Encuentros de Crecimiento»: respeta lo ya generado, agrega lo nuevo y retira las tareas de acompañantes que ya no corresponden (solo las que nadie ha empezado a responder).',
+        'Al crear un colaborador nuevo se elige su líder en el mismo formulario: queda en el organigrama de inmediato.',
+      ],
     },
     {
       slug: 'identidad-organizacional',
