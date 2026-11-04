@@ -95,7 +95,7 @@ export function GinoAyuda({ nombre, rol }: { nombre: string; rol: string }) {
             >
               <X size={11} />
             </button>
-            ¡Hola{primerNombre ? `, ${primerNombre}` : ''}! Soy <strong>Gino</strong>. Si algo no te queda claro, aquí estoy para ayudarte.
+            ¡Hola{primerNombre ? `, ${primerNombre}` : ''}! Soy <strong>Gino</strong>. Si algo no es claro, aquí estoy para ayudarte.
           </div>
         )}
         <button
