@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { FiltroTabla } from '@/components/ui/filtro-tabla';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FormularioCrearCurso } from '@/components/espiral-crecimiento/formulario-crear-curso';
@@ -142,7 +143,8 @@ export default async function NexaFormacionPage() {
       {!cursos || cursos.length === 0 ? (
         <EmptyState icon={GraduationCap} titulo="Sin cursos cargados todavía" />
       ) : (
-        <div className="card overflow-hidden">
+        <FiltroTabla columnas={['Categoría']} plural="cursos" placeholder="Buscar curso…">
+          <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
@@ -181,6 +183,7 @@ export default async function NexaFormacionPage() {
             </tbody>
           </table>
         </div>
+        </FiltroTabla>
       )}
     </div>
   );

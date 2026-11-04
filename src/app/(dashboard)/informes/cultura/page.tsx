@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { EmptyState } from '@/components/ui/empty-state';
+import { FiltroTabla } from '@/components/ui/filtro-tabla';
 import { Heart, FileDown, FileSpreadsheet } from 'lucide-react';
 import { obtenerInformeCultura } from './data';
 
@@ -37,7 +38,8 @@ export default async function InformeCulturaPage() {
       {filas.length === 0 ? (
         <EmptyState icon={Heart} titulo="Sin datos todavía" descripcion="Aún no hay reconocimientos, reacciones o formación de cultura registrados." />
       ) : (
-        <div className="card overflow-hidden">
+        <FiltroTabla columnas={[]} plural="personas" placeholder="Buscar persona…">
+          <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
@@ -61,6 +63,7 @@ export default async function InformeCulturaPage() {
             </tbody>
           </table>
         </div>
+        </FiltroTabla>
       )}
     </div>
   );

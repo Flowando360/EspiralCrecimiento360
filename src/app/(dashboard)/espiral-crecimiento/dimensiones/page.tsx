@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { FiltroTabla } from '@/components/ui/filtro-tabla';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -96,7 +97,8 @@ export default async function DimensionesPage() {
       {colaboradores.length === 0 ? (
         <EmptyState icon={LayoutGrid} titulo="Sin colaboradores" descripcion="Todavía no hay nadie cargado en tu empresa." />
       ) : (
-        <div className="card overflow-x-auto">
+        <FiltroTabla columnas={['Cargo']} plural="personas" placeholder="Buscar persona…">
+          <div className="card overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
@@ -153,6 +155,7 @@ export default async function DimensionesPage() {
             </tbody>
           </table>
         </div>
+        </FiltroTabla>
       )}
     </div>
   );

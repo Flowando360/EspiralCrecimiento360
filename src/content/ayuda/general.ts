@@ -6,6 +6,17 @@ export const moduloGeneral: ModuloAyuda = {
   descripcion: 'La pantalla de bienvenida y tu propia ficha personal.',
   paginas: [
     {
+      slug: 'buscar-y-filtrar',
+      ruta: '/espiral-crecimiento/colaboradores',
+      titulo: 'Buscar y filtrar listas',
+      resumen: 'Las listas largas tienen una casilla de búsqueda y filtros encima de la tabla: Colaboradores, Usuarios y roles, Cargos, Organigrama, Dimensiones, Banco de candidatos, informes de PDI, Formación, SST y Cultura, Directorio y Formación de Nexa, y el detalle de cada ciclo.',
+      camposYBotones: [
+        { nombre: 'Buscar', explicacion: 'Escribe parte de un nombre, cargo o correo; no importan mayúsculas ni tildes. La tabla se acorta al instante.' },
+        { nombre: 'Filtros por columna', explicacion: 'Listas desplegables (cargo, área, estado, etapa…) con los valores que existen en esa lista.' },
+        { nombre: 'Mostrando X de Y / Limpiar filtros', explicacion: 'Te dice cuántas filas se ven y te deja volver a la lista completa con un clic.' },
+      ],
+    },
+    {
       slug: 'cambiar-contrasena',
       ruta: '/cambiar-contrasena',
       titulo: 'Cambiar mi contraseña',

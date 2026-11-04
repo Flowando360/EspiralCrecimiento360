@@ -1,5 +1,6 @@
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
+import { FiltroTabla } from '@/components/ui/filtro-tabla';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FormularioCrearAliado } from '@/components/espiral-crecimiento/formulario-crear-aliado';
 import { FilaAliado } from '@/components/espiral-crecimiento/fila-aliado';
@@ -33,7 +34,8 @@ export default async function NexaDirectorioPage() {
       {!aliados || aliados.length === 0 ? (
         <EmptyState icon={Handshake} titulo="Sin aliados registrados todavía" />
       ) : (
-        <div className="card overflow-hidden">
+        <FiltroTabla columnas={['Tipo']} plural="contactos" placeholder="Buscar contacto…">
+          <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
@@ -51,6 +53,7 @@ export default async function NexaDirectorioPage() {
             </tbody>
           </table>
         </div>
+        </FiltroTabla>
       )}
     </div>
   );

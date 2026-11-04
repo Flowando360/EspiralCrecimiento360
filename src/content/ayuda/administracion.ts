@@ -136,6 +136,7 @@ export const moduloAdministracion: ModuloAyuda = {
       camposYBotones: [
         { nombre: 'Nuevo usuario', explicacion: 'Elige un colaborador sin cuenta todavía, su nombre completo (con el usuario ya sugerido a partir del nombre — editable), correo, rol (admin_th/líder/colaborador/gerencia/auditor_externo) y una contraseña temporal.' },
         { nombre: 'Rol personalizado (opcional)', explicacion: 'Aparece solo si la empresa ya creó roles en Roles y permisos. Al crear o editar un usuario puedes asignarle uno. Limita los módulos del menú que esa persona ve; el rol de sistema sigue decidiendo qué datos puede ver. Déjalo en "Sin rol personalizado" para usar solo el rol de sistema.' },
+        { nombre: 'Búsqueda y filtros', explicacion: 'Encima de la tabla: busca por nombre, usuario o correo (sin importar tildes) y filtra por rol, estado (activos o inactivos) y si tiene ficha de colaborador vinculada. «Limpiar filtros» muestra todos otra vez.' },
         { nombre: 'Tabla de usuarios', explicacion: 'Nombre (con el apodo debajo si esa persona ya definió uno), correo, Usuario, rol, si la cuenta está activa, y una columna de Acciones.' },
         { nombre: 'Usuario', explicacion: 'Lo que la persona escribe en el login en vez del correo completo (ver "Usuario o correo" en el login). Es un dato propio de la cuenta, independiente del correo — siempre primernombre.primerapellido, sugerido automáticamente a partir del nombre, pero editable por admin_th en cualquier momento (por ejemplo si dos personas chocan, o si el nombre trae un error). Cambiarlo no cambia el correo de la cuenta.' },
         { nombre: 'Editar', explicacion: 'Cambia nombre, apodo ("cómo le gusta que le llamen"), usuario, correo, rol o ficha de colaborador vinculada de una cuenta ya existente, sin salir de la tabla.' },
@@ -157,6 +158,7 @@ export const moduloAdministracion: ModuloAyuda = {
       resumen:
         'Crea roles propios para tu empresa y decide, módulo por módulo, qué puede leer, escribir y borrar quien los tenga. Luego asígnalos desde Usuarios y roles.',
       camposYBotones: [
+        { nombre: 'Buscadores', explicacion: 'Una casilla arriba de la lista busca roles por nombre; otra, dentro del rol, busca un módulo en la tabla de permisos.' },
         { nombre: 'Lista de roles', explicacion: 'Roles creados en la empresa, con cuántos usuarios los tienen. Haz clic en uno para editarlo.' },
         { nombre: 'Nuevo rol', explicacion: 'Crea un rol con nombre (mínimo 2 caracteres) y descripción opcional. Nace con Inicio y Mi perfil en lectura, y el resto sin acceso.' },
         { nombre: 'Nombre y descripción', explicacion: 'Se pueden cambiar en cualquier momento con "Guardar cambios".' },

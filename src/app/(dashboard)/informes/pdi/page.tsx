@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { FiltroTabla } from '@/components/ui/filtro-tabla';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Target, FileDown, FileSpreadsheet } from 'lucide-react';
 import { formatearFecha, cn } from '@/lib/utils';
@@ -106,7 +107,8 @@ export default async function InformePdiPage({
           descripcion="No hay registros que coincidan con el filtro actual."
         />
       ) : (
-        <div className="card overflow-hidden">
+        <FiltroTabla columnas={['Estado']} plural="acciones" placeholder="Buscar por persona, brecha o acción…">
+          <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
@@ -136,6 +138,7 @@ export default async function InformePdiPage({
             </tbody>
           </table>
         </div>
+        </FiltroTabla>
       )}
     </div>
   );

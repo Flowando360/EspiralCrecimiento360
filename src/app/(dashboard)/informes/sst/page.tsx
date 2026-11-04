@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { FiltroTabla } from '@/components/ui/filtro-tabla';
 import { redirect } from 'next/navigation';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ShieldCheck, FileDown, FileSpreadsheet } from 'lucide-react';
@@ -100,6 +101,7 @@ export default async function InformeSSTPage({
         {!informe || informe.certificaciones.length === 0 ? (
           <EmptyState icon={ShieldCheck} titulo="Sin certificaciones registradas" />
         ) : (
+          <FiltroTabla columnas={['Estado']} plural="registros" placeholder="Buscar por persona o certificación…">
           <div className="overflow-hidden -mx-5">
             <table className="w-full text-sm">
               <thead>
@@ -130,6 +132,7 @@ export default async function InformeSSTPage({
               </tbody>
             </table>
           </div>
+          </FiltroTabla>
         )}
       </div>
 
@@ -162,6 +165,7 @@ export default async function InformeSSTPage({
         {!informe || informe.requisitosSinDato.length === 0 ? (
           <EmptyState icon={ShieldCheck} titulo="Sin requisitos SST definidos por cargo" />
         ) : (
+          <FiltroTabla columnas={['Tipo', 'Estado']} plural="registros" placeholder="Buscar por persona, cargo o requisito…">
           <div className="overflow-hidden -mx-5">
             <table className="w-full text-sm">
               <thead>
@@ -193,6 +197,7 @@ export default async function InformeSSTPage({
               </tbody>
             </table>
           </div>
+          </FiltroTabla>
         )}
       </div>
     </div>

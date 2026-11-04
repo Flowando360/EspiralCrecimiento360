@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { actualizarRol, crearRol, eliminarRol, guardarPermisosRol } from '@/app/(dashboard)/administracion/roles/actions';
-import { cn } from '@/lib/utils';
+import { cn, normalizarBusqueda } from '@/lib/utils';
 import { Plus, Save, Trash2, Check } from 'lucide-react';
 
 type Modulo =
@@ -75,6 +75,8 @@ export function GestorRoles({ roles }: { roles: RolEmpresa[] }) {
   const router = useRouter();
   const [seleccionadoId, setSeleccionadoId] = useState<string | null>(roles[0]?.id ?? null);
   const [creando, setCreando] = useState(false);
+  const [busquedaRol, setBusquedaRol] = useState('');
+  const [busquedaModulo, setBusquedaModulo] = useState('');
   const [nombreNuevo, setNombreNuevo] = useState('');
   const [descripcionNueva, setDescripcionNueva] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -152,12 +154,32 @@ export function GestorRoles({ roles }: { roles: RolEmpresa[] }) {
     });
   }
 
+  const qRol = normalizarBusqueda(busquedaRol);
+  const rolesVisibles = qRol
+    ? roles.filter((r) => normalizarBusqueda(`${r.nombre} ${r.descripcion ?? ''}`).includes(qRol))
+    : roles;
+  const qMod = normalizarBusqueda(busquedaModulo);
+  const modulosVisibles = qMod ? MODULOS.filter((m) => normalizarBusqueda(m.etiqueta).includes(qMod)) : MODULOS;
+
   return (
     <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
       <aside className="space-y-3">
         <div className="card p-3 space-y-1">
+          {roles.length > 0 && (
+            <input
+              type="search"
+              value={busquedaRol}
+              onChange={(e) => setBusquedaRol(e.target.value)}
+              placeholder="Buscar rol…"
+              aria-label="Buscar rol"
+              className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm mb-1"
+            />
+          )}
           {roles.length === 0 && <p className="text-sm text-marmol-500 px-2 py-3">Todavía no hay roles personalizados.</p>}
-          {roles.map((r) => (
+          {roles.length > 0 && rolesVisibles.length === 0 && (
+            <p className="text-sm text-marmol-500 px-2 py-3">Ningún rol coincide con «{busquedaRol}».</p>
+          )}
+          {rolesVisibles.map((r) => (
             <button
               key={r.id}
               type="button"
@@ -242,6 +264,14 @@ export function GestorRoles({ roles }: { roles: RolEmpresa[] }) {
               </div>
             </div>
 
+            <input
+              type="search"
+              value={busquedaModulo}
+              onChange={(e) => setBusquedaModulo(e.target.value)}
+              placeholder="Buscar módulo…"
+              aria-label="Buscar módulo"
+              className="w-full sm:w-72 rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
+            />
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -253,7 +283,7 @@ export function GestorRoles({ roles }: { roles: RolEmpresa[] }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {MODULOS.map(({ id, etiqueta }) => (
+                  {modulosVisibles.map(({ id, etiqueta }) => (
                     <tr key={id} className="border-b border-marmol-100">
                       <td className="py-2 pr-3 text-marmol-700">{etiqueta}</td>
                       {(['leer', 'escribir', 'borrar'] as const).map((campo) => (

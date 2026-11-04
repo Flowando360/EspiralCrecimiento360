@@ -1,4 +1,5 @@
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { FiltroTabla } from '@/components/ui/filtro-tabla';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -55,6 +56,7 @@ export default async function SincronizacionesGuiaFlowPage() {
         {!intentos || intentos.length === 0 ? (
           <p className="text-sm text-marmol-400 p-5">Todavía no hay intentos registrados.</p>
         ) : (
+          <FiltroTabla columnas={['Resultado']} plural="registros" placeholder="Buscar por nombre o correo…">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs text-marmol-500 border-b border-marmol-100">
@@ -102,6 +104,7 @@ export default async function SincronizacionesGuiaFlowPage() {
               })}
             </tbody>
           </table>
+          </FiltroTabla>
         )}
       </div>
     </div>

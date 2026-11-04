@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { FiltroTabla } from '@/components/ui/filtro-tabla';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -39,7 +40,8 @@ export default async function AdminCargosPage() {
       {!cargos || cargos.length === 0 ? (
         <EmptyState icon={Sparkles} titulo="Sin cargos cargados" />
       ) : (
-        <div className="card overflow-hidden">
+        <FiltroTabla columnas={['Área']} plural="cargos" placeholder="Buscar cargo…">
+          <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
@@ -67,6 +69,7 @@ export default async function AdminCargosPage() {
             </tbody>
           </table>
         </div>
+        </FiltroTabla>
       )}
     </div>
   );

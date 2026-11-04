@@ -1,5 +1,6 @@
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { FiltroTabla } from '@/components/ui/filtro-tabla';
 import { redirect } from 'next/navigation';
 import { cn, formatearFecha } from '@/lib/utils';
 import { CheckCircle2, Clock, AlertTriangle, FileText, ShieldOff } from 'lucide-react';
@@ -250,7 +251,8 @@ export default async function SeguimientoGuiaFlowPage() {
         del sistema). A quien todavía no ha respondido lo encuentras en la pestaña Invitaciones.
       </p>
 
-      <div className="card overflow-x-auto">
+      <FiltroTabla columnas={['Estado']} plural="personas" placeholder="Buscar por nombre o correo…">
+        <div className="card overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-xs text-marmol-500 border-b border-marmol-100">
@@ -305,6 +307,7 @@ export default async function SeguimientoGuiaFlowPage() {
           </tbody>
         </table>
       </div>
+      </FiltroTabla>
 
       <p className="flex items-start gap-1.5 text-xs text-marmol-400 max-w-2xl">
         <ShieldOff size={13} className="mt-0.5 shrink-0" />

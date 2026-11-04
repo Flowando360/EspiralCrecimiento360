@@ -2,7 +2,8 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { FormularioCrearUsuario } from '@/components/espiral-crecimiento/formulario-crear-usuario';
-import { FilaUsuario, type UsuarioFila } from '@/components/espiral-crecimiento/fila-usuario';
+import { ListaUsuarios } from '@/components/espiral-crecimiento/lista-usuarios';
+import type { UsuarioFila } from '@/components/espiral-crecimiento/fila-usuario';
 
 export default async function AdminUsuariosPage() {
   const perfil = await getPerfilActual();
@@ -57,41 +58,22 @@ export default async function AdminUsuariosPage() {
         <FormularioCrearUsuario colaboradoresSinCuenta={colaboradoresSinCuenta} rolesPersonalizados={rolesPersonalizados} />
       </div>
 
-      <div className="card overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
-              <th className="px-4 py-3 font-medium">Nombre</th>
-              <th className="px-4 py-3 font-medium">Correo</th>
-              <th className="px-4 py-3 font-medium">Usuario</th>
-              <th className="px-4 py-3 font-medium">Rol</th>
-              <th className="px-4 py-3 font-medium">Estado</th>
-              <th className="px-4 py-3 font-medium">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(usuarios ?? []).map((u) => (
-              <FilaUsuario
-                key={u.id}
-                usuario={{
-                  id: u.id,
-                  nombre_completo: u.nombre_completo,
-                  nombre_preferido: u.nombre_preferido,
-                  usuario: u.usuario,
-                  email: u.email,
-                  rol: u.rol as UsuarioFila['rol'],
-                  activo: u.activo,
-                  rol_personalizado_id: u.rol_personalizado_id ?? null,
-                }}
-                esUsuarioActual={u.id === perfil.usuario_id}
-                ficha={fichaPorUsuario.get(u.id) ?? null}
-                fichasDisponibles={colaboradoresSinCuenta}
-                rolesPersonalizados={rolesPersonalizados}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <ListaUsuarios
+        usuarios={(usuarios ?? []).map((u) => ({
+          id: u.id,
+          nombre_completo: u.nombre_completo,
+          nombre_preferido: u.nombre_preferido,
+          usuario: u.usuario,
+          email: u.email,
+          rol: u.rol as UsuarioFila['rol'],
+          activo: u.activo,
+          rol_personalizado_id: u.rol_personalizado_id ?? null,
+        }))}
+        usuarioActualId={perfil.usuario_id}
+        fichaPorUsuario={Object.fromEntries(fichaPorUsuario)}
+        fichasDisponibles={colaboradoresSinCuenta}
+        rolesPersonalizados={rolesPersonalizados}
+      />
     </div>
   );
 }

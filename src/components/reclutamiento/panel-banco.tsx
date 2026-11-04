@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { normalizarBusqueda } from '@/lib/utils';
 import { actualizarDisponibilidadCandidato, atenderSolicitudTitular } from '@/app/(dashboard)/reclutamiento/actions';
 
 export interface CandidatoBanco {
@@ -32,6 +33,8 @@ export function PanelBanco({ candidatos, solicitudes }: { candidatos: CandidatoB
   const [lista, setLista] = useState(candidatos);
   const [pendientes, setPendientes] = useState(solicitudes);
   const [error, setError] = useState<string | null>(null);
+  const [busqueda, setBusqueda] = useState('');
+  const [soloDisponibles, setSoloDisponibles] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function alternar(id: string, disponible: boolean) {
@@ -51,6 +54,12 @@ export function PanelBanco({ candidatos, solicitudes }: { candidatos: CandidatoB
       else setError(res.error);
     });
   }
+
+  const q = normalizarBusqueda(busqueda);
+  const visibles = lista.filter(
+    (c) =>
+      (!q || normalizarBusqueda(`${c.nombre} ${c.origen ?? ''}`).includes(q)) && (!soloDisponibles || c.disponible)
+  );
 
   return (
     <div className="space-y-6">
@@ -91,6 +100,24 @@ export function PanelBanco({ candidatos, solicitudes }: { candidatos: CandidatoB
         {lista.length === 0 ? (
           <p className="text-sm text-marmol-500">Todavía no hay candidatos.</p>
         ) : (
+          <>
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              type="search"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              placeholder="Buscar por nombre u origen…"
+              aria-label="Buscar candidato"
+              className="flex-1 min-w-[12rem] rounded-lg border border-marmol-200 px-3 py-1.5 text-sm"
+            />
+            <label className="inline-flex items-center gap-2 text-sm text-marmol-700 cursor-pointer">
+              <input type="checkbox" checked={soloDisponibles} onChange={(e) => setSoloDisponibles(e.target.checked)} />
+              Solo disponibles
+            </label>
+            <span className="text-xs text-marmol-500">
+              Mostrando {visibles.length} de {lista.length}
+            </span>
+          </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs text-marmol-400 border-b border-marmol-100">
@@ -101,7 +128,7 @@ export function PanelBanco({ candidatos, solicitudes }: { candidatos: CandidatoB
               </tr>
             </thead>
             <tbody>
-              {lista.map((c) => (
+              {visibles.map((c) => (
                 <tr key={c.id} className="border-b border-marmol-50 last:border-0">
                   <td className="py-1.5 text-marmol-800">{c.nombre}</td>
                   <td className="py-1.5 text-marmol-500 text-xs">{c.origen ?? '—'}</td>
@@ -111,8 +138,14 @@ export function PanelBanco({ candidatos, solicitudes }: { candidatos: CandidatoB
                   </td>
                 </tr>
               ))}
+              {visibles.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="py-4 text-center text-sm text-marmol-500">Ningún candidato coincide.</td>
+                </tr>
+              )}
             </tbody>
           </table>
+          </>
         )}
       </section>
       {error && <p className="text-xs text-bajo">{error}</p>}

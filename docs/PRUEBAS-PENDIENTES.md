@@ -73,3 +73,8 @@ Servidor local con puente a Supabase (el proxy de la nube no deja salir al servi
 - **Requiere aplicar `supabase/migrations/0109_valoracion_borrador_y_envio.sql` en Supabase (SQL Editor)** ANTES de fusionar a `main`: sin ella el disparador antiguo marca la valoración como enviada al responder el último ítem.
 - Las valoraciones que ya estaban completas antes del cambio quedan como enviadas (bloqueadas).
 - La clave inicial no se obliga a cambiar: cada quien la cambia cuando quiera.
+
+## Actualización (2026-11-04, búsqueda y filtros)
+- Valoración con borrador/envío: migración 0109 aplicada por Diana; probado con Playwright en CONVERGIA (guardar, recargar, enviar, solo lectura, candado en la base); valoración de prueba devuelta a pendiente.
+- Búsqueda y filtros nuevos: Usuarios (texto, rol, estado, ficha), Roles (roles y módulos), Banco de candidatos, y un componente reutilizable `FiltroTabla` (`src/components/ui/filtro-tabla.tsx`) aplicado a Cargos, Organigrama, Dimensiones, Informes PDI/Formación/SST/Cultura, Nexa Directorio/Formación, Seguimiento de Guías del Flow, Sincronizaciones y detalle de ciclo.
+- Para agregar el filtro a otra tabla servida desde el servidor: envolverla en `<FiltroTabla columnas={['Estado']}>`; los nombres deben coincidir con los `<th>`.

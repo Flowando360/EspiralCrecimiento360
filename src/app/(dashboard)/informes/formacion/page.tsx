@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { EmptyState } from '@/components/ui/empty-state';
+import { FiltroTabla } from '@/components/ui/filtro-tabla';
 import { GraduationCap, FileDown, FileSpreadsheet } from 'lucide-react';
 import { formatearFecha, cn } from '@/lib/utils';
 import { obtenerInformeFormacion } from './data';
@@ -73,7 +74,8 @@ export default async function InformeFormacionPage() {
       {filas.length === 0 ? (
         <EmptyState icon={GraduationCap} titulo="Sin formación asignada" descripcion="No hay cursos asignados que coincidan con tu alcance." />
       ) : (
-        <div className="card overflow-hidden">
+        <FiltroTabla columnas={['Categoría', 'Estado']} plural="registros" placeholder="Buscar por persona o curso…">
+          <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
@@ -103,6 +105,7 @@ export default async function InformeFormacionPage() {
             </tbody>
           </table>
         </div>
+        </FiltroTabla>
       )}
     </div>
   );

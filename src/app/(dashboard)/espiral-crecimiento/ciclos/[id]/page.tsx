@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { FiltroTabla } from '@/components/ui/filtro-tabla';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { GenerarEvaluacionesPanel } from '@/components/espiral-crecimiento/generar-evaluaciones-panel';
@@ -127,7 +128,8 @@ export default async function CicloDetallePage({ params }: { params: { id: strin
         </div>
       )}
 
-      <div className="card overflow-hidden">
+      <FiltroTabla columnas={['Cargo', 'Etapa']} plural="personas" placeholder="Buscar persona…">
+        <div className="card overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
@@ -209,6 +211,7 @@ export default async function CicloDetallePage({ params }: { params: { id: strin
           </tbody>
         </table>
       </div>
+      </FiltroTabla>
     </div>
   );
 }

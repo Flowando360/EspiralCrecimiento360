@@ -117,3 +117,8 @@ export function primero<T>(valor: T | T[] | null | undefined): T | undefined {
   if (valor == null) return undefined;
   return Array.isArray(valor) ? valor[0] : valor;
 }
+
+/** Minúsculas y sin tildes, para búsquedas que no distinguen «Ángela» de «angela». */
+export function normalizarBusqueda(texto: string): string {
+  return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+}
