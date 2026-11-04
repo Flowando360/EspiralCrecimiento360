@@ -1,5 +1,6 @@
 import type { RolUsuario } from '@/types/colaborador';
 import { BarraSuperior } from './barra-superior';
+import { GinoAyuda } from '@/components/ayuda/gino-ayuda';
 import type { PermisosModulo } from '@/lib/supabase/get-perfil-actual';
 
 /**
@@ -38,6 +39,7 @@ export function AppShell({
         permisos={permisos}
       />
       <main className="p-4 sm:p-6 max-w-[1400px] w-full mx-auto min-w-0">{children}</main>
+      <GinoAyuda nombre={nombre} rol={rol} />
     </div>
   );
 }

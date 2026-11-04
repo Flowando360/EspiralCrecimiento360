@@ -7,7 +7,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { cn, etiquetaRol } from '@/lib/utils';
 import type { RolUsuario } from '@/types/colaborador';
-import { CentroAyudaBoton } from '@/components/ayuda/centro-ayuda-boton';
 import {
   Home,
   User,
@@ -140,7 +139,7 @@ const NAV: NavGroup[] = [
       { href: 'https://andre-proy.vercel.app/juegos', label: 'Ludo Retos', icon: Crosshair, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },
       { href: '/nexa/notebook', label: 'Mi cuaderno', icon: NotebookPen, roles: ['admin_th', 'lider', 'colaborador'] },
       { href: '/nexa/directorio', label: 'Directorio de aliados', icon: Handshake, roles: ['admin_th', 'lider', 'gerencia'] },
-      { href: '/nexa/asistente', label: 'Asistente IA', icon: Bot, roles: ['admin_th', 'lider', 'colaborador'] },
+      { href: '/nexa/asistente', label: 'Gino · Asistente IA', icon: Bot, roles: ['admin_th', 'lider', 'colaborador'] },
     ],
   },
   {
@@ -295,7 +294,6 @@ export function BarraSuperior({
         </div>
 
         <div className="ml-auto flex items-center gap-0.5 sm:gap-1.5 shrink-0">
-          <CentroAyudaBoton className="rounded-lg p-2 text-white/85 hover:bg-white/10 hover:text-white transition" />
           <IconoConBadge href="/alertas" icon={Bell} contador={alertasPendientes} titulo="Alertas de fechas clave" />
           <IconoConBadge href="/notificaciones" icon={Mail} contador={notificacionesNoLeidas} titulo="Notificaciones" />
           <IconoConBadge href="/mensajes" icon={MessageCircle} contador={mensajesNoLeidos} titulo="Mensajes" />

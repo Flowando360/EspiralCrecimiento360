@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { MODULOS } from '@/content/ayuda';
 import { buscarEnAyuda } from '@/content/ayuda/buscador';
-import { HelpCircle, Search, HelpingHand, SpellCheck, ClipboardList, BookOpenCheck } from 'lucide-react';
+import { Sparkles, Search, HelpingHand, SpellCheck, ClipboardList, BookOpenCheck } from 'lucide-react';
 
 export default function AyudaHomePage() {
   const [consulta, setConsulta] = useState('');
@@ -12,13 +12,31 @@ export default function AyudaHomePage() {
 
   return (
     <div className="space-y-8 max-w-3xl">
-      <div>
-        <h1 className="font-display text-2xl font-semibold text-secundario flex items-center gap-2">
-          <HelpCircle size={22} className="text-flow-500" /> Centro de Ayuda
-        </h1>
-        <p className="text-sm text-marmol-500 mt-1">
-          Documentación por módulo, preguntas frecuentes, glosario y plan de pruebas de Espiral de Crecimiento.
+      <div className="flex items-center gap-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/marca/gino-128.png" alt="Gino" className="h-16 w-16 rounded-full shrink-0 shadow-[0_0_18px_rgba(132,204,22,0.45)]" />
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-secundario">Centro de Ayuda</h1>
+          <p className="text-sm text-marmol-500 mt-1">
+            Soy <strong>Gino</strong>, tu amigo en Espiral de Crecimiento. Aquí encuentras el manual por módulo, las preguntas frecuentes, el
+            glosario y el plan de pruebas. Si no encuentras algo, búscalo abajo o cuéntamelo.
+          </p>
+        </div>
+      </div>
+
+      <div className="card p-5 border-flow-200">
+        <h2 className="font-display font-semibold text-secundario flex items-center gap-2">
+          <Sparkles size={16} className="text-flow-500" /> ¿Qué es Espiral de Crecimiento 360°?
+        </h2>
+        <p className="text-sm text-marmol-600 mt-2">
+          Es la plataforma de Talento Humano para acompañar el crecimiento de cada persona y de la empresa. Mira a cada persona en cuatro
+          dimensiones (<strong>Ser, Saber, Hacer y Deber</strong>), reúne la valoración de su líder, sus pares, sus colaboradores y la suya
+          propia, y la convierte en conversaciones, acuerdos y planes de desarrollo. Se llama «espiral» porque cuando un ciclo de
+          acompañamiento se cierra empieza otro: no se da vueltas sobre lo mismo, se va creciendo hacia arriba.
         </p>
+        <Link href="/ayuda/modulo/general/que-es-espiral" className="inline-block mt-3 text-sm text-flow-600 hover:text-flow-700 font-medium">
+          Leer la explicación completa →
+        </Link>
       </div>
 
       <div className="relative">
@@ -26,7 +44,7 @@ export default function AyudaHomePage() {
         <input
           value={consulta}
           onChange={(e) => setConsulta(e.target.value)}
-          placeholder="Busca cualquier tema, pantalla o palabra…"
+          placeholder="Pregúntale a Gino: busca cualquier tema, pantalla o palabra…"
           className="w-full rounded-lg border border-marmol-200 pl-10 pr-3 py-2.5 text-sm"
         />
       </div>

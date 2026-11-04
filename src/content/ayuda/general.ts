@@ -6,6 +6,53 @@ export const moduloGeneral: ModuloAyuda = {
   descripcion: 'La pantalla de bienvenida y tu propia ficha personal.',
   paginas: [
     {
+      slug: 'que-es-espiral',
+      ruta: '/ayuda-general/que-es-espiral',
+      titulo: 'Qué es Espiral de Crecimiento 360°',
+      resumen:
+        'Espiral de Crecimiento 360° es la plataforma de Talento Humano para acompañar el crecimiento de cada persona y de la empresa. Se llama «espiral» porque un ciclo de acompañamiento no se cierra sobre sí mismo: cuando termina empieza otro, y la persona va creciendo hacia arriba, como una espiral. Une en un solo lugar lo que se sabe de cada persona, cómo la ven quienes trabajan con ella y qué se va a hacer para que crezca.',
+      camposYBotones: [
+        { nombre: 'Las cuatro dimensiones', explicacion: 'Cada persona se mira en cuatro frentes. Ser: quién es (talentos, propósito), con la Guía del Flow. Saber: si cumple lo que su cargo exige (formación, habilidades, certificaciones, experiencia). Hacer: su desempeño en lo que hace, valorado por ciclo. Deber: su comportamiento frente a la cultura de la empresa, también por ciclo.' },
+        { nombre: 'Una mirada de 360°', explicacion: 'Cada persona se autoevalúa y la valoran su líder, sus pares (quienes comparten líder) y los colaboradores a su cargo. Todos salen del organigrama, no se escogen a mano. Los resultados se combinan en un índice y un semáforo.' },
+        { nombre: 'Del dato a la conversación', explicacion: 'La valoración no se queda en un número: el líder prepara su Brief, se sienta con la persona a dar retroalimentación, ambos firman un Acuerdo de crecimiento (qué hace la persona y qué hace la empresa) y, si hace falta, se crea un Plan de Desarrollo Individual (PDI) con fechas.' },
+        { nombre: 'Ciclos que se siguen', explicacion: 'Talento Humano abre un Ciclo de Crecimiento (por ejemplo, de octubre a diciembre). Al cerrarlo se aprende de lo que pasó y se abre el siguiente. Ser y Saber se actualizan de forma continua, sin esperar al ciclo.' },
+        { nombre: 'Todo lo de Talento Humano, en un lugar', explicacion: 'Espiral 360° (fichas, ciclos, organigrama, planes de desarrollo, indicadores, externos), Reclutamiento y selección, Nexa (cultura y formación: feed, cursos, reconocimientos, clima, simulacros y Gino), Procesos y cumplimiento (SG-SST, auditorías, acciones correctivas), Informes y Administración.' },
+        { nombre: 'Qué ve cada persona', explicacion: 'Talento Humano administra todo lo de su empresa; el líder ve y acompaña a su equipo; cada colaborador ve y actualiza lo propio; gerencia ve datos agregados. Cada empresa tiene su propia identidad (logo y colores) y sus datos están separados de los de cualquier otra.' },
+        { nombre: 'Gino, tu amigo en la plataforma', explicacion: 'En la esquina inferior derecha de todas las pantallas está Gino: te explica donde estás, responde tus dudas y recibe tus sugerencias. Mira «Conoce a Gino».' },
+      ],
+      proceso: [
+        'Talento Humano deja listos los cargos, el organigrama y las personas.',
+        'Cada persona completa su Guía del Flow (Ser) y se revisa su Saber contra el cargo.',
+        'Talento Humano abre un Ciclo de Crecimiento y genera los Encuentros de Crecimiento (Hacer y Deber).',
+        'Cada acompañante hace su valoración y la envía; el sistema calcula índices y semáforos.',
+        'El líder prepara su Brief, conversa con la persona y ambos firman el Acuerdo de crecimiento.',
+        'Se crean los planes de desarrollo; se cierra el ciclo y se abre el siguiente.',
+      ],
+      notas: [
+        'La inteligencia artificial propone resúmenes y sugerencias, pero nunca decide: lo que ve el líder en el día a día lo corrige y lo completa.',
+        'Espiral no reemplaza la conversación entre personas: la prepara y deja constancia de lo acordado.',
+      ],
+    },
+    {
+      slug: 'conoce-a-gino',
+      ruta: '/ayuda-general/conoce-a-gino',
+      titulo: 'Conoce a Gino, tu amigo en la plataforma',
+      resumen:
+        'Gino es el robot sonriente de la esquina inferior derecha. Está en todas las pantallas para acompañarte como un amigo: te explica lo que ves, te dice cómo hacer algo paso a paso y recibe tus ideas para mejorar la plataforma.',
+      camposYBotones: [
+        { nombre: 'El botón de Gino', explicacion: 'Círculo con el robot, siempre a la vista abajo a la derecha. Al entrar te saluda por tu nombre (o por cómo te gusta que te llamen) una sola vez por sesión. Púlsalo para abrirlo; con Esc o la X lo cierras.' },
+        { nombre: 'Esta pantalla', explicacion: 'Lo primero que te muestra Gino es la explicación de la pantalla donde estás: para qué sirve, qué hace cada botón y el proceso paso a paso.' },
+        { nombre: 'Pregúntale a Gino', explicacion: 'Escribe lo que quieres hacer («¿cómo evalúo a mi equipo?») y Gino busca en el manual, las preguntas frecuentes y el glosario, y te da los pasos.' },
+        { nombre: '¿Quieres que se mejore? / No encontré cómo hacerlo', explicacion: 'Si la respuesta no te sirve o algo no existe, cuéntaselo a Gino: eliges si es una mejora, algo nuevo o algo que no funciona, lo describes (puedes adjuntar una captura) y le llega al equipo de la plataforma (FlowAndo), que lo estudia, lo va mejorando y te avisa por correo cuando esté listo.' },
+        { nombre: 'Conversar con Gino (asistente con IA)', explicacion: 'Un chat (también en Nexa → Gino · Asistente IA) donde le puedes preguntar con tus palabras. Responde con las políticas y procedimientos propios de tu empresa cuando Talento Humano los ha cargado.' },
+        { nombre: 'Centro de Ayuda completo, preguntas frecuentes, glosario y plan de pruebas', explicacion: 'Desde Gino llegas a toda la documentación por módulos.' },
+      ],
+      notas: [
+        'Gino es un amigo, no un juez: lo que le preguntes no aparece en ninguna evaluación.',
+        'Si el chat con IA no responde, es porque el servicio no está configurado; Talento Humano o soporte lo pueden activar.',
+      ],
+    },
+    {
       slug: 'buscar-y-filtrar',
       ruta: '/ayuda-general/buscar-y-filtrar',
       titulo: 'Buscar y filtrar listas',
@@ -35,7 +82,7 @@ export const moduloGeneral: ModuloAyuda = {
         { nombre: 'Espiral 360° → Formación individual, Reconocimientos y Clima Organizacional', explicacion: 'Formación individual (Talento Humano, líder, colaborador): tus cursos asignados con avance o quiz. Reconocimientos (todos menos auditor): ranking de puntos y muro de reconocimientos, donde puedes reconocer a alguien. Clima Organizacional (todos menos auditor): rondas anónimas de eNPS y compromiso; Talento Humano las abre y cierra y ve resultados agregados.' },
         { nombre: 'Espiral 360° → Guías del Flow y Sincronizaciones (solo Talento Humano)', explicacion: 'Guías del Flow: Invitaciones (genera los enlaces del cuestionario del Ser para una o varias personas) y Seguimiento (quién ya se registró o respondió, con filtro por estado). Sincronizaciones: bitácora de cada intento de vincular una Guía del Flow con un colaborador por correo, con filtro por resultado.' },
         { nombre: 'Reclutamiento y selección → Reclutamiento y Banco de candidatos (Talento Humano y líder)', explicacion: 'Reclutamiento: vacantes con su enlace público de postulación y un tablero de 7 etapas por vacante (el líder ve los candidatos que Talento Humano le envió y los evalúa). Se opera con «Mover a…» en cada tarjeta. Banco de candidatos: todas las personas que se han postulado, con buscador y «Solo disponibles», disponibilidad para otros cargos y las solicitudes de los titulares de datos. El histórico se conserva siempre.' },
-        { nombre: 'Nexa · Cultura y Formación (según rol)', explicacion: 'Feed corporativo (comunicados y logros), Ludo Retos (juegos externos), Mi cuaderno (apuntes privados que nadie más ve), Directorio de aliados (contactos de ARL, asesores y proveedores; con búsqueda y filtro por tipo; no lo ve el colaborador) y Asistente IA (responde dudas apoyándose en los documentos propios que Talento Humano cargó).' },
+        { nombre: 'Nexa · Cultura y Formación (según rol)', explicacion: 'Feed corporativo (comunicados y logros), Ludo Retos (juegos externos), Mi cuaderno (apuntes privados que nadie más ve), Directorio de aliados (contactos de ARL, asesores y proveedores; con búsqueda y filtro por tipo; no lo ve el colaborador) y Gino · Asistente IA (tu amigo en la plataforma: responde dudas apoyándose en los documentos propios que Talento Humano cargó).' },
         { nombre: 'Procesos y Cumplimiento (Talento Humano, líder, gerencia)', explicacion: 'Procesos y sistemas de gestión (mapa de procesos y checklist por norma), Contexto FODA, Riesgos y oportunidades, Matriz legal, Matriz de comunicaciones, Gestión documental (borrador → revisión → validación → vigente, con confirmación de lectura), Auditorías internas (también las ve el auditor externo), Diagnóstico ISO 9001, ACPM, Gestión de cambio y Simulacros (SST). Cada una es un registro con responsable y estado; se opera creando, editando y moviendo el registro por sus etapas.' },
         { nombre: 'Informes (según rol)', explicacion: 'Todos los informes, Encuentro 360° Integrado (resultado consolidado de una persona; con PDF y Excel), Plan de Desarrollo Individual, Cumplimiento SST, Brechas por dimensión, Formación, Cultura y Engagement, Consolidado Gerencial, Histórico Comparativo entre ciclos, Evidencia de auditoría (ZIP para el auditor) y Revisión por la Dirección. Los de listas largas traen búsqueda y filtros por estado o categoría. Se opera eligiendo el informe, filtrando y descargando cuando hay botón de PDF o Excel.' },
         { nombre: 'Administración (solo Talento Humano)', explicacion: 'Cargos y perfiles (perfil del cargo y manual de funciones; «Nuevo cargo»), Organigrama (editar: asigna el equipo de un líder o el líder de cada persona, con un panel «Para revisar» de vacíos), Identidad Organizacional, Dotaciones, Usuarios y roles (cuentas de acceso, con búsqueda y filtros por rol, estado y ficha), Roles y permisos (roles propios con permisos por módulo; con buscadores), Respaldo de datos (ZIP con un CSV por tabla), Salarios (alza masiva), Parámetros legales y Configuración (datos legales y ponderaciones entre líder, pares y colaboradores a cargo).' },

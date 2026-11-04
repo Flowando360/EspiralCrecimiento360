@@ -581,14 +581,14 @@ export const planPruebas: SeccionPlanPruebas[] = [
     ],
   },
   {
-    modulo: 'Nexa — Asistente IA y base documental',
+    modulo: 'Nexa — Gino (asistente IA) y base documental',
     escenarios: [
       {
         titulo: 'Cargar un documento de política y que el asistente lo use',
         rolNecesario: 'admin_th (carga el documento) y cualquier usuario (le pregunta al asistente)',
         pasos: [
-          { paso: 'Como admin_th, entra a Nexa → Asistente IA → "Base documental" y pega un texto corto de una política de ejemplo (ej. "Los EPP se entregan cada 6 meses").', resultadoEsperado: 'El documento aparece en la lista, activo, con la cantidad de caracteres cargados.' },
-          { paso: 'Ve al chat del Asistente IA y pregunta algo directamente relacionado con ese texto.', resultadoEsperado: 'La respuesta incorpora la información del documento cargado (no una respuesta genérica).' },
+          { paso: 'Como admin_th, entra a Nexa → Gino · Asistente IA → "Base documental" y pega un texto corto de una política de ejemplo (ej. "Los EPP se entregan cada 6 meses").', resultadoEsperado: 'El documento aparece en la lista, activo, con la cantidad de caracteres cargados.' },
+          { paso: 'Ve al chat de Gino (Asistente IA) y pregunta algo directamente relacionado con ese texto.', resultadoEsperado: 'La respuesta incorpora la información del documento cargado (no una respuesta genérica).' },
           { paso: 'Desactiva ese documento (casilla Activo/Inactivo) y vuelve a hacer la misma pregunta.', resultadoEsperado: 'El asistente ya no usa ese documento como referencia.' },
           { paso: 'Pregunta algo normativo para lo que no hay ningún documento cargado ni activo.', resultadoEsperado: 'El asistente dice explícitamente que no tiene esa información, en vez de inventar una respuesta.' },
         ],

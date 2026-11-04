@@ -3,5 +3,5 @@ import { AsistenteChat } from '@/components/espiral-crecimiento/asistente-chat';
 
 export default async function AsistenteIaPage() {
   const perfil = await getPerfilActual();
-  return <AsistenteChat esAdminTh={perfil?.rol === 'admin_th'} />;
+  return <AsistenteChat esAdminTh={perfil?.rol === 'admin_th'} nombre={perfil?.nombre_preferido?.trim() || perfil?.nombre_completo} />;
 }

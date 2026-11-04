@@ -249,9 +249,9 @@ export const moduloNexa: ModuloAyuda = {
     {
       slug: 'asistente-ia',
       ruta: '/nexa/asistente',
-      titulo: 'Asistente IA',
+      titulo: 'Gino · Asistente IA',
       resumen:
-        'Chat que responde dudas normativas y de procedimiento apoyándose en los documentos de políticas propias que admin_th haya cargado (reglamento SST, manual interno), además del propósito/valores de la empresa. Si no tiene ningún documento relevante para una pregunta normativa, lo dice en vez de inventar una respuesta.',
+        'Gino es el amigo de la plataforma: un chat que te ayuda a usar Espiral y responde dudas normativas y de procedimiento apoyándose en los documentos de políticas propias que admin_th haya cargado (reglamento SST, manual interno), además del propósito/valores de la empresa. Si no tiene ningún documento relevante para una pregunta normativa, lo dice en vez de inventar una respuesta.',
       camposYBotones: [
         { nombre: 'Campo de pregunta', explicacion: 'Escribe tu duda y presiona enviar; la respuesta aparece en el chat.' },
         { nombre: 'Base documental (admin_th)', explicacion: 'Botón que lleva a la pantalla donde se cargan los documentos que usa el asistente (ver "Base documental del asistente" más abajo).' },
@@ -265,7 +265,7 @@ export const moduloNexa: ModuloAyuda = {
       slug: 'documentos-politica',
       ruta: '/nexa/asistente/documentos',
       titulo: 'Base documental del asistente',
-      resumen: 'Solo admin_th. Aquí se cargan los documentos propios (reglamento SST, manual interno, políticas) que el Asistente IA usa como referencia antes de responder.',
+      resumen: 'Solo admin_th. Aquí se cargan los documentos propios (reglamento SST, manual interno, políticas) que Gino usa como referencia antes de responder.',
       camposYBotones: [
         { nombre: 'Subir el PDF', explicacion: 'El texto se extrae automáticamente del archivo — no hace falta transcribirlo a mano.' },
         { nombre: 'Pegar el texto', explicacion: 'Alternativa a subir un PDF: pega directamente el texto de la política (útil si no tienes el archivo a mano, o solo quieres cargar un fragmento).' },

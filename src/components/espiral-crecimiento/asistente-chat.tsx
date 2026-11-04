@@ -2,19 +2,20 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Bot, Send, FileText } from 'lucide-react';
+import { Send, FileText } from 'lucide-react';
 
 interface Mensaje {
   rol: 'usuario' | 'asistente';
   texto: string;
 }
 
-export function AsistenteChat({ esAdminTh }: { esAdminTh: boolean }) {
+export function AsistenteChat({ esAdminTh, nombre }: { esAdminTh: boolean; nombre?: string }) {
+  const primerNombre = (nombre ?? '').trim().split(/\s+/)[0];
   const [mensajes, setMensajes] = useState<Mensaje[]>([
     {
       rol: 'asistente',
       texto:
-        'Hola, soy el asistente de Nexa. Puedo resolver dudas sobre protocolos de seguridad, uso de EPP, políticas internas y procedimientos de la compañía. ¿En qué te ayudo?',
+        `¡Hola${primerNombre ? `, ${primerNombre}` : ''}! Soy Gino, tu amigo en Espiral. Puedo resolver dudas sobre cómo usar la plataforma, protocolos de seguridad, uso de EPP, políticas internas y procedimientos de la compañía. ¿En qué te ayudo?`,
     },
   ]);
   const [pregunta, setPregunta] = useState('');
@@ -38,7 +39,7 @@ export function AsistenteChat({ esAdminTh }: { esAdminTh: boolean }) {
     } catch {
       setMensajes((prev) => [
         ...prev,
-        { rol: 'asistente', texto: 'No pude conectarme al asistente. Intenta de nuevo en un momento.' },
+        { rol: 'asistente', texto: 'Ups, no pude conectarme. Intenta de nuevo en un momento y aquí estoy.' },
       ]);
     } finally {
       setCargando(false);
@@ -50,10 +51,11 @@ export function AsistenteChat({ esAdminTh }: { esAdminTh: boolean }) {
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold text-secundario flex items-center gap-2">
-            <Bot size={22} className="text-flow-500" /> Asistente IA
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/marca/gino-128.png" alt="" className="h-9 w-9 rounded-full shadow-[0_0_10px_rgba(132,204,22,0.4)]" /> Gino
           </h1>
           <p className="text-sm text-marmol-500 mt-1">
-            Responde con las políticas y procedimientos propios cargados por Talento Humano, cuando aplica.
+            Tu amigo en Espiral: te ayuda a usar la plataforma y responde con las políticas y procedimientos propios cargados por Talento Humano, cuando aplica.
           </p>
         </div>
         {esAdminTh && (
@@ -69,6 +71,10 @@ export function AsistenteChat({ esAdminTh }: { esAdminTh: boolean }) {
       <div className="flex-1 overflow-y-auto card p-4 space-y-3">
         {mensajes.map((m, i) => (
           <div key={i} className={m.rol === 'usuario' ? 'text-right' : 'text-left'}>
+            {m.rol === 'asistente' && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src="/marca/gino-128.png" alt="Gino" className="inline-block h-7 w-7 rounded-full align-bottom mr-1.5" />
+            )}
             <span
               className={
                 m.rol === 'usuario'
@@ -80,7 +86,7 @@ export function AsistenteChat({ esAdminTh }: { esAdminTh: boolean }) {
             </span>
           </div>
         ))}
-        {cargando && <p className="text-xs text-marmol-400">Escribiendo…</p>}
+        {cargando && <p className="text-xs text-marmol-400">Gino está escribiendo…</p>}
       </div>
 
       <form
@@ -93,7 +99,7 @@ export function AsistenteChat({ esAdminTh }: { esAdminTh: boolean }) {
         <input
           value={pregunta}
           onChange={(e) => setPregunta(e.target.value)}
-          placeholder="Escribe tu pregunta…"
+          placeholder="Pregúntale a Gino…"
           className="flex-1 rounded-lg border border-marmol-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-flow-400"
         />
         <button

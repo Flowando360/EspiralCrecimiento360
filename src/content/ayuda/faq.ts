@@ -2,6 +2,16 @@ import type { PreguntaFrecuente } from '@/types/ayuda';
 
 export const preguntasFrecuentes: PreguntaFrecuente[] = [
   {
+    pregunta: '¿Qué es Espiral de Crecimiento 360°?',
+    respuesta:
+      'Es la plataforma de Talento Humano para acompañar el crecimiento de cada persona y de la empresa. Mira a cada persona en cuatro dimensiones (Ser, Saber, Hacer y Deber), reúne la valoración del líder, los pares, los colaboradores a cargo y la propia persona, y convierte lo que se encuentra en conversaciones, acuerdos y planes de desarrollo. Se llama «espiral» porque cuando un ciclo de acompañamiento se cierra, empieza otro: no se da vueltas sobre lo mismo, se va creciendo hacia arriba. Lee más en Centro de Ayuda → Inicio y Mi Perfil → «Qué es Espiral de Crecimiento 360°».',
+  },
+  {
+    pregunta: '¿Quién es Gino y cómo me ayuda?',
+    respuesta:
+      'Gino es el amigo de la plataforma: el botón redondo con el robot sonriente que ves en la esquina inferior derecha de todas las pantallas. Al pulsarlo te explica la pantalla donde estás, busca la respuesta a «¿cómo hago esto?», recibe tus sugerencias si algo no existe todavía y, desde «Conversar con Gino», responde tus dudas en un chat con IA (incluidas las políticas propias de tu empresa, si Talento Humano las cargó).',
+  },
+  {
     pregunta: '¿Qué significan Ser, Saber, Hacer y Deber?',
     respuesta:
       'Son las cuatro dimensiones que valora el Espiral de Crecimiento. Ser: quién es la persona (talentos, propósito), se explora con la Guía del Flow. Saber: si cumple lo que exige su cargo (formación, habilidades, certificaciones, experiencia). Hacer: su desempeño en comportamientos observables, valorado por ciclo. Deber: su comportamiento cultural/actitudinal, valorado también por ciclo.',
@@ -206,9 +216,9 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
       'En Mi Perfil, sección "Cómo te gusta que te llamen", escribe tu apodo o diminutivo y guarda. Reemplaza tu primer nombre legal en el saludo de Inicio y en el encabezado. Si lo dejas vacío, vuelve a usar tu primer nombre. admin_th también puede fijarlo por ti desde Administración → Usuarios y roles.',
   },
   {
-    pregunta: '¿Cómo hago que el Asistente IA conozca nuestras políticas y reglamentos reales?',
+    pregunta: '¿Cómo hago que Gino (el asistente con IA) conozca nuestras políticas y reglamentos reales?',
     respuesta:
-      'Solo admin_th puede cargarlos, desde Nexa → Asistente IA → "Base documental". Se sube el PDF (el texto se extrae solo) o se pega el texto directamente. El asistente busca automáticamente el documento más relacionado con cada pregunta que le hagan.',
+      'Solo admin_th puede cargarlos, desde Nexa → Gino · Asistente IA → "Base documental". Se sube el PDF (el texto se extrae solo) o se pega el texto directamente. Gino busca automáticamente el documento más relacionado con cada pregunta que le hagan.',
   },
   {
     pregunta: '¿Cómo se calcula la tasa de rotación de personal?',

@@ -46,9 +46,9 @@ export function BotonEliminarCiclo({
       <button
         type="button"
         onClick={() => setAbierto(true)}
-        className="inline-flex items-center gap-1 text-xs text-marmol-400 hover:text-bajo"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-bajo/40 text-bajo hover:bg-bajo/10 text-xs font-medium px-2.5 py-1.5 transition"
       >
-        <Trash2 size={12} /> Eliminar ciclo
+        <Trash2 size={13} /> Eliminar ciclo
       </button>
     );
   }

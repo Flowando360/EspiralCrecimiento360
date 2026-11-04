@@ -90,7 +90,7 @@ export const moduloAdministracion: ModuloAyuda = {
         { nombre: 'Principios y Valores', explicacion: 'Listas editables por separado, se agregan/eliminan elemento por elemento.' },
       ],
       notas: [
-        'Todo lo que guardes aquí se usa automáticamente en varios lugares: el Asistente IA de Nexa lo usa como contexto para responder alineado con la empresa, aparece como tarjeta en el dashboard de Inicio, se referencia en los informes PDI y 360°, y genera los puntos comunes del Plan de inducción.',
+        'Todo lo que guardes aquí se usa automáticamente en varios lugares: Gino (el asistente con IA de Nexa) lo usa como contexto para responder alineado con la empresa, aparece como tarjeta en el dashboard de Inicio, se referencia en los informes PDI y 360°, y genera los puntos comunes del Plan de inducción.',
       ],
     },
     {

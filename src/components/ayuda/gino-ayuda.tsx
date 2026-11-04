@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { buscarPaginaPorRuta } from '@/content/ayuda';
 import { buscarEnAyuda, type ResultadoBusqueda } from '@/content/ayuda/buscador';
-import { HelpCircle, X, Search, BookOpen, HelpingHand, SpellCheck, ClipboardList, MessageSquarePlus } from 'lucide-react';
+import { X, Search, BookOpen, HelpingHand, SpellCheck, ClipboardList, MessageSquarePlus, Sparkles, MessageCircle } from 'lucide-react';
 import { FormularioRequerimiento, type TipoRequerimiento } from './formulario-requerimiento';
 
 const ETIQUETA_TIPO: Record<ResultadoBusqueda['tipo'], string> = {
@@ -14,9 +14,40 @@ const ETIQUETA_TIPO: Record<ResultadoBusqueda['tipo'], string> = {
   glosario: 'Glosario',
 };
 
-export function CentroAyudaBoton({ className }: { className?: string }) {
+/**
+ * Gino: el amigo que acompaña a cada persona en la plataforma. Es el botón flotante
+ * de la esquina inferior derecha; al abrirlo muestra la ayuda de la pantalla donde
+ * estás, busca respuestas en el manual y lleva al chat con IA.
+ */
+export function GinoAyuda({ nombre, rol }: { nombre: string; rol: string }) {
   const pathname = usePathname();
   const [abierto, setAbierto] = useState(false);
+  const [saludo, setSaludo] = useState(false);
+  const primerNombre = (nombre ?? '').trim().split(/\s+/)[0] || '';
+  const puedeChatear = ['admin_th', 'lider', 'colaborador'].includes(rol);
+
+  /** Saludo breve, una sola vez por sesión del navegador. */
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem('gino-saludo')) return;
+    } catch {
+      return;
+    }
+    const mostrar = setTimeout(() => {
+      try {
+        sessionStorage.setItem('gino-saludo', '1');
+      } catch {
+        /* sin almacenamiento: el saludo simplemente puede repetirse */
+      }
+      setSaludo(true);
+    }, 1500);
+    const ocultar = setTimeout(() => setSaludo(false), 11000);
+    return () => {
+      clearTimeout(mostrar);
+      clearTimeout(ocultar);
+    };
+  }, []);
+
   const [consulta, setConsulta] = useState('');
   const [requerimiento, setRequerimiento] = useState<{ tipo: TipoRequerimiento; consulta?: string; respuesta?: string } | null>(null);
 
@@ -53,32 +84,54 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setAbierto(true)}
-        className={className ?? 'rounded-lg p-2 text-marmol-500 hover:bg-marmol-100 transition'}
-        title="Centro de Ayuda"
-      >
-        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end gap-2 print:hidden">
+        {saludo && !abierto && (
+          <div className="relative max-w-[240px] rounded-2xl rounded-br-sm bg-white text-marmol-800 shadow-lg border border-marmol-100 px-3.5 py-2.5 text-sm">
+            <button
+              type="button"
+              onClick={() => setSaludo(false)}
+              aria-label="Cerrar saludo"
+              className="absolute -top-2 -left-2 h-5 w-5 rounded-full bg-marmol-100 text-marmol-500 hover:bg-marmol-200 flex items-center justify-center"
+            >
+              <X size={11} />
+            </button>
+            ¡Hola{primerNombre ? `, ${primerNombre}` : ''}! Soy <strong>Gino</strong>. Si algo no te queda claro, aquí estoy para ayudarte.
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            setSaludo(false);
+            setAbierto(true);
+          }}
+          title="Gino, tu amigo en Espiral. ¿Te ayudo?"
+          aria-label="Abrir a Gino, tu asistente y Centro de Ayuda"
+          className="group relative h-16 w-16 rounded-full bg-[#050b18] shadow-[0_0_22px_rgba(132,204,22,0.45),0_4px_14px_rgba(0,0,0,0.35)] hover:shadow-[0_0_30px_rgba(132,204,22,0.7),0_6px_18px_rgba(0,0,0,0.4)] hover:scale-105 active:scale-95 transition motion-reduce:transition-none focus:outline-none focus-visible:ring-4 focus-visible:ring-flow-300"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/marca/ayuda-icono.svg" alt="" className="h-6 w-6 object-contain" />
-        </span>
-      </button>
+          <img src="/marca/gino-128.png" alt="" className="h-full w-full rounded-full object-cover" draggable={false} />
+        </button>
+      </div>
 
       {abierto && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-black/20" onClick={() => cerrar()} />
           <div className="relative w-full max-w-md h-full bg-white shadow-xl flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-marmol-100">
+            <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-marmol-100">
               <button
                 type="button"
                 onClick={volverAlCentro}
-                className="font-display font-semibold text-secundario flex items-center gap-2 hover:text-flow-600 transition"
-                title="Ver todas las opciones del Centro de Ayuda"
+                className="flex items-center gap-3 text-left hover:opacity-90 transition"
+                title="Volver al inicio de Gino"
               >
-                <HelpCircle size={18} className="text-flow-500" /> Centro de Ayuda
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/marca/gino-128.png" alt="Gino" className="h-11 w-11 rounded-full shrink-0 shadow-[0_0_12px_rgba(132,204,22,0.4)]" />
+                <span>
+                  <span className="block font-display font-semibold text-secundario leading-tight">Gino</span>
+                  <span className="block text-xs text-marmol-500">Tu amigo en Espiral de Crecimiento</span>
+                </span>
               </button>
-              <button type="button" onClick={() => cerrar()} aria-label="Cerrar Centro de Ayuda" title="Cerrar" className="text-marmol-400 hover:text-marmol-700">
+              <button type="button" onClick={() => cerrar()} aria-label="Cerrar a Gino" title="Cerrar" className="text-marmol-400 hover:text-marmol-700">
                 <X size={18} />
               </button>
             </div>
@@ -89,7 +142,7 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
                 <input
                   value={consulta}
                   onChange={(e) => setConsulta(e.target.value)}
-                  placeholder="¿Cómo hago esto? Escribe lo que quieres hacer…"
+                  placeholder="Pregúntale a Gino: ¿cómo hago esto?"
                   className="w-full rounded-lg border border-marmol-200 pl-8 pr-2.5 py-2 text-sm"
                 />
               </div>
@@ -125,7 +178,7 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
                     </div>
                   )}
                   {resultados.length === 0 ? (
-                    <p className="text-sm text-marmol-500">No encontré una respuesta para “{consulta}”.</p>
+                    <p className="text-sm text-marmol-500">Mmm, no encontré una respuesta para “{consulta}”. Cuéntame qué necesitas y lo anotamos.</p>
                   ) : (
                     <p className="text-xs uppercase tracking-wide text-marmol-400">Coincidencias</p>
                   )}
@@ -163,6 +216,20 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
                 </div>
               ) : (
                 <>
+                  <div className="rounded-xl bg-flow-50 border border-flow-100 p-3 text-sm text-marmol-700">
+                    <p>
+                      ¡Hola{primerNombre ? `, ${primerNombre}` : ''}! Soy <strong>Gino</strong>, tu amigo en Espiral. Te cuento cómo funciona esta
+                      pantalla, busco respuestas en el manual y, si algo no existe todavía, me lo cuentas y lo anotamos para mejorarlo.
+                    </p>
+                    <Link
+                      href="/ayuda/modulo/general/que-es-espiral"
+                      onClick={() => cerrar()}
+                      className="inline-flex items-center gap-1.5 mt-2 text-flow-700 hover:text-flow-800 font-medium"
+                    >
+                      <Sparkles size={14} /> ¿Qué es Espiral de Crecimiento?
+                    </Link>
+                  </div>
+
                   {contextual ? (
                     <div>
                       <p className="text-[12px] uppercase tracking-wide text-flow-600 font-medium mb-1">
@@ -213,7 +280,7 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
                     </div>
                   ) : (
                     <p className="text-sm text-marmol-500">
-                      Todavía no hay ayuda específica para esta pantalla. Explora el Centro de Ayuda completo abajo.
+                      Todavía no tengo una explicación específica para esta pantalla, pero puedes explorar el Centro de Ayuda completo aquí abajo.
                     </p>
                   )}
 
@@ -226,6 +293,15 @@ export function CentroAyudaBoton({ className }: { className?: string }) {
                   </button>
 
                   <div className="border-t border-marmol-100 pt-4 space-y-1">
+                    {puedeChatear && (
+                      <Link
+                        href="/nexa/asistente"
+                        onClick={() => cerrar()}
+                        className="flex items-center gap-2 text-sm text-marmol-700 hover:text-flow-600 py-1.5"
+                      >
+                        <MessageCircle size={15} /> Conversar con Gino (asistente con IA)
+                      </Link>
+                    )}
                     <Link
                       href="/ayuda"
                       onClick={() => cerrar()}
