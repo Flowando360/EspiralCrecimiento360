@@ -5,6 +5,7 @@ import { IndicadoresEquipoChart } from '@/components/espiral-crecimiento/indicad
 import { RotacionTendenciaChart } from '@/components/espiral-crecimiento/rotacion-tendencia-chart';
 import { TrendingUp, Users, ShieldAlert, GraduationCap, UserMinus, HardHat, UserPlus, CalendarCheck } from 'lucide-react';
 import { obtenerUmbralAnonimato } from '@/lib/informes/anonimato';
+import { calcularCumplimientoObjetivos } from '@/lib/desempeno/objetivos';
 import { calcularIndicadoresSst, calcularIndicadoresReclutamiento, calcularIndicadoresPlan } from '@/lib/informes/indicadores-sst-reclutamiento';
 
 const MESES = [
@@ -23,6 +24,11 @@ export default async function IndicadoresPage() {
     supabase.from('v_indicadores_equipo').select('*').eq('empresa_id', perfil.empresa_id),
     supabase.from('v_rotacion_mensual').select('*').eq('empresa_id', perfil.empresa_id),
   ]);
+
+  // Cumplimiento de objetivos concertados: solo objetivos ya cerrados; con anonimato (mínimo de personas con objetivos cerrados).
+  const { data: objetivosCerrados } = await supabase.from('objetivos_ciclo').select('colaborador_id, resultado').not('resultado', 'is', null);
+  const personasConObjetivos = new Set((objetivosCerrados ?? []).map((o: any) => o.colaborador_id)).size;
+  const cumplimientoObjetivos = personasConObjetivos >= umbralAnonimato ? calcularCumplimientoObjetivos((objetivosCerrados ?? []) as any[]).porcentaje : null;
 
   // SST y Reclutamiento usan datos de acceso restringido (incapacidades, vacantes): solo Talento Humano.
   const verSstYReclutamiento = perfil.rol === 'admin_th';
@@ -57,6 +63,13 @@ export default async function IndicadoresPage() {
           icon={Users}
         />
       </div>
+
+      <StatCard
+        label="Cumplimiento de objetivos concertados"
+        value={cumplimientoObjetivos != null ? `${cumplimientoObjetivos}%` : '—'}
+        icon={TrendingUp}
+        hint={personasConObjetivos > 0 && cumplimientoObjetivos == null ? `Menos de ${umbralAnonimato} personas con objetivos cerrados` : 'Objetivos ya cerrados: cumplido 100, parcial 50, no cumplido 0'}
+      />
 
       <StatCard
         label="Alertas críticas abiertas"

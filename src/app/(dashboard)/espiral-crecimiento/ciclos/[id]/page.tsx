@@ -7,7 +7,7 @@ import { GenerarEvaluacionesPanel } from '@/components/espiral-crecimiento/gener
 import { EditarCiclo } from '@/components/espiral-crecimiento/editar-ciclo';
 import { BotonEliminarCiclo } from '@/components/espiral-crecimiento/boton-eliminar-ciclo';
 import { notFound } from 'next/navigation';
-import { FileText, HandshakeIcon, Unlock } from 'lucide-react';
+import { FileText, HandshakeIcon, Target, Unlock } from 'lucide-react';
 import { cn, formatearFecha, primero } from '@/lib/utils';
 import { ESTADOS_VIGENTES } from '@/lib/colaboradores/estados';
 
@@ -153,6 +153,7 @@ export default async function CicloDetallePage({ params }: { params: { id: strin
                 <>
                   <th className="px-4 py-3 font-medium">Brief</th>
                   <th className="px-4 py-3 font-medium">Acuerdo</th>
+                  <th className="px-4 py-3 font-medium">Objetivos</th>
                   {perfil?.rol === 'admin_th' && <th className="px-4 py-3 font-medium">Valoraciones</th>}
                 </>
               )}
@@ -212,6 +213,14 @@ export default async function CicloDetallePage({ params }: { params: { id: strin
                         className="inline-flex items-center gap-1 text-xs text-flow-600 hover:text-flow-700"
                       >
                         <HandshakeIcon size={12} /> Acuerdo
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/espiral-crecimiento/evaluaciones/${e.id}/objetivos`}
+                        className="inline-flex items-center gap-1 text-xs text-flow-600 hover:text-flow-700"
+                      >
+                        <Target size={12} /> Objetivos
                       </Link>
                     </td>
                     {perfil?.rol === 'admin_th' && (

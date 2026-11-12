@@ -8568,6 +8568,81 @@ export type Database = {
           },
         ]
       }
+      objetivos_ciclo: {
+        Row: {
+          aceptado_en: string | null
+          cerrado_en: string | null
+          cerrado_por_nombre: string | null
+          cierre_comentario: string | null
+          colaborador_id: string
+          comentario_colaborador: string | null
+          created_at: string
+          creado_por_nombre: string | null
+          criterio_exito: string
+          descripcion: string | null
+          empresa_id: string
+          evaluacion_id: string
+          fecha_meta: string | null
+          id: string
+          resultado: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          aceptado_en?: string | null
+          cerrado_en?: string | null
+          cerrado_por_nombre?: string | null
+          cierre_comentario?: string | null
+          colaborador_id: string
+          comentario_colaborador?: string | null
+          created_at?: string
+          creado_por_nombre?: string | null
+          criterio_exito: string
+          descripcion?: string | null
+          empresa_id: string
+          evaluacion_id: string
+          fecha_meta?: string | null
+          id?: string
+          resultado?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          aceptado_en?: string | null
+          cerrado_en?: string | null
+          cerrado_por_nombre?: string | null
+          cierre_comentario?: string | null
+          colaborador_id?: string
+          comentario_colaborador?: string | null
+          created_at?: string
+          creado_por_nombre?: string | null
+          criterio_exito?: string
+          descripcion?: string | null
+          empresa_id?: string
+          evaluacion_id?: string
+          fecha_meta?: string | null
+          id?: string
+          resultado?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objetivos_ciclo_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objetivos_ciclo_evaluacion_id_fkey"
+            columns: ["evaluacion_id"]
+            isOneToOne: false
+            referencedRelation: "evaluaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ser_comentarios_colaborador: {
         Row: {
           aspecto_id: string | null

@@ -183,6 +183,13 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
               {lider?.nombre_completo && ` · Líder: ${lider.nombre_completo}`}
             </p>
           </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <Link
+              href={`/espiral-crecimiento/evaluaciones/${params.evaluacionId}/objetivos`}
+              className="inline-flex items-center gap-1 text-xs text-flow-600 hover:text-flow-700"
+            >
+              <Target size={12} /> Objetivos concertados
+            </Link>
           {puedeEditarRetro && (
             <div className="flex items-center gap-2">
               <Link
@@ -199,6 +206,7 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
               </Link>
             </div>
           )}
+          </div>
         </div>
       </div>
 

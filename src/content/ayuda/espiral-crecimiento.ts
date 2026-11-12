@@ -418,6 +418,29 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       ],
     },
     {
+      slug: 'objetivos-concertados',
+      ruta: '/espiral-crecimiento/evaluaciones/*/objetivos',
+      titulo: 'Objetivos concertados del ciclo',
+      resumen:
+        'Antes de evaluar, el líder (o Talento Humano) y la persona acuerdan qué se espera en el ciclo y con qué criterio se juzgará. Al cierre se registra si se cumplió, y de ahí sale el indicador de cumplimiento de objetivos.',
+      camposYBotones: [
+        { nombre: 'Proponer objetivo', explicacion: 'Talento Humano o el líder directo escriben el objetivo, su criterio de éxito (cómo se sabrá que se cumplió, medible u observable), un detalle y una fecha meta opcionales.' },
+        { nombre: 'Aceptar objetivo / Quiero conversarlo', explicacion: 'La propia persona acepta cada objetivo, o lo deja con un comentario para conversarlo con su líder. Si el líder modifica un objetivo ya aceptado, la aceptación se reinicia.' },
+        { nombre: 'Cierre (Cumplido, Parcial, No cumplido)', explicacion: 'Al terminar el ciclo, el líder o Talento Humano registran el resultado de cada objetivo acordado. Se puede reabrir para corregir.' },
+        { nombre: 'Cumplimiento de objetivos', explicacion: 'Porcentaje sobre los objetivos cerrados: cumplido vale 100, parcial 50 y no cumplido 0. También aparece, agregado y protegido por el umbral de anonimato, en Espiral 360° → Indicadores.' },
+      ],
+      proceso: [
+        'Al abrir el ciclo, entra al detalle del ciclo y pulsa «Objetivos» en la fila de la persona.',
+        'Propón 2 a 5 objetivos con su criterio de éxito.',
+        'La persona los acepta o pide conversarlos; ajusten hasta que queden acordados.',
+        'Al cierre del ciclo, registra Cumplido, Parcial o No cumplido en cada uno.',
+      ],
+      notas: [
+        'Pueden entrar: Talento Humano, el líder directo de la persona y la propia persona (que solo puede aceptar o comentar).',
+        'Solo se pueden cerrar objetivos que la persona ya aceptó.',
+      ],
+    },
+    {
       slug: 'brief',
       ruta: '/espiral-crecimiento/evaluaciones/*/brief',
       titulo: 'Brief de retroalimentación',
