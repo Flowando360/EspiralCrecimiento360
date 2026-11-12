@@ -11,6 +11,7 @@ import {
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Sparkles, Lock } from 'lucide-react';
 import type { BloqueSer } from '@/types/colaborador';
+import { SeguimientoSer } from '@/components/espiral-crecimiento/seguimiento-ser';
 
 const BLOQUES: { valor: BloqueSer; titulo: string }[] = [
   { valor: 'esencia', titulo: 'Esencia / Sello' },
@@ -101,6 +102,14 @@ export default async function GuiaDelFlowPage({ params }: { params: { id: string
       .maybeSingle();
     comentarioGeneral = comentariosRaw?.comentario ?? null;
   }
+
+  const { data: seguimientos } = await supabase
+    .from('ser_seguimientos')
+    .select('id, fecha, fortalezas_en_practica, motivadores, acuerdos, proxima_revision, registrado_por_nombre')
+    .eq('colaborador_id', params.id)
+    .order('fecha', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(50);
 
   let invitacionInicial: { link: string; creadaEl: string; usadaEl: string | null } | null = null;
   if (puedeGestionar) {
@@ -225,6 +234,8 @@ export default async function GuiaDelFlowPage({ params }: { params: { id: string
           )}
         </>
       )}
+
+      <SeguimientoSer colaboradorId={params.id} seguimientos={(seguimientos ?? []) as any[]} puedeRegistrar={puedeGestionar} />
     </div>
   );
 }

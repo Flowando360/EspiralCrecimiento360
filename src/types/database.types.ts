@@ -8477,6 +8477,59 @@ export type Database = {
           },
         ]
       }
+      ser_seguimientos: {
+        Row: {
+          acuerdos: string | null
+          colaborador_id: string
+          created_at: string
+          empresa_id: string
+          fecha: string
+          fortalezas_en_practica: string | null
+          id: string
+          motivadores: string | null
+          proxima_revision: string | null
+          registrado_por: string | null
+          registrado_por_nombre: string | null
+          updated_at: string
+        }
+        Insert: {
+          acuerdos?: string | null
+          colaborador_id: string
+          created_at?: string
+          empresa_id: string
+          fecha?: string
+          fortalezas_en_practica?: string | null
+          id?: string
+          motivadores?: string | null
+          proxima_revision?: string | null
+          registrado_por?: string | null
+          registrado_por_nombre?: string | null
+          updated_at?: string
+        }
+        Update: {
+          acuerdos?: string | null
+          colaborador_id?: string
+          created_at?: string
+          empresa_id?: string
+          fecha?: string
+          fortalezas_en_practica?: string | null
+          id?: string
+          motivadores?: string | null
+          proxima_revision?: string | null
+          registrado_por?: string | null
+          registrado_por_nombre?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ser_seguimientos_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ser_comentarios_colaborador: {
         Row: {
           aspecto_id: string | null
