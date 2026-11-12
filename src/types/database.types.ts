@@ -2144,8 +2144,48 @@ export type Database = {
           },
         ]
       }
+      contexto_estrategias: {
+        Row: {
+          actividad_id: string | null
+          analisis_id: string
+          created_at: string
+          descripcion: string
+          estado: string
+          id: string
+          item_ids: string[]
+          origen: string
+          tipo: string
+        }
+        Insert: {
+          actividad_id?: string | null
+          analisis_id: string
+          created_at?: string
+          descripcion: string
+          estado?: string
+          id?: string
+          item_ids?: string[]
+          origen?: string
+          tipo: string
+        }
+        Update: {
+          actividad_id?: string | null
+          analisis_id?: string
+          created_at?: string
+          descripcion?: string
+          estado?: string
+          id?: string
+          item_ids?: string[]
+          origen?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
       contexto_items: {
         Row: {
+          impacto: number | null
+          probabilidad: number | null
+          riesgo_id: string | null
+          sugerencia_ia: string | null
           analisis_id: string
           created_at: string
           descripcion: string
@@ -2154,6 +2194,10 @@ export type Database = {
           tipo: string
         }
         Insert: {
+          impacto?: number | null
+          probabilidad?: number | null
+          riesgo_id?: string | null
+          sugerencia_ia?: string | null
           analisis_id: string
           created_at?: string
           descripcion: string
@@ -2162,6 +2206,10 @@ export type Database = {
           tipo: string
         }
         Update: {
+          impacto?: number | null
+          probabilidad?: number | null
+          riesgo_id?: string | null
+          sugerencia_ia?: string | null
           analisis_id?: string
           created_at?: string
           descripcion?: string

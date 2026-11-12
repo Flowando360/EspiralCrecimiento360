@@ -3,7 +3,8 @@ import { notFound, redirect } from 'next/navigation';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { ChevronLeft, Compass } from 'lucide-react';
-import { DetalleContexto } from '@/components/procesos-gestion/detalle-contexto';
+import { DetalleContexto, type ItemContexto } from '@/components/procesos-gestion/detalle-contexto';
+import { EstrategiasFoda, type EstrategiaVista } from '@/components/procesos-gestion/estrategias-foda';
 import { formatearFecha } from '@/lib/utils';
 
 export default async function DetalleContextoPage({ params }: { params: { id: string } }) {
@@ -24,7 +25,7 @@ export default async function DetalleContextoPage({ params }: { params: { id: st
 
   const { data: itemsRaw } = await supabase
     .from('contexto_items')
-    .select('id, tipo, descripcion, orden, created_at')
+    .select('id, tipo, descripcion, orden, created_at, impacto, probabilidad, sugerencia_ia, riesgo_id')
     .eq('analisis_id', params.id)
     .order('orden', { ascending: true });
 
@@ -38,6 +39,22 @@ export default async function DetalleContextoPage({ params }: { params: { id: st
     if (!a.origen_contexto_item_id) continue;
     conteoAcpmPorItem[a.origen_contexto_item_id] = (conteoAcpmPorItem[a.origen_contexto_item_id] ?? 0) + 1;
   }
+
+  const { data: estrategiasRaw } = await supabase
+    .from('contexto_estrategias')
+    .select('id, tipo, descripcion, origen, estado, actividad_id, item_ids')
+    .eq('analisis_id', params.id)
+    .order('created_at');
+  const itemPorId = new Map((itemsRaw ?? []).map((i) => [i.id as string, i]));
+  const estrategias: EstrategiaVista[] = ((estrategiasRaw ?? []) as any[]).map((e) => ({
+    id: e.id,
+    tipo: e.tipo,
+    descripcion: e.descripcion,
+    origen: e.origen,
+    estado: e.estado,
+    actividad_id: e.actividad_id,
+    factores: ((e.item_ids ?? []) as string[]).map((id) => itemPorId.get(id)).filter(Boolean).map((i: any) => ({ tipo: i.tipo, descripcion: i.descripcion })),
+  }));
 
   const { data: responsable } = analisis.responsable_id
     ? await supabase.from('colaboradores').select('nombre_completo').eq('id', analisis.responsable_id).maybeSingle()
@@ -58,8 +75,15 @@ export default async function DetalleContextoPage({ params }: { params: { id: st
 
       <DetalleContexto
         analisisId={analisis.id}
-        itemsIniciales={(itemsRaw ?? []) as { id: string; tipo: 'debilidad' | 'oportunidad' | 'fortaleza' | 'amenaza'; descripcion: string; orden: number }[]}
+        itemsIniciales={(itemsRaw ?? []) as ItemContexto[]}
         conteoAcpmPorItem={conteoAcpmPorItem}
+        puedeEditar={perfil.rol === 'admin_th'}
+      />
+
+      <EstrategiasFoda
+        analisisId={analisis.id}
+        estrategias={estrategias}
+        factores={(itemsRaw ?? []).map((i: any) => ({ id: i.id, tipo: i.tipo, descripcion: i.descripcion }))}
         puedeEditar={perfil.rol === 'admin_th'}
       />
     </div>
