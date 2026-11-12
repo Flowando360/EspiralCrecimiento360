@@ -418,6 +418,29 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       ],
     },
     {
+      slug: 'perfil-integral',
+      ruta: '/espiral-crecimiento/evaluaciones/*/perfil-integral',
+      titulo: 'Perfil integral de talento',
+      resumen:
+        'Una sola pantalla por persona y ciclo que cruza Ser, Saber, Hacer y Deber en el formato del modelo: resultado por dimensión, hipótesis del Ser, lectura de cada dimensión, interpretación integral y posibles acciones. La plataforma o la IA proponen y tú decides.',
+      camposYBotones: [
+        { nombre: 'Tabla de dimensiones y tarjeta de índice integral', explicacion: 'Arriba, el resultado de cada dimensión (el Ser sin nota) y el índice de desempeño integral con sus pesos.' },
+        { nombre: 'Rehacer borrador con los datos', explicacion: 'Genera un borrador automático (sin IA) con reglas claras a partir de los datos. Reemplaza lo que ves en pantalla hasta que guardes.' },
+        { nombre: 'Mejorar la redacción con IA', explicacion: 'Pide a la IA que redacte mejor el borrador. Solo usa los datos ya cruzados (nunca aspectos íntimos del Ser), no inventa y trata el Ser como hipótesis. Si no responde, queda el borrador automático.' },
+        { nombre: 'Campos editables', explicacion: 'Hipótesis del Ser, lectura de Saber, Hacer y Deber, interpretación integral y posibles acciones. Edítalos libremente; al guardar, queda registrado quién y cuándo.' },
+      ],
+      proceso: [
+        'Abre el resultado de la evaluación y pulsa «Perfil integral».',
+        'Lee la tabla y el índice; revisa el borrador de cada campo.',
+        'Ajusta lo que haga falta y, si quieres, pide una mejor redacción con IA.',
+        'Pulsa «Guardar perfil integral». Úsalo para preparar la conversación y el plan de desarrollo.',
+      ],
+      notas: [
+        'Solo Talento Humano y el líder directo lo ven; la persona evaluada no (como el Brief). Si la persona decidió no compartir su Guía del Flow con su líder, el líder no verá hipótesis del Ser.',
+        'Las hipótesis del Ser son recursos para conversar: no explican automáticamente el desempeño.',
+      ],
+    },
+    {
       slug: 'objetivos-concertados',
       ruta: '/espiral-crecimiento/evaluaciones/*/objetivos',
       titulo: 'Objetivos concertados del ciclo',

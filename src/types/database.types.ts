@@ -8643,6 +8643,72 @@ export type Database = {
           },
         ]
       }
+      perfiles_integrales: {
+        Row: {
+          acciones: string | null
+          actualizado_por_nombre: string | null
+          colaborador_id: string
+          created_at: string
+          empresa_id: string
+          evaluacion_id: string
+          fuente: string
+          hipotesis_ser: string | null
+          id: string
+          interpretacion: string | null
+          lectura_deber: string | null
+          lectura_hacer: string | null
+          lectura_saber: string | null
+          updated_at: string
+        }
+        Insert: {
+          acciones?: string | null
+          actualizado_por_nombre?: string | null
+          colaborador_id: string
+          created_at?: string
+          empresa_id: string
+          evaluacion_id: string
+          fuente?: string
+          hipotesis_ser?: string | null
+          id?: string
+          interpretacion?: string | null
+          lectura_deber?: string | null
+          lectura_hacer?: string | null
+          lectura_saber?: string | null
+          updated_at?: string
+        }
+        Update: {
+          acciones?: string | null
+          actualizado_por_nombre?: string | null
+          colaborador_id?: string
+          created_at?: string
+          empresa_id?: string
+          evaluacion_id?: string
+          fuente?: string
+          hipotesis_ser?: string | null
+          id?: string
+          interpretacion?: string | null
+          lectura_deber?: string | null
+          lectura_hacer?: string | null
+          lectura_saber?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perfiles_integrales_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "perfiles_integrales_evaluacion_id_fkey"
+            columns: ["evaluacion_id"]
+            isOneToOne: true
+            referencedRelation: "evaluaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ser_comentarios_colaborador: {
         Row: {
           aspecto_id: string | null

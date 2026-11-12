@@ -4,7 +4,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { FormularioAccionPdi, type SugerenciaPdi } from '@/components/espiral-crecimiento/formulario-accion-pdi';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, FileText, HandshakeIcon, Paperclip, Target } from 'lucide-react';
+import { ArrowLeft, Compass, FileText, HandshakeIcon, Paperclip, Target } from 'lucide-react';
 import { firmarEvidencias } from '@/app/(dashboard)/espiral-crecimiento/evaluar/evidencias-actions';
 import { formatearFecha, cn, primero } from '@/lib/utils';
 import { TarjetaIndiceIntegral } from '@/components/espiral-crecimiento/tarjeta-indice-integral';
@@ -197,6 +197,12 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
                 className="inline-flex items-center gap-1 text-xs text-flow-600 hover:text-flow-700"
               >
                 <FileText size={12} /> Brief
+              </Link>
+              <Link
+                href={`/espiral-crecimiento/evaluaciones/${params.evaluacionId}/perfil-integral`}
+                className="inline-flex items-center gap-1 text-xs text-flow-600 hover:text-flow-700"
+              >
+                <Compass size={12} /> Perfil integral
               </Link>
               <Link
                 href={`/espiral-crecimiento/evaluaciones/${params.evaluacionId}/acuerdo`}
