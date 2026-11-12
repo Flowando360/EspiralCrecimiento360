@@ -332,12 +332,14 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       slug: 'indicadores',
       ruta: '/espiral-crecimiento/indicadores',
       titulo: 'Indicadores',
-      resumen: 'Panorama de la empresa: índices de Hacer y Deber, cumplimiento de Saber, alineación talento-rol, rotación de personal, y un mapa comparativo por equipo.',
+      resumen: 'Panorama de la empresa: índices de Hacer y Deber, cumplimiento de Saber, alineación talento-rol, rotación de personal, SST y Reclutamiento (para Talento Humano), y un mapa comparativo por equipo.',
       camposYBotones: [
         { nombre: 'Mapa de equipos', explicacion: 'Gráfico que compara Hacer, Deber y Saber promedio de cada equipo (agrupado por líder).' },
         { nombre: 'Tasa de rotación anual', explicacion: 'Porcentaje de personas que salieron en los últimos 12 meses, sobre quienes ya estaban activos hace 12 meses. Sale "—" si todavía no hay suficiente antigüedad registrada para calcularla.' },
         { nombre: 'Rotación voluntaria', explicacion: 'La misma tasa, pero contando solo las salidas registradas con motivo "Renuncia voluntaria" en el Historial de la ficha.' },
         { nombre: 'Salidas último año / Salidas voluntarias', explicacion: 'El conteo bruto de personas que salieron en los últimos 12 meses (total y solo voluntarias), sin convertir a porcentaje.' },
+        { nombre: 'Sección SST (solo admin_th)', explicacion: 'Accidentes laborales y su tasa por cada 100 trabajadores, días de incapacidad por origen (enfermedad general, accidente laboral, etc.), % de exámenes médicos al día y avance del plan de formación SST. Salen de las incapacidades, alertas y cursos ya registrados. Lo que la plataforma aún no registra (investigación de accidentes, permisos y calamidad) se avisa debajo.' },
+        { nombre: 'Sección Reclutamiento (solo admin_th)', explicacion: 'Tiempo promedio de cierre de vacantes, efectividad de la contratación (% que supera el período de prueba), rotación temprana (salidas en los primeros 6 meses) y fuentes de candidatos. La fuente distingue por ahora solo entre formulario público e ingreso manual.' },
         { nombre: 'Tendencia de salidas (12 meses)', explicacion: 'Gráfico de líneas mes a mes, comparando el total de salidas contra las voluntarias.' },
       ],
       notas: [
