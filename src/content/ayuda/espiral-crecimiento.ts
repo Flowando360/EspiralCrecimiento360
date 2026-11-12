@@ -418,6 +418,28 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       ],
     },
     {
+      slug: 'movilidad-interna',
+      ruta: '/espiral-crecimiento/movilidad',
+      titulo: 'Movilidad interna y potencial subutilizado',
+      resumen:
+        'Cruza lo que cada persona ya acredita (verificaciones de Saber y hoja de vida) con lo que exigen los cargos, para tener candidatos internos antes de abrir una vacante y descubrir talento que podría aportar más. Solo Talento Humano.',
+      camposYBotones: [
+        { nombre: 'Candidatos internos para un cargo', explicacion: 'Elige un cargo (los que tienen vacante abierta lo indican) y verás hasta 10 personas ordenadas por afinidad. Abre cada una para ver, requisito por requisito, qué está cubierto (✓), parcial (≈) o falta (✗) y por qué.' },
+        { nombre: 'Potencial subutilizado', explicacion: 'Personas con Hacer alto y Deber alto o medio en su última evaluación que además cubren al menos el 75 % de los requisitos de otro cargo de su mismo nivel o superior, con el cargo a explorar y su afinidad.' },
+        { nombre: 'Cómo se calcula la afinidad', explicacion: 'Cada habilidad del cargo cuenta si la persona la tiene verificada en su Saber (con el nivel exigido) o acreditada en su hoja de vida; además cuentan la formación y la experiencia mínima. Cubierto vale 1, parcial 0,5 y faltante 0; la afinidad es el promedio.' },
+      ],
+      proceso: [
+        'Antes de abrir una vacante, entra a Movilidad interna y elige el cargo.',
+        'Revisa los candidatos con mayor afinidad y el detalle de lo que les falta.',
+        'Conversa con las personas y sus líderes: la afinidad es un punto de partida, no una decisión.',
+        'Si hay brechas pequeñas, conviértelas en acciones del plan de desarrollo.',
+      ],
+      notas: [
+        'Compara textos (nombres de habilidades, títulos de la hoja de vida), así que puede equivocarse: revisa siempre el detalle. No usa el Ser ni lo califica.',
+        'Mientras más completas estén las hojas de vida, las verificaciones de Saber y los requisitos de los cargos, mejor funciona. Un cargo sin requisitos definidos no se puede comparar.',
+      ],
+    },
+    {
       slug: 'perfil-integral',
       ruta: '/espiral-crecimiento/evaluaciones/*/perfil-integral',
       titulo: 'Perfil integral de talento',
