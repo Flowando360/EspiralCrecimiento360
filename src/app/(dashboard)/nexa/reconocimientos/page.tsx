@@ -2,6 +2,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FormularioOtorgarReconocimiento } from '@/components/espiral-crecimiento/formulario-otorgar-reconocimiento';
+import { GestorCategoriasReconocimiento } from '@/components/espiral-crecimiento/gestor-categorias-reconocimiento';
 import { RankingTabs } from '@/components/espiral-crecimiento/ranking-tabs';
 import { calcularRankingCumplimiento } from '@/lib/nexa/ranking-cumplimiento';
 import { Award } from 'lucide-react';
@@ -17,6 +18,14 @@ export default async function NexaReconocimientosPage() {
     .select('id, colaborador_id, puntos, motivo, otorgado_en, colaborador:colaborador_id(nombre_completo), insignia:insignia_id(nombre, icono)')
     .order('otorgado_en', { ascending: false })
     .limit(200);
+
+  const { data: categoriasRaw } = await supabase
+    .from('nexa_reconocimiento_categorias')
+    .select('id, nombre, descripcion, puntos, activa')
+    .eq('empresa_id', perfil.empresa_id)
+    .order('orden')
+    .order('nombre');
+  const categorias = (categoriasRaw ?? []) as { id: string; nombre: string; descripcion: string | null; puntos: number; activa: boolean }[];
 
   const puedeOtorgar = perfil.rol === 'admin_th' || perfil.rol === 'lider';
   let colaboradores: { id: string; nombre_completo: string }[] = [];
@@ -59,8 +68,10 @@ export default async function NexaReconocimientosPage() {
             visibilidad social.
           </p>
         </div>
-        {puedeOtorgar && <FormularioOtorgarReconocimiento colaboradores={colaboradores} />}
+        {puedeOtorgar && <FormularioOtorgarReconocimiento colaboradores={colaboradores} categorias={categorias.filter((c) => c.activa)} />}
       </div>
+
+      {perfil.rol === 'admin_th' && <GestorCategoriasReconocimiento categorias={categorias} />}
 
       <div className="grid md:grid-cols-2 gap-6">
         <RankingTabs rankingPuntos={rankingCompleto} miColaboradorId={perfil.colaborador_id} rankingCumplimiento={rankingCumplimiento} />

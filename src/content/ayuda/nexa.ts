@@ -165,7 +165,8 @@ export const moduloNexa: ModuloAyuda = {
       resumen:
         'Ranking de puntos y muro de los últimos reconocimientos otorgados en la empresa. Desde que existe el módulo de Procesos, este mismo ranking también suma automáticamente los puntos que se ganan ahí.',
       camposYBotones: [
-        { nombre: 'Otorgar reconocimiento', explicacion: 'admin_th y líder. Elige a la persona (el líder solo ve su propio equipo), escribe el motivo y los puntos.' },
+        { nombre: 'Otorgar reconocimiento', explicacion: 'admin_th y líder. Elige a la persona (el líder solo ve su propio equipo) y una categoría del catálogo (Desempeño excepcional, Innovación, Trabajo en equipo…). El puntaje lo fija el sistema según la categoría — nadie escribe puntos a mano — y puedes agregar un detalle opcional de qué hizo la persona.' },
+        { nombre: 'Categorías y puntajes (admin_th)', explicacion: 'Desplegable con el catálogo: cambia los puntos de cada categoría, desactívala o agrega una nueva. Cambiar los puntos no modifica lo ya otorgado.' },
         {
           nombre: 'Pestaña "Por puntos"',
           explicacion:

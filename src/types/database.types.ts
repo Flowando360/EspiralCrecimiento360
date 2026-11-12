@@ -6570,8 +6570,42 @@ export type Database = {
           },
         ]
       }
+      nexa_reconocimiento_categorias: {
+        Row: {
+          activa: boolean
+          creado_en: string
+          descripcion: string | null
+          empresa_id: string
+          id: string
+          nombre: string
+          orden: number
+          puntos: number
+        }
+        Insert: {
+          activa?: boolean
+          creado_en?: string
+          descripcion?: string | null
+          empresa_id: string
+          id?: string
+          nombre: string
+          orden?: number
+          puntos?: number
+        }
+        Update: {
+          activa?: boolean
+          creado_en?: string
+          descripcion?: string | null
+          empresa_id?: string
+          id?: string
+          nombre?: string
+          orden?: number
+          puntos?: number
+        }
+        Relationships: []
+      }
       nexa_reconocimientos: {
         Row: {
+          categoria_id: string | null
           colaborador_id: string
           evaluacion_origen_id: string | null
           id: string
@@ -6582,6 +6616,7 @@ export type Database = {
           puntos: number
         }
         Insert: {
+          categoria_id?: string | null
           colaborador_id: string
           evaluacion_origen_id?: string | null
           id?: string
@@ -6592,6 +6627,7 @@ export type Database = {
           puntos?: number
         }
         Update: {
+          categoria_id?: string | null
           colaborador_id?: string
           evaluacion_origen_id?: string | null
           id?: string

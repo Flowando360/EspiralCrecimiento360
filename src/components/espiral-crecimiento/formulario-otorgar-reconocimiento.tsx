@@ -6,13 +6,14 @@ import { otorgarReconocimiento } from '@/app/(dashboard)/nexa/reconocimientos/ac
 import { Award } from 'lucide-react';
 
 type Colaborador = { id: string; nombre_completo: string };
+type Categoria = { id: string; nombre: string; descripcion: string | null; puntos: number };
 
-export function FormularioOtorgarReconocimiento({ colaboradores }: { colaboradores: Colaborador[] }) {
+export function FormularioOtorgarReconocimiento({ colaboradores, categorias }: { colaboradores: Colaborador[]; categorias: Categoria[] }) {
   const router = useRouter();
   const [mostrar, setMostrar] = useState(false);
   const [colaboradorId, setColaboradorId] = useState(colaboradores[0]?.id ?? '');
-  const [motivo, setMotivo] = useState('');
-  const [puntos, setPuntos] = useState('10');
+  const [categoriaId, setCategoriaId] = useState(categorias[0]?.id ?? '');
+  const [detalle, setDetalle] = useState('');
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -21,12 +22,11 @@ export function FormularioOtorgarReconocimiento({ colaboradores }: { colaborador
     startTransition(async () => {
       const res = await otorgarReconocimiento({
         colaboradorId,
-        motivo,
-        puntos: Number(puntos) || 0,
+        categoriaId,
+        detalle,
       });
       if (res.ok) {
-        setMotivo('');
-        setPuntos('10');
+        setDetalle('');
         setMostrar(false);
         router.refresh();
       } else {
@@ -62,26 +62,38 @@ export function FormularioOtorgarReconocimiento({ colaboradores }: { colaborador
           </option>
         ))}
       </select>
-      <input
-        type="text"
-        placeholder="Motivo"
-        value={motivo}
-        onChange={(e) => setMotivo(e.target.value)}
-        className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
-      />
-      <input
-        type="number"
-        min={0}
-        placeholder="Puntos"
-        value={puntos}
-        onChange={(e) => setPuntos(e.target.value)}
-        className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
-      />
+      {categorias.length === 0 ? (
+        <p className="text-sm text-marmol-500">Aún no hay categorías activas. Talento Humano debe crearlas primero.</p>
+      ) : (
+        <>
+          <select
+            value={categoriaId}
+            onChange={(e) => setCategoriaId(e.target.value)}
+            aria-label="Categoría del reconocimiento"
+            className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
+          >
+            {categorias.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nombre} — {c.puntos} pts
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-marmol-400">{categorias.find((c) => c.id === categoriaId)?.descripcion}</p>
+          <input
+            type="text"
+            placeholder="¿Qué hizo? (opcional)"
+            value={detalle}
+            onChange={(e) => setDetalle(e.target.value)}
+            maxLength={300}
+            className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
+          />
+        </>
+      )}
       {error && <p className="text-sm text-bajo">{error}</p>}
       <div className="flex gap-2">
         <button
           type="button"
-          disabled={pending || !motivo || !colaboradorId}
+          disabled={pending || !categoriaId || !colaboradorId}
           onClick={otorgar}
           className="rounded-lg bg-flow-500 hover:bg-flow-600 disabled:opacity-40 text-white text-sm font-medium px-4 py-2 transition"
         >
