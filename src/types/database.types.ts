@@ -9519,7 +9519,13 @@ export type Database = {
           fecha_apertura: string
           fecha_cierre: string | null
           id: string
+          beneficios: string | null
+          ciudad: string | null
+          horario: string | null
           lider_solicitante_id: string | null
+          modalidad: string | null
+          requisitos: string | null
+          tipo_contrato: string | null
           presupuesto_salarial: number | null
           titulo: string
         }
@@ -9533,7 +9539,13 @@ export type Database = {
           fecha_apertura?: string
           fecha_cierre?: string | null
           id?: string
+          beneficios?: string | null
+          ciudad?: string | null
+          horario?: string | null
           lider_solicitante_id?: string | null
+          modalidad?: string | null
+          requisitos?: string | null
+          tipo_contrato?: string | null
           presupuesto_salarial?: number | null
           titulo: string
         }
@@ -9547,7 +9559,13 @@ export type Database = {
           fecha_apertura?: string
           fecha_cierre?: string | null
           id?: string
+          beneficios?: string | null
+          ciudad?: string | null
+          horario?: string | null
           lider_solicitante_id?: string | null
+          modalidad?: string | null
+          requisitos?: string | null
+          tipo_contrato?: string | null
           presupuesto_salarial?: number | null
           titulo?: string
         }

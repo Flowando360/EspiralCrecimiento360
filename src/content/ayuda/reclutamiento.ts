@@ -45,7 +45,10 @@ export const moduloReclutamiento: ModuloAyuda = {
         { nombre: 'Título de la vacante', explicacion: 'Puede ser distinto al nombre del cargo (ej. "Auxiliar de logística — turno mañana").' },
         { nombre: 'Líder solicitante', explicacion: 'Opcional: quién pidió abrir la vacante.' },
         { nombre: 'Presupuesto salarial', explicacion: 'Opcional. Solo es visible internamente; nunca se muestra en el formulario público.' },
-        { nombre: 'Descripción del perfil', explicacion: 'Opcional. Si la llenas, sí aparece en el formulario público de postulación.' },
+        { nombre: 'Modalidad, ciudad, horario y tipo de contrato', explicacion: 'Opcionales. Aparecen en el formulario público y en la imagen para redes, para que quien la vea decida si le conviene postularse.' },
+        { nombre: 'Redactar desde el perfil del cargo', explicacion: 'Arma un borrador de la descripción y de los requisitos con lo que ya tiene el cargo (objetivo, funciones, habilidades, formación y experiencia). Sin IA, con reglas claras. Reemplaza lo que hayas escrito (te pregunta antes).' },
+        { nombre: 'Redactar con IA', explicacion: 'Igual, pero la IA redacta mejor el borrador. Usa solo lo que está en el perfil del cargo y en los datos que escribiste: no inventa salario, beneficios, horarios ni requisitos. Si no responde, queda el borrador automático. Siempre puedes editarlo antes de publicar.' },
+        { nombre: 'Descripción, requisitos y beneficios', explicacion: 'Textos de la oferta. Aparecen en el formulario público. Los beneficios los escribes tú: ni la IA ni el sistema los inventan. El presupuesto salarial sigue siendo interno.' },
       ],
       notas: ['Exclusivo de admin_th.'],
     },
@@ -57,6 +60,7 @@ export const moduloReclutamiento: ModuloAyuda = {
         'El proceso de selección de una vacante: un tablero con los candidatos moviéndose por etapas, desde que se postulan hasta que se contratan o se descartan, con la evaluación del líder, entrevistas y referencias.',
       camposYBotones: [
         { nombre: 'Enlace público de postulación (admin_th)', explicacion: 'Un enlace (/postular/…) que puedes copiar y compartir por redes, WhatsApp o correo. Cualquiera puede postularse sin cuenta. Deja de recibir postulaciones apenas la vacante deja de estar "Abierta".' },
+        { nombre: 'Difusión de la vacante (admin_th, vacante abierta)', explicacion: 'Botones para descargar el código QR del formulario público (PNG o SVG para imprimir) y una imagen lista para redes con la marca de tu empresa (logo y color de Administración → Datos de la empresa), el título, los datos de la oferta, los requisitos principales y el QR: cuadrada para Instagram, Facebook y LinkedIn, y vertical para historias y WhatsApp. Completa antes modalidad, ciudad, horario y requisitos para que quede útil.' },
         { nombre: 'Editar vacante / Cambiar estado (admin_th)', explicacion: 'Edita los datos o cambia el estado: Abierta, En pausa, Cancelada o Cubierto. Al cubrirla o cancelarla se guarda la fecha de cierre.' },
         {
           nombre: 'Tablero de 7 columnas',

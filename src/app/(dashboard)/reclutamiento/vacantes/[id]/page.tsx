@@ -4,10 +4,12 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { notFound, redirect } from 'next/navigation';
 import { TableroPostulaciones } from '@/components/reclutamiento/tablero-postulaciones';
 import { EnlacePostulacion } from '@/components/reclutamiento/enlace-postulacion';
+import { DifusionVacante } from '@/components/reclutamiento/difusion-vacante';
 import { SelectorEstadoVacante } from '@/components/reclutamiento/selector-estado-vacante';
 import { EditarVacante } from '@/components/reclutamiento/editar-vacante';
 import { EnviarALider } from '@/components/reclutamiento/enviar-a-lider';
 import { ArrowLeft, Briefcase, Wallet, UserCog } from 'lucide-react';
+import { IA_OFERTA_DISPONIBLE } from '@/lib/reclutamiento/oferta';
 
 const ESTADO_LABEL: Record<string, string> = { abierta: 'Abierta', pausada: 'En pausa', cancelada: 'Cancelada', cubierta: 'Cubierto', cerrada: 'Cerrada' };
 const ESTADO_CLASE: Record<string, string> = {
@@ -28,7 +30,7 @@ export default async function DetalleVacantePage({ params }: { params: { id: str
   const { data: vacante } = await supabase
     .from('vacantes')
     .select(
-      'id, empresa_id, titulo, descripcion, estado, fecha_apertura, fecha_cierre, presupuesto_salarial, cargo:cargos(id, nombre), lider_solicitante:lider_solicitante_id(id, nombre_completo)'
+      'id, empresa_id, titulo, descripcion, modalidad, ciudad, horario, tipo_contrato, requisitos, beneficios, estado, fecha_apertura, fecha_cierre, presupuesto_salarial, cargo:cargos(id, nombre), lider_solicitante:lider_solicitante_id(id, nombre_completo)'
     )
     .eq('id', params.id)
     .maybeSingle();
@@ -135,7 +137,14 @@ export default async function DetalleVacantePage({ params }: { params: { id: str
                     cargoId: (vacante.cargo as any)?.id ?? '',
                     liderSolicitanteId: (vacante.lider_solicitante as any)?.id ?? '',
                     presupuestoSalarial: vacante.presupuesto_salarial != null ? String(vacante.presupuesto_salarial) : '',
+                    modalidad: (vacante as any).modalidad ?? '',
+                    ciudad: (vacante as any).ciudad ?? '',
+                    horario: (vacante as any).horario ?? '',
+                    tipoContrato: (vacante as any).tipo_contrato ?? '',
+                    requisitos: (vacante as any).requisitos ?? '',
+                    beneficios: (vacante as any).beneficios ?? '',
                   }}
+                  iaDisponible={IA_OFERTA_DISPONIBLE()}
                 />
               </div>
             )}
@@ -148,6 +157,7 @@ export default async function DetalleVacantePage({ params }: { params: { id: str
       </div>
 
       {perfil.rol === 'admin_th' && <EnlacePostulacion vacanteId={vacante.id} />}
+      {perfil.rol === 'admin_th' && vacante.estado === 'abierta' && <DifusionVacante vacanteId={vacante.id} />}
 
       <TableroPostulaciones
         vacanteId={vacante.id}

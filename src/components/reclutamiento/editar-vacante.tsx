@@ -3,21 +3,25 @@
 import { useState, useTransition } from 'react';
 import { Pencil, Check, X } from 'lucide-react';
 import { actualizarVacante } from '@/app/(dashboard)/reclutamiento/actions';
+import { CamposOfertaVacante, type DatosOferta } from '@/components/reclutamiento/campos-oferta-vacante';
 
 export function EditarVacante({
   vacanteId,
   cargos,
   lideres,
   datosIniciales,
+  iaDisponible = true,
 }: {
+  iaDisponible?: boolean;
   vacanteId: string;
   cargos: { id: string; nombre: string }[];
   lideres: { id: string; nombre_completo: string }[];
-  datosIniciales: { titulo: string; descripcion: string; cargoId: string; liderSolicitanteId: string; presupuestoSalarial: string };
+  datosIniciales: { titulo: string; descripcion: string; cargoId: string; liderSolicitanteId: string; presupuestoSalarial: string; modalidad?: string; ciudad?: string; horario?: string; tipoContrato?: string; requisitos?: string; beneficios?: string };
 }) {
   const [editando, setEditando] = useState(false);
   const [titulo, setTitulo] = useState(datosIniciales.titulo);
-  const [descripcion, setDescripcion] = useState(datosIniciales.descripcion);
+  const oferta0: DatosOferta = { descripcion: datosIniciales.descripcion, modalidad: datosIniciales.modalidad ?? '', ciudad: datosIniciales.ciudad ?? '', horario: datosIniciales.horario ?? '', tipoContrato: datosIniciales.tipoContrato ?? '', requisitos: datosIniciales.requisitos ?? '', beneficios: datosIniciales.beneficios ?? '' };
+  const [oferta, setOferta] = useState<DatosOferta>(oferta0);
   const [cargoId, setCargoId] = useState(datosIniciales.cargoId);
   const [liderSolicitanteId, setLiderSolicitanteId] = useState(datosIniciales.liderSolicitanteId);
   const [presupuestoSalarial, setPresupuestoSalarial] = useState(datosIniciales.presupuestoSalarial);
@@ -27,7 +31,7 @@ export function EditarVacante({
   function guardar() {
     setError(null);
     startTransition(async () => {
-      const res = await actualizarVacante({ vacanteId, titulo, descripcion, cargoId, liderSolicitanteId, presupuestoSalarial });
+      const res = await actualizarVacante({ vacanteId, titulo, descripcion: oferta.descripcion, cargoId, liderSolicitanteId, presupuestoSalarial, modalidad: oferta.modalidad as any, ciudad: oferta.ciudad, horario: oferta.horario, tipoContrato: oferta.tipoContrato, requisitos: oferta.requisitos, beneficios: oferta.beneficios });
       if (res.ok) setEditando(false);
       else setError(res.error);
     });
@@ -35,7 +39,7 @@ export function EditarVacante({
 
   function cancelar() {
     setTitulo(datosIniciales.titulo);
-    setDescripcion(datosIniciales.descripcion);
+    setOferta(oferta0);
     setCargoId(datosIniciales.cargoId);
     setLiderSolicitanteId(datosIniciales.liderSolicitanteId);
     setPresupuestoSalarial(datosIniciales.presupuestoSalarial);
@@ -56,7 +60,7 @@ export function EditarVacante({
   }
 
   return (
-    <div className="card p-4 space-y-2 w-full max-w-lg">
+    <div className="card p-4 space-y-2 w-full max-w-2xl">
       <div>
         <label className="block text-xs text-marmol-500 mb-1">Título</label>
         <input value={titulo} onChange={(e) => setTitulo(e.target.value)} className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
@@ -93,10 +97,7 @@ export function EditarVacante({
           />
         </div>
       </div>
-      <div>
-        <label className="block text-xs text-marmol-500 mb-1">Descripción</label>
-        <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={3} className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm" />
-      </div>
+      <CamposOfertaVacante valor={oferta} onChange={setOferta} cargoId={cargoId} titulo={titulo} iaDisponible={iaDisponible} />
       {error && <p className="text-xs text-bajo">{error}</p>}
       <div className="flex items-center gap-2">
         <button

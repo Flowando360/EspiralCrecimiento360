@@ -5,6 +5,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { buscarCandidatoExistente } from '@/lib/reclutamiento/duplicados';
+import { borradorOferta, mejorarOfertaConIA, type PerfilCargoOferta } from '@/lib/reclutamiento/oferta';
 
 const RUTA = '/reclutamiento';
 
@@ -21,6 +22,12 @@ const VacanteSchema = z.object({
   descripcion: z.string().trim().optional(),
   liderSolicitanteId: z.string().uuid().optional().or(z.literal('')),
   presupuestoSalarial: z.string().optional(),
+  modalidad: z.enum(['presencial', 'hibrido', 'remoto']).optional().or(z.literal('')),
+  ciudad: z.string().trim().max(120).optional(),
+  horario: z.string().trim().max(200).optional(),
+  tipoContrato: z.string().trim().max(60).optional(),
+  requisitos: z.string().trim().max(3000).optional(),
+  beneficios: z.string().trim().max(2000).optional(),
 });
 
 export async function crearVacante(input: z.infer<typeof VacanteSchema>) {
@@ -45,6 +52,12 @@ export async function crearVacante(input: z.infer<typeof VacanteSchema>) {
       descripcion: parsed.data.descripcion || null,
       lider_solicitante_id: parsed.data.liderSolicitanteId || null,
       presupuesto_salarial: presupuesto,
+      modalidad: parsed.data.modalidad || null,
+      ciudad: parsed.data.ciudad || null,
+      horario: parsed.data.horario || null,
+      tipo_contrato: parsed.data.tipoContrato || null,
+      requisitos: parsed.data.requisitos || null,
+      beneficios: parsed.data.beneficios || null,
       creado_por: perfil.usuario_id,
     })
     .select('id')
@@ -82,6 +95,12 @@ const EditarVacanteSchema = z.object({
   descripcion: z.string().trim().optional(),
   liderSolicitanteId: z.string().uuid().optional().or(z.literal('')),
   presupuestoSalarial: z.string().optional(),
+  modalidad: z.enum(['presencial', 'hibrido', 'remoto']).optional().or(z.literal('')),
+  ciudad: z.string().trim().max(120).optional(),
+  horario: z.string().trim().max(200).optional(),
+  tipoContrato: z.string().trim().max(60).optional(),
+  requisitos: z.string().trim().max(3000).optional(),
+  beneficios: z.string().trim().max(2000).optional(),
 });
 
 /** Edita título, descripción, cargo, líder solicitante y presupuesto de una vacante ya creada (admin_th). */
@@ -106,6 +125,12 @@ export async function actualizarVacante(input: z.infer<typeof EditarVacanteSchem
       descripcion: parsed.data.descripcion || null,
       lider_solicitante_id: parsed.data.liderSolicitanteId || null,
       presupuesto_salarial: presupuesto,
+      modalidad: parsed.data.modalidad || null,
+      ciudad: parsed.data.ciudad || null,
+      horario: parsed.data.horario || null,
+      tipo_contrato: parsed.data.tipoContrato || null,
+      requisitos: parsed.data.requisitos || null,
+      beneficios: parsed.data.beneficios || null,
     })
     .eq('id', parsed.data.vacanteId)
     .eq('empresa_id', perfil.empresa_id);
@@ -536,4 +561,60 @@ export async function atenderSolicitudTitular(solicitudId: string) {
 
   revalidatePath('/reclutamiento/candidatos');
   return { ok: true as const };
+}
+
+const OfertaSchema = z.object({
+  cargoId: z.string().uuid('Selecciona un cargo'),
+  titulo: z.string().trim().max(200).optional(),
+  modalidad: z.string().trim().max(20).optional(),
+  ciudad: z.string().trim().max(120).optional(),
+  horario: z.string().trim().max(200).optional(),
+  tipoContrato: z.string().trim().max(60).optional(),
+  beneficios: z.string().trim().max(2000).optional(),
+  conIA: z.boolean().default(false),
+});
+
+/**
+ * Propone el texto de la oferta (descripción y requisitos) a partir del perfil del cargo. Sin IA arma un borrador con
+ * reglas; con IA lo redacta mejor sin inventar nada. No guarda: Talento Humano revisa, edita y publica.
+ */
+export async function proponerOfertaVacante(input: z.infer<typeof OfertaSchema>) {
+  const perfil = await requerirAdminTh();
+  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+  const p = OfertaSchema.safeParse(input);
+  if (!p.success) return { ok: false as const, error: p.error.issues[0]?.message ?? 'Datos inválidos' };
+
+  const supabase = createClient();
+  const { data: cargo } = await supabase
+    .from('cargos')
+    .select('id, nombre, objetivo_cargo, formacion_nivel, formacion_titulo_especifico, experiencia_minima_meses')
+    .eq('id', p.data.cargoId)
+    .eq('empresa_id', perfil.empresa_id)
+    .maybeSingle();
+  if (!cargo) return { ok: false as const, error: 'Cargo no encontrado' };
+
+  const [{ data: funciones }, { data: habilidades }, { data: empresa }] = await Promise.all([
+    supabase.from('cargo_funciones_principales').select('funcion').eq('cargo_id', cargo.id).order('orden'),
+    supabase.from('cargo_habilidades').select('nombre').eq('cargo_id', cargo.id).order('orden'),
+    supabase.from('empresas').select('nombre').eq('id', perfil.empresa_id).maybeSingle(),
+  ]);
+  const perfilCargo: PerfilCargoOferta = {
+    nombre: cargo.nombre,
+    objetivo: cargo.objetivo_cargo ?? null,
+    funciones: ((funciones ?? []) as any[]).map((f) => String(f.funcion)),
+    habilidades: ((habilidades ?? []) as any[]).map((h) => String(h.nombre)),
+    formacionNivel: cargo.formacion_nivel ?? null,
+    formacionTitulo: cargo.formacion_titulo_especifico ?? null,
+    experienciaMeses: cargo.experiencia_minima_meses ?? null,
+  };
+  const borrador = borradorOferta(perfilCargo, p.data.titulo || cargo.nombre);
+  if (!p.data.conIA) return { ok: true as const, ...borrador, fuente: 'automatico' as const };
+
+  const mejorada = await mejorarOfertaConIA(
+    perfilCargo,
+    { titulo: p.data.titulo || cargo.nombre, modalidad: p.data.modalidad, ciudad: p.data.ciudad, horario: p.data.horario, tipoContrato: p.data.tipoContrato, beneficios: p.data.beneficios, empresa: empresa?.nombre ?? null },
+    borrador
+  );
+  if (mejorada) return { ok: true as const, ...mejorada, fuente: 'ia' as const };
+  return { ok: true as const, ...borrador, fuente: 'automatico' as const, aviso: 'No se pudo usar la IA en este momento; se dejó el borrador automático.' };
 }

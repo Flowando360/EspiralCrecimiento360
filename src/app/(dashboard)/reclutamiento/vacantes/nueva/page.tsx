@@ -4,6 +4,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { redirect } from 'next/navigation';
 import { FormularioVacante } from '@/components/reclutamiento/formulario-vacante';
 import { ArrowLeft, Briefcase } from 'lucide-react';
+import { IA_OFERTA_DISPONIBLE } from '@/lib/reclutamiento/oferta';
 
 export default async function NuevaVacantePage() {
   const perfil = await getPerfilActual();
@@ -22,7 +23,7 @@ export default async function NuevaVacantePage() {
   ]);
 
   return (
-    <div className="space-y-6 max-w-xl">
+    <div className="space-y-6 max-w-2xl">
       <div>
         <Link href="/reclutamiento" className="inline-flex items-center gap-1 text-xs text-marmol-400 hover:text-marmol-600 mb-2">
           <ArrowLeft size={12} /> Volver a Reclutamiento
@@ -42,7 +43,7 @@ export default async function NuevaVacantePage() {
           abrir una vacante.
         </div>
       ) : (
-        <FormularioVacante cargos={cargos} lideres={lideres ?? []} />
+        <FormularioVacante cargos={cargos} lideres={lideres ?? []} iaDisponible={IA_OFERTA_DISPONIBLE()} />
       )}
     </div>
   );

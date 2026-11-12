@@ -3,18 +3,21 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { crearVacante } from '@/app/(dashboard)/reclutamiento/actions';
+import { CamposOfertaVacante, type DatosOferta } from '@/components/reclutamiento/campos-oferta-vacante';
 
 export function FormularioVacante({
   cargos,
   lideres,
+  iaDisponible = true,
 }: {
+  iaDisponible?: boolean;
   cargos: { id: string; nombre: string; proceso_area: string | null }[];
   lideres: { id: string; nombre_completo: string }[];
 }) {
   const router = useRouter();
   const [cargoId, setCargoId] = useState('');
   const [titulo, setTitulo] = useState('');
-  const [descripcion, setDescripcion] = useState('');
+  const [oferta, setOferta] = useState<DatosOferta>({ descripcion: '', modalidad: '', ciudad: '', horario: '', tipoContrato: '', requisitos: '', beneficios: '' });
   const [liderSolicitanteId, setLiderSolicitanteId] = useState('');
   const [presupuestoSalarial, setPresupuestoSalarial] = useState('');
   const [pending, startTransition] = useTransition();
@@ -23,7 +26,7 @@ export function FormularioVacante({
   function crear() {
     setError(null);
     startTransition(async () => {
-      const res = await crearVacante({ cargoId, titulo, descripcion, liderSolicitanteId, presupuestoSalarial });
+      const res = await crearVacante({ cargoId, titulo, descripcion: oferta.descripcion, liderSolicitanteId, presupuestoSalarial, modalidad: oferta.modalidad as any, ciudad: oferta.ciudad, horario: oferta.horario, tipoContrato: oferta.tipoContrato, requisitos: oferta.requisitos, beneficios: oferta.beneficios });
       if (res.ok) router.push(`/reclutamiento/vacantes/${res.id}`);
       else setError(res.error);
     });
@@ -78,16 +81,7 @@ export function FormularioVacante({
           />
         </div>
       </div>
-      <div>
-        <label className={label}>Descripción del perfil (opcional)</label>
-        <textarea
-          className={campo}
-          rows={4}
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
-          placeholder="Contexto adicional para quien vea la vacante o se postule."
-        />
-      </div>
+      <CamposOfertaVacante valor={oferta} onChange={setOferta} cargoId={cargoId} titulo={titulo} iaDisponible={iaDisponible} />
 
       <button
         type="button"
