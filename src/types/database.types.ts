@@ -9376,6 +9376,10 @@ export type Database = {
           id: string
           item_evaluado: string
           observaciones: string | null
+          fecha_evidencia: string | null
+          fuente_evidencia: string | null
+          nivel_dominio: number | null
+          nivel_requerido: number | null
         }
         Insert: {
           bloque: Database["public"]["Enums"]["bloque_saber"]
@@ -9389,6 +9393,10 @@ export type Database = {
           id?: string
           item_evaluado: string
           observaciones?: string | null
+          fecha_evidencia?: string | null
+          fuente_evidencia?: string | null
+          nivel_dominio?: number | null
+          nivel_requerido?: number | null
         }
         Update: {
           bloque?: Database["public"]["Enums"]["bloque_saber"]
@@ -9402,6 +9410,10 @@ export type Database = {
           id?: string
           item_evaluado?: string
           observaciones?: string | null
+          fecha_evidencia?: string | null
+          fuente_evidencia?: string | null
+          nivel_dominio?: number | null
+          nivel_requerido?: number | null
         }
         Relationships: [
           {

@@ -189,6 +189,8 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       ],
       notas: [
         'Puede editar: admin_th y el líder directo de la persona. El propio colaborador y gerencia solo consultan.',
+        'Mapa de dominio: arriba de los bloques se cuenta cuántos conocimientos están Dominados, Parciales o en Brecha, y se listan las brechas a cerrar (con el nivel que demuestra la persona frente al que exige el cargo y la fuente de la evidencia).',
+        'Nivel de dominio y fuente de evidencia: en cada ítem puedes indicar el nivel que la persona demuestra (Sin dominio, Básico, Intermedio o Avanzado), el nivel que exige el cargo y de dónde sale la evidencia (prueba, demostración práctica, entrevista, certificación, documento u observación del líder). Si indicas ambos niveles, el estado se calcula solo: Dominado si alcanza el nivel exigido, Parcial si está un nivel por debajo y Brecha si está a dos o más. Las habilidades del cargo traen su nivel exigido (bajo = Básico, medio = Intermedio, alto = Avanzado) al generar el checklist.',
       ],
     },
     {

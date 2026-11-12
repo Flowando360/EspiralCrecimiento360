@@ -5,6 +5,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import type { VerificacionSaber } from '@/types/colaborador';
+import { estadoSugerido, nivelDesdeEsperado } from '@/lib/saber/dominio';
 
 const BLOQUES = [
   'formacion_academica',
@@ -84,6 +85,10 @@ const ActualizarSchema = z.object({
   estado: z.enum(ESTADOS),
   evidenciaUrl: z.string().trim().optional(),
   observaciones: z.string().trim().optional(),
+  nivelDominio: z.number().int().min(0).max(3).nullable().optional(),
+  nivelRequerido: z.number().int().min(1).max(3).nullable().optional(),
+  fuenteEvidencia: z.enum(['prueba', 'demostracion', 'entrevista', 'certificacion', 'documento', 'observacion_lider']).nullable().optional(),
+  fechaEvidencia: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
 });
 
 export async function actualizarVerificacionSaber(input: z.infer<typeof ActualizarSchema>) {
@@ -94,10 +99,16 @@ export async function actualizarVerificacionSaber(input: z.infer<typeof Actualiz
   if (!permiso.ok) return { ok: false as const, error: permiso.error };
 
   const supabase = createClient();
+  // Si hay nivel demostrado y nivel requerido, el estado se deriva de ellos (dominado / parcial / brecha).
+  const derivado = estadoSugerido(parsed.data.nivelDominio, parsed.data.nivelRequerido);
   const { error } = await supabase
     .from('verificaciones_saber')
     .update({
-      estado: parsed.data.estado,
+      estado: derivado ?? parsed.data.estado,
+      nivel_dominio: parsed.data.nivelDominio ?? null,
+      nivel_requerido: parsed.data.nivelRequerido ?? null,
+      fuente_evidencia: parsed.data.fuenteEvidencia ?? null,
+      fecha_evidencia: parsed.data.fechaEvidencia ?? null,
       evidencia_url: parsed.data.evidenciaUrl || null,
       observaciones: parsed.data.observaciones || null,
       certificado_por: permiso.perfil.usuario_id,
@@ -179,7 +190,7 @@ export async function generarChecklistSaber(colaboradorId: string) {
   const registros = (hoja ?? []) as any[];
   const hoy = new Date().toISOString().slice(0, 10);
 
-  const nuevos: { bloque: string; item_evaluado: string; estado: string; evidencia_url?: string | null; observaciones: string }[] = [];
+  const nuevos: { bloque: string; item_evaluado: string; estado: string; evidencia_url?: string | null; observaciones: string; nivel_requerido?: number | null; fuente_evidencia?: string | null }[] = [];
   const origen = 'Generado desde el cargo y la hoja de vida.';
 
   // 1. Formación académica mínima
@@ -192,6 +203,7 @@ export async function generarChecklistSaber(colaboradorId: string) {
         (cargo.formacion_titulo_especifico ? ` — ${cargo.formacion_titulo_especifico}` : ''),
       estado: academicas.length > 0 ? 'cumple' : 'no_cumple_pendiente',
       evidencia_url: academicas.find((a) => a.documento_url)?.documento_url ?? null,
+      fuente_evidencia: academicas.length > 0 ? 'documento' : null,
       observaciones: academicas.length > 0 ? `${origen} Acredita: ${academicas.map((a) => a.titulo).join('; ')}.` : `${origen} Sin formación académica en la hoja de vida.`,
     });
   }
@@ -202,6 +214,7 @@ export async function generarChecklistSaber(colaboradorId: string) {
       bloque: 'habilidades_funcionales_tecnicas',
       item_evaluado: `${h.nombre} (${h.tipo}, nivel ${h.nivel_esperado})`,
       estado: 'no_cumple_pendiente',
+      nivel_requerido: nivelDesdeEsperado((h as any).nivel_esperado),
       observaciones: `${origen} Pendiente de verificar por el líder.`,
     });
   }
@@ -214,6 +227,7 @@ export async function generarChecklistSaber(colaboradorId: string) {
       item_evaluado: r.titulo + (r.institucion ? ` — ${r.institucion}` : ''),
       estado: vencida ? 'no_cumple_pendiente' : r.documento_url || r.verificado ? 'cumple' : 'cumple_parcial',
       evidencia_url: r.documento_url ?? null,
+      fuente_evidencia: r.documento_url || r.verificado ? 'certificacion' : null,
       observaciones: vencida
         ? `${origen} Vencida el ${r.fecha_vencimiento}.`
         : `${origen}${r.documento_url || r.verificado ? '' : ' Sin soporte cargado.'}`,
@@ -243,6 +257,8 @@ export async function generarChecklistSaber(colaboradorId: string) {
       item_evaluado: n.item_evaluado,
       estado: n.estado as (typeof ESTADOS)[number],
       evidencia_url: n.evidencia_url ?? null,
+      nivel_requerido: n.nivel_requerido ?? null,
+      fuente_evidencia: n.fuente_evidencia ?? null,
       observaciones: n.observaciones,
     }))
   );

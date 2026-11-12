@@ -106,6 +106,10 @@ export interface VerificacionSaber {
   certificado_por: string | null;
   observaciones: string | null;
   fecha_verificacion: string;
+  nivel_dominio?: number | null;
+  nivel_requerido?: number | null;
+  fuente_evidencia?: string | null;
+  fecha_evidencia?: string | null;
 }
 
 export type TipoHojaVida = 'academica' | 'certificacion' | 'curso' | 'experiencia_laboral';

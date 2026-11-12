@@ -6,6 +6,7 @@ import { ChecklistSaber } from '@/components/espiral-crecimiento/checklist-saber
 import { notFound } from 'next/navigation';
 import { ArrowLeft, GraduationCap } from 'lucide-react';
 import type { BloqueSaber, VerificacionSaber } from '@/types/colaborador';
+import { resumirDominio, NIVELES_DOMINIO, ETIQUETA_FUENTE } from '@/lib/saber/dominio';
 
 const BLOQUES: { valor: BloqueSaber; titulo: string }[] = [
   { valor: 'formacion_academica', titulo: 'Formación académica' },
@@ -61,6 +62,10 @@ export default async function SaberColaboradorPage({ params }: { params: { id: s
   const verificacionesPorBloque = (bloque: BloqueSaber) =>
     ((verificaciones ?? []) as VerificacionSaber[]).filter((v) => v.bloque === bloque);
 
+  const todas = (verificaciones ?? []) as VerificacionSaber[];
+  const resumen = resumirDominio(todas);
+  const brechas = todas.filter((v) => v.estado === 'no_cumple_pendiente');
+
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
@@ -75,6 +80,34 @@ export default async function SaberColaboradorPage({ params }: { params: { id: s
         </h1>
         <p className="text-sm text-marmol-500 mt-1">{colaborador.nombre_completo}</p>
       </div>
+
+      {resumen.total > 0 && (
+        <div className="card p-5 space-y-3">
+          <h2 className="font-display font-semibold text-secundario">Mapa de dominio</h2>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="rounded-lg bg-alto/10 p-3"><p className="text-2xl font-display font-semibold text-secundario">{resumen.dominados}</p><p className="text-xs text-marmol-500">Dominado</p></div>
+            <div className="rounded-lg bg-medio/10 p-3"><p className="text-2xl font-display font-semibold text-secundario">{resumen.parciales}</p><p className="text-xs text-marmol-500">Parcial</p></div>
+            <div className="rounded-lg bg-bajo/10 p-3"><p className="text-2xl font-display font-semibold text-secundario">{resumen.brechas}</p><p className="text-xs text-marmol-500">Brecha</p></div>
+          </div>
+          {brechas.length > 0 && (
+            <div className="text-xs text-marmol-600">
+              <p className="font-medium mb-1">Brechas a cerrar:</p>
+              <ul className="list-disc pl-4 space-y-0.5">
+                {brechas.map((b) => (
+                  <li key={b.id}>
+                    {b.item_evaluado}
+                    {b.nivel_dominio != null && b.nivel_requerido != null ? ` — demuestra ${NIVELES_DOMINIO.find((n) => n.valor === b.nivel_dominio)?.etiqueta.toLowerCase()}, el cargo exige ${NIVELES_DOMINIO.find((n) => n.valor === b.nivel_requerido)?.etiqueta.toLowerCase()}` : ''}
+                    {b.fuente_evidencia ? ` (${ETIQUETA_FUENTE[b.fuente_evidencia]})` : ''}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {resumen.sinFuente > 0 && (
+            <p className="text-xs text-marmol-400">{resumen.sinFuente} ítem(s) aún sin fuente de evidencia declarada: cuando la indiques, el mapa gana respaldo.</p>
+          )}
+        </div>
+      )}
 
       {puedeEditar && <BotonGenerarChecklistSaber colaboradorId={params.id} />}
 

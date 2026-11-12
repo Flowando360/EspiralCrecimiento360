@@ -9,6 +9,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Plus, Trash2 } from 'lucide-react';
 import type { BloqueSaber, EstadoVerificacionSaber, VerificacionSaber } from '@/types/colaborador';
+import { FUENTES_EVIDENCIA, NIVELES_DOMINIO, NIVELES_REQUERIDOS, estadoSugerido } from '@/lib/saber/dominio';
 
 const ETIQUETA_ESTADO: Record<EstadoVerificacionSaber, string> = {
   cumple: 'Cumple',
@@ -24,7 +25,7 @@ const CLASE_ESTADO: Record<EstadoVerificacionSaber, string> = {
 
 const ESTADOS: EstadoVerificacionSaber[] = ['cumple', 'cumple_parcial', 'no_cumple_pendiente'];
 
-type Item = Pick<VerificacionSaber, 'id' | 'item_evaluado' | 'estado' | 'evidencia_url' | 'observaciones'>;
+type Item = Pick<VerificacionSaber, 'id' | 'item_evaluado' | 'estado' | 'evidencia_url' | 'observaciones' | 'nivel_dominio' | 'nivel_requerido' | 'fuente_evidencia' | 'fecha_evidencia'>;
 
 export function ChecklistSaber({
   colaboradorId,
@@ -56,7 +57,12 @@ export function ChecklistSaber({
   function actualizar(id: string, cambios: Partial<Item>) {
     const actual = items.find((i) => i.id === id);
     if (!actual) return;
-    const siguiente = { ...actual, ...cambios };
+    let siguiente = { ...actual, ...cambios };
+    // Con nivel demostrado y nivel requerido, el estado se deriva (dominado / parcial / brecha).
+    if ('nivel_dominio' in cambios || 'nivel_requerido' in cambios) {
+      const sug = estadoSugerido(siguiente.nivel_dominio, siguiente.nivel_requerido);
+      if (sug) siguiente = { ...siguiente, estado: sug };
+    }
     setItems((prev) => prev.map((i) => (i.id === id ? siguiente : i)));
     startTransition(() => {
       actualizarVerificacionSaber({
@@ -65,6 +71,10 @@ export function ChecklistSaber({
         estado: siguiente.estado,
         evidenciaUrl: siguiente.evidencia_url ?? undefined,
         observaciones: siguiente.observaciones ?? undefined,
+        nivelDominio: siguiente.nivel_dominio ?? null,
+        nivelRequerido: siguiente.nivel_requerido ?? null,
+        fuenteEvidencia: (siguiente.fuente_evidencia as any) ?? null,
+        fechaEvidencia: siguiente.fecha_evidencia ?? null,
       });
     });
   }
@@ -118,6 +128,58 @@ export function ChecklistSaber({
             <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium', CLASE_ESTADO[item.estado])}>
               {ETIQUETA_ESTADO[item.estado]}
             </span>
+          )}
+
+          {/* Nivel de dominio, nivel que exige el cargo y fuente de la evidencia */}
+          {puedeEditar ? (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <label className="text-[12px] text-marmol-500">
+                Nivel que demuestra
+                <select
+                  value={item.nivel_dominio ?? ''}
+                  onChange={(e) => actualizar(item.id, { nivel_dominio: e.target.value === '' ? null : Number(e.target.value) })}
+                  className="mt-0.5 w-full rounded-lg border border-marmol-200 px-2 py-1 text-xs"
+                >
+                  <option value="">Sin definir</option>
+                  {NIVELES_DOMINIO.map((n) => (
+                    <option key={n.valor} value={n.valor}>{n.etiqueta}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-[12px] text-marmol-500">
+                Nivel que exige el cargo
+                <select
+                  value={item.nivel_requerido ?? ''}
+                  onChange={(e) => actualizar(item.id, { nivel_requerido: e.target.value === '' ? null : Number(e.target.value) })}
+                  className="mt-0.5 w-full rounded-lg border border-marmol-200 px-2 py-1 text-xs"
+                >
+                  <option value="">Sin definir</option>
+                  {NIVELES_REQUERIDOS.map((n) => (
+                    <option key={n.valor} value={n.valor}>{n.etiqueta}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-[12px] text-marmol-500">
+                Fuente de la evidencia
+                <select
+                  value={item.fuente_evidencia ?? ''}
+                  onChange={(e) => actualizar(item.id, { fuente_evidencia: e.target.value === '' ? null : e.target.value, fecha_evidencia: e.target.value === '' ? null : item.fecha_evidencia ?? new Date().toISOString().slice(0, 10) })}
+                  className="mt-0.5 w-full rounded-lg border border-marmol-200 px-2 py-1 text-xs"
+                >
+                  <option value="">Sin definir</option>
+                  {FUENTES_EVIDENCIA.map((f) => (
+                    <option key={f.valor} value={f.valor}>{f.etiqueta}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          ) : (
+            (item.nivel_dominio != null || item.fuente_evidencia) && (
+              <p className="text-xs text-marmol-500">
+                {item.nivel_dominio != null && <>Nivel: {NIVELES_DOMINIO.find((n) => n.valor === item.nivel_dominio)?.etiqueta}{item.nivel_requerido != null ? ` (el cargo exige ${NIVELES_REQUERIDOS.find((n) => n.valor === item.nivel_requerido)?.etiqueta})` : ''}. </>}
+                {item.fuente_evidencia && <>Evidencia: {FUENTES_EVIDENCIA.find((f) => f.valor === item.fuente_evidencia)?.etiqueta}.</>}
+              </p>
+            )
           )}
 
           {puedeEditar && (
