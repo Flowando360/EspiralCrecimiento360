@@ -3,6 +3,9 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { PanelParticipantesSimulacro } from '@/components/espiral-crecimiento/panel-participantes-simulacro';
 import { EditarSimulacro } from '@/components/espiral-crecimiento/editar-simulacro';
+import { ActaSimulacro } from '@/components/espiral-crecimiento/acta-simulacro';
+import { HallazgosSimulacro } from '@/components/espiral-crecimiento/hallazgos-simulacro';
+import { AdjuntosSimulacro, type AdjuntoVista } from '@/components/espiral-crecimiento/adjuntos-simulacro';
 import { formatearFecha } from '@/lib/utils';
 
 export default async function DetalleSimulacroPage({ params }: { params: { id: string } }) {
@@ -12,7 +15,7 @@ export default async function DetalleSimulacroPage({ params }: { params: { id: s
   const supabase = createClient();
   const { data: simulacro } = await supabase
     .from('nexa_simulacros')
-    .select('id, titulo, descripcion, fecha, participantes_esperados')
+    .select('id, titulo, descripcion, fecha, participantes_esperados, tipo, sede, escenario, duracion_minutos, tiempo_evacuacion_esperado_min, tiempo_evacuacion_real_min, brigadistas_participantes, observaciones_brigada, adjuntos')
     .eq('id', params.id)
     .eq('empresa_id', perfil.empresa_id)
     .maybeSingle();
@@ -24,7 +27,22 @@ export default async function DetalleSimulacroPage({ params }: { params: { id: s
     .select('colaborador_id, asistio, calificacion_desempeno, colaborador:colaborador_id(nombre_completo)')
     .eq('simulacro_id', simulacro.id);
 
+  const { data: hallazgosRaw } = await supabase
+    .from('nexa_simulacro_hallazgos')
+    .select('id, descripcion, categoria, severidad, acpm_id, acpm:acpm_id(codigo)')
+    .eq('simulacro_id', simulacro.id)
+    .order('creado_en');
+
+  const adjuntosRaw = (Array.isArray(simulacro.adjuntos) ? simulacro.adjuntos : []) as { nombre: string; ruta: string; tipo: string; tamano: number }[];
+  const adjuntos: AdjuntoVista[] = await Promise.all(
+    adjuntosRaw.map(async (a) => {
+      const { data } = await supabase.storage.from('simulacros').createSignedUrl(a.ruta, 3600);
+      return { ...a, url: data?.signedUrl ?? null };
+    })
+  );
+
   const esAdminTh = perfil.rol === 'admin_th';
+  const texto = (v: unknown) => (v == null ? '' : String(v));
   let colaboradores: { id: string; nombre_completo: string }[] = [];
   if (esAdminTh) {
     const { data } = await supabase
@@ -54,6 +72,36 @@ export default async function DetalleSimulacroPage({ params }: { params: { id: s
           />
         )}
       </div>
+
+      <ActaSimulacro
+        simulacroId={simulacro.id}
+        editable={esAdminTh}
+        datos={{
+          tipo: texto(simulacro.tipo),
+          sede: texto(simulacro.sede),
+          escenario: texto(simulacro.escenario),
+          duracionMinutos: texto(simulacro.duracion_minutos),
+          tiempoEvacuacionEsperadoMin: texto(simulacro.tiempo_evacuacion_esperado_min),
+          tiempoEvacuacionRealMin: texto(simulacro.tiempo_evacuacion_real_min),
+          brigadistasParticipantes: texto(simulacro.brigadistas_participantes),
+          observacionesBrigada: texto(simulacro.observaciones_brigada),
+        }}
+      />
+
+      <HallazgosSimulacro
+        simulacroId={simulacro.id}
+        editable={esAdminTh}
+        hallazgos={(hallazgosRaw ?? []).map((h: any) => ({
+          id: h.id,
+          descripcion: h.descripcion,
+          categoria: h.categoria,
+          severidad: h.severidad,
+          acpmId: h.acpm_id,
+          acpmCodigo: h.acpm?.codigo ?? null,
+        }))}
+      />
+
+      <AdjuntosSimulacro simulacroId={simulacro.id} adjuntos={adjuntos} editable={esAdminTh} />
 
       {esAdminTh ? (
         <PanelParticipantesSimulacro

@@ -197,7 +197,7 @@ export const moduloNexa: ModuloAyuda = {
       slug: 'simulacros',
       ruta: '/nexa/simulacros',
       titulo: 'Simulacros y dinámicas en vivo',
-      resumen: 'Programación de simulacros de seguridad y dinámicas de cultura.',
+      resumen: 'Programación de simulacros de seguridad (con su acta, hallazgos y evidencias) y dinámicas de cultura.',
       camposYBotones: [
         { nombre: 'Nuevo simulacro (admin_th)', explicacion: 'Título, descripción, fecha y número de participantes esperados.' },
         { nombre: 'Tarjeta de simulacro', explicacion: 'Clic para entrar al detalle y registrar asistencia/valoración.' },
@@ -207,8 +207,11 @@ export const moduloNexa: ModuloAyuda = {
       slug: 'detalle-simulacro',
       ruta: '/nexa/simulacros/*',
       titulo: 'Detalle de un simulacro',
-      resumen: 'Registro de quién asistió y su valoración de desempeño (1-5).',
+      resumen: 'El acta completa del simulacro (el evento, no solo la asistencia): tipo, sede, escenario, tiempos de evacuación, brigadistas, hallazgos, evidencias y el registro de quién asistió.',
       camposYBotones: [
+        { nombre: 'Acta del simulacro (admin_th edita)', explicacion: 'Tipo (incendio, sismo, evacuación, derrame, otro), sede, duración, tiempo de evacuación esperado vs. real (te avisa si quedó por encima de lo esperado), número de brigadistas, escenario simulado y observaciones sobre el desempeño de la brigada.' },
+        { nombre: 'Hallazgos', explicacion: 'Lo que el simulacro dejó en evidencia, con categoría (no conformidad, oportunidad de mejora u observación) y severidad. El botón «Crear acción en ACPM» genera la acción en Procesos → ACPM ya con la descripción, el origen (el simulacro), el tipo de acción y la prioridad llenos, y deja el vínculo hallazgo → acción → cierre.' },
+        { nombre: 'Evidencias', explicacion: 'Sube fotografías, el acta firmada en PDF o las listas de asistencia escaneadas (JPG, PNG, WebP o PDF, hasta 4 MB cada uno). Se guardan en un espacio privado de tu empresa.' },
         { nombre: 'Asistió (admin_th)', explicacion: 'Casilla por persona.' },
         { nombre: 'Valoración (admin_th)', explicacion: 'De 1 a 5, opcional.' },
         { nombre: 'Guardar', explicacion: 'Guarda esa fila individualmente.' },

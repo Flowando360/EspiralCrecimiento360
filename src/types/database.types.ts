@@ -6996,8 +6996,47 @@ export type Database = {
           },
         ]
       }
+      nexa_simulacro_hallazgos: {
+        Row: {
+          acpm_id: string | null
+          categoria: string
+          creado_en: string
+          descripcion: string
+          id: string
+          severidad: string
+          simulacro_id: string
+        }
+        Insert: {
+          acpm_id?: string | null
+          categoria?: string
+          creado_en?: string
+          descripcion: string
+          id?: string
+          severidad?: string
+          simulacro_id: string
+        }
+        Update: {
+          acpm_id?: string | null
+          categoria?: string
+          creado_en?: string
+          descripcion?: string
+          id?: string
+          severidad?: string
+          simulacro_id?: string
+        }
+        Relationships: []
+      }
       nexa_simulacros: {
         Row: {
+          adjuntos: Json
+          brigadistas_participantes: number | null
+          duracion_minutos: number | null
+          escenario: string | null
+          observaciones_brigada: string | null
+          sede: string | null
+          tiempo_evacuacion_esperado_min: number | null
+          tiempo_evacuacion_real_min: number | null
+          tipo: string | null
           created_at: string
           descripcion: string | null
           empresa_id: string
@@ -7007,6 +7046,15 @@ export type Database = {
           titulo: string
         }
         Insert: {
+          adjuntos?: Json
+          brigadistas_participantes?: number | null
+          duracion_minutos?: number | null
+          escenario?: string | null
+          observaciones_brigada?: string | null
+          sede?: string | null
+          tiempo_evacuacion_esperado_min?: number | null
+          tiempo_evacuacion_real_min?: number | null
+          tipo?: string | null
           created_at?: string
           descripcion?: string | null
           empresa_id: string
@@ -7016,6 +7064,15 @@ export type Database = {
           titulo: string
         }
         Update: {
+          adjuntos?: Json
+          brigadistas_participantes?: number | null
+          duracion_minutos?: number | null
+          escenario?: string | null
+          observaciones_brigada?: string | null
+          sede?: string | null
+          tiempo_evacuacion_esperado_min?: number | null
+          tiempo_evacuacion_real_min?: number | null
+          tipo?: string | null
           created_at?: string
           descripcion?: string | null
           empresa_id?: string
