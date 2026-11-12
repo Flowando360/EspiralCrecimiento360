@@ -38,7 +38,7 @@ export default async function IndicadoresPage() {
       <div>
         <h1 className="font-display text-2xl font-semibold text-secundario">Indicadores</h1>
         <p className="text-sm text-marmol-500 mt-1">
-          Alineación talento-rol, brechas de formación, cumplimiento y coherencia cultural — por
+          Con Guía y desempeño sin alerta, brechas de formación, cumplimiento y coherencia cultural — por
           organización y por equipo.
         </p>
       </div>
@@ -52,7 +52,7 @@ export default async function IndicadoresPage() {
           icon={GraduationCap}
         />
         <StatCard
-          label="Alineación talento-rol"
+          label="Con Guía y desempeño sin alerta"
           value={empresa?.pct_alineacion_talento_rol ? `${empresa.pct_alineacion_talento_rol}%` : '—'}
           icon={Users}
         />

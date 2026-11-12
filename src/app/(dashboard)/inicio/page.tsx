@@ -133,10 +133,10 @@ export default async function InicioPage() {
             info="Saber = conocimiento: % de los requisitos del cargo (formación, experiencia, habilidades) que la hoja de vida de la persona cumple. 100% es cumplir todo; un valor bajo indica necesidad de formación."
           />
           <StatCard
-            label="Alineación talento-rol"
+            label="Con Guía y desempeño sin alerta"
             value={indicadores?.pct_alineacion_talento_rol ? `${indicadores.pct_alineacion_talento_rol}%` : '—'}
-            hint="% de personas en un rol alineado con su Ser"
-            info="Ser = talento y motivaciones (Guía del Flow). Mide qué porcentaje de las personas está en un cargo que encaja con su forma de ser. Alto: buen encaje; bajo: riesgo de desmotivación o rotación."
+            hint="% de quienes tienen Guía y no están en semáforo bajo de Hacer"
+            info="De las personas que ya aplicaron la Guía del Flow y tienen evaluación, qué porcentaje no está en semáforo bajo de Hacer. No mide el Ser ni lo califica (el Ser se describe, no tiene nota): solo cruza tener la Guía con un desempeño sin alerta. Bajo: revisar a quién acompañar."
           />
           <StatCard
             label="En proceso de salida"

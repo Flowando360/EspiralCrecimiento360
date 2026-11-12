@@ -370,7 +370,7 @@ export const planPruebas: SeccionPlanPruebas[] = [
         titulo: 'Revisar el panorama de Indicadores',
         rolNecesario: 'admin_th, líder o gerencia',
         pasos: [
-          { paso: 'Entra a Espiral de Crecimiento → Indicadores.', resultadoEsperado: 'Carga el índice general de Hacer/Deber, cumplimiento de Saber y alineación talento-rol, según tu alcance (equipo o toda la empresa).' },
+          { paso: 'Entra a Espiral de Crecimiento → Indicadores.', resultadoEsperado: 'Carga el índice general de Hacer/Deber, cumplimiento de Saber y «con Guía y desempeño sin alerta», según tu alcance (equipo o toda la empresa).' },
           { paso: 'Revisa el mapa de equipos.', resultadoEsperado: 'Compara el promedio de Hacer, Deber y Saber de cada equipo, agrupado por líder.' },
           { paso: 'Baja hasta "Rotación de personal".', resultadoEsperado: 'Ves la tasa de rotación anual, la voluntaria, el conteo de salidas y el gráfico de tendencia mensual (12 meses).' },
           { paso: 'Registra la salida de un colaborador de prueba con antigüedad de más de 12 meses (Historial → "Agregar movimiento" → "Salida"), con motivo "Renuncia voluntaria".', resultadoEsperado: 'Al volver a Indicadores, la tasa de rotación anual y la voluntaria suben, y el mes correspondiente aparece en el gráfico de tendencia.' },

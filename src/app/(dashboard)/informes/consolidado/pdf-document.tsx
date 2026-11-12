@@ -39,7 +39,7 @@ export function InformeConsolidadoDocument({ informe }: { informe: InformeConsol
           <Indicador etiqueta="Colaboradores activos" valor={informe.totalActivos} />
           <Indicador etiqueta="En proceso de salida" valor={informe.enProcesoSalida} />
           <Indicador
-            etiqueta="Alineación talento-rol"
+            etiqueta="Con Guía y desempeño sin alerta"
             valor={informe.pctAlineacionTalentoRol != null ? `${informe.pctAlineacionTalentoRol}%` : '—'}
           />
           <Indicador etiqueta="Alertas críticas abiertas" valor={informe.alertasCriticas ?? '—'} />

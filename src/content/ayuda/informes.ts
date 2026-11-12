@@ -81,7 +81,7 @@ export const moduloInformes: ModuloAyuda = {
       camposYBotones: [
         { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
         { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
-      notas: ['Visible solo para admin_th y gerencia.', 'Con un filtro activo, Saber, alineación talento-rol y alertas no se muestran: solo existen a nivel empresa.', 'Las áreas (o el filtro) con menos personas con dato que el umbral de anonimato no muestran promedios de Hacer y Deber: aparece «Menos de N personas».'],
+      notas: ['Visible solo para admin_th y gerencia.', 'Con un filtro activo, Saber, «con Guía y desempeño sin alerta» y alertas no se muestran: solo existen a nivel empresa.', 'Las áreas (o el filtro) con menos personas con dato que el umbral de anonimato no muestran promedios de Hacer y Deber: aparece «Menos de N personas».'],
     },
     {
       slug: 'historico',

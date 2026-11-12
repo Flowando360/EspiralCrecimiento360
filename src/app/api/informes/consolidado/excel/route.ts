@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   indicadores.addRows([
     { indicador: 'Colaboradores activos', valor: informe.totalActivos },
     { indicador: 'En proceso de salida', valor: informe.enProcesoSalida },
-    { indicador: 'Alineación talento-rol', valor: informe.pctAlineacionTalentoRol != null ? `${informe.pctAlineacionTalentoRol}%` : '' },
+    { indicador: 'Con Guía y desempeño sin alerta', valor: informe.pctAlineacionTalentoRol != null ? `${informe.pctAlineacionTalentoRol}%` : '' },
     { indicador: 'Alertas críticas abiertas', valor: informe.alertasCriticas ?? '' },
     { indicador: 'Alertas abiertas (total)', valor: informe.alertasAbiertas ?? '' },
     { indicador: 'Índice de Hacer (promedio)', valor: informe.promedioHacerEmpresa ?? '' },

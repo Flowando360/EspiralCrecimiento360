@@ -57,7 +57,7 @@ export default async function InformeConsolidadoPage({ searchParams }: { searchP
 
       {informe.filtroDescripcion && (
         <p className="text-xs text-medio bg-medio/10 border border-medio/20 rounded-lg px-3 py-2">
-          Mostrando solo: {informe.filtroDescripcion}. Saber, alineación talento-rol y alertas se calculan para toda la empresa, por eso no se muestran con filtro.
+          Mostrando solo: {informe.filtroDescripcion}. Saber, «con Guía y desempeño sin alerta» y alertas se calculan para toda la empresa, por eso no se muestran con filtro.
         </p>
       )}
 
@@ -70,7 +70,7 @@ export default async function InformeConsolidadoPage({ searchParams }: { searchP
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Dato etiqueta="Colaboradores activos" valor={informe.totalActivos} />
         <Dato etiqueta="En proceso de salida" valor={informe.enProcesoSalida} />
-        <Dato etiqueta="Alineación talento-rol" valor={informe.pctAlineacionTalentoRol != null ? `${informe.pctAlineacionTalentoRol}%` : '—'} />
+        <Dato etiqueta="Con Guía y desempeño sin alerta" valor={informe.pctAlineacionTalentoRol != null ? `${informe.pctAlineacionTalentoRol}%` : '—'} />
         <Dato etiqueta="Alertas críticas abiertas" valor={informe.alertasCriticas ?? '—'} />
       </div>
 

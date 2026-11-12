@@ -475,7 +475,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       slug: 'indicadores',
       ruta: '/espiral-crecimiento/indicadores',
       titulo: 'Indicadores',
-      resumen: 'Panorama de la empresa: índices de Hacer y Deber, cumplimiento de Saber, alineación talento-rol, rotación de personal, SST y Reclutamiento (para Talento Humano), y un mapa comparativo por equipo.',
+      resumen: 'Panorama de la empresa: índices de Hacer y Deber, cumplimiento de Saber, «con Guía y desempeño sin alerta», rotación de personal, SST y Reclutamiento (para Talento Humano), y un mapa comparativo por equipo.',
       camposYBotones: [
         { nombre: 'Mapa de equipos', explicacion: 'Gráfico que compara Hacer, Deber y Saber promedio de cada equipo (agrupado por líder).' },
         { nombre: 'Tasa de rotación anual', explicacion: 'Porcentaje de personas que salieron en los últimos 12 meses, sobre quienes ya estaban activos hace 12 meses. Sale "—" si todavía no hay suficiente antigüedad registrada para calcularla.' },
