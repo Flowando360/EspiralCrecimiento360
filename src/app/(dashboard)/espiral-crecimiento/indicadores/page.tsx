@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { StatCard } from '@/components/ui/stat-card';
 import { IndicadoresEquipoChart } from '@/components/espiral-crecimiento/indicadores-equipo-chart';
 import { RotacionTendenciaChart } from '@/components/espiral-crecimiento/rotacion-tendencia-chart';
-import { TrendingUp, Users, ShieldAlert, GraduationCap, UserMinus, HardHat, UserPlus } from 'lucide-react';
-import { calcularIndicadoresSst, calcularIndicadoresReclutamiento } from '@/lib/informes/indicadores-sst-reclutamiento';
+import { TrendingUp, Users, ShieldAlert, GraduationCap, UserMinus, HardHat, UserPlus, CalendarCheck } from 'lucide-react';
+import { calcularIndicadoresSst, calcularIndicadoresReclutamiento, calcularIndicadoresPlan } from '@/lib/informes/indicadores-sst-reclutamiento';
 
 const MESES = [
   'ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
@@ -27,6 +27,9 @@ export default async function IndicadoresPage() {
   const [sst, rec] = verSstYReclutamiento
     ? await Promise.all([calcularIndicadoresSst(perfil.empresa_id), calcularIndicadoresReclutamiento(perfil.empresa_id)])
     : [null, null];
+
+  const verPlan = ['admin_th', 'lider', 'gerencia'].includes(perfil.rol);
+  const plan = verPlan ? await calcularIndicadoresPlan(perfil.empresa_id) : null;
 
   return (
     <div className="space-y-6">
@@ -253,6 +256,44 @@ export default async function IndicadoresPage() {
               <li key={t}>No disponible todavía — {t}</li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {plan && plan.general.programadas > 0 && (
+        <div>
+          <h2 className="font-display text-lg font-semibold text-secundario mb-3 flex items-center gap-2">
+            <CalendarCheck size={18} /> Plan de trabajo anual {plan.anio}
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard
+              label="Cumplimiento del plan"
+              value={plan.general.cumplimientoPct != null ? `${plan.general.cumplimientoPct}%` : '—'}
+              icon={CalendarCheck}
+              tono={plan.general.cumplimientoPct == null ? 'neutral' : plan.general.cumplimientoPct >= 90 ? 'alto' : plan.general.cumplimientoPct >= 70 ? 'medio' : 'bajo'}
+              hint={`${plan.general.ejecutadas} ejecutadas · ${plan.general.atrasadas} atrasadas`}
+              info="Porcentaje de las actividades del plan de trabajo cuya fecha ya llegó que se ejecutaron. Se actualiza solo a medida que se marcan ejecutadas en Procesos → Plan de trabajo anual."
+            />
+            <StatCard
+              label="Cumplimiento del plan de formación"
+              value={plan.formacion.cumplimientoPct != null ? `${plan.formacion.cumplimientoPct}%` : '—'}
+              icon={GraduationCap}
+              hint={`${plan.formacion.horasEjecutadas} de ${plan.formacion.horasProgramadas} h`}
+              info="Lo mismo, solo para las capacitaciones, inducciones y actividades de formación del plan, con las horas ejecutadas frente a las programadas."
+            />
+            <StatCard
+              label="Actividades SST ejecutadas"
+              value={`${plan.sst.ejecutadas} / ${plan.sst.programadas}`}
+              icon={HardHat}
+              hint={`${plan.sst.horasEjecutadas} h de SST ejecutadas`}
+              info="Actividades del SG-SST (simulacros, inspecciones, pausas activas, capacitaciones…) ejecutadas frente a las programadas en el año."
+            />
+            <StatCard
+              label="Cobertura de las actividades"
+              value={plan.general.coberturaPct != null ? `${plan.general.coberturaPct}%` : '—'}
+              icon={Users}
+              info="De las personas que debían participar en las actividades ejecutadas, el porcentaje que realmente participó."
+            />
+          </div>
         </div>
       )}
     </div>

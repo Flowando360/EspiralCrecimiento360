@@ -21,7 +21,7 @@ async function generarCodigoAcpm(supabase: ReturnType<typeof createClient>, empr
 
 const AcpmSchema = z.object({
   procesoId: z.string().uuid().optional(),
-  origenTipo: z.enum(['hallazgo_auditoria', 'riesgo', 'contexto', 'revision_proceso', 'indicador', 'pqrs', 'mejora_propia', 'simulacro']),
+  origenTipo: z.enum(['hallazgo_auditoria', 'riesgo', 'contexto', 'revision_proceso', 'indicador', 'pqrs', 'mejora_propia', 'simulacro', 'plan_trabajo']),
   origenHallazgoId: z.string().uuid().optional(),
   origenRiesgoId: z.string().uuid().optional(),
   origenContextoItemId: z.string().uuid().optional(),

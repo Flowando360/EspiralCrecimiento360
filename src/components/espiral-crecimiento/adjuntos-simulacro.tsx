@@ -22,7 +22,29 @@ const TIPOS = [
 ];
 
 /** Evidencia del simulacro: fotos, acta firmada en PDF y listas de asistencia escaneadas. */
-export function AdjuntosSimulacro({ simulacroId, adjuntos, editable }: { simulacroId: string; adjuntos: AdjuntoVista[]; editable: boolean }) {
+type Resp = { ok: boolean; error?: string };
+export interface AccionesAdjuntos {
+  subir: (datos: FormData) => Promise<Resp>;
+  eliminar: (id: string, ruta: string) => Promise<Resp>;
+}
+
+/** Sirve para cualquier registro con evidencias: por defecto las del simulacro; otros módulos pasan sus propias acciones. */
+export function AdjuntosSimulacro({
+  simulacroId,
+  adjuntos,
+  editable,
+  acciones,
+  sinTarjeta = false,
+}: {
+  simulacroId: string;
+  adjuntos: AdjuntoVista[];
+  editable: boolean;
+  acciones?: AccionesAdjuntos;
+  sinTarjeta?: boolean;
+}) {
+  const subirFn = acciones?.subir ?? subirAdjuntoSimulacro;
+  const eliminarFn = acciones?.eliminar ?? eliminarAdjuntoSimulacro;
+
   const router = useRouter();
   const entrada = useRef<HTMLInputElement>(null);
   const [tipo, setTipo] = useState('foto');
@@ -38,12 +60,13 @@ export function AdjuntosSimulacro({ simulacroId, adjuntos, editable }: { simulac
     setError(null);
     const datos = new FormData();
     datos.set('simulacroId', simulacroId);
+    datos.set('id', simulacroId);
     datos.set('tipo', tipo);
     datos.set('archivo', archivo);
     startTransition(async () => {
-      const res = await subirAdjuntoSimulacro(datos);
+      const res = await subirFn(datos);
       if (!res.ok) {
-        setError(res.error);
+        setError(res.error ?? 'No se pudo completar');
         return;
       }
       if (entrada.current) entrada.current.value = '';
@@ -55,17 +78,19 @@ export function AdjuntosSimulacro({ simulacroId, adjuntos, editable }: { simulac
     if (!confirm('¿Quitar este archivo del simulacro?')) return;
     setError(null);
     startTransition(async () => {
-      const res = await eliminarAdjuntoSimulacro(simulacroId, ruta);
-      if (!res.ok) setError(res.error);
+      const res = await eliminarFn(simulacroId, ruta);
+      if (!res.ok) setError(res.error ?? 'No se pudo completar');
       else router.refresh();
     });
   }
 
   return (
-    <div className="card p-5 space-y-3">
-      <h2 className="font-display font-semibold text-secundario flex items-center gap-2">
-        <Paperclip size={16} /> Evidencias
-      </h2>
+    <div className={sinTarjeta ? 'space-y-3' : 'card p-5 space-y-3'}>
+      {!sinTarjeta && (
+        <h2 className="font-display font-semibold text-secundario flex items-center gap-2">
+          <Paperclip size={16} /> Evidencias
+        </h2>
+      )}
       {adjuntos.length === 0 ? (
         <p className="text-sm text-marmol-400">Aún no hay fotos ni documentos adjuntos.</p>
       ) : (

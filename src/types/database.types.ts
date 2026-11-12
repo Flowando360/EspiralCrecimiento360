@@ -7026,6 +7026,84 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_trabajo_actividades: {
+        Row: {
+          acpm_id: string | null
+          adjuntos: Json
+          aliado_id: string | null
+          calificacion: number | null
+          created_at: string
+          creado_por: string | null
+          empresa_id: string
+          estado: string
+          fecha_ejecutada: string | null
+          fecha_programada: string
+          horas: number | null
+          id: string
+          nombre: string
+          notas: string | null
+          personas_alcanzadas: number | null
+          personas_objetivo: number | null
+          poblacion_detalle: string | null
+          poblacion_tipo: string
+          presupuesto_ejecutado: number | null
+          presupuesto_estimado: number | null
+          responsable_id: string | null
+          sistema: string
+          tipo: string
+        }
+        Insert: {
+          acpm_id?: string | null
+          adjuntos?: Json
+          aliado_id?: string | null
+          calificacion?: number | null
+          created_at?: string
+          creado_por?: string | null
+          empresa_id: string
+          estado?: string
+          fecha_ejecutada?: string | null
+          fecha_programada: string
+          horas?: number | null
+          id?: string
+          nombre: string
+          notas?: string | null
+          personas_alcanzadas?: number | null
+          personas_objetivo?: number | null
+          poblacion_detalle?: string | null
+          poblacion_tipo?: string
+          presupuesto_ejecutado?: number | null
+          presupuesto_estimado?: number | null
+          responsable_id?: string | null
+          sistema?: string
+          tipo?: string
+        }
+        Update: {
+          acpm_id?: string | null
+          adjuntos?: Json
+          aliado_id?: string | null
+          calificacion?: number | null
+          created_at?: string
+          creado_por?: string | null
+          empresa_id?: string
+          estado?: string
+          fecha_ejecutada?: string | null
+          fecha_programada?: string
+          horas?: number | null
+          id?: string
+          nombre?: string
+          notas?: string | null
+          personas_alcanzadas?: number | null
+          personas_objetivo?: number | null
+          poblacion_detalle?: string | null
+          poblacion_tipo?: string
+          presupuesto_ejecutado?: number | null
+          presupuesto_estimado?: number | null
+          responsable_id?: string | null
+          sistema?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
       nexa_simulacros: {
         Row: {
           adjuntos: Json

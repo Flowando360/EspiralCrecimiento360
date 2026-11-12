@@ -16,7 +16,7 @@ import { crearAcpm, actualizarEstadoAcpm, cerrarAcpm, agregarTarea, actualizarTa
 import { cn, formatearFecha } from '@/lib/utils';
 import { Plus, Trash2, User, Calendar, X, Check, ShieldQuestion } from 'lucide-react';
 
-type OrigenTipo = 'hallazgo_auditoria' | 'riesgo' | 'contexto' | 'revision_proceso' | 'indicador' | 'pqrs' | 'mejora_propia' | 'simulacro';
+type OrigenTipo = 'hallazgo_auditoria' | 'riesgo' | 'contexto' | 'revision_proceso' | 'indicador' | 'pqrs' | 'mejora_propia' | 'simulacro' | 'plan_trabajo';
 type TipoAccion = 'correctiva' | 'preventiva' | 'mejora';
 type MetodologiaCausa = 'cinco_porques' | 'ishikawa' | 'libre';
 type EstadoAcpm = 'registrada' | 'analisis_causa' | 'plan_accion' | 'seguimiento' | 'validacion_eficacia' | 'cerrada_efectiva' | 'reabierta';
@@ -74,6 +74,7 @@ const ETIQUETA_ORIGEN: Record<OrigenTipo, string> = {
   pqrs: 'PQRS',
   mejora_propia: 'Mejora propia',
   simulacro: 'Simulacro de emergencia',
+  plan_trabajo: 'Actividad del plan de trabajo',
 };
 
 const ETIQUETA_TIPO_ACCION: Record<TipoAccion, string> = { correctiva: 'Correctiva', preventiva: 'Preventiva', mejora: 'Mejora' };

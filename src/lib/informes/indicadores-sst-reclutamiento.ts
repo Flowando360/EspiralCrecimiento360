@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { resumirPlan } from '@/lib/plan-trabajo/catalogos';
 
 /**
  * Indicadores de SST y de Reclutamiento para el módulo Indicadores
@@ -179,5 +180,30 @@ export async function calcularIndicadoresReclutamiento(empresaId: string): Promi
     noDisponible: [
       'Fuentes de reclutamiento más finas (LinkedIn, referidos, bolsas de empleo): hoy solo se distingue entre formulario público e ingreso manual.',
     ],
+  };
+}
+
+/** Indicadores del plan de trabajo anual del año en curso (se alimentan solos de las actividades ejecutadas). */
+export async function calcularIndicadoresPlan(empresaId: string) {
+  const supabase = createClient();
+  const anio = new Date().getFullYear();
+  const { data } = await supabase
+    .from('plan_trabajo_actividades')
+    .select('tipo, sistema, estado, fecha_programada, horas, personas_objetivo, personas_alcanzadas, presupuesto_estimado, presupuesto_ejecutado')
+    .eq('empresa_id', empresaId)
+    .gte('fecha_programada', `${anio}-01-01`)
+    .lte('fecha_programada', `${anio}-12-31`);
+  const filas = ((data ?? []) as any[]).map((a) => ({
+    ...a,
+    horas: a.horas != null ? Number(a.horas) : null,
+    presupuesto_estimado: a.presupuesto_estimado != null ? Number(a.presupuesto_estimado) : null,
+    presupuesto_ejecutado: a.presupuesto_ejecutado != null ? Number(a.presupuesto_ejecutado) : null,
+  }));
+  const hoy = new Date().toISOString().slice(0, 10);
+  return {
+    anio,
+    general: resumirPlan(filas, hoy),
+    formacion: resumirPlan(filas.filter((a) => a.sistema === 'formacion' || ['capacitacion', 'induccion_reinduccion'].includes(a.tipo)), hoy),
+    sst: resumirPlan(filas.filter((a) => a.sistema === 'sg_sst'), hoy),
   };
 }

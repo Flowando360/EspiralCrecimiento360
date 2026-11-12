@@ -290,6 +290,28 @@ export const moduloProcesosGestion: ModuloAyuda = {
       notas: ['Pueden ver esta pantalla: admin_th, líder y gerencia. Solicitar: admin_th y líder. Evaluar, aprobar/rechazar y marcar implementado: exclusivo de admin_th.'],
     },
     {
+      slug: 'plan-trabajo-anual',
+      ruta: '/procesos-gestion/plan-trabajo',
+      titulo: 'Plan de trabajo anual',
+      resumen:
+        'Registro único de todas las actividades de Gestión Humana del año (SST, bienestar, formación y sistemas de gestión) con su programación, ejecución, cobertura, presupuesto y evidencias. De ese mismo registro salen el plan de trabajo, el plan de formación y sus indicadores, así no hay que llevarlos aparte en Excel.',
+      camposYBotones: [
+        { nombre: 'Pestañas Plan de trabajo / Plan de formación / SG-SST', explicacion: 'Tres vistas del mismo registro: todo el plan, solo las actividades de formación (capacitaciones, inducciones) o solo las del SG-SST. Con las flechas ‹ › cambias de año.' },
+        { nombre: 'Tarjetas de cumplimiento', explicacion: 'Cumplimiento a la fecha (de las actividades cuya fecha ya llegó, cuántas se ejecutaron; verde desde 90 %, amarillo desde 70 %), atrasadas, cobertura (personas alcanzadas frente al objetivo) y horas ejecutadas frente a las programadas. Cada una tiene su «i».' },
+        { nombre: 'Filtros', explicacion: 'Por sistema (SG-SST, ISO 9001, bienestar y clima, formación), tipo de actividad (simulacro, pausa activa, inspección, capacitación, celebración, auditoría interna, comité…) y estado.' },
+        { nombre: 'Nueva actividad (admin_th)', explicacion: 'Nombre, tipo, sistema al que aporta, fecha programada, responsable, población objetivo (todos, un área o un cargo), personas objetivo, presupuesto estimado, aliado o proveedor del Directorio de aliados de Nexa y estado (programada, en curso, ejecutada, reprogramada, cancelada).' },
+        { nombre: 'Editar para registrar la ejecución (admin_th)', explicacion: 'Al ejecutarla pon el estado «Ejecutada» y llena fecha de ejecución, personas alcanzadas, horas, presupuesto ejecutado y la calificación o NPS del evento. Si no pones fecha de ejecución se usa la de hoy.' },
+        { nombre: 'Evidencias', explicacion: 'Fotografías, listas de asistencia escaneadas o actas en PDF (JPG, PNG, WebP o PDF, hasta 4 MB cada uno), guardadas en un espacio privado de tu empresa. Las ve cualquiera que pueda abrir el plan; solo admin_th sube o quita.' },
+        { nombre: 'ACPM (admin_th)', explicacion: 'Si la actividad reveló un hallazgo (una capacitación que mostró una brecha crítica, una inspección con una condición insegura), lo conviertes en una acción de mejora en Procesos → ACPM, que queda vinculada a la actividad para cerrar el ciclo PHVA.' },
+        { nombre: 'Exportar a Excel', explicacion: 'Descarga el plan del año con los filtros activos (una hoja con las actividades y otra con los indicadores), listo para presentar a la gerencia o a una auditoría.' },
+      ],
+      notas: [
+        'Una actividad «atrasada» es la que tenía fecha programada anterior a hoy y sigue sin ejecutarse. Las canceladas no cuentan en el cumplimiento.',
+        'Pueden ver el plan admin_th, líder y gerencia; crear y editar es solo de admin_th.',
+        'Los indicadores de cumplimiento del plan, del plan de formación y de actividades SST también aparecen en Espiral 360° → Indicadores.',
+      ],
+    },
+    {
       slug: 'matriz-legal',
       ruta: '/procesos-gestion/legal',
       titulo: 'Matriz de requisitos legales',

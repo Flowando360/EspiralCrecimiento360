@@ -60,6 +60,7 @@ import {
   KeyRound,
   DatabaseBackup,
   UserRoundCog,
+  CalendarCheck,
 } from 'lucide-react';
 import type { Modulo, PermisosModulo } from '@/lib/supabase/get-perfil-actual';
 
@@ -150,6 +151,7 @@ const NAV: NavGroup[] = [
       { href: '/procesos-gestion', label: 'Procesos y sistemas de gestión', icon: ClipboardCheck, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/procesos-gestion/contexto', label: 'Contexto (FODA)', icon: Compass, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Planear' },
       { href: '/procesos-gestion/riesgos', label: 'Riesgos y oportunidades', icon: ShieldAlert, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Planear' },
+      { href: '/procesos-gestion/plan-trabajo', label: 'Plan de trabajo anual', icon: CalendarCheck, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Planear' },
       { href: '/procesos-gestion/legal', label: 'Matriz legal', icon: Scale, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Planear' },
       { href: '/procesos-gestion/comunicaciones', label: 'Matriz de comunicaciones', icon: Megaphone, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Planear' },
       { href: '/procesos-gestion/documentos', label: 'Gestión documental', icon: FileStack, roles: ['admin_th', 'lider', 'gerencia'], fase: 'Hacer' },
