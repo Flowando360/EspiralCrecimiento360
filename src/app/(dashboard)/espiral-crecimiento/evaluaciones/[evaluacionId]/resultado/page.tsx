@@ -74,7 +74,7 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
       .from('evaluacion_tareas')
       .select(
         `tipo_evaluador,
-         respuestas:respuestas_evaluacion(nota, evaluacion_item_id, item:evaluacion_item_id(id, bloque, titulo, descripcion, orden, activo))`
+         respuestas:respuestas_evaluacion(nota, no_aplica, evaluacion_item_id, item:evaluacion_item_id(id, bloque, titulo, descripcion, orden, activo))`
       )
       .eq('evaluacion_id', params.evaluacionId)
       .eq('completada', true),
@@ -91,7 +91,7 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
   // Pares y colaboradores a cargo alimentan el índice oficial (arriba, ya
   // calculado por el trigger) pero no se muestran desglosados acá — se
   // protege el anonimato de quien califica, buena práctica en 360°.
-  const porItem = new Map<string, { bloque: Bloque; titulo: string; descripcion: string | null; orden: number; auto: number | null; lider: number | null }>();
+  const porItem = new Map<string, { bloque: Bloque; titulo: string; descripcion: string | null; orden: number; auto: number | null; lider: number | null; autoNA: boolean; liderNA: boolean }>();
 
   for (const tarea of (tareas ?? []) as any[]) {
     if (tarea.tipo_evaluador !== 'autoevaluacion' && tarea.tipo_evaluador !== 'lider') continue;
@@ -105,9 +105,17 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
         orden: item.orden ?? 0,
         auto: null,
         lider: null,
+        autoNA: false,
+        liderNA: false,
       };
-      if (tarea.tipo_evaluador === 'autoevaluacion') actual.auto = r.nota;
-      if (tarea.tipo_evaluador === 'lider') actual.lider = r.nota;
+      if (tarea.tipo_evaluador === 'autoevaluacion') {
+        actual.auto = r.nota;
+        actual.autoNA = Boolean(r.no_aplica);
+      }
+      if (tarea.tipo_evaluador === 'lider') {
+        actual.lider = r.nota;
+        actual.liderNA = Boolean(r.no_aplica);
+      }
       porItem.set(item.id, actual);
     }
   }
@@ -170,6 +178,18 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
           )}
         </div>
       </div>
+
+      {(resultado?.items_no_aplica ?? 0) > 0 && (() => {
+        const na = resultado.items_no_aplica as number;
+        const total = na + ((resultado.items_evaluados as number | null) ?? 0);
+        const pct = total > 0 ? Math.round((100 * na) / total) : 0;
+        return (
+          <p className={cn('text-xs rounded-lg px-3 py-2 border', pct > 30 ? 'text-medio bg-medio/10 border-medio/20' : 'text-marmol-500 bg-marmol-50 border-marmol-100')}>
+            {na} de {total} respuestas se marcaron «No aplica» ({pct} %). No cuentan como cero: los índices se calculan solo con lo que sí se valoró.
+            {pct > 30 && ' Son muchas: lee el resultado con cautela y revisa si el perfil del cargo necesita ajustes.'}
+          </p>
+        );
+      })()}
 
       {/* ── Tarjetas comparativas: Hacer y Deber, cada una Auto/Final/Brecha ── */}
       <div className="grid sm:grid-cols-2 gap-4">
@@ -249,8 +269,8 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
                         <p className="text-xs text-marmol-400 mt-0.5">Resultado esperado: {item.descripcion}</p>
                       )}
                     </td>
-                    <td className="px-5 py-3 text-center font-medium text-marmol-700">{item.auto ?? '—'}</td>
-                    <td className="px-5 py-3 text-center font-medium text-marmol-700">{item.lider ?? '—'}</td>
+                    <td className="px-5 py-3 text-center font-medium text-marmol-700">{item.autoNA ? <span className="text-xs font-normal text-marmol-400" title="No aplica: no cuenta como cero">N/A</span> : (item.auto ?? '—')}</td>
+                    <td className="px-5 py-3 text-center font-medium text-marmol-700">{item.liderNA ? <span className="text-xs font-normal text-marmol-400" title="No aplica: no cuenta como cero">N/A</span> : (item.lider ?? '—')}</td>
                   </tr>
                 ))}
               </tbody>

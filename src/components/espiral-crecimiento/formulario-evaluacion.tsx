@@ -54,12 +54,16 @@ export function FormularioEvaluacion({
 }: {
   evaluacionTareaId: string;
   items: ItemEvaluacion[];
-  respuestasIniciales: Record<string, { nota: number; observacion?: string; resultadoReal?: string }>;
+  respuestasIniciales: Record<string, { nota: number | null; noAplica?: boolean; observacion?: string; resultadoReal?: string }>;
   /** Fecha de envío si la valoración ya fue enviada (solo lectura); null si sigue en borrador */
   enviadaEn: string | null;
 }) {
   const [notas, setNotas] = useState<Record<string, number>>(
-    Object.fromEntries(Object.entries(respuestasIniciales).map(([k, v]) => [k, v.nota]))
+    Object.fromEntries(Object.entries(respuestasIniciales).filter(([, v]) => typeof v.nota === 'number').map(([k, v]) => [k, v.nota as number]))
+  );
+  // «No aplica»: no cuenta como cero, se excluye del promedio y pide una justificación breve.
+  const [noAplica, setNoAplica] = useState<Record<string, boolean>>(
+    Object.fromEntries(Object.entries(respuestasIniciales).filter(([, v]) => v.noAplica).map(([k]) => [k, true]))
   );
   const [observaciones, setObservaciones] = useState<Record<string, string>>(
     Object.fromEntries(Object.entries(respuestasIniciales).map(([k, v]) => [k, v.observacion ?? '']))
@@ -78,10 +82,11 @@ export function FormularioEvaluacion({
 
   function respuestasActuales() {
     return items
-      .filter((i) => typeof notas[i.id] === 'number')
+      .filter((i) => typeof notas[i.id] === 'number' || noAplica[i.id])
       .map((i) => ({
         evaluacionItemId: i.id,
-        nota: notas[i.id] as number,
+        nota: noAplica[i.id] ? null : (notas[i.id] as number),
+        noAplica: Boolean(noAplica[i.id]),
         observacion: observaciones[i.id] || undefined,
         resultadoReal: resultadosReales[i.id] || undefined,
       }));
@@ -136,14 +141,26 @@ export function FormularioEvaluacion({
     }
   }
 
-  function guardar(itemId: string, nota: number) {
+  /** `valor` es la nota de 1 a 5, o 'na' para «No aplica». */
+  function guardar(itemId: string, valor: number | 'na') {
     if (enviada) return;
-    setNotas((prev) => ({ ...prev, [itemId]: nota }));
+    const esNa = valor === 'na';
+    if (esNa) {
+      setNotas((prev) => {
+        const { [itemId]: _quitada, ...resto } = prev;
+        return resto;
+      });
+      setNoAplica((prev) => ({ ...prev, [itemId]: true }));
+    } else {
+      setNotas((prev) => ({ ...prev, [itemId]: valor }));
+      setNoAplica((prev) => ({ ...prev, [itemId]: false }));
+    }
     startTransition(async () => {
       const res = await guardarRespuesta({
         evaluacionTareaId,
         evaluacionItemId: itemId,
-        nota,
+        nota: esNa ? null : valor,
+        noAplica: esNa,
         observacion: observaciones[itemId],
         resultadoReal: resultadosReales[itemId],
       });
@@ -180,7 +197,8 @@ export function FormularioEvaluacion({
     () => promedio(items.map((i) => notas[i.id]).filter((n): n is number => typeof n === 'number')),
     [items, notas]
   );
-  const totalRespondidos = Object.keys(notas).filter((id) => items.some((i) => i.id === id)).length;
+  const totalRespondidos = items.filter((i) => typeof notas[i.id] === 'number' || noAplica[i.id]).length;
+  const totalNoAplica = items.filter((i) => noAplica[i.id]).length;
 
   const faltan = items.length - totalRespondidos;
 
@@ -212,6 +230,7 @@ export function FormularioEvaluacion({
               <p className="text-sm font-medium text-marmol-800">Promedio general</p>
               <p className="text-xs text-marmol-500">
                 {totalRespondidos} de {items.length} ítems respondidos
+                {totalNoAplica > 0 && ` · ${totalNoAplica} «No aplica»`}
               </p>
               <div className="mt-1 h-1.5 w-40 max-w-full overflow-hidden rounded-full bg-marmol-100">
                 <div
@@ -261,6 +280,11 @@ export function FormularioEvaluacion({
           ))}
         </div>
 
+        {!enviada && totalNoAplica > 0 && (
+          <p className="text-xs text-marmol-500">
+            Los ítems «No aplica» no cuentan como cero: se excluyen del promedio. Cada uno necesita una breve explicación.
+          </p>
+        )}
         {!enviada && (
           <p className="text-xs text-marmol-500">
             {faltan > 0
@@ -289,6 +313,8 @@ export function FormularioEvaluacion({
           <div className="card divide-y divide-marmol-100 overflow-hidden">
             {itemsBloque.map((item) => {
               const nota = notas[item.id];
+              const esNoAplica = Boolean(noAplica[item.id]);
+              const valorVigente: number | 'na' | undefined = esNoAplica ? 'na' : nota;
               const criterioSeleccionado = item.criterios?.find((c) => c.nivel === nota);
               const estaExpandido = expandido === item.id;
 
@@ -324,6 +350,23 @@ export function FormularioEvaluacion({
                           {n}
                         </button>
                       ))}
+                      <button
+                        type="button"
+                        disabled={enviada}
+                        title="Este criterio no aplica a esta persona o no se pudo observar. No cuenta como cero."
+                        onClick={() => {
+                          guardar(item.id, 'na');
+                          setExpandido(item.id);
+                        }}
+                        className={cn(
+                          'h-8 rounded-lg border px-2 text-xs font-medium transition',
+                          noAplica[item.id]
+                            ? 'border-marmol-500 bg-marmol-500 text-white'
+                            : 'border-marmol-200 text-marmol-500 hover:border-marmol-400'
+                        )}
+                      >
+                        No aplica
+                      </button>
                     </div>
                   </div>
 
@@ -334,7 +377,7 @@ export function FormularioEvaluacion({
                       defaultValue={resultadosReales[item.id] ?? ''}
                       onChange={(e) => setResultadosReales((prev) => ({ ...prev, [item.id]: e.target.value }))}
                       onBlur={() => {
-                        if (nota) guardar(item.id, nota);
+                        if (valorVigente) guardar(item.id, valorVigente);
                       }}
                       readOnly={enviada}
                       className="mt-2.5 w-full rounded-lg border border-marmol-200 px-3 py-1.5 text-sm read-only:bg-marmol-50"
@@ -369,11 +412,11 @@ export function FormularioEvaluacion({
 
                   {estaExpandido && (
                     <textarea
-                      placeholder="Observación (opcional)…"
+                      placeholder={esNoAplica ? '¿Por qué no aplica o no se pudo observar? (obligatorio)…' : 'Observación (opcional)…'}
                       defaultValue={observaciones[item.id] ?? ''}
                       onChange={(e) => setObservaciones((prev) => ({ ...prev, [item.id]: e.target.value }))}
                       onBlur={() => {
-                        if (nota) guardar(item.id, nota);
+                        if (valorVigente) guardar(item.id, valorVigente);
                       }}
                       readOnly={enviada}
                       className="mt-2 w-full rounded-lg border border-marmol-200 p-2.5 text-sm read-only:bg-marmol-50"

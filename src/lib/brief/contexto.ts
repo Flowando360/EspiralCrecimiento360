@@ -117,7 +117,7 @@ export async function recopilarContextoBrief(supabase: Cliente, evaluacionId: st
       const x: Acum = porItem.get(it.id) ?? { titulo: it.titulo, bloque: it.bloque, auto: null, lider: null, t: [] as number[] };
       if (t.tipo_evaluador === 'autoevaluacion') x.auto = r.nota;
       else if (t.tipo_evaluador === 'lider') x.lider = r.nota;
-      else x.t.push(r.nota);
+      else if (r.nota != null) x.t.push(r.nota);
       porItem.set(it.id, x);
     }
   }

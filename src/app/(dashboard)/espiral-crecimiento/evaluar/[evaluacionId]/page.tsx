@@ -40,13 +40,13 @@ export default async function EvaluarPage({ params }: { params: { evaluacionId: 
 
   const { data: respuestasExistentes } = await supabase
     .from('respuestas_evaluacion')
-    .select('evaluacion_item_id, nota, observacion, resultado_real')
+    .select('evaluacion_item_id, nota, no_aplica, observacion, resultado_real')
     .eq('evaluacion_tarea_id', tarea.id);
 
   const respuestasIniciales = Object.fromEntries(
     (respuestasExistentes ?? []).map((r) => [
       r.evaluacion_item_id,
-      { nota: r.nota, observacion: r.observacion ?? undefined, resultadoReal: r.resultado_real ?? undefined },
+      { nota: r.nota, noAplica: r.no_aplica, observacion: r.observacion ?? undefined, resultadoReal: r.resultado_real ?? undefined },
     ])
   );
 

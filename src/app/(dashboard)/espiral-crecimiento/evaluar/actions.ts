@@ -12,13 +12,21 @@ async function tareaYaEnviada(supabase: ReturnType<typeof createClient>, tareaId
   return Boolean(data?.completada);
 }
 
+/** Una respuesta es una nota de 1 a 5 o un «No aplica» (que no cuenta como cero y debe justificarse al enviar). */
+const NotaSchema = z.number().int().min(1).max(5).nullable();
+
 const RespuestaSchema = z.object({
   evaluacionTareaId: z.string().uuid(),
   evaluacionItemId: z.string().uuid(),
-  nota: z.number().int().min(1).max(5),
+  nota: NotaSchema,
+  noAplica: z.boolean().default(false),
   observacion: z.string().optional(),
   resultadoReal: z.string().optional(), // solo aplica al bloque "Roles y Funciones"
 });
+
+function consistente(r: { nota: number | null; noAplica: boolean }): boolean {
+  return r.noAplica ? r.nota === null : r.nota !== null;
+}
 
 /**
  * Guarda (o actualiza) UNA calificación, ahora contra un ítem de la
@@ -41,8 +49,10 @@ export async function guardarRespuesta(input: z.infer<typeof RespuestaSchema>) {
   // Se busca la respuesta y se actualiza o inserta, en vez de usar upsert/ON CONFLICT:
   // el índice único de (tarea, ítem) es PARCIAL en la base de datos y PostgreSQL no lo
   // acepta como destino de ON CONFLICT (error 42P10), lo que impedía guardar cualquier nota.
+  if (!consistente(parsed)) return { ok: false, error: 'Elige una nota de 1 a 5 o «No aplica»' };
   const valores = {
-    nota: parsed.nota,
+    nota: parsed.noAplica ? null : parsed.nota,
+    no_aplica: parsed.noAplica,
     observacion: parsed.observacion ?? null,
     resultado_real: parsed.resultadoReal ?? null,
   };
@@ -87,7 +97,8 @@ const BorradorSchema = z.object({
     .array(
       z.object({
         evaluacionItemId: z.string().uuid(),
-        nota: z.number().int().min(1).max(5),
+        nota: NotaSchema,
+        noAplica: z.boolean().default(false),
         observacion: z.string().optional(),
         resultadoReal: z.string().optional(),
       })
@@ -105,12 +116,14 @@ export async function guardarBorrador(input: z.infer<typeof BorradorSchema>) {
     return { ok: false as const, error: MENSAJE_ENVIADA };
   }
   if (parsed.data.respuestas.length === 0) return { ok: true as const, guardadas: 0 };
+  if (!parsed.data.respuestas.every(consistente)) return { ok: false as const, error: 'Cada ítem debe tener una nota de 1 a 5 o «No aplica»' };
 
   const { error } = await supabase.from('respuestas_evaluacion').upsert(
     parsed.data.respuestas.map((r) => ({
       evaluacion_tarea_id: parsed.data.evaluacionTareaId,
       evaluacion_item_id: r.evaluacionItemId,
-      nota: r.nota,
+      nota: r.noAplica ? null : r.nota,
+      no_aplica: r.noAplica,
       observacion: r.observacion || null,
       resultado_real: r.resultadoReal || null,
     })),
@@ -150,13 +163,23 @@ export async function enviarValoracion(input: { evaluacionTareaId: string }) {
   const idsActivos = new Set((items ?? []).map((i) => i.id));
   const { data: respuestas } = await supabase
     .from('respuestas_evaluacion')
-    .select('evaluacion_item_id')
+    .select('evaluacion_item_id, no_aplica, observacion')
     .eq('evaluacion_tarea_id', tarea.id);
   const respondidos = new Set((respuestas ?? []).map((r) => r.evaluacion_item_id).filter((id): id is string => id != null && idsActivos.has(id)));
   const faltan = idsActivos.size - respondidos.size;
   if (idsActivos.size === 0) return { ok: false as const, error: 'Esta valoración no tiene ítems para enviar' };
   if (faltan > 0) {
     return { ok: false as const, error: `Aún faltan ${faltan} ${faltan === 1 ? 'ítem' : 'ítems'} por responder. Complétalos y vuelve a enviar.` };
+  }
+
+  // «No aplica» exige una justificación breve y no puede ser la respuesta a todo.
+  const activas = (respuestas ?? []).filter((r) => r.evaluacion_item_id != null && idsActivos.has(r.evaluacion_item_id));
+  const sinJustificar = activas.filter((r) => r.no_aplica && (r.observacion ?? '').trim().length < 5).length;
+  if (sinJustificar > 0) {
+    return { ok: false as const, error: `Marcaste ${sinJustificar} ${sinJustificar === 1 ? 'ítem' : 'ítems'} como «No aplica» sin explicar por qué. Agrega una breve observación en cada uno.` };
+  }
+  if (activas.length > 0 && activas.every((r) => r.no_aplica)) {
+    return { ok: false as const, error: 'No puedes marcar todos los ítems como «No aplica»: debe quedar al menos uno valorado.' };
   }
 
   const { error } = await supabase

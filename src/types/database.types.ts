@@ -8291,7 +8291,8 @@ export type Database = {
           evaluacion_item_id: string | null
           evaluacion_tarea_id: string
           id: string
-          nota: number
+          no_aplica: boolean
+          nota: number | null
           observacion: string | null
           resultado_real: string | null
         }
@@ -8302,7 +8303,8 @@ export type Database = {
           evaluacion_item_id?: string | null
           evaluacion_tarea_id: string
           id?: string
-          nota: number
+          no_aplica?: boolean
+          nota?: number | null
           observacion?: string | null
           resultado_real?: string | null
         }
@@ -8313,7 +8315,8 @@ export type Database = {
           evaluacion_item_id?: string | null
           evaluacion_tarea_id?: string
           id?: string
-          nota?: number
+          no_aplica?: boolean
+          nota?: number | null
           observacion?: string | null
           resultado_real?: string | null
         }
@@ -8343,6 +8346,8 @@ export type Database = {
       }
       resultados_evaluacion: {
         Row: {
+          items_evaluados: number | null
+          items_no_aplica: number | null
           actualizado_en: string
           brecha_deber: number | null
           brecha_hacer: number | null
@@ -8354,6 +8359,8 @@ export type Database = {
           semaforo_hacer: string | null
         }
         Insert: {
+          items_evaluados?: number | null
+          items_no_aplica?: number | null
           actualizado_en?: string
           brecha_deber?: number | null
           brecha_hacer?: number | null
@@ -8365,6 +8372,8 @@ export type Database = {
           semaforo_hacer?: string | null
         }
         Update: {
+          items_evaluados?: number | null
+          items_no_aplica?: number | null
           actualizado_en?: string
           brecha_deber?: number | null
           brecha_hacer?: number | null
