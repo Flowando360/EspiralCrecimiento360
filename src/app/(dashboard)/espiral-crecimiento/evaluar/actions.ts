@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { registrarAuditoria } from '@/lib/auditoria/registrar';
 
 const MENSAJE_ENVIADA = 'Esta valoración ya fue enviada y no se puede modificar';
 
@@ -189,8 +190,68 @@ export async function enviarValoracion(input: { evaluacionTareaId: string }) {
     .eq('completada', false);
   if (error) return { ok: false as const, error: error.message };
 
+  await registrarAuditoria(perfil, {
+    modulo: 'valoraciones',
+    accion: 'valoracion.enviar',
+    resumen: `${perfil.nombre_completo} envió una valoración (${activas.length} ítems)`,
+    objetoTipo: 'evaluacion_tarea',
+    objetoId: tarea.id,
+    detalle: { evaluacion_id: tarea.evaluacion_id },
+  });
+
   revalidatePath('/espiral-crecimiento/ciclos');
   revalidatePath('/inicio');
   revalidatePath(`/espiral-crecimiento/evaluar/${tarea.evaluacion_id}`);
+  return { ok: true as const };
+}
+
+/**
+ * Reabre una valoración ya enviada para que su evaluador la corrija (solo Talento Humano).
+ * Exige un motivo, deja el cambio en la bitácora de auditoría y, como la valoración vuelve a
+ * borrador, sus notas dejan de contar en los resultados hasta que se envíe de nuevo.
+ */
+export async function reabrirValoracion(input: { evaluacionTareaId: string; motivo: string }) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'Solo Talento Humano puede reabrir una valoración' };
+  const tareaId = z.string().uuid().safeParse(input.evaluacionTareaId);
+  const motivo = (input.motivo ?? '').trim();
+  if (!tareaId.success) return { ok: false as const, error: 'Datos inválidos' };
+  if (motivo.length < 10) return { ok: false as const, error: 'Explica el motivo de la reapertura (mínimo 10 caracteres)' };
+
+  const supabase = createClient();
+  const { data: tarea } = await supabase
+    .from('evaluacion_tareas')
+    .select(
+      `id, evaluacion_id, completada, fecha_completada, tipo_evaluador,
+       evaluador:evaluador_colaborador_id(nombre_completo, empresa_id),
+       evaluacion:evaluaciones(colaborador:colaborador_evaluado_id(nombre_completo))`
+    )
+    .eq('id', tareaId.data)
+    .maybeSingle();
+  const evaluador = (Array.isArray(tarea?.evaluador) ? tarea?.evaluador[0] : tarea?.evaluador) as any;
+  if (!tarea || evaluador?.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'No encontramos esa valoración' };
+  if (!tarea.completada) return { ok: false as const, error: 'Esta valoración ya está abierta (en borrador)' };
+
+  const { error } = await supabase
+    .from('evaluacion_tareas')
+    .update({ completada: false, fecha_completada: null })
+    .eq('id', tarea.id)
+    .eq('completada', true);
+  if (error) return { ok: false as const, error: error.message };
+
+  const evaluacion = (Array.isArray(tarea.evaluacion) ? tarea.evaluacion[0] : tarea.evaluacion) as any;
+  const evaluado = (Array.isArray(evaluacion?.colaborador) ? evaluacion?.colaborador[0] : evaluacion?.colaborador) as any;
+  await registrarAuditoria(perfil, {
+    modulo: 'valoraciones',
+    accion: 'valoracion.reabrir',
+    resumen: `Reabrió la valoración de ${evaluador?.nombre_completo ?? 'un evaluador'} (${tarea.tipo_evaluador}) sobre ${evaluado?.nombre_completo ?? 'una persona'}`,
+    objetoTipo: 'evaluacion_tarea',
+    objetoId: tarea.id,
+    detalle: { motivo, evaluacion_id: tarea.evaluacion_id, enviada_el: tarea.fecha_completada },
+  });
+
+  revalidatePath('/espiral-crecimiento/ciclos');
+  revalidatePath('/inicio');
+  revalidatePath(`/espiral-crecimiento/evaluaciones/${tarea.evaluacion_id}/valoraciones`);
   return { ok: true as const };
 }

@@ -8,6 +8,7 @@ export const MODULOS_AUDITORIA = [
   { value: 'parametros_legales', label: 'Parámetros legales' },
   { value: 'competencias', label: 'Competencias' },
   { value: 'cargos', label: 'Cargos' },
+  { value: 'valoraciones', label: 'Valoraciones (envíos y reaperturas)' },
 ] as const;
 
 export interface FiltrosAuditoria {

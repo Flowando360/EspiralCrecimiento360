@@ -391,6 +391,28 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       ],
     },
     {
+      slug: 'reabrir-valoraciones',
+      ruta: '/espiral-crecimiento/evaluaciones/*/valoraciones',
+      titulo: 'Reabrir una valoración enviada',
+      resumen:
+        'Pantalla de Talento Humano para ver quién ya envió su valoración de una persona y, si hubo un error, reabrirla con un motivo para que su evaluador la corrija. Todo envío y toda reapertura quedan en la auditoría.',
+      camposYBotones: [
+        { nombre: 'Lista de valoraciones', explicacion: 'Cada evaluador (autoevaluación, líder, pares, colaboradores a cargo) con su estado: enviada (con fecha) o pendiente/en borrador.' },
+        { nombre: 'Reabrir', explicacion: 'Solo en valoraciones enviadas. Pide un motivo de al menos 10 caracteres. La valoración vuelve a borrador: deja de contar en los resultados (índices, semáforo, brecha) y reaparece como pendiente en el Inicio de su evaluador.' },
+        { nombre: 'Registro de envíos y reaperturas', explicacion: 'Historial de quién envió o reabrió, cuándo y con qué motivo. También se consulta en Administración → Auditoría, módulo «Valoraciones».' },
+      ],
+      proceso: [
+        'Abre el detalle del ciclo y, en la fila de la persona, pulsa «Ver / reabrir» (columna Valoraciones, solo Talento Humano).',
+        'Busca la valoración enviada que hay que corregir y pulsa «Reabrir».',
+        'Escribe el motivo y confirma. Avisa al evaluador: la verá otra vez como pendiente.',
+        'Cuando la envíe de nuevo, los resultados se recalculan solos.',
+      ],
+      notas: [
+        'Solo Talento Humano puede reabrir. Las notas ya guardadas se conservan: el evaluador cambia lo que haga falta y vuelve a enviar.',
+        'Si el evaluador no reenvía, esa valoración no cuenta en el resultado.',
+      ],
+    },
+    {
       slug: 'brief',
       ruta: '/espiral-crecimiento/evaluaciones/*/brief',
       titulo: 'Brief de retroalimentación',
