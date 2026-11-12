@@ -1,6 +1,7 @@
 import { crearNormalizadorAreas } from '@/lib/areas';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { obtenerUmbralAnonimato } from '@/lib/informes/anonimato';
 import { coincideEquipo, hayFiltrosEquipo, describirFiltrosEquipo, type FiltrosEquipo } from '@/lib/informes/filtros-equipo';
 
 export interface FilaArea {
@@ -8,6 +9,8 @@ export interface FilaArea {
   tamano: number;
   promedioHacer: number | null;
   promedioDeber: number | null;
+  /** Hay datos pero el área tiene menos personas que el umbral de anonimato. */
+  protegido?: boolean;
 }
 
 export interface InformeConsolidado {
@@ -22,6 +25,10 @@ export interface InformeConsolidado {
   /** Texto del filtro activo (área / equipo), o null si el informe es de toda la empresa. */
   filtroDescripcion: string | null;
   porArea: FilaArea[];
+  /** Mínimo de personas con dato para mostrar un promedio de grupo. */
+  umbralAnonimato: number;
+  /** El filtro activo tiene menos personas que el umbral: sus promedios se ocultan. */
+  filtroProtegido: boolean;
 }
 
 /**
@@ -35,6 +42,7 @@ export async function obtenerInformeConsolidado(filtros: FiltrosEquipo = {}): Pr
   if (!perfil || !['admin_th', 'gerencia'].includes(perfil.rol)) return { perfil: null, informe: null };
 
   const supabase = createClient();
+  const umbral = await obtenerUmbralAnonimato(perfil.empresa_id);
 
   const [{ data: indicadores }, { data: colaboradoresRaw }, { data: resultadosRaw }] = await Promise.all([
     supabase.from('v_indicadores_empresa').select('*').eq('empresa_id', perfil.empresa_id).maybeSingle(),
@@ -78,13 +86,17 @@ export async function obtenerInformeConsolidado(filtros: FiltrosEquipo = {}): Pr
     .map(([area, ids]) => {
       const hacer = ids.map((id) => resultadoPorColaborador.get(id)?.indice_hacer).filter((v): v is number => v != null);
       const deber = ids.map((id) => resultadoPorColaborador.get(id)?.indice_deber).filter((v): v is number => v != null);
-      return { area, tamano: ids.length, promedioHacer: promedio(hacer), promedioDeber: promedio(deber) };
+      // Grupos con menos personas con dato que el umbral: no se muestra el promedio (anonimato).
+      return { area, tamano: ids.length, promedioHacer: hacer.length >= umbral ? promedio(hacer) : null, promedioDeber: deber.length >= umbral ? promedio(deber) : null, protegido: (hacer.length > 0 && hacer.length < umbral) || (deber.length > 0 && deber.length < umbral) };
     })
     .sort((a, b) => a.area.localeCompare(b.area));
 
   const idsFiltrados = colaboradores.map((c) => c.id as string);
-  const hacerFiltrado = promedio(idsFiltrados.map((id) => resultadoPorColaborador.get(id)?.indice_hacer).filter((v): v is number => v != null));
-  const deberFiltrado = promedio(idsFiltrados.map((id) => resultadoPorColaborador.get(id)?.indice_deber).filter((v): v is number => v != null));
+  const valoresHacerFiltrado = idsFiltrados.map((id) => resultadoPorColaborador.get(id)?.indice_hacer).filter((v): v is number => v != null);
+  const valoresDeberFiltrado = idsFiltrados.map((id) => resultadoPorColaborador.get(id)?.indice_deber).filter((v): v is number => v != null);
+  const hacerFiltrado = valoresHacerFiltrado.length >= umbral ? promedio(valoresHacerFiltrado) : null;
+  const deberFiltrado = valoresDeberFiltrado.length >= umbral ? promedio(valoresDeberFiltrado) : null;
+  const filtroProtegido = filtrado && ((valoresHacerFiltrado.length > 0 && valoresHacerFiltrado.length < umbral) || (valoresDeberFiltrado.length > 0 && valoresDeberFiltrado.length < umbral));
 
   return {
     perfil,
@@ -100,6 +112,8 @@ export async function obtenerInformeConsolidado(filtros: FiltrosEquipo = {}): Pr
       alertasAbiertas: filtrado ? null : indicadores?.alertas_abiertas ?? 0,
       alertasCriticas: filtrado ? null : indicadores?.alertas_criticas ?? 0,
       porArea,
+      umbralAnonimato: umbral,
+      filtroProtegido,
     },
   };
 }

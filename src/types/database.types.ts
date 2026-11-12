@@ -3051,6 +3051,7 @@ export type Database = {
           siglas: string | null
           slug: string
           telefono: string | null
+          umbral_anonimato_agregados: number
           color_acento: string
           color_secundario: string
         }
@@ -3089,6 +3090,7 @@ export type Database = {
           siglas?: string | null
           slug: string
           telefono?: string | null
+          umbral_anonimato_agregados?: number
           color_acento?: string
           color_secundario?: string
         }
@@ -3127,6 +3129,7 @@ export type Database = {
           siglas?: string | null
           slug?: string
           telefono?: string | null
+          umbral_anonimato_agregados?: number
           color_acento?: string
           color_secundario?: string
         }

@@ -12,7 +12,10 @@ const CLASE_SEMAFORO: Record<NonNullable<SemaforoDimension>, string> = {
   bajo: 'badge-bajo',
 };
 
-function Celda({ promedio, conDato, tamano, semaforo, sufijo = '' }: { promedio: number | null; conDato: number; tamano: number; semaforo: SemaforoDimension; sufijo?: string }) {
+function Celda({ promedio, conDato, tamano, semaforo, sufijo = '', protegido = false, umbral = 5 }: { promedio: number | null; conDato: number; tamano: number; semaforo: SemaforoDimension; sufijo?: string; protegido?: boolean; umbral?: number }) {
+  if (protegido) {
+    return <span className="text-xs text-marmol-400" title="Para proteger la privacidad no se muestran promedios de grupos pequeños">Menos de {umbral} personas</span>;
+  }
   if (promedio === null) {
     return <span className="text-xs text-marmol-400">Sin dato registrado</span>;
   }
@@ -34,7 +37,7 @@ export default async function InformeBrechasPage({
 }) {
   const agrupacion: Agrupacion = searchParams.agrupacion === 'area' ? 'area' : 'equipo';
   const filtros = leerFiltrosEquipo(searchParams);
-  const { perfil, filas } = await obtenerInformeBrechas(agrupacion, filtros);
+  const { perfil, filas, umbral } = await obtenerInformeBrechas(agrupacion, filtros);
 
   if (!perfil) redirect('/informes');
   const opcionesEquipo = await opcionesFiltroEquipo(perfil);
@@ -120,13 +123,13 @@ export default async function InformeBrechasPage({
                     <span className="text-xs text-marmol-500">{f.ser.conDato} de {f.tamano} con Guía</span>
                   </td>
                   <td className="px-4 py-3">
-                    <Celda promedio={f.saber.promedio} conDato={f.saber.conDato} tamano={f.tamano} semaforo={f.saber.semaforo} sufijo="%" />
+                    <Celda promedio={f.saber.promedio} conDato={f.saber.conDato} tamano={f.tamano} semaforo={f.saber.semaforo} sufijo="%" protegido={f.saber.protegido} umbral={umbral} />
                   </td>
                   <td className="px-4 py-3">
-                    <Celda promedio={f.hacer.promedio} conDato={f.hacer.conDato} tamano={f.tamano} semaforo={f.hacer.semaforo} />
+                    <Celda promedio={f.hacer.promedio} conDato={f.hacer.conDato} tamano={f.tamano} semaforo={f.hacer.semaforo} protegido={f.hacer.protegido} umbral={umbral} />
                   </td>
                   <td className="px-4 py-3">
-                    <Celda promedio={f.deber.promedio} conDato={f.deber.conDato} tamano={f.tamano} semaforo={f.deber.semaforo} />
+                    <Celda promedio={f.deber.promedio} conDato={f.deber.conDato} tamano={f.tamano} semaforo={f.deber.semaforo} protegido={f.deber.protegido} umbral={umbral} />
                   </td>
                 </tr>
               ))}
@@ -137,7 +140,7 @@ export default async function InformeBrechasPage({
 
       <p className="text-xs text-marmol-400">
         El Ser se describe, no se califica: solo se indica cuántas personas ya tienen Guía del Flow. Saber es un % de cumplimiento y Hacer/Deber van de 1 a 5, cada semáforo con su propio
-        umbral. "(x/y)" indica cuántas personas del grupo tienen dato registrado para esa dimensión.
+        umbral. Por privacidad no se muestran promedios de grupos con menos de {umbral} personas con dato. "(x/y)" indica cuántas personas del grupo tienen dato registrado para esa dimensión.
       </p>
     </div>
   );

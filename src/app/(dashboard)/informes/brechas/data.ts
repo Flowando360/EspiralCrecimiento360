@@ -2,6 +2,7 @@ import { crearNormalizadorAreas } from '@/lib/areas';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { coincideEquipo, type FiltrosEquipo } from '@/lib/informes/filtros-equipo';
+import { obtenerUmbralAnonimato } from '@/lib/informes/anonimato';
 
 export type Agrupacion = 'equipo' | 'area';
 export type SemaforoDimension = 'alto' | 'medio' | 'bajo' | null;
@@ -10,9 +11,10 @@ export interface FilaBrecha {
   grupo: string;
   tamano: number;
   ser: { conDato: number };
-  saber: { promedio: number | null; conDato: number; semaforo: SemaforoDimension };
-  hacer: { promedio: number | null; conDato: number; semaforo: SemaforoDimension };
-  deber: { promedio: number | null; conDato: number; semaforo: SemaforoDimension };
+  /** protegido = hay datos, pero el grupo tiene menos personas que el umbral de anonimato y no se muestra el promedio. */
+  saber: { promedio: number | null; conDato: number; semaforo: SemaforoDimension; protegido?: boolean };
+  hacer: { promedio: number | null; conDato: number; semaforo: SemaforoDimension; protegido?: boolean };
+  deber: { promedio: number | null; conDato: number; semaforo: SemaforoDimension; protegido?: boolean };
 }
 
 function promedio(valores: number[]): number | null {
@@ -47,7 +49,7 @@ function semaforoPorcentaje(valor: number | null): SemaforoDimension {
 export async function obtenerInformeBrechas(agrupacion: Agrupacion, filtros: FiltrosEquipo = {}) {
   const perfil = await getPerfilActual();
   if (!perfil || !['admin_th', 'lider', 'gerencia'].includes(perfil.rol)) {
-    return { perfil: null, filas: [] as FilaBrecha[] };
+    return { perfil: null, filas: [] as FilaBrecha[], umbral: 5 };
   }
 
   const supabase = createClient();
@@ -70,7 +72,8 @@ export async function obtenerInformeBrechas(agrupacion: Agrupacion, filtros: Fil
   const colaboradores = ((colaboradoresRaw ?? []) as any[]).filter((c) => coincideEquipo(c, filtros));
   const colaboradorIds = colaboradores.map((c) => c.id);
 
-  if (colaboradorIds.length === 0) return { perfil, filas: [] };
+  const umbral = await obtenerUmbralAnonimato(perfil.empresa_id);
+  if (colaboradorIds.length === 0) return { perfil, filas: [], umbral };
 
   const [{ data: resultadosRaw }, { data: saberRaw }, { data: serRaw }] = await Promise.all([
     supabase
@@ -130,12 +133,18 @@ export async function obtenerInformeBrechas(agrupacion: Agrupacion, filtros: Fil
         tamano: ids.length,
         // El Ser se describe, no se califica: solo se informa cuántas personas ya tienen Guía del Flow.
         ser: { conDato: serValores.length },
-        saber: { promedio: promSaber, conDato: saberValores.length, semaforo: semaforoPorcentaje(promSaber) },
-        hacer: { promedio: promHacer, conDato: hacerValores.length, semaforo: semaforo1a5(promHacer) },
-        deber: { promedio: promDeber, conDato: deberValores.length, semaforo: semaforo1a5(promDeber) },
+        saber: protegerDim({ promedio: promSaber, conDato: saberValores.length, semaforo: semaforoPorcentaje(promSaber) }, umbral),
+        hacer: protegerDim({ promedio: promHacer, conDato: hacerValores.length, semaforo: semaforo1a5(promHacer) }, umbral),
+        deber: protegerDim({ promedio: promDeber, conDato: deberValores.length, semaforo: semaforo1a5(promDeber) }, umbral),
       };
     })
     .sort((a, b) => a.grupo.localeCompare(b.grupo));
 
-  return { perfil, filas };
+  return { perfil, filas, umbral };
+}
+
+/** Si el grupo tiene menos personas con dato que el umbral, no se muestra el promedio (anonimato). */
+function protegerDim(d: { promedio: number | null; conDato: number; semaforo: SemaforoDimension }, umbral: number) {
+  if (d.conDato > 0 && d.conDato < umbral) return { promedio: null, conDato: d.conDato, semaforo: null as SemaforoDimension, protegido: true };
+  return d;
 }

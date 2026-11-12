@@ -4,6 +4,7 @@ import { StatCard } from '@/components/ui/stat-card';
 import { IndicadoresEquipoChart } from '@/components/espiral-crecimiento/indicadores-equipo-chart';
 import { RotacionTendenciaChart } from '@/components/espiral-crecimiento/rotacion-tendencia-chart';
 import { TrendingUp, Users, ShieldAlert, GraduationCap, UserMinus, HardHat, UserPlus, CalendarCheck } from 'lucide-react';
+import { obtenerUmbralAnonimato } from '@/lib/informes/anonimato';
 import { calcularIndicadoresSst, calcularIndicadoresReclutamiento, calcularIndicadoresPlan } from '@/lib/informes/indicadores-sst-reclutamiento';
 
 const MESES = [
@@ -15,6 +16,7 @@ export default async function IndicadoresPage() {
   if (!perfil) return null;
 
   const supabase = createClient();
+  const umbralAnonimato = await obtenerUmbralAnonimato(perfil.empresa_id);
 
   const [{ data: empresa }, { data: equipos }, { data: rotacionMensual }] = await Promise.all([
     supabase.from('v_indicadores_empresa').select('*').eq('empresa_id', perfil.empresa_id).maybeSingle(),
@@ -68,7 +70,7 @@ export default async function IndicadoresPage() {
           Mapa de equipos: Hacer vs. Deber promedio
         </h2>
         <IndicadoresEquipoChart
-          datos={(equipos ?? []).map((e: any) => ({
+          datos={(equipos ?? []).filter((e: any) => Number(e.tamano_equipo ?? 0) >= umbralAnonimato).map((e: any) => ({
             equipo: e.lider_nombre,
             hacer: e.promedio_hacer ?? 0,
             deber: e.promedio_deber ?? 0,
@@ -76,6 +78,12 @@ export default async function IndicadoresPage() {
           }))}
         />
       </div>
+
+      {(equipos ?? []).some((e: any) => Number(e.tamano_equipo ?? 0) < umbralAnonimato) && (
+        <p className="text-xs text-marmol-500">
+          Por privacidad, el mapa solo incluye equipos de {umbralAnonimato} personas o más ({(equipos ?? []).filter((e: any) => Number(e.tamano_equipo ?? 0) < umbralAnonimato).length} equipo(s) más pequeño(s) no se muestran).
+        </p>
+      )}
 
       <div>
         <h2 className="font-display text-lg font-semibold text-secundario mb-3">Rotación de personal</h2>

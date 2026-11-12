@@ -37,9 +37,9 @@ export function BrechasDocument({ filas, agrupacion }: { filas: FilaBrecha[]; ag
             <Text style={styles.celdaGrupo}>{f.grupo}</Text>
             <Text style={styles.celdaN}>{f.tamano}</Text>
             <Text style={styles.celdaDim}>{f.ser.conDato} de {f.tamano} con Guía</Text>
-            <Text style={styles.celdaDim}>{f.saber.promedio != null ? `${f.saber.promedio}%` : 'Sin dato'}</Text>
-            <Text style={styles.celdaDim}>{f.hacer.promedio ?? 'Sin dato'}</Text>
-            <Text style={styles.celdaDim}>{f.deber.promedio ?? 'Sin dato'}</Text>
+            <Text style={styles.celdaDim}>{f.saber.protegido ? 'Grupo pequeño' : f.saber.promedio != null ? `${f.saber.promedio}%` : 'Sin dato'}</Text>
+            <Text style={styles.celdaDim}>{f.hacer.protegido ? 'Grupo pequeño' : f.hacer.promedio ?? 'Sin dato'}</Text>
+            <Text style={styles.celdaDim}>{f.deber.protegido ? 'Grupo pequeño' : f.deber.promedio ?? 'Sin dato'}</Text>
           </View>
         ))}
 

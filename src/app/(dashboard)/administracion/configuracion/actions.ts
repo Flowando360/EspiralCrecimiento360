@@ -252,6 +252,34 @@ export async function guardarUmbralClima(input: z.infer<typeof UmbralClimaSchema
   return { ok: true };
 }
 
+const UmbralAnonimatoSchema = z.object({ minimo: z.number().int('Debe ser un número entero').min(2, 'El mínimo es 2').max(50, 'El máximo es 50') });
+
+/** Mínimo de personas con dato para mostrar promedios de un grupo en informes de desempeño (0124). */
+export async function guardarUmbralAnonimato(input: z.infer<typeof UmbralAnonimatoSchema>) {
+  const perfil = await getPerfilActual();
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false, error: 'No autorizado' };
+  const parsed = UmbralAnonimatoSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
+
+  const supabase = createClient();
+  const { data: antes } = await supabase.from('empresas').select('umbral_anonimato_agregados').eq('id', perfil.empresa_id).maybeSingle();
+  const { error } = await supabase.from('empresas').update({ umbral_anonimato_agregados: parsed.data.minimo }).eq('id', perfil.empresa_id);
+  if (error) return { ok: false, error: error.message };
+
+  await registrarAuditoria(perfil, {
+    modulo: 'empresa',
+    accion: 'empresa.umbral_anonimato',
+    resumen: `Cambió el mínimo de personas para mostrar promedios de grupo de ${antes?.umbral_anonimato_agregados ?? 5} a ${parsed.data.minimo}`,
+    objetoTipo: 'empresa',
+    objetoId: perfil.empresa_id,
+    detalle: { antes: antes?.umbral_anonimato_agregados ?? null, despues: parsed.data.minimo },
+  });
+
+  revalidatePath('/administracion/configuracion');
+  revalidatePath('/informes');
+  return { ok: true };
+}
+
 const UmbralDifusionSchema = z.object({
   porcentaje: z.number().int().min(1).max(100),
 });

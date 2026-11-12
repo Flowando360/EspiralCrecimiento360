@@ -6,6 +6,7 @@ import { FormularioPonderaciones } from '@/components/administracion/formulario-
 import { FormularioDatosEmpresa } from '@/components/administracion/formulario-datos-empresa';
 import { FormularioPreguntasClima } from '@/components/administracion/formulario-preguntas-clima';
 import { FormularioUmbralClima } from '@/components/administracion/formulario-umbral-clima';
+import { FormularioUmbralAnonimato } from '@/components/administracion/formulario-umbral-anonimato';
 import { FormularioUmbralDifusion } from '@/components/administracion/formulario-umbral-difusion';
 import { FormularioEstructuraCodigoDocumental } from '@/components/administracion/formulario-estructura-codigo-documental';
 import { FormularioEscalaRiesgos } from '@/components/administracion/formulario-escala-riesgos';
@@ -23,7 +24,7 @@ export default async function AdminConfiguracionPage() {
   const { data: empresa } = await supabase
     .from('empresas')
     .select(
-      'nit, direccion, telefono, ciudad, firmante_nombre, firmante_cargo, siglas, clima_pregunta_enps, clima_pregunta_reconocimiento, clima_pregunta_liderazgo, clima_pregunta_desarrollo, clima_pregunta_comunicacion, clima_pregunta_condiciones, clima_pregunta_pertenencia, clima_umbral_tipo, clima_umbral_cantidad, clima_umbral_porcentaje, documental_umbral_difusion_pct, documental_prefijos_tipo, documental_separador_codigo, documental_digitos_consecutivo, riesgos_escala'
+      'nit, direccion, telefono, ciudad, firmante_nombre, firmante_cargo, siglas, clima_pregunta_enps, clima_pregunta_reconocimiento, clima_pregunta_liderazgo, clima_pregunta_desarrollo, clima_pregunta_comunicacion, clima_pregunta_condiciones, clima_pregunta_pertenencia, clima_umbral_tipo, clima_umbral_cantidad, clima_umbral_porcentaje, umbral_anonimato_agregados, documental_umbral_difusion_pct, documental_prefijos_tipo, documental_separador_codigo, documental_digitos_consecutivo, riesgos_escala'
     )
     .eq('id', perfil.empresa_id)
     .maybeSingle();
@@ -95,6 +96,8 @@ export default async function AdminConfiguracionPage() {
           porcentaje: empresa?.clima_umbral_porcentaje ?? null,
         }}
       />
+
+      <FormularioUmbralAnonimato inicial={(empresa as any)?.umbral_anonimato_agregados ?? 5} />
 
       <FormularioUmbralDifusion inicial={empresa?.documental_umbral_difusion_pct ?? 100} />
 

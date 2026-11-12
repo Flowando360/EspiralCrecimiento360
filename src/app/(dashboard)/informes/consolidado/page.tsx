@@ -61,6 +61,12 @@ export default async function InformeConsolidadoPage({ searchParams }: { searchP
         </p>
       )}
 
+      {(informe.filtroProtegido || informe.porArea.some((a) => a.protegido)) && (
+        <p className="text-xs text-marmol-500 bg-marmol-50 border border-marmol-200 rounded-lg px-3 py-2">
+          Por privacidad no se muestran promedios de grupos con menos de {informe.umbralAnonimato} personas con dato (se configura en Administración → Configuración).
+        </p>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Dato etiqueta="Colaboradores activos" valor={informe.totalActivos} />
         <Dato etiqueta="En proceso de salida" valor={informe.enProcesoSalida} />
@@ -92,8 +98,8 @@ export default async function InformeConsolidadoPage({ searchParams }: { searchP
               <tr key={a.area} className="border-b border-marmol-100 last:border-0">
                 <td className="px-4 py-3 font-medium text-marmol-900">{a.area}</td>
                 <td className="px-4 py-3 text-marmol-600">{a.tamano}</td>
-                <td className="px-4 py-3 text-marmol-600">{a.promedioHacer ?? '—'}</td>
-                <td className="px-4 py-3 text-marmol-600">{a.promedioDeber ?? '—'}</td>
+                <td className="px-4 py-3 text-marmol-600">{a.protegido ? `Menos de ${informe.umbralAnonimato} personas` : a.promedioHacer ?? '—'}</td>
+                <td className="px-4 py-3 text-marmol-600">{a.protegido ? `Menos de ${informe.umbralAnonimato} personas` : a.promedioDeber ?? '—'}</td>
               </tr>
             ))}
           </tbody>

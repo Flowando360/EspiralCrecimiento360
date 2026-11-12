@@ -34,9 +34,9 @@ export async function GET(req: NextRequest) {
       grupo: f.grupo,
       tamano: f.tamano,
       ser: `${f.ser.conDato} de ${f.tamano}`,
-      saber: f.saber.promedio ?? 'Sin dato',
-      hacer: f.hacer.promedio ?? 'Sin dato',
-      deber: f.deber.promedio ?? 'Sin dato',
+      saber: f.saber.protegido ? 'Grupo pequeño' : f.saber.promedio ?? 'Sin dato',
+      hacer: f.hacer.protegido ? 'Grupo pequeño' : f.hacer.promedio ?? 'Sin dato',
+      deber: f.deber.protegido ? 'Grupo pequeño' : f.deber.promedio ?? 'Sin dato',
     });
   }
 
