@@ -111,6 +111,7 @@ export function ListaColaboradores({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
+              <th className="px-4 py-3 font-medium">Documento</th>
               <th className="px-4 py-3 font-medium">Nombre</th>
               <th className="px-4 py-3 font-medium">Cargo</th>
               <th className="px-4 py-3 font-medium">Área</th>

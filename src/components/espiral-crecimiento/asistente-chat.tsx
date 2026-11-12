@@ -9,6 +9,14 @@ interface Mensaje {
   texto: string;
 }
 
+const SUGERENCIAS = [
+  '¿Qué es la Guía del Flow?',
+  '¿Qué significan Ser, Saber, Hacer y Deber?',
+  '¿Qué es un Encuentro de Crecimiento?',
+  '¿Cómo se calcula el Índice de Hacer?',
+  '¿Qué es un PDI?',
+];
+
 export function AsistenteChat({ esAdminTh, nombre }: { esAdminTh: boolean; nombre?: string }) {
   const primerNombre = (nombre ?? '').trim().split(/\s+/)[0];
   const [mensajes, setMensajes] = useState<Mensaje[]>([
@@ -21,9 +29,9 @@ export function AsistenteChat({ esAdminTh, nombre }: { esAdminTh: boolean; nombr
   const [pregunta, setPregunta] = useState('');
   const [cargando, setCargando] = useState(false);
 
-  async function enviar() {
-    if (!pregunta.trim()) return;
-    const nuevaPregunta = pregunta;
+  async function enviar(texto?: string) {
+    const nuevaPregunta = (texto ?? pregunta).trim();
+    if (!nuevaPregunta) return;
     setMensajes((prev) => [...prev, { rol: 'usuario', texto: nuevaPregunta }]);
     setPregunta('');
     setCargando(true);
@@ -86,6 +94,20 @@ export function AsistenteChat({ esAdminTh, nombre }: { esAdminTh: boolean; nombr
             </span>
           </div>
         ))}
+        {mensajes.length === 1 && (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {SUGERENCIAS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => enviar(s)}
+                className="rounded-full border border-flow-300 text-flow-700 hover:bg-flow-50 text-xs px-3 py-1.5 transition"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
         {cargando && <p className="text-xs text-marmol-400">Gino está escribiendo…</p>}
       </div>
 

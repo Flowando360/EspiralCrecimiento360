@@ -15,6 +15,7 @@ export const moduloAdministracion: ModuloAyuda = {
         { nombre: '+ Nuevo cargo', explicacion: 'Crea un cargo desde cero, sin necesidad de un Excel. Pide nombre, proceso o área y si tiene personal a cargo; al crearlo te lleva a su edición para completar el manual de funciones, las habilidades, los riesgos, los exámenes y el EPP.' },
         { nombre: 'Importar desde Excel', explicacion: 'Sube el archivo con el formato FORSST-61 del perfil de cargo; el sistema previsualiza los datos leídos (con advertencias si algo no se pudo interpretar) antes de guardarlos.' },
         { nombre: 'Nombre del cargo', explicacion: 'Clic para ver el detalle completo del perfil.' },
+        { nombre: 'Área / proceso', explicacion: 'Se guarda unificada: «administrativo», «Administrativo» y «ADMINISTRATIVO» quedan como una sola área, para que los informes por área no la partan en varias.' },
       ],
       proceso: [
         'Para crear un cargo desde cero: pulsa "+ Nuevo cargo", escribe el nombre y el área, "Crear cargo y continuar", y completa sus datos en la pantalla de edición (guarda los datos generales con "Guardar cambios"; cada lista de funciones, habilidades, decisiones, riesgos, exámenes y EPP se agrega con su propio botón "Agregar").',

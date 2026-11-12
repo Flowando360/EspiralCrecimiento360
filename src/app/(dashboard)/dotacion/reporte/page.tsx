@@ -1,3 +1,4 @@
+import { crearNormalizadorAreas } from '@/lib/areas';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
@@ -23,11 +24,12 @@ export default async function ReporteConsumoDotacionPage({
     .select('categoria, cantidad, fecha_entrega, colaborador:colaboradores(cargo:cargos(nombre, proceso_area))')
     .eq('empresa_id', perfil.empresa_id);
 
+  const normalizarArea = crearNormalizadorAreas((entregas ?? []).map((e: any) => e.colaborador?.cargo?.proceso_area));
   const filas = (entregas ?? []).map((e: any) => ({
     categoria: e.categoria as string,
     cantidad: e.cantidad as number,
     mes: (e.fecha_entrega as string).slice(0, 7), // "2026-09"
-    area: e.colaborador?.cargo?.proceso_area ?? 'Sin área',
+    area: normalizarArea(e.colaborador?.cargo?.proceso_area) ?? 'Sin área',
     cargo: e.colaborador?.cargo?.nombre ?? 'Sin cargo',
   }));
 

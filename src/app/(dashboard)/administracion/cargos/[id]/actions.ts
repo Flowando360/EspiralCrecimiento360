@@ -1,5 +1,7 @@
 'use server';
 
+import { canonizarAreaEmpresa } from '@/lib/areas';
+
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
@@ -141,7 +143,7 @@ export async function actualizarCargo(input: z.infer<typeof EditarCargoSchema>) 
     .from('cargos')
     .update({
       nombre: d.nombre,
-      proceso_area: d.procesoArea || null,
+      proceso_area: await canonizarAreaEmpresa(supabase, perfil.empresa_id, d.procesoArea),
       objetivo_cargo: d.objetivoCargo || null,
       tiene_personal_a_cargo: d.tienePersonalACargo,
       codigo_documento: d.codigoDocumento || null,

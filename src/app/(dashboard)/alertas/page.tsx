@@ -4,7 +4,8 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { AlertaSeveridadDot, AlertaTipoBadge } from '@/components/alertas/alerta-badge';
 import { AccionesAlerta } from '@/components/alertas/acciones-alerta';
 import { formatearFecha, diasHasta } from '@/lib/utils';
-import { Bell } from 'lucide-react';
+import Link from 'next/link';
+import { Bell, ArrowLeft } from 'lucide-react';
 
 export default async function AlertasPage() {
   const perfil = await getPerfilActual();
@@ -26,6 +27,9 @@ export default async function AlertasPage() {
 
   return (
     <div className="space-y-6">
+      <Link href="/inicio" className="inline-flex items-center gap-1 text-xs text-marmol-400 hover:text-marmol-600">
+        <ArrowLeft size={12} /> Volver al inicio
+      </Link>
       <div>
         <h1 className="font-display text-2xl font-semibold text-secundario">Alertas y fechas clave</h1>
         <p className="text-sm text-marmol-500 mt-1">

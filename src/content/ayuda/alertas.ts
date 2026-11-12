@@ -12,6 +12,7 @@ export const moduloAlertas: ModuloAyuda = {
       resumen:
         'Lista de alertas pendientes o notificadas: vencimientos de contratos, exámenes/certificaciones/EPP de SST, formación, Ciclos de Crecimiento y fechas de cultura (cumpleaños, aniversarios).',
       camposYBotones: [
+        { nombre: '← Volver al inicio', explicacion: 'Enlace al comienzo de la pantalla para regresar al Inicio después de pulsar «Ver todas».' },
         { nombre: 'Punto de color (severidad)', explicacion: 'Informativa, atención o crítica — según qué tan cerca está el vencimiento.' },
         { nombre: 'Etiqueta de tipo', explicacion: 'Contrato, SST, formación, ciclo o cultura.' },
         { nombre: 'Días restantes', explicacion: 'Cuenta regresiva (o "Hace X días" si ya venció) hasta la fecha objetivo.' },

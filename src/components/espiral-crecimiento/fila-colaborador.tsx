@@ -9,6 +9,7 @@ import { formatearFecha } from '@/lib/utils';
 export interface ColaboradorFila {
   id: string;
   nombre_completo: string;
+  numero_documento: string | null;
   estado: string;
   fecha_ingreso: string;
   cargo: { nombre: string; proceso_area: string | null } | null;
@@ -38,6 +39,7 @@ export function FilaColaborador({ colaborador, puedeEliminar }: { colaborador: C
 
   return (
     <tr className="border-b border-marmol-100 last:border-0 hover:bg-marmol-50">
+      <td className="px-4 py-3 text-marmol-600 tabular-nums whitespace-nowrap">{colaborador.numero_documento ?? '—'}</td>
       <td className="px-4 py-3">
         <Link
           href={`/espiral-crecimiento/colaboradores/${colaborador.id}`}

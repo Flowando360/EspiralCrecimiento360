@@ -4,15 +4,7 @@ import { useState, useTransition } from 'react';
 import { crearColaborador } from '@/app/(dashboard)/espiral-crecimiento/colaboradores/nuevo/actions';
 import { CargaHojaVidaIA } from '@/components/espiral-crecimiento/carga-hoja-vida-ia';
 import type { EstadoColaborador, TipoContrato } from '@/types/colaborador';
-
-const TIPOS_CONTRATO: { value: TipoContrato; label: string }[] = [
-  { value: 'indefinido', label: 'Indefinido' },
-  { value: 'fijo', label: 'Término fijo' },
-  { value: 'obra_labor', label: 'Obra o labor' },
-  { value: 'prestacion_servicios', label: 'Prestación de servicios' },
-  { value: 'aprendizaje', label: 'Contrato de aprendizaje' },
-  { value: 'externo', label: 'Externo (no es empleado directo)' },
-];
+import { TIPOS_CONTRATO, calcularFinPrueba } from '@/lib/contratos';
 
 const ESTADOS: { value: EstadoColaborador; label: string }[] = [
   { value: 'periodo_prueba', label: 'Período de prueba' },
@@ -263,6 +255,27 @@ export function FormularioNuevoColaborador({
                 </option>
               ))}
             </select>
+            {(() => {
+              const prueba = calcularFinPrueba(tipoContrato, fechaIngreso);
+              if (prueba) {
+                return (
+                  <p className="text-xs text-marmol-500 mt-1">
+                    Período de prueba: hasta el <strong>{prueba.fecha}</strong> ({prueba.descripcion}).
+                  </p>
+                );
+              }
+              if (tipoContrato === 'fijo') {
+                return (
+                  <p className="text-xs text-marmol-500 mt-1">
+                    En término fijo el período de prueba es la quinta parte de la duración pactada (máx. 2 meses).
+                  </p>
+                );
+              }
+              if (['prestacion_servicios', 'empleado_mision', 'externo'].includes(tipoContrato)) {
+                return <p className="text-xs text-marmol-500 mt-1">Este tipo de vinculación no maneja período de prueba laboral.</p>;
+              }
+              return null;
+            })()}
           </div>
           <div>
             <label className={label}>Salario</label>

@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { glosario } from '@/content/ayuda/glosario';
+
+/** Conocimiento base de la metodología y la plataforma (informe de pruebas, hallazgo 4.21). */
+const INTRO_PLATAFORMA =
+  'Metodología de la plataforma: se acompaña a cada persona en cuatro dimensiones — Ser (talentos y propósito, con la Guía del Flow), Saber (cumplimiento de los requisitos del cargo), Hacer (desempeño en comportamientos observables) y Deber (cumplimiento cultural y de responsabilidades). Hacer y Deber se valoran por ciclo en el Encuentro de Crecimiento (equivale a la evaluación de desempeño 360°) con escala de 1 a 5. Glosario de la plataforma:';
+const CONOCIMIENTO_PLATAFORMA = [INTRO_PLATAFORMA, ...glosario.map((t) => `- ${t.termino}: ${t.definicion}`)].join('\n');
 
 type SupabaseServerClient = ReturnType<typeof createClient>;
 
@@ -110,9 +116,10 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           model: 'claude-sonnet-5',
-          max_tokens: 500,
+          max_tokens: 700,
           system:
             `Eres Gino, el asistente y amigo de las personas de ${nombreEmpresa} dentro de Espiral de Crecimiento 360° (la plataforma de Talento Humano para acompañar el crecimiento de cada persona en cuatro dimensiones: Ser, Saber, Hacer y Deber). Hablas en español, con tuteo, cercano, cálido y sin tecnicismos, como un compañero que apoya; presentas tu nombre solo si te lo preguntan. Si alguien pregunta cómo usar una pantalla de la plataforma, oriéntalo con pasos simples y recuérdale que tu botón flotante (esquina inferior derecha) abre la ayuda de la pantalla donde está. Respondes dudas sobre SST, políticas internas y procedimientos de forma breve, clara y práctica, basándote en los fragmentos de documentos propios que se te den como contexto cuando existan. Si la pregunta es normativa/de procedimiento y NO tienes ningún fragmento relevante en el contexto, dilo explícitamente (no inventes la política) y sugiere contactar a Talento Humano o al líder SST.` +
+            `\n\n${CONOCIMIENTO_PLATAFORMA}` +
             contextoIdentidad +
             contextoDocumentos,
           messages: [{ role: 'user', content: pregunta }],

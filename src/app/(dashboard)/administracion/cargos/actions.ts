@@ -1,5 +1,7 @@
 'use server';
 
+import { canonizarAreaEmpresa } from '@/lib/areas';
+
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
@@ -56,7 +58,7 @@ export async function guardarPerfilCargoImportado(datos: PerfilCargoParseado) {
   if (!cargoId) {
     const { data: creado, error: errorCrear } = await supabase
       .from('cargos')
-      .insert({ empresa_id: perfil.empresa_id, nombre: datos.nombre, proceso_area: datos.procesoArea })
+      .insert({ empresa_id: perfil.empresa_id, nombre: datos.nombre, proceso_area: await canonizarAreaEmpresa(supabase, perfil.empresa_id, datos.procesoArea) })
       .select('id')
       .single();
     if (errorCrear || !creado) return { ok: false as const, error: errorCrear?.message ?? 'No se pudo crear el cargo' };
@@ -69,7 +71,7 @@ export async function guardarPerfilCargoImportado(datos: PerfilCargoParseado) {
   const set = (campo: string, valor: unknown) => {
     if (valor !== null && valor !== undefined) camposCargo[campo] = valor;
   };
-  set('proceso_area', datos.procesoArea);
+  set('proceso_area', await canonizarAreaEmpresa(supabase, perfil.empresa_id, datos.procesoArea));
   set('objetivo_cargo', datos.objetivoCargo);
   set('codigo_documento', datos.codigoDocumento);
   set('version_documento', datos.versionDocumento);

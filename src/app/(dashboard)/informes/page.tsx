@@ -29,7 +29,7 @@ const INFORMES: InformeDisponible[] = [
   },
   {
     href: '/informes/sst',
-    titulo: 'Cumplimiento SST',
+    titulo: 'Seguimiento SST',
     descripcion: 'Certificaciones, vencimientos y alertas SST abiertas, con evidencia documental.',
     icon: ShieldCheck,
     // No existe todavía un rol "Líder SST" en el sistema — se apoya en los roles existentes.

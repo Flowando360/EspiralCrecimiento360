@@ -37,7 +37,7 @@ export const moduloInformes: ModuloAyuda = {
     {
       slug: 'sst',
       ruta: '/informes/sst',
-      titulo: 'Informe de Cumplimiento SST',
+      titulo: 'Informe de Seguimiento SST',
       resumen: 'Certificaciones, vencimientos y alertas SST abiertas, con la evidencia documental disponible.',
       camposYBotones: [{ nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
       notas: ['Visible para admin_th, líder y gerencia.'],

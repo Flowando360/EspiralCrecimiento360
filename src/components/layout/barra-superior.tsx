@@ -167,7 +167,7 @@ const NAV: NavGroup[] = [
       { href: '/informes', label: 'Todos los informes', icon: FileBarChart, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },
       { href: '/informes/360', label: 'Encuentro 360° Integrado', icon: Users2, roles: ['admin_th', 'lider', 'colaborador'] },
       { href: '/informes/pdi', label: 'Plan de Desarrollo Individual', icon: Target, roles: ['admin_th', 'lider', 'colaborador'] },
-      { href: '/informes/sst', label: 'Cumplimiento SST', icon: ShieldCheck, roles: ['admin_th', 'lider', 'gerencia'] },
+      { href: '/informes/sst', label: 'Seguimiento SST', icon: ShieldCheck, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/informes/brechas', label: 'Brechas por dimensión', icon: BarChart3, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/informes/formacion', label: 'Formación', icon: GraduationCap, roles: ['admin_th', 'lider', 'gerencia', 'colaborador'] },
       { href: '/informes/cultura', label: 'Cultura y Engagement', icon: Heart, roles: ['admin_th', 'lider', 'gerencia'] },

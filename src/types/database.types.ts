@@ -9899,6 +9899,10 @@ export type Database = {
         | "prestacion_servicios"
         | "aprendizaje"
         | "externo"
+        | "empleado_mision"
+        | "aprendizaje_lectiva"
+        | "aprendizaje_productiva"
+        | "pasantia"
       tipo_elemento_identidad: "principio" | "valor"
       tipo_evaluador: "autoevaluacion" | "lider" | "par" | "colaborador_a_cargo"
       tipo_habilidad: "funcional" | "tecnica"
@@ -10167,6 +10171,10 @@ export const Constants = {
         "prestacion_servicios",
         "aprendizaje",
         "externo",
+        "empleado_mision",
+        "aprendizaje_lectiva",
+        "aprendizaje_productiva",
+        "pasantia",
       ],
       tipo_elemento_identidad: ["principio", "valor"],
       tipo_evaluador: ["autoevaluacion", "lider", "par", "colaborador_a_cargo"],

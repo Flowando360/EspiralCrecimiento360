@@ -1,14 +1,6 @@
 import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/renderer';
 import { formatearFecha } from '@/lib/utils';
-
-const TIPO_CONTRATO_TEXTO: Record<string, string> = {
-  indefinido: 'a término indefinido',
-  fijo: 'a término fijo',
-  obra_labor: 'por obra o labor',
-  prestacion_servicios: 'de prestación de servicios',
-  aprendizaje: 'de aprendizaje',
-  externo: 'externo',
-};
+import { TIPO_CONTRATO_TEXTO } from '@/lib/contratos';
 
 function formatearDocumento(numero: string | null): string {
   if (!numero) return '—';

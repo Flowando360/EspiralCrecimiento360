@@ -1,3 +1,4 @@
+import { crearNormalizadorAreas } from '@/lib/areas';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 
@@ -99,10 +100,11 @@ export async function obtenerInformeBrechas(agrupacion: Agrupacion) {
     ((serRaw ?? []) as any[]).map((s) => [s.colaborador_id, s.promedio_ser as number | null])
   );
 
+  const normalizarArea = crearNormalizadorAreas(colaboradores.map((c: any) => c.cargo?.proceso_area));
   const grupos = new Map<string, string[]>(); // nombre del grupo -> ids de colaboradores
   for (const co of colaboradores) {
     const nombreGrupo =
-      agrupacion === 'equipo' ? co.lider?.nombre_completo ?? 'Sin líder asignado' : co.cargo?.proceso_area ?? 'Sin área asignada';
+      agrupacion === 'equipo' ? co.lider?.nombre_completo ?? 'Sin líder asignado' : normalizarArea(co.cargo?.proceso_area) ?? 'Sin área asignada';
     if (!grupos.has(nombreGrupo)) grupos.set(nombreGrupo, []);
     grupos.get(nombreGrupo)!.push(co.id);
   }

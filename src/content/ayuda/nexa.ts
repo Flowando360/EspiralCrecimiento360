@@ -253,6 +253,7 @@ export const moduloNexa: ModuloAyuda = {
       resumen:
         'Gino es el amigo de la plataforma: un chat que te ayuda a usar Espiral y responde dudas normativas y de procedimiento apoyándose en los documentos de políticas propias que admin_th haya cargado (reglamento SST, manual interno), además del propósito/valores de la empresa. Si no tiene ningún documento relevante para una pregunta normativa, lo dice en vez de inventar una respuesta.',
       camposYBotones: [
+        { nombre: 'Preguntas sugeridas', explicacion: 'Al abrir el chat aparecen botones con preguntas frecuentes (¿Qué es la Guía del Flow?, ¿Qué significan Ser, Saber, Hacer y Deber?…). Tócalas para preguntar sin escribir. Gino también conoce el glosario y la metodología de la plataforma, no solo los documentos de la empresa.' },
         { nombre: 'Campo de pregunta', explicacion: 'Escribe tu duda y presiona enviar; la respuesta aparece en el chat.' },
         { nombre: 'Base documental (admin_th)', explicacion: 'Botón que lleva a la pantalla donde se cargan los documentos que usa el asistente (ver "Base documental del asistente" más abajo).' },
       ],

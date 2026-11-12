@@ -1,5 +1,7 @@
 'use server';
 
+import { VALORES_TIPO_CONTRATO } from '@/lib/contratos';
+
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { redirect } from 'next/navigation';
@@ -17,7 +19,7 @@ const CrearColaboradorSchema = z.object({
   liderId: z.string().uuid().optional().or(z.literal('')),
   equipoIds: z.array(z.string().uuid()).optional(),
   fechaIngreso: z.string().min(1, 'La fecha de ingreso es requerida'),
-  tipoContrato: z.enum(['indefinido', 'fijo', 'obra_labor', 'prestacion_servicios', 'aprendizaje', 'externo']),
+  tipoContrato: z.enum(VALORES_TIPO_CONTRATO),
   estado: z.enum(['activo', 'periodo_prueba', 'inactivo', 'en_proceso_salida']),
   salario: z.string().optional(),
   eps: z.string().trim().optional(),

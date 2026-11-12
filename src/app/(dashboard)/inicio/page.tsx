@@ -64,6 +64,13 @@ export default async function InicioPage() {
       .eq('empresa_id', perfil.empresa_id)
       .maybeSingle();
 
+    const { count: enPruebaCount } = await supabase
+      .from('colaboradores')
+      .select('id', { count: 'exact', head: true })
+      .eq('empresa_id', perfil.empresa_id)
+      .eq('estado', 'periodo_prueba');
+    const enPrueba = enPruebaCount ?? 0;
+
     const { filas: historico } = await obtenerInformeHistorico();
     const cicloActual = historico[historico.length - 1];
     const cicloAnterior = historico[historico.length - 2];
@@ -93,23 +100,28 @@ export default async function InicioPage() {
             label="Colaboradores activos"
             value={indicadores?.total_activos ?? '—'}
             icon={Users}
+            hint={enPrueba > 0 ? `+ ${enPrueba} en período de prueba (no incluidos)` : 'Ninguno en período de prueba'}
+            info="Personas con contrato confirmado y estado Activo. Quienes están en período de prueba se cuentan aparte (ver la nota debajo del número), porque su vínculo se puede terminar sin indemnización y requieren seguimiento diferenciado."
           />
           <StatCard
             label="Índice de Hacer (promedio)"
             value={indicadores?.promedio_hacer_empresa ?? '—'}
             icon={TrendingUp}
             tono="flow"
+            info="Hacer = desempeño: qué tan bien cumple la persona sus funciones y objetivos, según el Encuentro de Crecimiento (evaluación de desempeño). Escala 1 a 5: cerca de 5 es un buen desempeño; por debajo de 3 señala brechas por atender."
           />
           <StatCard
             label="Índice de Deber (promedio)"
             value={indicadores?.promedio_deber_empresa ?? '—'}
             icon={TrendingUp}
             tono="flow"
+            info="Deber = cumplimiento de normas, políticas y responsabilidades (SST, procedimientos, compromisos). Escala 1 a 5: un valor alto indica buen cumplimiento; uno bajo, riesgo de incumplimientos."
           />
           <StatCard
             label="Alertas críticas abiertas"
             value={indicadores?.alertas_criticas ?? 0}
             icon={ShieldAlert}
+            info="Alertas de severidad crítica que siguen sin resolverse (vencimientos de contrato, exámenes, certificaciones, etc.). Lo esperado es 0."
             tono={((indicadores?.alertas_criticas as number) ?? 0) > 0 ? 'bajo' : 'alto'}
           />
         </div>
@@ -118,15 +130,18 @@ export default async function InicioPage() {
           <StatCard
             label="Cumplimiento Saber (promedio)"
             value={indicadores?.promedio_saber_empresa ? `${indicadores.promedio_saber_empresa}%` : '—'}
+            info="Saber = conocimiento: % de los requisitos del cargo (formación, experiencia, habilidades) que la hoja de vida de la persona cumple. 100% es cumplir todo; un valor bajo indica necesidad de formación."
           />
           <StatCard
             label="Alineación talento-rol"
             value={indicadores?.pct_alineacion_talento_rol ? `${indicadores.pct_alineacion_talento_rol}%` : '—'}
             hint="% de personas en un rol alineado con su Ser"
+            info="Ser = talento y motivaciones (Guía del Flow). Mide qué porcentaje de las personas está en un cargo que encaja con su forma de ser. Alto: buen encaje; bajo: riesgo de desmotivación o rotación."
           />
           <StatCard
             label="En proceso de salida"
             value={indicadores?.en_proceso_salida ?? 0}
+            info="Colaboradores con la salida ya iniciada (renuncia, terminación, etc.) que todavía no han dejado la empresa."
           />
         </div>
 

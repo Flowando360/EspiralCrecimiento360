@@ -1,3 +1,4 @@
+import { crearNormalizadorAreas } from '@/lib/areas';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 
@@ -54,9 +55,10 @@ export async function obtenerInformeConsolidado(): Promise<{ perfil: any; inform
     resultadoPorColaborador.set(cid, { indice_hacer: r.indice_hacer, indice_deber: r.indice_deber });
   }
 
+  const normalizarArea = crearNormalizadorAreas(colaboradores.map((c: any) => c.cargo?.proceso_area));
   const grupos = new Map<string, string[]>();
   for (const co of colaboradores) {
-    const area = co.cargo?.proceso_area ?? 'Sin área asignada';
+    const area = normalizarArea(co.cargo?.proceso_area) ?? 'Sin área asignada';
     if (!grupos.has(area)) grupos.set(area, []);
     grupos.get(area)!.push(co.id);
   }

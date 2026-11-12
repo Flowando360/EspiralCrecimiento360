@@ -8,6 +8,10 @@ export type TipoContrato =
   | 'obra_labor'
   | 'prestacion_servicios'
   | 'aprendizaje'
+  | 'aprendizaje_lectiva'
+  | 'aprendizaje_productiva'
+  | 'pasantia'
+  | 'empleado_mision'
   | 'externo';
 
 export interface Cargo {

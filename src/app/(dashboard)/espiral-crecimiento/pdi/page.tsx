@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
-import { Target, X } from 'lucide-react';
+import { Target, X, ArrowLeft } from 'lucide-react';
 import { PdiKanban } from '@/components/espiral-crecimiento/pdi-kanban';
 
 export default async function PdiPage({ searchParams }: { searchParams: { colaboradorId?: string } }) {
@@ -42,6 +42,11 @@ export default async function PdiPage({ searchParams }: { searchParams: { colabo
 
   return (
     <div className="space-y-6">
+      {colaboradorIdFiltro && (
+        <Link href="/espiral-crecimiento/dimensiones" className="inline-flex items-center gap-1 text-xs text-marmol-400 hover:text-marmol-600">
+          <ArrowLeft size={12} /> Volver a Dimensiones
+        </Link>
+      )}
       <div className="flex items-start justify-between flex-wrap gap-2">
         <div>
           <h1 className="font-display text-2xl font-semibold text-secundario">
