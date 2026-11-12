@@ -8530,6 +8530,44 @@ export type Database = {
           },
         ]
       }
+      ser_consentimientos: {
+        Row: {
+          aceptado_en: string
+          actualizado_en: string
+          colaborador_id: string
+          comparte_con_lider: boolean
+          empresa_id: string
+          id: string
+          version_finalidad: string
+        }
+        Insert: {
+          aceptado_en?: string
+          actualizado_en?: string
+          colaborador_id: string
+          comparte_con_lider?: boolean
+          empresa_id: string
+          id?: string
+          version_finalidad: string
+        }
+        Update: {
+          aceptado_en?: string
+          actualizado_en?: string
+          colaborador_id?: string
+          comparte_con_lider?: boolean
+          empresa_id?: string
+          id?: string
+          version_finalidad?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ser_consentimientos_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: true
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ser_comentarios_colaborador: {
         Row: {
           aspecto_id: string | null

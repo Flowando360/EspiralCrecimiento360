@@ -11,6 +11,7 @@ import {
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Sparkles, Lock } from 'lucide-react';
 import type { BloqueSer } from '@/types/colaborador';
+import { ConsentimientoGuia } from '@/components/espiral-crecimiento/consentimiento-guia';
 import { SeguimientoSer } from '@/components/espiral-crecimiento/seguimiento-ser';
 
 const BLOQUES: { valor: BloqueSer; titulo: string }[] = [
@@ -103,6 +104,10 @@ export default async function GuiaDelFlowPage({ params }: { params: { id: string
     comentarioGeneral = comentariosRaw?.comentario ?? null;
   }
 
+  // Decisión de la persona sobre quién ve su Guía (sin fila = aún no decide: el líder la ve, como antes).
+  const { data: consentimiento } = await supabase.from('ser_consentimientos').select('comparte_con_lider').eq('colaborador_id', params.id).maybeSingle();
+  const liderBloqueado = esLider && consentimiento != null && !consentimiento.comparte_con_lider;
+
   const { data: seguimientos } = await supabase
     .from('ser_seguimientos')
     .select('id, fecha, fortalezas_en_practica, motivadores, acuerdos, proxima_revision, registrado_por_nombre')
@@ -153,9 +158,26 @@ export default async function GuiaDelFlowPage({ params }: { params: { id: string
         )}
       </div>
 
-      {puedeGestionar && <InvitacionGuiaFlow colaboradorId={params.id} invitacionInicial={invitacionInicial} />}
+      {liderBloqueado && (
+        <div className="card p-4 text-sm text-marmol-600 flex items-start gap-2">
+          <Lock size={14} className="mt-0.5 shrink-0" />
+          <p>Esta persona decidió no compartir el informe de su Guía del Flow con su líder directo. Puedes seguir acompañándola con el seguimiento del Ser, abajo.</p>
+        </div>
+      )}
 
-      {!guia ? (
+      {esAdminTh && (
+        <p className="text-xs text-marmol-500">
+          Consentimiento de la persona: {consentimiento == null ? 'pendiente (su líder la ve mientras tanto)' : consentimiento.comparte_con_lider ? 'comparte el informe con su líder directo' : 'solo ella y Talento Humano ven el informe'}.
+        </p>
+      )}
+
+      {esElPropioColaborador && (
+        <ConsentimientoGuia inicial={{ decidido: consentimiento != null, comparteConLider: consentimiento?.comparte_con_lider ?? true }} />
+      )}
+
+      {puedeGestionar && !liderBloqueado && <InvitacionGuiaFlow colaboradorId={params.id} invitacionInicial={invitacionInicial} />}
+
+      {liderBloqueado ? null : !guia ? (
         <div className="card flex flex-col items-center justify-center gap-3 py-16 text-center">
           <Sparkles size={28} className="text-marmol-300" />
           <p className="text-sm font-medium text-marmol-700">Sin Guía del Flow registrada todavía</p>
