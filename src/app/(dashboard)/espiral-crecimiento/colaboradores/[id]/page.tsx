@@ -12,8 +12,9 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
 
   const supabase = createClient();
 
-  const { data: filaSede } = await supabase.from('colaboradores').select('sede:sede_id(nombre)').eq('id', params.id).maybeSingle();
-  const nombreSede = (Array.isArray((filaSede as any)?.sede) ? (filaSede as any).sede[0] : (filaSede as any)?.sede)?.nombre as string | undefined;
+  const { data: filaSede } = await supabase.from('colaboradores').select('sede_id').eq('id', params.id).maybeSingle();
+  const { data: filaNombreSede } = filaSede?.sede_id ? await supabase.from('sedes').select('nombre').eq('id', filaSede.sede_id).maybeSingle() : { data: null };
+  const nombreSede = filaNombreSede?.nombre as string | undefined;
 
   const { data: colaborador } = await supabase
     .from('colaboradores')
