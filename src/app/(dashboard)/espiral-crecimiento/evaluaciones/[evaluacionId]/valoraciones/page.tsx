@@ -4,6 +4,9 @@ import { ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { ReabrirValoracion } from '@/components/espiral-crecimiento/reabrir-valoracion';
+import { InvitarClienteInterno } from '@/components/espiral-crecimiento/invitar-cliente-interno';
+import { QuitarClienteInterno } from '@/components/espiral-crecimiento/quitar-cliente-interno';
+import { ESTADOS_VIGENTES } from '@/lib/colaboradores/estados';
 import { formatearFecha, primero } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -13,6 +16,7 @@ const TIPOS: Record<string, string> = {
   lider: 'Líder',
   par: 'Par',
   colaborador_a_cargo: 'Colaborador a cargo',
+  cliente_interno: 'Cliente interno',
 };
 
 export default async function ValoracionesDeUnaEvaluacionPage({ params }: { params: { evaluacionId: string } }) {
@@ -33,6 +37,17 @@ export default async function ValoracionesDeUnaEvaluacionPage({ params }: { para
     .select('id, tipo_evaluador, completada, fecha_completada, evaluador:evaluador_colaborador_id(nombre_completo)')
     .eq('evaluacion_id', evaluacion.id)
     .order('tipo_evaluador');
+
+  const { data: posibles } = await supabase
+    .from('colaboradores')
+    .select('id, nombre_completo')
+    .eq('empresa_id', perfil.empresa_id)
+    .in('estado', ESTADOS_VIGENTES)
+    .eq('es_externo', false)
+    .order('nombre_completo');
+  const { data: tareasIds } = await supabase.from('evaluacion_tareas').select('evaluador_colaborador_id').eq('evaluacion_id', evaluacion.id);
+  const ocupados = new Set(((tareasIds ?? []) as any[]).map((t) => t.evaluador_colaborador_id as string));
+  const opcionesCliente = ((posibles ?? []) as any[]).filter((c) => !ocupados.has(c.id) && c.id !== evaluado.id).map((c) => ({ id: c.id as string, nombre: c.nombre_completo as string }));
 
   const { data: historial } = await supabase
     .from('auditoria_cambios')
@@ -68,10 +83,24 @@ export default async function ValoracionesDeUnaEvaluacionPage({ params }: { para
                   {t.completada ? `Enviada el ${formatearFecha(t.fecha_completada)}` : 'Pendiente o en borrador (no cuenta en resultados)'}
                 </p>
               </div>
-              {t.completada ? <ReabrirValoracion tareaId={t.id} evaluador={nombre} /> : <span className="text-xs text-marmol-400">Abierta</span>}
+              {t.completada ? (
+                <ReabrirValoracion tareaId={t.id} evaluador={nombre} />
+              ) : t.tipo_evaluador === 'cliente_interno' ? (
+                <QuitarClienteInterno evaluacionId={evaluacion.id} tareaId={t.id} />
+              ) : (
+                <span className="text-xs text-marmol-400">Abierta</span>
+              )}
             </div>
           );
         })}
+      </div>
+
+      <div className="card p-4 space-y-2">
+        <h2 className="font-display text-lg font-semibold text-secundario">Invitar a un cliente interno</h2>
+        <p className="text-xs text-marmol-400 max-w-xl">
+          Un cliente interno es alguien (de otra área, por ejemplo) que recibe el servicio de {evaluado.nombre_completo}. Responde solo las competencias funcionales y las funciones del cargo, puede usar «No aplica» y su opinión cuenta como una fuente más si el ciclo le asignó peso (Administración → Configuración). Nunca se muestra quién respondió.
+        </p>
+        <InvitarClienteInterno evaluacionId={evaluacion.id} opciones={opcionesCliente} />
       </div>
 
       <div>

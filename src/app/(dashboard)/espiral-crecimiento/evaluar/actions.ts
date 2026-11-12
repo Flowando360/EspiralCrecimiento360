@@ -5,6 +5,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { registrarAuditoria } from '@/lib/auditoria/registrar';
+import { bloquesParaTipo } from '@/lib/desempeno/fuentes';
 
 const MENSAJE_ENVIADA = 'Esta valoración ya fue enviada y no se puede modificar';
 
@@ -148,7 +149,7 @@ export async function enviarValoracion(input: { evaluacionTareaId: string }) {
   const supabase = createClient();
   const { data: tarea } = await supabase
     .from('evaluacion_tareas')
-    .select('id, evaluacion_id, completada, evaluador_colaborador_id')
+    .select('id, evaluacion_id, completada, evaluador_colaborador_id, tipo_evaluador')
     .eq('id', tareaId.data)
     .maybeSingle();
   if (!tarea || tarea.evaluador_colaborador_id !== perfil.colaborador_id) {
@@ -156,11 +157,10 @@ export async function enviarValoracion(input: { evaluacionTareaId: string }) {
   }
   if (tarea.completada) return { ok: false as const, error: MENSAJE_ENVIADA };
 
-  const { data: items } = await supabase
-    .from('evaluacion_items')
-    .select('id')
-    .eq('evaluacion_id', tarea.evaluacion_id)
-    .eq('activo', true);
+  let consultaItems = supabase.from('evaluacion_items').select('id').eq('evaluacion_id', tarea.evaluacion_id).eq('activo', true);
+  const bloquesPermitidos = bloquesParaTipo(tarea.tipo_evaluador);
+  if (bloquesPermitidos) consultaItems = consultaItems.in('bloque', bloquesPermitidos as any);
+  const { data: items } = await consultaItems;
   const idsActivos = new Set((items ?? []).map((i) => i.id));
   const { data: respuestas } = await supabase
     .from('respuestas_evaluacion')

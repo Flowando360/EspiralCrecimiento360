@@ -11,6 +11,7 @@ export interface PesosIniciales {
   colaboradoresConEquipo: number;
   liderSinEquipo: number;
   paresSinEquipo: number;
+  clientesInternos: number;
 }
 
 export function FormularioPonderaciones({
@@ -107,6 +108,23 @@ export function FormularioPonderaciones({
               className="w-full rounded-lg border border-marmol-200 px-2 py-1.5"
             />
           </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="font-display font-semibold text-secundario pt-2">Clientes internos (opcional)</h2>
+        <p className="text-xs text-marmol-400 mt-0.5 max-w-xl">
+          Peso de las personas que reciben el servicio de quien se evalúa y que Talento Humano invita a valorar (de 0 a 50 %). Lo que asignes aquí se resta proporcionalmente a las demás fuentes, así todo sigue sumando 100 %. En 0 la fuente no cuenta.
+        </p>
+        <div className="max-w-[10rem] mt-2">
+          <input
+            type="number"
+            min={0}
+            max={50}
+            value={pesos.clientesInternos}
+            onChange={(e) => actualizar('clientesInternos', e.target.value)}
+            className="w-full rounded-lg border border-marmol-200 px-2 py-1.5 text-sm"
+          />
         </div>
       </div>
 

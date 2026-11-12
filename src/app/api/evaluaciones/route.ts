@@ -146,10 +146,10 @@ export async function POST(req: NextRequest) {
     const evaluadoresVigentes = new Set(asignaciones.map((a: any) => a.evaluador_id as string));
     const { data: tareasExistentes } = await supabase
       .from('evaluacion_tareas')
-      .select('id, evaluador_colaborador_id, completada')
+      .select('id, evaluador_colaborador_id, completada, tipo_evaluador')
       .eq('evaluacion_id', evaluacion.id);
     const obsoletas = (tareasExistentes ?? []).filter(
-      (t: any) => !t.completada && !evaluadoresVigentes.has(t.evaluador_colaborador_id)
+      (t: any) => !t.completada && t.tipo_evaluador !== 'cliente_interno' && !evaluadoresVigentes.has(t.evaluador_colaborador_id)
     );
     if (obsoletas.length > 0) {
       const { data: conRespuestas } = await supabase

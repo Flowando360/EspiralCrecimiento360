@@ -1398,6 +1398,7 @@ export type Database = {
           peso_lider_con_equipo: number
           peso_lider_sin_equipo: number
           peso_pares_con_equipo: number
+          peso_clientes_internos: number
           peso_pares_sin_equipo: number
         }
         Insert: {
@@ -1413,6 +1414,7 @@ export type Database = {
           peso_lider_con_equipo?: number
           peso_lider_sin_equipo?: number
           peso_pares_con_equipo?: number
+          peso_clientes_internos?: number
           peso_pares_sin_equipo?: number
         }
         Update: {
@@ -1428,6 +1430,7 @@ export type Database = {
           peso_lider_con_equipo?: number
           peso_lider_sin_equipo?: number
           peso_pares_con_equipo?: number
+          peso_clientes_internos?: number
           peso_pares_sin_equipo?: number
         }
         Relationships: [
@@ -10476,7 +10479,7 @@ export type Database = {
         | "aprendizaje_productiva"
         | "pasantia"
       tipo_elemento_identidad: "principio" | "valor"
-      tipo_evaluador: "autoevaluacion" | "lider" | "par" | "colaborador_a_cargo"
+      tipo_evaluador: "autoevaluacion" | "lider" | "par" | "colaborador_a_cargo" | "cliente_interno"
       tipo_habilidad: "funcional" | "tecnica"
       tipo_incapacidad:
         | "enfermedad_general"
@@ -10750,7 +10753,7 @@ export const Constants = {
         "pasantia",
       ],
       tipo_elemento_identidad: ["principio", "valor"],
-      tipo_evaluador: ["autoevaluacion", "lider", "par", "colaborador_a_cargo"],
+      tipo_evaluador: ["autoevaluacion", "lider", "par", "colaborador_a_cargo", "cliente_interno"],
       tipo_habilidad: ["funcional", "tecnica"],
       tipo_incapacidad: [
         "enfermedad_general",

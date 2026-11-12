@@ -126,6 +126,7 @@ export default async function AdminConfiguracionPage() {
             colaboradoresConEquipo: Math.round((ciclo.peso_colaboradores_con_equipo ?? 0.3) * 100),
             liderSinEquipo: Math.round((ciclo.peso_lider_sin_equipo ?? 0.6) * 100),
             paresSinEquipo: Math.round((ciclo.peso_pares_sin_equipo ?? 0.4) * 100),
+            clientesInternos: Math.round(((ciclo as any).peso_clientes_internos ?? 0) * 100),
           }}
         />
       ) : (

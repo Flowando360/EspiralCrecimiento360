@@ -13,6 +13,7 @@ const ETIQUETA_EVALUADOR: Record<string, string> = {
   lider: 'Líder',
   par: 'Pares',
   colaborador_a_cargo: 'Colaboradores a cargo',
+  cliente_interno: 'Clientes internos',
 };
 
 export default async function Informe360Page({

@@ -20,6 +20,7 @@ const ETIQUETA_EVALUADOR: Record<string, string> = {
   lider: 'Líder',
   par: 'Pares',
   colaborador_a_cargo: 'Colaboradores a cargo',
+  cliente_interno: 'Clientes internos',
 };
 
 export function Informe360Document({ informe }: { informe: Informe360 }) {

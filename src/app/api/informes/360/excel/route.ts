@@ -10,6 +10,7 @@ const ETIQUETA_EVALUADOR: Record<string, string> = {
   lider: 'Líder',
   par: 'Pares',
   colaborador_a_cargo: 'Colaboradores a cargo',
+  cliente_interno: 'Clientes internos',
 };
 
 export async function GET(req: NextRequest) {

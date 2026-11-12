@@ -16,6 +16,7 @@ const PonderacionesSchema = z
     colaboradoresConEquipo: z.number().int().min(0).max(100),
     liderSinEquipo: z.number().int().min(0).max(100),
     paresSinEquipo: z.number().int().min(0).max(100),
+    clientesInternos: z.number().int().min(0).max(50).default(0),
   })
   .refine((v) => v.liderConEquipo + v.paresConEquipo + v.colaboradoresConEquipo === 100, {
     message: 'Los pesos de "con personal a cargo" deben sumar 100%',
@@ -63,6 +64,7 @@ export async function guardarPonderaciones(input: z.infer<typeof PonderacionesSc
       peso_colaboradores_con_equipo: parsed.data.colaboradoresConEquipo / 100,
       peso_lider_sin_equipo: parsed.data.liderSinEquipo / 100,
       peso_pares_sin_equipo: parsed.data.paresSinEquipo / 100,
+      peso_clientes_internos: parsed.data.clientesInternos / 100,
     })
     .eq('id', parsed.data.cicloId);
 
@@ -80,6 +82,7 @@ export async function guardarPonderaciones(input: z.infer<typeof PonderacionesSc
       colaboradoresConEquipo: parsed.data.colaboradoresConEquipo,
       liderSinEquipo: parsed.data.liderSinEquipo,
       paresSinEquipo: parsed.data.paresSinEquipo,
+      clientesInternos: parsed.data.clientesInternos,
     },
   });
   revalidatePath('/administracion/configuracion');

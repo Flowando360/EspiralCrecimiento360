@@ -1,3 +1,4 @@
+import { bloquesParaTipo } from '@/lib/desempeno/fuentes';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { FormularioEvaluacion, type ItemEvaluacion } from '@/components/espiral-crecimiento/formulario-evaluacion';
@@ -37,6 +38,7 @@ export default async function EvaluarPage({ params }: { params: { evaluacionId: 
     )
     .eq('evaluacion_id', params.evaluacionId)
     .eq('activo', true)
+    .in('bloque', (bloquesParaTipo(tarea.tipo_evaluador) ?? ['competencias_organizacionales', 'competencias_funcionales', 'competencias_liderazgo', 'roles_y_funciones', 'cultura']) as any)
     .order('orden');
 
   const { data: respuestasExistentes } = await supabase
@@ -71,6 +73,7 @@ export default async function EvaluarPage({ params }: { params: { evaluacionId: 
     lider: 'Valoración del líder',
     par: 'Valoración de un par',
     colaborador_a_cargo: 'Valoración de colaborador a cargo',
+    cliente_interno: 'Valoración como cliente interno',
   };
 
   return (

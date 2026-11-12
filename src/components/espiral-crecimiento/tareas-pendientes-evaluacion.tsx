@@ -7,6 +7,7 @@ const ETIQUETA_TIPO: Record<string, string> = {
   lider: 'Valorar como líder',
   par: 'Valorar como par',
   colaborador_a_cargo: 'Valorar como colaborador a cargo',
+  cliente_interno: 'Valorar como cliente interno',
 };
 
 export interface TareaPendiente {

@@ -47,7 +47,7 @@ export async function cargarDesempenoIntegral(params: {
     supabase.from('v_saber_cumplimiento').select('porcentaje_cumplimiento').eq('colaborador_id', params.colaboradorId).maybeSingle(),
     supabase
       .from('evaluaciones')
-      .select('tenia_personal_a_cargo, pesos_integral_congelados, ciclo:ciclo_id(peso_lider_con_equipo, peso_pares_con_equipo, peso_colaboradores_con_equipo, peso_lider_sin_equipo, peso_pares_sin_equipo)')
+      .select('tenia_personal_a_cargo, pesos_integral_congelados, ciclo:ciclo_id(peso_lider_con_equipo, peso_pares_con_equipo, peso_colaboradores_con_equipo, peso_lider_sin_equipo, peso_pares_sin_equipo, peso_clientes_internos)')
       .eq('id', params.evaluacionId)
       .maybeSingle(),
     supabase
@@ -68,10 +68,13 @@ export async function cargarDesempenoIntegral(params: {
   // Pesos de las fuentes del ciclo (mismos que usa el cálculo de Hacer y Deber).
   const ciclo = (Array.isArray((evaluacion as any)?.ciclo) ? (evaluacion as any).ciclo[0] : (evaluacion as any)?.ciclo) ?? {};
   const conEquipo = Boolean((evaluacion as any)?.tenia_personal_a_cargo);
+  const pesoCliente = Number(ciclo.peso_clientes_internos) || 0;
+  const escala = 1 - pesoCliente; // el peso de clientes internos se resta proporcionalmente a las demás fuentes
   const pesosFuentes = {
-    lider: Number(conEquipo ? ciclo.peso_lider_con_equipo : ciclo.peso_lider_sin_equipo) || 0,
-    par: Number(conEquipo ? ciclo.peso_pares_con_equipo : ciclo.peso_pares_sin_equipo) || 0,
-    colaborador_a_cargo: conEquipo ? Number(ciclo.peso_colaboradores_con_equipo) || 0 : 0,
+    lider: (Number(conEquipo ? ciclo.peso_lider_con_equipo : ciclo.peso_lider_sin_equipo) || 0) * escala,
+    par: (Number(conEquipo ? ciclo.peso_pares_con_equipo : ciclo.peso_pares_sin_equipo) || 0) * escala,
+    colaborador_a_cargo: (conEquipo ? Number(ciclo.peso_colaboradores_con_equipo) || 0 : 0) * escala,
+    cliente_interno: pesoCliente,
   };
 
   // Notas por criterio (ítem) y fuente, sin contar los «No aplica».

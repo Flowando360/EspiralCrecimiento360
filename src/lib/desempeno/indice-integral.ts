@@ -96,6 +96,7 @@ export interface PesosFuentes {
   lider: number;
   par: number;
   colaborador_a_cargo: number;
+  cliente_interno?: number;
 }
 
 /**
@@ -103,14 +104,15 @@ export interface PesosFuentes {
  * y media ponderada por el peso de cada fuente, reescalada a las que sí respondieron. La autoevaluación no cuenta.
  */
 export function notaConsolidada(notas: NotaPorFuente[], pesos: PesosFuentes): number | null {
-  const fuentes: (keyof PesosFuentes)[] = ['lider', 'par', 'colaborador_a_cargo'];
+  const fuentes: (keyof PesosFuentes)[] = ['lider', 'par', 'colaborador_a_cargo', 'cliente_interno'];
   let suma = 0;
   let sumaPesos = 0;
   for (const f of fuentes) {
     const delas = notas.filter((n) => n.tipoEvaluador === f).map((n) => n.nota);
-    if (delas.length === 0 || pesos[f] <= 0) continue;
-    suma += (delas.reduce((a, b) => a + b, 0) / delas.length) * pesos[f];
-    sumaPesos += pesos[f];
+    const peso = pesos[f] ?? 0;
+    if (delas.length === 0 || peso <= 0) continue;
+    suma += (delas.reduce((a, b) => a + b, 0) / delas.length) * peso;
+    sumaPesos += peso;
   }
   return sumaPesos > 0 ? Math.round((suma / sumaPesos) * 100) / 100 : null;
 }
