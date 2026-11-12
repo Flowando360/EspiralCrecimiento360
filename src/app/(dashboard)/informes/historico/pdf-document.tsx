@@ -49,9 +49,9 @@ export function InformeHistoricoDocument({ filas }: { filas: FilaHistorico[] }) 
                 <Text style={styles.celdaCiclo}>{f.cicloNombre}</Text>
                 <Text style={styles.celdaFecha}>{formatearFecha(f.fechaApertura)}</Text>
                 <Text style={styles.celdaPersonas}>{f.personas}</Text>
-                <Text style={styles.celdaIndice}>{f.promedioHacer ?? '—'}</Text>
+                <Text style={styles.celdaIndice}>{f.protegido ? 'Grupo pequeño' : f.promedioHacer ?? '—'}</Text>
                 <Text style={styles.celdaTendencia}>{tendenciaTexto(f.promedioHacer, filas[i - 1]?.promedioHacer)}</Text>
-                <Text style={styles.celdaIndice}>{f.promedioDeber ?? '—'}</Text>
+                <Text style={styles.celdaIndice}>{f.protegido ? 'Grupo pequeño' : f.promedioDeber ?? '—'}</Text>
                 <Text style={styles.celdaTendencia}>{tendenciaTexto(f.promedioDeber, filas[i - 1]?.promedioDeber)}</Text>
               </View>
             ))}

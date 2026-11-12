@@ -94,6 +94,8 @@ export const moduloInformes: ModuloAyuda = {
       notas: [
         'Visible para admin_th, líder (su equipo) y gerencia.',
         'Un resumen de los dos ciclos más recientes también aparece como widget en el dashboard de Inicio.',
+        'Por privacidad, si en un ciclo hay menos personas con resultado que el umbral de anonimato (5 por defecto, se cambia en Administración → Configuración), ese ciclo muestra «Menos de N personas» en lugar del promedio.',
+        'Formación y PDI son listados persona por persona (no promedios), por eso el umbral no aplica ahí.',
       ],
     },
     {

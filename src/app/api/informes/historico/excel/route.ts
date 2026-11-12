@@ -42,9 +42,9 @@ export async function GET(req: NextRequest) {
       ciclo: f.cicloNombre,
       apertura: formatearFecha(f.fechaApertura),
       personas: f.personas,
-      hacer: f.promedioHacer ?? '',
+      hacer: f.protegido ? 'Grupo pequeño' : f.promedioHacer ?? '',
       hacer_tendencia: tendencia(f.promedioHacer, filas[i - 1]?.promedioHacer),
-      deber: f.promedioDeber ?? '',
+      deber: f.protegido ? 'Grupo pequeño' : f.promedioDeber ?? '',
       deber_tendencia: tendencia(f.promedioDeber, filas[i - 1]?.promedioDeber),
     });
   });

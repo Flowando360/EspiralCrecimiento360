@@ -16,7 +16,7 @@ function Tendencia({ actual, anterior }: { actual: number | null; anterior: numb
 
 export default async function InformeHistoricoPage({ searchParams }: { searchParams: { area?: string; liderId?: string } }) {
   const filtros = leerFiltrosEquipo(searchParams);
-  const { perfil, filas } = await obtenerInformeHistorico(filtros);
+  const { perfil, filas, umbral } = await obtenerInformeHistorico(filtros);
   if (!perfil) redirect('/inicio');
   const opcionesEquipo = await opcionesFiltroEquipo(perfil);
   const qs = queryFiltrosEquipo(filtros);
@@ -76,11 +76,11 @@ export default async function InformeHistoricoPage({ searchParams }: { searchPar
                   <td className="px-4 py-3 font-medium text-marmol-900">{f.cicloNombre}</td>
                   <td className="px-4 py-3 text-marmol-500">{formatearFecha(f.fechaApertura)}</td>
                   <td className="px-4 py-3 text-marmol-600">{f.personas}</td>
-                  <td className="px-4 py-3 text-marmol-600">{f.promedioHacer ?? '—'}</td>
+                  <td className="px-4 py-3 text-marmol-600">{f.protegido ? `Menos de ${umbral} personas` : f.promedioHacer ?? '—'}</td>
                   <td className="px-4 py-3 text-xs">
                     <Tendencia actual={f.promedioHacer} anterior={filas[i - 1]?.promedioHacer} />
                   </td>
-                  <td className="px-4 py-3 text-marmol-600">{f.promedioDeber ?? '—'}</td>
+                  <td className="px-4 py-3 text-marmol-600">{f.protegido ? `Menos de ${umbral} personas` : f.promedioDeber ?? '—'}</td>
                   <td className="px-4 py-3 text-xs">
                     <Tendencia actual={f.promedioDeber} anterior={filas[i - 1]?.promedioDeber} />
                   </td>

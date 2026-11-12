@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { obtenerUmbralAnonimato } from '@/lib/informes/anonimato';
 import { coincideEquipo, hayFiltrosEquipo, type FiltrosEquipo } from '@/lib/informes/filtros-equipo';
 
 export interface FilaHistorico {
@@ -9,6 +10,8 @@ export interface FilaHistorico {
   personas: number;
   promedioHacer: number | null;
   promedioDeber: number | null;
+  /** Hay resultados, pero son menos que el umbral de anonimato: no se muestra el promedio. */
+  protegido?: boolean;
 }
 
 /**
@@ -19,10 +22,11 @@ export interface FilaHistorico {
 export async function obtenerInformeHistorico(filtros: FiltrosEquipo = {}) {
   const perfil = await getPerfilActual();
   if (!perfil || !['admin_th', 'lider', 'gerencia'].includes(perfil.rol)) {
-    return { perfil: null, filas: [] as FilaHistorico[] };
+    return { perfil: null, filas: [] as FilaHistorico[], umbral: 5 };
   }
 
   const supabase = createClient();
+  const umbral = await obtenerUmbralAnonimato(perfil.empresa_id);
 
   let colaboradorIds: string[] | null = null;
   if (perfil.rol === 'lider' && perfil.colaborador_id) {
@@ -65,10 +69,12 @@ export async function obtenerInformeHistorico(filtros: FiltrosEquipo = {}) {
       cicloNombre: ciclo.nombre,
       fechaApertura: ciclo.fecha_apertura,
       personas: resultados?.length ?? 0,
-      promedioHacer: promedio(hacer),
-      promedioDeber: promedio(deber),
+      // Anonimato: con menos personas con dato que el umbral no se muestra el promedio.
+      promedioHacer: hacer.length >= umbral ? promedio(hacer) : null,
+      promedioDeber: deber.length >= umbral ? promedio(deber) : null,
+      protegido: (hacer.length > 0 && hacer.length < umbral) || (deber.length > 0 && deber.length < umbral),
     });
   }
 
-  return { perfil, filas };
+  return { perfil, filas, umbral };
 }
