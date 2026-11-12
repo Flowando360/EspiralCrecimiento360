@@ -16,7 +16,7 @@ export default async function EditarColaboradorPage({ params }: { params: { id: 
     supabase
       .from('colaboradores')
       .select(
-        'id, empresa_id, nombre_completo, numero_documento, email, telefono, cargo_id, lider_id, fecha_ingreso, tipo_contrato, estado, salario, eps, arl, afp, caja_compensacion'
+        'id, empresa_id, nombre_completo, numero_documento, email, telefono, cargo_id, lider_id, sede_id, fecha_ingreso, tipo_contrato, estado, salario, eps, arl, afp, caja_compensacion'
       )
       .eq('id', params.id)
       .maybeSingle(),
@@ -63,6 +63,7 @@ export default async function EditarColaboradorPage({ params }: { params: { id: 
           telefono: colaborador.telefono ?? '',
           cargoId: colaborador.cargo_id,
           liderId: colaborador.lider_id ?? '',
+          sedeId: (colaborador as any).sede_id ?? '',
           fechaIngreso: colaborador.fecha_ingreso,
           tipoContrato: colaborador.tipo_contrato,
           estado: colaborador.estado,

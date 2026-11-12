@@ -17,7 +17,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
     .select(
       `id, empresa_id, nombre_completo, email, telefono, fecha_ingreso, estado, tipo_contrato, lider_id, es_externo,
        cargo:cargos(id, nombre, proceso_area, objetivo_cargo, tiene_personal_a_cargo),
-       lider:lider_id(id, nombre_completo)`
+       lider:lider_id(id, nombre_completo), sede:sede_id(nombre)`
     )
     .eq('id', params.id)
     .maybeSingle();
@@ -136,7 +136,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
               {cargo?.nombre} · {cargo?.proceso_area}
             </p>
             <p className="text-xs text-marmol-400 mt-1">
-              Ingreso: {formatearFecha(colaborador.fecha_ingreso)} · Líder: {lider?.nombre_completo ?? '—'}
+              Ingreso: {formatearFecha(colaborador.fecha_ingreso)} · Líder: {lider?.nombre_completo ?? '—'}{(colaborador as any).sede?.nombre ? ` · Sede: ${(colaborador as any).sede.nombre}` : ''}
             </p>
           </div>
         </div>

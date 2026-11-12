@@ -1805,6 +1805,7 @@ export type Database = {
       }
       colaboradores: {
         Row: {
+          sede_id: string | null
           tipo_externo: string | null
           entidad_externa: string | null
           servicio: string | null
@@ -1837,6 +1838,7 @@ export type Database = {
           usuario_id: string | null
         }
         Insert: {
+          sede_id?: string | null
           tipo_externo?: string | null
           entidad_externa?: string | null
           servicio?: string | null
@@ -1869,6 +1871,7 @@ export type Database = {
           usuario_id?: string | null
         }
         Update: {
+          sede_id?: string | null
           tipo_externo?: string | null
           entidad_externa?: string | null
           servicio?: string | null
@@ -8711,6 +8714,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sedes: {
+        Row: {
+          activa: boolean
+          ciudad: string | null
+          created_at: string
+          direccion: string | null
+          empresa_id: string
+          id: string
+          nombre: string
+        }
+        Insert: {
+          activa?: boolean
+          ciudad?: string | null
+          created_at?: string
+          direccion?: string | null
+          empresa_id: string
+          id?: string
+          nombre: string
+        }
+        Update: {
+          activa?: boolean
+          ciudad?: string | null
+          created_at?: string
+          direccion?: string | null
+          empresa_id?: string
+          id?: string
+          nombre?: string
+        }
+        Relationships: []
       }
       ser_comentarios_colaborador: {
         Row: {

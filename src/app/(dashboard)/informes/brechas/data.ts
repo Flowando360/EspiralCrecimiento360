@@ -4,7 +4,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { coincideEquipo, type FiltrosEquipo } from '@/lib/informes/filtros-equipo';
 import { obtenerUmbralAnonimato } from '@/lib/informes/anonimato';
 
-export type Agrupacion = 'equipo' | 'area';
+export type Agrupacion = 'equipo' | 'area' | 'sede';
 export type SemaforoDimension = 'alto' | 'medio' | 'bajo' | null;
 
 export interface FilaBrecha {
@@ -54,11 +54,10 @@ export async function obtenerInformeBrechas(agrupacion: Agrupacion, filtros: Fil
 
   const supabase = createClient();
 
-  let colaboradoresQuery = supabase
-    .from('colaboradores')
+  let colaboradoresQuery: any = (supabase.from('colaboradores') as any)
     .select(
       `id, lider_id, cargo:cargo_id(proceso_area),
-       lider:lider_id(nombre_completo)`
+       lider:lider_id(nombre_completo), sede:sede_id(nombre)`
     )
     .eq('empresa_id', perfil.empresa_id)
     .eq('estado', 'activo')
@@ -108,7 +107,7 @@ export async function obtenerInformeBrechas(agrupacion: Agrupacion, filtros: Fil
   const grupos = new Map<string, string[]>(); // nombre del grupo -> ids de colaboradores
   for (const co of colaboradores) {
     const nombreGrupo =
-      agrupacion === 'equipo' ? co.lider?.nombre_completo ?? 'Sin líder asignado' : normalizarArea(co.cargo?.proceso_area) ?? 'Sin área asignada';
+      agrupacion === 'equipo' ? co.lider?.nombre_completo ?? 'Sin líder asignado' : agrupacion === 'sede' ? co.sede?.nombre ?? 'Sin sede' : normalizarArea(co.cargo?.proceso_area) ?? 'Sin área asignada';
     if (!grupos.has(nombreGrupo)) grupos.set(nombreGrupo, []);
     grupos.get(nombreGrupo)!.push(co.id);
   }

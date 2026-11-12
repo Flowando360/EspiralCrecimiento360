@@ -17,8 +17,10 @@ export function FormularioNuevoColaborador({
   cargos,
   posiblesLideres,
   cuentasSinFicha,
+  sedes = [],
   datosIniciales,
 }: {
+  sedes?: { id: string; nombre: string }[];
   cargos: { id: string; nombre: string; proceso_area: string | null }[];
   posiblesLideres: { id: string; nombre_completo: string }[];
   cuentasSinFicha: { id: string; nombre_completo: string; email: string | null }[];
@@ -32,6 +34,7 @@ export function FormularioNuevoColaborador({
   const [telefono, setTelefono] = useState(datosIniciales?.telefono ?? '');
   const [cargoId, setCargoId] = useState(datosIniciales?.cargoId ?? '');
   const [liderId, setLiderId] = useState('');
+  const [sedeId, setSedeId] = useState('');
   const [sinLiderConfirmado, setSinLiderConfirmado] = useState(false);
   const [equipoIds, setEquipoIds] = useState<string[]>([]);
   const [filtroEquipo, setFiltroEquipo] = useState('');
@@ -79,6 +82,7 @@ export function FormularioNuevoColaborador({
         telefono,
         cargoId,
         liderId,
+        sedeId,
         equipoIds,
         fechaIngreso,
         tipoContrato,
@@ -172,6 +176,17 @@ export function FormularioNuevoColaborador({
               ))}
             </select>
           </div>
+          {sedes.length > 0 && (
+            <div>
+              <label className={label}>Sede</label>
+              <select value={sedeId} onChange={(e) => setSedeId(e.target.value)} className={campo}>
+                <option value="">Sin sede</option>
+                {sedes.map((s) => (
+                  <option key={s.id} value={s.id}>{s.nombre}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className={label}>Líder directo *</label>
             <select

@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const agrupacion: Agrupacion = req.nextUrl.searchParams.get('agrupacion') === 'area' ? 'area' : 'equipo';
+  const agrupacion: Agrupacion = req.nextUrl.searchParams.get('agrupacion') === 'area' ? 'area' : req.nextUrl.searchParams.get('agrupacion') === 'sede' ? 'sede' : 'equipo';
   const { perfil, filas } = await obtenerInformeBrechas(agrupacion, leerFiltrosEquipo(req.nextUrl.searchParams));
 
   if (!perfil) {
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
   const hoja = workbook.addWorksheet('Brechas');
   hoja.columns = [
-    { header: agrupacion === 'equipo' ? 'Equipo (líder)' : 'Área', key: 'grupo', width: 28 },
+    { header: agrupacion === 'equipo' ? 'Equipo (líder)' : agrupacion === 'sede' ? 'Sede' : 'Área', key: 'grupo', width: 28 },
     { header: 'Personas', key: 'tamano', width: 10 },
     { header: 'Ser (personas con Guía del Flow, sin nota)', key: 'ser', width: 14 },
     { header: 'Saber (%)', key: 'saber', width: 14 },

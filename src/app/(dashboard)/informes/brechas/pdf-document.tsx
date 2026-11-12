@@ -20,11 +20,11 @@ export function BrechasDocument({ filas, agrupacion }: { filas: FilaBrecha[]; ag
       <Page size="A4" orientation="landscape" style={styles.page}>
         <Text style={styles.titulo}>Informe de brechas por dimensión</Text>
         <Text style={styles.subtitulo}>
-          Comparativo {agrupacion === 'equipo' ? 'por equipo' : 'por área'} · Generado el {formatearFecha(new Date())}
+          Comparativo {agrupacion === 'equipo' ? 'por equipo' : agrupacion === 'sede' ? 'por sede' : 'por área'} · Generado el {formatearFecha(new Date())}
         </Text>
 
         <View style={[styles.fila, styles.filaEncabezado]}>
-          <Text style={styles.celdaGrupo}>{agrupacion === 'equipo' ? 'Equipo (líder)' : 'Área'}</Text>
+          <Text style={styles.celdaGrupo}>{agrupacion === 'equipo' ? 'Equipo (líder)' : agrupacion === 'sede' ? 'Sede' : 'Área'}</Text>
           <Text style={styles.celdaN}>Personas</Text>
           <Text style={styles.celdaDim}>Ser</Text>
           <Text style={styles.celdaDim}>Saber</Text>

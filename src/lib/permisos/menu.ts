@@ -173,6 +173,7 @@ export const NAV: NavGroup[] = [
       { href: '/administracion/competencias', label: 'Competencias por nivel', icon: Sparkles, roles: ['admin_th'] },
       { href: '/administracion/indice-integral', label: 'Índice integral (pesos)', icon: BarChart3, roles: ['admin_th'] },
       { href: '/administracion/organigrama', label: 'Organigrama (editar)', icon: Network, roles: ['admin_th'] },
+      { href: '/administracion/sedes', label: 'Sedes', icon: Network, roles: ['admin_th'] },
       { href: '/administracion/identidad', label: 'Identidad Organizacional', icon: Compass, roles: ['admin_th'] },
       { href: '/administracion/dotaciones', label: 'Dotaciones', icon: Shirt, roles: ['admin_th'], modulo: 'dotaciones' },
       { href: '/administracion/usuarios', label: 'Usuarios y roles', icon: Users, roles: ['admin_th'] },

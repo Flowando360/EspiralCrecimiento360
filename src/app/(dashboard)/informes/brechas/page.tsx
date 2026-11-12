@@ -35,7 +35,7 @@ export default async function InformeBrechasPage({
 }: {
   searchParams: { agrupacion?: string; area?: string; liderId?: string };
 }) {
-  const agrupacion: Agrupacion = searchParams.agrupacion === 'area' ? 'area' : 'equipo';
+  const agrupacion: Agrupacion = searchParams.agrupacion === 'area' ? 'area' : searchParams.agrupacion === 'sede' ? 'sede' : 'equipo';
   const filtros = leerFiltrosEquipo(searchParams);
   const { perfil, filas, umbral } = await obtenerInformeBrechas(agrupacion, filtros);
 
@@ -97,6 +97,15 @@ export default async function InformeBrechasPage({
         >
           Por área
         </a>
+        <a
+          href={queryFiltrosEquipo(filtros, 'agrupacion=sede')}
+          className={cn(
+            'rounded-lg px-3 py-1.5 text-sm font-medium transition',
+            agrupacion === 'sede' ? 'bg-flow-500 text-white' : 'text-marmol-600 hover:bg-marmol-100'
+          )}
+        >
+          Por sede
+        </a>
       </div>
 
       {filas.length === 0 ? (
@@ -106,7 +115,7 @@ export default async function InformeBrechasPage({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
-                <th className="px-4 py-3 font-medium">{agrupacion === 'equipo' ? 'Equipo (líder)' : 'Área'}</th>
+                <th className="px-4 py-3 font-medium">{agrupacion === 'equipo' ? 'Equipo (líder)' : agrupacion === 'sede' ? 'Sede' : 'Área'}</th>
                 <th className="px-4 py-3 font-medium">Personas</th>
                 <th className="px-4 py-3 font-medium text-ser">Ser</th>
                 <th className="px-4 py-3 font-medium text-saber">Saber</th>

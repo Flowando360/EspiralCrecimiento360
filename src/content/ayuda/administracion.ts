@@ -109,6 +109,19 @@ export const moduloAdministracion: ModuloAyuda = {
       ],
     },
     {
+      slug: 'sedes',
+      ruta: '/administracion/sedes',
+      titulo: 'Sedes',
+      resumen: 'Las ubicaciones de la empresa (planta, oficina, bodega…). Cada persona puede asignarse a una sede y los informes se pueden comparar por sede. Es opcional.',
+      camposYBotones: [
+        { nombre: 'Nueva sede', explicacion: 'Nombre (obligatorio), ciudad y dirección (opcionales). No puede haber dos sedes con el mismo nombre.' },
+        { nombre: 'Editar / Desactivar / Eliminar', explicacion: 'Editar cambia sus datos. Desactivar la oculta de los formularios nuevos sin perder a quienes ya la tienen. Eliminar solo funciona si nadie la tiene asignada.' },
+        { nombre: 'Asignar la sede a una persona', explicacion: 'En Nuevo colaborador y en Editar colaborador aparece el campo «Sede» (solo si ya creaste sedes). La sede se ve en la ficha.' },
+        { nombre: 'Informe de Brechas por sede', explicacion: 'En Informes → Brechas por dimensión hay un tercer botón «Por sede» (también en PDF y Excel). Aplican las mismas reglas de privacidad: no se muestran promedios de sedes con menos personas que el mínimo.' },
+      ],
+      notas: ['Solo Talento Humano. Una empresa con una sola ubicación no necesita crear sedes.'],
+    },
+    {
       slug: 'organigrama-editar',
       ruta: '/administracion/organigrama',
       titulo: 'Editar organigrama',

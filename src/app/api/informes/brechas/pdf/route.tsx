@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const agrupacion: Agrupacion = req.nextUrl.searchParams.get('agrupacion') === 'area' ? 'area' : 'equipo';
+  const agrupacion: Agrupacion = req.nextUrl.searchParams.get('agrupacion') === 'area' ? 'area' : req.nextUrl.searchParams.get('agrupacion') === 'sede' ? 'sede' : 'equipo';
   const { perfil, filas } = await obtenerInformeBrechas(agrupacion, leerFiltrosEquipo(req.nextUrl.searchParams));
 
   if (!perfil) {

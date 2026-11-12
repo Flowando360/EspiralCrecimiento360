@@ -16,6 +16,8 @@ export default async function NuevoColaboradorPage({
 
   const supabase = createClient();
 
+  const { data: sedes } = await supabase.from('sedes').select('id, nombre').eq('empresa_id', perfil.empresa_id).eq('activa', true).order('nombre');
+
   const [{ data: cargos }, { data: colaboradores }, { data: cuentas }, { data: vinculadas }] = await Promise.all([
     supabase
       .from('cargos')
@@ -88,6 +90,7 @@ export default async function NuevoColaboradorPage({
           cargos={cargos}
           posiblesLideres={colaboradores ?? []}
           cuentasSinFicha={cuentasSinFicha}
+          sedes={(sedes ?? []) as any}
           datosIniciales={
             searchParams?.nombre
               ? {

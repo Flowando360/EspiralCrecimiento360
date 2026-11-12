@@ -21,6 +21,7 @@ export interface DatosIniciales {
   telefono: string;
   cargoId: string;
   liderId: string;
+  sedeId: string;
   fechaIngreso: string;
   tipoContrato: TipoContrato;
   estado: EstadoColaborador;
@@ -34,8 +35,10 @@ export interface DatosIniciales {
 export function FormularioEditarColaborador({
   cargos,
   posiblesLideres,
+  sedes = [],
   datosIniciales: d,
 }: {
+  sedes?: { id: string; nombre: string }[];
   cargos: { id: string; nombre: string; proceso_area: string | null }[];
   posiblesLideres: { id: string; nombre_completo: string }[];
   datosIniciales: DatosIniciales;
@@ -46,6 +49,7 @@ export function FormularioEditarColaborador({
   const [telefono, setTelefono] = useState(d.telefono);
   const [cargoId, setCargoId] = useState(d.cargoId);
   const [liderId, setLiderId] = useState(d.liderId);
+  const [sedeId, setSedeId] = useState(d.sedeId);
   const [fechaIngreso, setFechaIngreso] = useState(d.fechaIngreso);
   const [tipoContrato, setTipoContrato] = useState<TipoContrato>(d.tipoContrato);
   const [estado, setEstado] = useState<EstadoColaborador>(d.estado);
@@ -69,6 +73,7 @@ export function FormularioEditarColaborador({
         telefono,
         cargoId,
         liderId,
+        sedeId,
         fechaIngreso,
         tipoContrato,
         estado,
@@ -140,6 +145,17 @@ export function FormularioEditarColaborador({
               Al cambiar el cargo, la tarjeta &quot;Perfil de cargo&quot; de la ficha se actualiza sola con los datos del cargo nuevo.
             </p>
           </div>
+          {sedes.length > 0 && (
+            <div>
+              <label className={label}>Sede</label>
+              <select value={sedeId} onChange={(e) => setSedeId(e.target.value)} className={campo}>
+                <option value="">Sin sede</option>
+                {sedes.map((s) => (
+                  <option key={s.id} value={s.id}>{s.nombre}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className={label}>Líder directo</label>
             <select value={liderId} onChange={(e) => setLiderId(e.target.value)} className={campo}>
