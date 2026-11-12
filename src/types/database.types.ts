@@ -8327,6 +8327,7 @@ export type Database = {
           evaluacion_item_id: string | null
           evaluacion_tarea_id: string
           id: string
+          adjuntos: Json
           no_aplica: boolean
           nota: number | null
           observacion: string | null
@@ -8339,6 +8340,7 @@ export type Database = {
           evaluacion_item_id?: string | null
           evaluacion_tarea_id: string
           id?: string
+          adjuntos?: Json
           no_aplica?: boolean
           nota?: number | null
           observacion?: string | null
@@ -8351,6 +8353,7 @@ export type Database = {
           evaluacion_item_id?: string | null
           evaluacion_tarea_id?: string
           id?: string
+          adjuntos?: Json
           no_aplica?: boolean
           nota?: number | null
           observacion?: string | null

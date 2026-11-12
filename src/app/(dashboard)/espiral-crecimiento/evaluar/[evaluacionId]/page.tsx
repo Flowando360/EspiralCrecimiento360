@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { FormularioEvaluacion, type ItemEvaluacion } from '@/components/espiral-crecimiento/formulario-evaluacion';
+import { firmarEvidencias, type EvidenciaVista } from '../evidencias-actions';
 import { notFound } from 'next/navigation';
 
 export default async function EvaluarPage({ params }: { params: { evaluacionId: string } }) {
@@ -40,8 +41,14 @@ export default async function EvaluarPage({ params }: { params: { evaluacionId: 
 
   const { data: respuestasExistentes } = await supabase
     .from('respuestas_evaluacion')
-    .select('evaluacion_item_id, nota, no_aplica, observacion, resultado_real')
+    .select('evaluacion_item_id, nota, no_aplica, observacion, resultado_real, adjuntos')
     .eq('evaluacion_tarea_id', tarea.id);
+
+  const evidenciasIniciales: Record<string, EvidenciaVista[]> = {};
+  for (const r of respuestasExistentes ?? []) {
+    const lista = Array.isArray(r.adjuntos) ? (r.adjuntos as any[]) : [];
+    if (r.evaluacion_item_id && lista.length > 0) evidenciasIniciales[r.evaluacion_item_id] = await firmarEvidencias(lista);
+  }
 
   const respuestasIniciales = Object.fromEntries(
     (respuestasExistentes ?? []).map((r) => [
@@ -90,6 +97,7 @@ export default async function EvaluarPage({ params }: { params: { evaluacionId: 
           evaluacionTareaId={tarea.id}
           items={itemsFormateados}
           respuestasIniciales={respuestasIniciales as any}
+          evidenciasIniciales={evidenciasIniciales}
           enviadaEn={tarea.completada ? (tarea.fecha_completada ?? 'enviada') : null}
         />
       )}

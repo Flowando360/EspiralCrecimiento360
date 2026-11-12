@@ -4,7 +4,8 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { FormularioAccionPdi, type SugerenciaPdi } from '@/components/espiral-crecimiento/formulario-accion-pdi';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, FileText, HandshakeIcon, Target } from 'lucide-react';
+import { ArrowLeft, FileText, HandshakeIcon, Paperclip, Target } from 'lucide-react';
+import { firmarEvidencias } from '@/app/(dashboard)/espiral-crecimiento/evaluar/evidencias-actions';
 import { formatearFecha, cn, primero } from '@/lib/utils';
 import { TarjetaIndiceIntegral } from '@/components/espiral-crecimiento/tarjeta-indice-integral';
 import { cargarDesempenoIntegral } from '@/lib/desempeno/cargar-integral';
@@ -85,7 +86,7 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
       .from('evaluacion_tareas')
       .select(
         `tipo_evaluador,
-         respuestas:respuestas_evaluacion(nota, no_aplica, evaluacion_item_id, item:evaluacion_item_id(id, bloque, titulo, descripcion, orden, activo))`
+         respuestas:respuestas_evaluacion(nota, no_aplica, adjuntos, evaluacion_item_id, item:evaluacion_item_id(id, bloque, titulo, descripcion, orden, activo))`
       )
       .eq('evaluacion_id', params.evaluacionId)
       .eq('completada', true),
@@ -102,14 +103,15 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
   // Pares y colaboradores a cargo alimentan el índice oficial (arriba, ya
   // calculado por el trigger) pero no se muestran desglosados acá — se
   // protege el anonimato de quien califica, buena práctica en 360°.
-  const porItem = new Map<string, { bloque: Bloque; titulo: string; descripcion: string | null; orden: number; auto: number | null; lider: number | null; autoNA: boolean; liderNA: boolean }>();
+  type FilaItem = { bloque: Bloque; titulo: string; descripcion: string | null; orden: number; auto: number | null; lider: number | null; autoNA: boolean; liderNA: boolean; evidencias: { fuente: string; nombre: string; ruta: string; tipo: string; tamano: number }[] };
+  const porItem = new Map<string, FilaItem>();
 
   for (const tarea of (tareas ?? []) as any[]) {
     if (tarea.tipo_evaluador !== 'autoevaluacion' && tarea.tipo_evaluador !== 'lider') continue;
     for (const r of tarea.respuestas ?? []) {
       const item = r.item;
       if (!item || !item.activo) continue;
-      const actual = porItem.get(item.id) ?? {
+      const actual: FilaItem = porItem.get(item.id) ?? {
         bloque: item.bloque,
         titulo: item.titulo,
         descripcion: item.descripcion,
@@ -118,7 +120,10 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
         lider: null,
         autoNA: false,
         liderNA: false,
+        evidencias: [],
       };
+      // Las evidencias de la autoevaluación y del líder se muestran con el resultado; las de pares y colaboradores a cargo no (se protege su anonimato).
+      for (const a of Array.isArray(r.adjuntos) ? r.adjuntos : []) actual.evidencias.push({ ...a, fuente: tarea.tipo_evaluador === 'lider' ? 'Líder' : 'Autoevaluación' });
       if (tarea.tipo_evaluador === 'autoevaluacion') {
         actual.auto = r.nota;
         actual.autoNA = Boolean(r.no_aplica);
@@ -129,6 +134,13 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
       }
       porItem.set(item.id, actual);
     }
+  }
+
+  const urlsEvidencias = new Map<string, string | null>();
+  {
+    const todas = Array.from(porItem.values()).flatMap((i) => i.evidencias);
+    const firmadas = await firmarEvidencias(todas.map(({ nombre, ruta, tipo, tamano }) => ({ nombre, ruta, tipo, tamano })));
+    for (const f of firmadas) urlsEvidencias.set(f.ruta, f.url);
   }
 
   const itemsPorBloque = ORDEN_BLOQUES.map((bloque) => ({
@@ -280,6 +292,22 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
                       <p className="text-marmol-800">{item.titulo}</p>
                       {item.descripcion && bloque === 'roles_y_funciones' && (
                         <p className="text-xs text-marmol-400 mt-0.5">Resultado esperado: {item.descripcion}</p>
+                      )}
+                      {item.evidencias.length > 0 && (
+                        <ul className="mt-1 space-y-0.5">
+                          {item.evidencias.map((e) => (
+                            <li key={e.ruta} className="text-xs text-marmol-500 flex items-center gap-1">
+                              <Paperclip size={11} /> {e.fuente}:{' '}
+                              {urlsEvidencias.get(e.ruta) ? (
+                                <a href={urlsEvidencias.get(e.ruta)!} target="_blank" rel="noreferrer" className="text-flow-700 hover:underline">
+                                  {e.nombre}
+                                </a>
+                              ) : (
+                                e.nombre
+                              )}
+                            </li>
+                          ))}
+                        </ul>
                       )}
                     </td>
                     <td className="px-5 py-3 text-center font-medium text-marmol-700">{item.autoNA ? <span className="text-xs font-normal text-marmol-400" title="No aplica: no cuenta como cero">N/A</span> : (item.auto ?? '—')}</td>

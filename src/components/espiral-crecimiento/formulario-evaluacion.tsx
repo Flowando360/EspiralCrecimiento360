@@ -4,6 +4,8 @@ import { useMemo, useState, useTransition } from 'react';
 import { guardarRespuesta, guardarBorrador, enviarValoracion } from '@/app/(dashboard)/espiral-crecimiento/evaluar/actions';
 import { cn } from '@/lib/utils';
 import { Check, Lock, Save, Send } from 'lucide-react';
+import { EvidenciasItem } from '@/components/espiral-crecimiento/evidencias-item';
+import type { EvidenciaVista } from '@/app/(dashboard)/espiral-crecimiento/evaluar/evidencias-actions';
 
 interface Criterio {
   nivel: number;
@@ -50,11 +52,14 @@ export function FormularioEvaluacion({
   evaluacionTareaId,
   items,
   respuestasIniciales,
+  evidenciasIniciales = {},
   enviadaEn,
 }: {
   evaluacionTareaId: string;
   items: ItemEvaluacion[];
   respuestasIniciales: Record<string, { nota: number | null; noAplica?: boolean; observacion?: string; resultadoReal?: string }>;
+  /** Evidencias ya adjuntas a cada ítem (con su enlace temporal de lectura). */
+  evidenciasIniciales?: Record<string, EvidenciaVista[]>;
   /** Fecha de envío si la valoración ya fue enviada (solo lectura); null si sigue en borrador */
   enviadaEn: string | null;
 }) {
@@ -409,6 +414,14 @@ export function FormularioEvaluacion({
                       </span>
                     )}
                   </div>
+
+                  <EvidenciasItem
+                    tareaId={evaluacionTareaId}
+                    itemId={item.id}
+                    iniciales={evidenciasIniciales[item.id] ?? []}
+                    bloqueado={enviada}
+                    tieneRespuesta={typeof nota === 'number' || esNoAplica}
+                  />
 
                   {estaExpandido && (
                     <textarea
