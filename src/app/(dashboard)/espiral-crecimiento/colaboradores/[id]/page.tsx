@@ -12,12 +12,15 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
 
   const supabase = createClient();
 
+  const { data: filaSede } = await supabase.from('colaboradores').select('sede:sede_id(nombre)').eq('id', params.id).maybeSingle();
+  const nombreSede = (Array.isArray((filaSede as any)?.sede) ? (filaSede as any).sede[0] : (filaSede as any)?.sede)?.nombre as string | undefined;
+
   const { data: colaborador } = await supabase
     .from('colaboradores')
     .select(
       `id, empresa_id, nombre_completo, email, telefono, fecha_ingreso, estado, tipo_contrato, lider_id, es_externo,
        cargo:cargos(id, nombre, proceso_area, objetivo_cargo, tiene_personal_a_cargo),
-       lider:lider_id(id, nombre_completo), sede:sede_id(nombre)`
+       lider:lider_id(id, nombre_completo)`
     )
     .eq('id', params.id)
     .maybeSingle();
@@ -136,7 +139,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
               {cargo?.nombre} · {cargo?.proceso_area}
             </p>
             <p className="text-xs text-marmol-400 mt-1">
-              Ingreso: {formatearFecha(colaborador.fecha_ingreso)} · Líder: {lider?.nombre_completo ?? '—'}{(colaborador as any).sede?.nombre ? ` · Sede: ${(colaborador as any).sede.nombre}` : ''}
+              Ingreso: {formatearFecha(colaborador.fecha_ingreso)} · Líder: {lider?.nombre_completo ?? '—'}{nombreSede ? ` · Sede: ${nombreSede}` : ''}
             </p>
           </div>
         </div>
