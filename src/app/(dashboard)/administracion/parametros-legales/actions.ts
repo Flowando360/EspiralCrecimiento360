@@ -1,5 +1,8 @@
 'use server';
 
+import { puedeAdministrar } from '@/lib/permisos/administracion';
+import { registrarAuditoria, diferencias } from '@/lib/auditoria/registrar';
+
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
@@ -13,7 +16,7 @@ const ParametroSchema = z.object({
 /** Registra o actualiza el SMLMV de un año. Lo usa la regla de elegibilidad de dotación (≤ 2 SMLMV). */
 export async function guardarParametroLegal(input: z.input<typeof ParametroSchema>) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
 
   const parsed = ParametroSchema.safeParse(input);
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
@@ -24,6 +27,14 @@ export async function guardarParametroLegal(input: z.input<typeof ParametroSchem
     .upsert({ empresa_id: perfil.empresa_id, anio: parsed.data.anio, smlmv: parsed.data.smlmv }, { onConflict: 'empresa_id,anio' });
   if (error) return { ok: false as const, error: error.message };
 
+  await registrarAuditoria(perfil, {
+    modulo: 'parametros_legales',
+    accion: 'parametro.smlmv',
+    resumen: `Registró el SMLMV de ${parsed.data.anio}: ${parsed.data.smlmv}`,
+    objetoTipo: 'parametro_legal',
+    objetoId: String(parsed.data.anio),
+    detalle: { anio: parsed.data.anio, smlmv: parsed.data.smlmv },
+  });
   revalidatePath('/administracion/parametros-legales');
   revalidatePath('/dotacion');
   return { ok: true as const };

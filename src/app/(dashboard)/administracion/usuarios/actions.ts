@@ -1,5 +1,9 @@
 'use server';
 
+import { puedeAdministrar } from '@/lib/permisos/administracion';
+import { registrarAuditoria, diferencias } from '@/lib/auditoria/registrar';
+import { quedaOtroAdministrador, rolTieneAdministracion } from '@/lib/permisos/administracion';
+
 import { createAdminClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
@@ -72,7 +76,7 @@ function mensajeErrorUsuarioDuplicado(error: { code?: string; message: string })
  */
 export async function crearCuentaUsuario(input: z.infer<typeof CrearCuentaSchema>) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
 
   const parsed = CrearCuentaSchema.safeParse(input);
   if (!parsed.success) {
@@ -128,6 +132,14 @@ export async function crearCuentaUsuario(input: z.infer<typeof CrearCuentaSchema
     }
   }
 
+  await registrarAuditoria(perfil, {
+    modulo: 'usuarios',
+    accion: 'usuario.crear',
+    resumen: `Creó la cuenta de ${parsed.data.nombreCompleto} (${parsed.data.usuario}) con rol ${parsed.data.rol}${rolPersonalizadoId ? ' y un rol personalizado' : ''}`,
+    objetoTipo: 'usuario',
+    objetoId: authData.user.id,
+    detalle: { rol: parsed.data.rol, rolPersonalizadoId, email: parsed.data.email },
+  });
   revalidatePath('/administracion/usuarios');
   return { ok: true as const };
 }
@@ -139,7 +151,7 @@ export async function crearCuentaUsuario(input: z.infer<typeof CrearCuentaSchema
  */
 export async function actualizarUsuario(input: z.infer<typeof EditarUsuarioSchema>) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
 
   const parsed = EditarUsuarioSchema.safeParse(input);
   if (!parsed.success) {
@@ -154,12 +166,28 @@ export async function actualizarUsuario(input: z.infer<typeof EditarUsuarioSchem
 
   const { data: usuario } = await admin
     .from('perfiles_usuario')
-    .select('id, email')
+    .select('id, email, nombre_completo, usuario, rol, rol_personalizado_id, activo')
     .eq('id', parsed.data.usuarioId)
     .eq('empresa_id', perfil.empresa_id)
     .maybeSingle();
 
   if (!usuario) return { ok: false as const, error: 'Usuario no encontrado' };
+
+  // Nadie puede cambiarse a sí mismo el rol ni los permisos (evita la autoasignación de privilegios).
+  const nuevoRolPersonalizado = parsed.data.rolPersonalizadoId === undefined ? usuario.rol_personalizado_id : parsed.data.rolPersonalizadoId;
+  if (
+    parsed.data.usuarioId === perfil.usuario_id &&
+    (parsed.data.rol !== usuario.rol || (nuevoRolPersonalizado ?? null) !== (usuario.rol_personalizado_id ?? null))
+  ) {
+    return { ok: false as const, error: 'No puedes cambiar tu propio rol ni tus propios permisos. Pídeselo a otro administrador.' };
+  }
+
+  // No se puede dejar la empresa sin ningún administrador con acceso completo.
+  const eraAdminTotal = usuario.rol === 'admin_th' && (!usuario.rol_personalizado_id || (await rolTieneAdministracion(admin, usuario.rol_personalizado_id)));
+  const seraAdminTotal = parsed.data.rol === 'admin_th' && (!nuevoRolPersonalizado || (await rolTieneAdministracion(admin, nuevoRolPersonalizado)));
+  if (eraAdminTotal && !seraAdminTotal && !(await quedaOtroAdministrador(admin, perfil.empresa_id, { usuarioId: usuario.id }))) {
+    return { ok: false as const, error: 'Debe quedar al menos un administrador activo con acceso completo a Administración.' };
+  }
 
   if (usuario.email !== parsed.data.email) {
     const { error: authError } = await admin.auth.admin.updateUserById(parsed.data.usuarioId, {
@@ -187,6 +215,24 @@ export async function actualizarUsuario(input: z.infer<typeof EditarUsuarioSchem
   if (parsed.data.colaboradorId !== undefined) {
     const res = await vincularFichaColaborador(admin, perfil.empresa_id, parsed.data.usuarioId, parsed.data.colaboradorId);
     if (!res.ok) return res;
+  }
+
+  const cambios = diferencias(
+    { nombre: usuario.nombre_completo, usuario: usuario.usuario, correo: usuario.email, rol: usuario.rol, rolPersonalizadoId: usuario.rol_personalizado_id },
+    { nombre: parsed.data.nombreCompleto, usuario: parsed.data.usuario, correo: parsed.data.email, rol: parsed.data.rol, rolPersonalizadoId: nuevoRolPersonalizado ?? null }
+  );
+  if (Object.keys(cambios).length > 0) {
+    const cambioDeRol = 'rol' in cambios || 'rolPersonalizadoId' in cambios;
+    await registrarAuditoria(perfil, {
+      modulo: 'usuarios',
+      accion: cambioDeRol ? 'usuario.rol' : 'usuario.editar',
+      resumen: cambioDeRol
+        ? `Cambió el rol o los permisos de ${parsed.data.nombreCompleto}${'rol' in cambios ? ` (rol de sistema: ${usuario.rol} → ${parsed.data.rol})` : ''}`
+        : `Editó los datos de la cuenta de ${parsed.data.nombreCompleto} (${Object.keys(cambios).join(', ')})`,
+      objetoTipo: 'usuario',
+      objetoId: usuario.id,
+      detalle: cambios,
+    });
   }
 
   revalidatePath('/administracion/usuarios');
@@ -243,7 +289,7 @@ async function vincularFichaColaborador(
  */
 export async function cambiarEstadoUsuario(usuarioId: string, activo: boolean) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
 
   if (usuarioId === perfil.usuario_id) {
     return { ok: false as const, error: 'No puedes retirar tu propia cuenta' };
@@ -253,12 +299,16 @@ export async function cambiarEstadoUsuario(usuarioId: string, activo: boolean) {
 
   const { data: usuario } = await admin
     .from('perfiles_usuario')
-    .select('id')
+    .select('id, nombre_completo, rol')
     .eq('id', usuarioId)
     .eq('empresa_id', perfil.empresa_id)
     .maybeSingle();
 
   if (!usuario) return { ok: false as const, error: 'Usuario no encontrado' };
+
+  if (!activo && usuario.rol === 'admin_th' && !(await quedaOtroAdministrador(admin, perfil.empresa_id, { usuarioId }))) {
+    return { ok: false as const, error: 'Debe quedar al menos un administrador activo con acceso completo a Administración.' };
+  }
 
   const { error: authError } = await admin.auth.admin.updateUserById(usuarioId, {
     ban_duration: activo ? 'none' : '876000h',
@@ -273,6 +323,13 @@ export async function cambiarEstadoUsuario(usuarioId: string, activo: boolean) {
 
   if (perfilError) return { ok: false as const, error: perfilError.message };
 
+  await registrarAuditoria(perfil, {
+    modulo: 'usuarios',
+    accion: activo ? 'usuario.reactivar' : 'usuario.retirar',
+    resumen: `${activo ? 'Reactivó' : 'Retiró'} la cuenta de ${usuario.nombre_completo}`,
+    objetoTipo: 'usuario',
+    objetoId: usuarioId,
+  });
   revalidatePath('/administracion/usuarios');
   return { ok: true as const };
 }
@@ -291,7 +348,7 @@ const RestablecerPasswordSchema = z.object({
  */
 export async function restablecerPassword(input: z.infer<typeof RestablecerPasswordSchema>) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
 
   const parsed = RestablecerPasswordSchema.safeParse(input);
   if (!parsed.success) {
@@ -302,7 +359,7 @@ export async function restablecerPassword(input: z.infer<typeof RestablecerPassw
 
   const { data: usuario } = await admin
     .from('perfiles_usuario')
-    .select('id')
+    .select('id, nombre_completo')
     .eq('id', parsed.data.usuarioId)
     .eq('empresa_id', perfil.empresa_id)
     .maybeSingle();
@@ -314,6 +371,13 @@ export async function restablecerPassword(input: z.infer<typeof RestablecerPassw
   });
 
   if (error) return { ok: false as const, error: error.message };
+  await registrarAuditoria(perfil, {
+    modulo: 'usuarios',
+    accion: 'usuario.password',
+    resumen: `Restableció la contraseña de ${usuario.nombre_completo}`,
+    objetoTipo: 'usuario',
+    objetoId: usuario.id,
+  });
   return { ok: true as const };
 }
 
@@ -331,7 +395,7 @@ export async function restablecerPassword(input: z.infer<typeof RestablecerPassw
  */
 export async function eliminarUsuarioDefinitivamente(usuarioId: string) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
 
   if (usuarioId === perfil.usuario_id) {
     return { ok: false as const, error: 'No puedes eliminar tu propia cuenta' };
@@ -341,12 +405,16 @@ export async function eliminarUsuarioDefinitivamente(usuarioId: string) {
 
   const { data: usuario } = await admin
     .from('perfiles_usuario')
-    .select('id')
+    .select('id, nombre_completo, rol, usuario')
     .eq('id', usuarioId)
     .eq('empresa_id', perfil.empresa_id)
     .maybeSingle();
 
   if (!usuario) return { ok: false as const, error: 'Usuario no encontrado' };
+
+  if (usuario.rol === 'admin_th' && !(await quedaOtroAdministrador(admin, perfil.empresa_id, { usuarioId }))) {
+    return { ok: false as const, error: 'Debe quedar al menos un administrador activo con acceso completo a Administración.' };
+  }
 
   const { error: authError } = await admin.auth.admin.deleteUser(usuarioId);
   if (authError) {
@@ -359,6 +427,14 @@ export async function eliminarUsuarioDefinitivamente(usuarioId: string) {
     };
   }
 
+  await registrarAuditoria(perfil, {
+    modulo: 'usuarios',
+    accion: 'usuario.eliminar',
+    resumen: `Eliminó definitivamente la cuenta de ${usuario.nombre_completo} (${usuario.usuario})`,
+    objetoTipo: 'usuario',
+    objetoId: usuarioId,
+    detalle: { rol: usuario.rol },
+  });
   revalidatePath('/administracion/usuarios');
   return { ok: true as const };
 }

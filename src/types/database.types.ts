@@ -7104,6 +7104,51 @@ export type Database = {
         }
         Relationships: []
       }
+      auditoria_cambios: {
+        Row: {
+          accion: string
+          creado_en: string
+          detalle: Json | null
+          empresa_id: string
+          id: string
+          modulo: string
+          objeto_id: string | null
+          objeto_tipo: string | null
+          resumen: string
+          usuario_id: string | null
+          usuario_nombre: string | null
+          usuario_rol: string | null
+        }
+        Insert: {
+          accion: string
+          creado_en?: string
+          detalle?: Json | null
+          empresa_id: string
+          id?: string
+          modulo: string
+          objeto_id?: string | null
+          objeto_tipo?: string | null
+          resumen: string
+          usuario_id?: string | null
+          usuario_nombre?: string | null
+          usuario_rol?: string | null
+        }
+        Update: {
+          accion?: string
+          creado_en?: string
+          detalle?: Json | null
+          empresa_id?: string
+          id?: string
+          modulo?: string
+          objeto_id?: string | null
+          objeto_tipo?: string | null
+          resumen?: string
+          usuario_id?: string | null
+          usuario_nombre?: string | null
+          usuario_rol?: string | null
+        }
+        Relationships: []
+      }
       nexa_simulacros: {
         Row: {
           adjuntos: Json

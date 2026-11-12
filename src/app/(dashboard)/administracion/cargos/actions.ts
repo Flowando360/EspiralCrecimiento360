@@ -1,5 +1,7 @@
 'use server';
 
+import { puedeAdministrar } from '@/lib/permisos/administracion';
+
 import { canonizarAreaEmpresa } from '@/lib/areas';
 
 import { createClient } from '@/lib/supabase/server';
@@ -17,7 +19,7 @@ type CargoUpdate = Database['public']['Tables']['cargos']['Update'];
  */
 export async function previsualizarPerfilCargo(formData: FormData) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
 
   const file = formData.get('archivo') as File;
   if (!file || file.size === 0) return { ok: false as const, error: 'Selecciona un archivo Excel' };
@@ -40,7 +42,7 @@ export async function previsualizarPerfilCargo(formData: FormData) {
  */
 export async function guardarPerfilCargoImportado(datos: PerfilCargoParseado) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
 
   if (!datos.nombre) return { ok: false as const, error: 'El archivo no trae un nombre de cargo identificable' };
 
@@ -197,7 +199,7 @@ export async function guardarPerfilCargoImportado(datos: PerfilCargoParseado) {
  */
 export async function crearCargoNuevo(input: { nombre: string; procesoArea?: string; tienePersonalACargo: boolean }) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
 
   const nombre = input.nombre?.trim();
   if (!nombre) return { ok: false as const, error: 'El nombre del cargo es requerido' };

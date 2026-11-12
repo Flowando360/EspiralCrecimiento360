@@ -1,5 +1,8 @@
 'use server';
 
+import { puedeAdministrar } from '@/lib/permisos/administracion';
+import { registrarAuditoria, diferencias } from '@/lib/auditoria/registrar';
+
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
@@ -30,7 +33,7 @@ const PonderacionesSchema = z
  */
 export async function guardarPonderaciones(input: z.infer<typeof PonderacionesSchema>) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false, error: 'No autorizado' };
 
   const parsed = PonderacionesSchema.safeParse(input);
   if (!parsed.success) {
@@ -65,6 +68,20 @@ export async function guardarPonderaciones(input: z.infer<typeof PonderacionesSc
 
   if (error) return { ok: false, error: error.message };
 
+  await registrarAuditoria(perfil, {
+    modulo: 'ponderaciones',
+    accion: 'ponderaciones.guardar',
+    resumen: 'Cambió los pesos de ponderación de un ciclo de evaluación',
+    objetoTipo: 'ciclo',
+    objetoId: parsed.data.cicloId,
+    detalle: {
+      liderConEquipo: parsed.data.liderConEquipo,
+      paresConEquipo: parsed.data.paresConEquipo,
+      colaboradoresConEquipo: parsed.data.colaboradoresConEquipo,
+      liderSinEquipo: parsed.data.liderSinEquipo,
+      paresSinEquipo: parsed.data.paresSinEquipo,
+    },
+  });
   revalidatePath('/administracion/configuracion');
   return { ok: true };
 }
@@ -87,12 +104,13 @@ const DatosEmpresaSchema = z.object({
  */
 export async function guardarDatosEmpresa(input: z.infer<typeof DatosEmpresaSchema>) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false, error: 'No autorizado' };
 
   const parsed = DatosEmpresaSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
 
   const supabase = createClient();
+  const { data: antesEmpresa } = await supabase.from('empresas').select('nit, direccion, telefono, ciudad, firmante_nombre, firmante_cargo, siglas').eq('id', perfil.empresa_id).maybeSingle();
   const { error } = await supabase
     .from('empresas')
     .update({
@@ -108,6 +126,26 @@ export async function guardarDatosEmpresa(input: z.infer<typeof DatosEmpresaSche
 
   if (error) return { ok: false, error: error.message };
 
+  const cambiosEmpresa = diferencias(antesEmpresa ?? {}, {
+    nit: parsed.data.nit || null,
+    direccion: parsed.data.direccion || null,
+    telefono: parsed.data.telefono || null,
+    ciudad: parsed.data.ciudad || null,
+    firmante_nombre: parsed.data.firmanteNombre || null,
+    firmante_cargo: parsed.data.firmanteCargo || null,
+    siglas: parsed.data.siglas || null,
+  });
+  if (Object.keys(cambiosEmpresa).length > 0) {
+    await registrarAuditoria(perfil, {
+      modulo: 'empresa',
+      accion: 'empresa.datos',
+      resumen: `Editó los datos de la empresa (${Object.keys(cambiosEmpresa).join(', ')})`,
+      objetoTipo: 'empresa',
+      objetoId: perfil.empresa_id,
+      detalle: cambiosEmpresa,
+    });
+  }
+
   revalidatePath('/administracion/configuracion');
   return { ok: true };
 }
@@ -119,7 +157,7 @@ export async function guardarDatosEmpresa(input: z.infer<typeof DatosEmpresaSche
  */
 export async function agregarCursoRecomendado(dimension: 'hacer' | 'deber', cursoId: string) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false, error: 'No autorizado' };
   if (!cursoId) return { ok: false, error: 'Selecciona un curso' };
 
   const supabase = createClient();
@@ -149,7 +187,7 @@ const PreguntasClimaSchema = z.object({
  */
 export async function guardarPreguntasClima(input: z.infer<typeof PreguntasClimaSchema>) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false, error: 'No autorizado' };
 
   const parsed = PreguntasClimaSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
@@ -192,7 +230,7 @@ const UmbralClimaSchema = z
  */
 export async function guardarUmbralClima(input: z.infer<typeof UmbralClimaSchema>) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false, error: 'No autorizado' };
 
   const parsed = UmbralClimaSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
@@ -225,7 +263,7 @@ const UmbralDifusionSchema = z.object({
  */
 export async function guardarUmbralDifusion(input: z.infer<typeof UmbralDifusionSchema>) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false, error: 'No autorizado' };
 
   const parsed = UmbralDifusionSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
@@ -262,7 +300,7 @@ const EstructuraCodigoDocumentalSchema = z.object({
  */
 export async function guardarEstructuraCodigoDocumental(input: z.infer<typeof EstructuraCodigoDocumentalSchema>) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false, error: 'No autorizado' };
 
   const parsed = EstructuraCodigoDocumentalSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
@@ -305,7 +343,7 @@ const EscalaRiesgosSchema = z.object({
  */
 export async function guardarEscalaRiesgos(input: z.infer<typeof EscalaRiesgosSchema>) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false, error: 'No autorizado' };
 
   const parsed = EscalaRiesgosSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
@@ -325,7 +363,7 @@ export async function guardarEscalaRiesgos(input: z.infer<typeof EscalaRiesgosSc
 
 export async function eliminarCursoRecomendado(id: string) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false, error: 'No autorizado' };
 
   const supabase = createClient();
   const { error } = await supabase.from('dimension_cursos_recomendados').delete().eq('id', id);

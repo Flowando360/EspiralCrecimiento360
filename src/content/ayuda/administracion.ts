@@ -187,6 +187,8 @@ export const moduloAdministracion: ModuloAyuda = {
         { nombre: 'Nuevo rol', explicacion: 'Crea un rol con nombre (mínimo 2 caracteres) y descripción opcional. Nace con Inicio y Mi perfil en lectura, y el resto sin acceso.' },
         { nombre: 'Nombre y descripción', explicacion: 'Se pueden cambiar en cualquier momento con "Guardar cambios".' },
         { nombre: 'Matriz de permisos (Leer / Escribir / Borrar)', explicacion: 'Una fila por módulo: Inicio, Mi perfil, Espiral de Crecimiento 360°, Reclutamiento, Nexa, Procesos, Informes, Dotaciones y Administración. Escribir marca Leer automáticamente; Borrar marca Escribir y Leer.' },
+        { nombre: 'Separar a Talento Humano del Administrador', explicacion: 'Botón que crea el rol «Talento Humano (operativo)»: acceso a todos los módulos de trabajo, sin Administración (usuarios, roles, cargos, configuración y respaldo). Es el principio de segregación de funciones: quien opera Talento Humano día a día no puede cambiar permisos ni configuración. Para usarlo, deja a una persona como administrador con acceso completo y a quien opera Talento Humano asígnale el rol de sistema admin_th más este rol personalizado.' },
+        { nombre: 'Matriz de roles del sistema', explicacion: 'Tabla al final de la página con las pantallas que ve cada rol de sistema (Administrador de Talento Humano, Gerencia, Líder, Colaborador y Auditor externo) y un resumen de lo que puede hacer cada uno. Sale del mismo menú de la aplicación, así que siempre está al día. «Descargar en Excel» la baja para entregarla a una auditoría.' },
         { nombre: 'Guardar cambios', explicacion: 'Guarda la matriz y los datos del rol.' },
         { nombre: 'Eliminar rol', explicacion: 'Borra el rol. Los usuarios que lo tenían quedan solo con su rol de sistema. Pide confirmación y avisa cuántos usuarios se verán afectados.' },
       ],
@@ -198,9 +200,29 @@ export const moduloAdministracion: ModuloAyuda = {
       notas: [
         'Un rol personalizado no da acceso a datos que el rol de sistema del usuario no ve. Por ejemplo, un colaborador con un rol personalizado no puede ver la información de todo el equipo, aunque la matriz lo permita.',
         'La lectura controla qué módulos aparecen en el menú y también bloquea sus pantallas: si alguien sin lectura en Nexa escribe la dirección de una pantalla de Nexa, vuelve al Inicio. Gino (el chat con IA), la ayuda, las alertas, los mensajes y el cambio de contraseña están disponibles para todos.',
-        'Escribir y Borrar se guardan para aplicarlos en cada acción; mientras esa parte esté pendiente, no los uses como única protección de información sensible.',
+        'La escritura en el módulo Administración sí se aplica: un rol personalizado sin «Escribir» en Administración no puede crear usuarios, cambiar roles ni modificar la configuración, aunque su rol de sistema sea admin_th.',
+        'Protecciones: nadie puede cambiarse a sí mismo el rol ni los permisos del rol que tiene asignado, y la plataforma no deja retirar, eliminar o quitarle el acceso al último administrador activo con acceso completo. Cada cambio queda en Auditoría de cambios.',
+        'Escribir y Borrar de los demás módulos se guardan para aplicarlos en cada acción; mientras esa parte esté pendiente, no los uses como única protección de información sensible.',
         'Las pantallas que el menú agrupa bajo otro módulo siguen a ese módulo: por ejemplo, Formación individual, Reconocimientos y Clima Organizacional pertenecen a Espiral 360°, y Simulacros pertenece a Procesos.',
         'Solo el administrador de la empresa (admin_th) ve y edita los roles de su empresa.',
+      ],
+    },
+    {
+      slug: 'auditoria-cambios',
+      ruta: '/administracion/auditoria',
+      titulo: 'Auditoría de cambios',
+      resumen:
+        'Bitácora de quién cambió qué y cuándo en la configuración de la empresa. Es de solo lectura: nadie puede editarla ni borrarla desde la aplicación, lo que la hace útil como evidencia para auditorías (ISO 9001, SG-SST, control interno).',
+      camposYBotones: [
+        { nombre: 'Qué se registra', explicacion: 'Alta, cambios de rol, retiro, reactivación, restablecimiento de contraseña (sin guardar la contraseña) y eliminación de usuarios; creación, edición, cambios de permisos y eliminación de roles; cambios en los datos de la empresa, en los pesos de ponderación de un ciclo, en los parámetros legales (SMLMV), en el nivel de cada competencia y en los cargos.' },
+        { nombre: 'Filtros', explicacion: 'Por módulo, por quién lo hizo y por rango de fechas (hora de Colombia). «Quitar filtros» vuelve a la lista completa.' },
+        { nombre: 'Ver detalle', explicacion: 'Cada cambio puede traer el antes y el después. En los permisos de un rol, L = leer, E = escribir y B = borrar.' },
+        { nombre: 'Exportar a Excel', explicacion: 'Descarga el registro (con los filtros activos, hasta 5.000 cambios) para entregarlo a un auditor.' },
+      ],
+      notas: [
+        'Solo lo ve el administrador con acceso completo a Administración.',
+        'El nombre y el rol de quien hizo el cambio quedan guardados tal como estaban en ese momento: si la cuenta se elimina después, el registro sigue siendo legible.',
+        'Los registros empiezan desde el día en que se activó esta función; los cambios anteriores no quedaron registrados.',
       ],
     },
     {

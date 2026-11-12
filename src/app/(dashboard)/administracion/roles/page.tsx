@@ -2,12 +2,15 @@ import { redirect } from 'next/navigation';
 import { ShieldCheck } from 'lucide-react';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
+import { PlantillaSegregacion } from '@/components/roles/plantilla-segregacion';
+import { MatrizRolesSistema } from '@/components/roles/matriz-roles-sistema';
+import { puedeAdministrar } from '@/lib/permisos/administracion';
 import { GestorRoles, type PermisoRol, type RolEmpresa } from '@/components/roles/gestor-roles';
 
 export default async function RolesPage() {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
-  if (perfil.rol !== 'admin_th') redirect('/inicio');
+  if (!puedeAdministrar(perfil)) redirect('/inicio');
 
   const supabase = createClient();
 
@@ -60,7 +63,11 @@ export default async function RolesPage() {
         </p>
       </div>
 
+      <PlantillaSegregacion />
+
       <GestorRoles roles={rolesEmpresa} />
+
+      <MatrizRolesSistema />
     </div>
   );
 }

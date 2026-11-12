@@ -1,5 +1,8 @@
 'use server';
 
+import { puedeAdministrar } from '@/lib/permisos/administracion';
+import { registrarAuditoria, diferencias } from '@/lib/auditoria/registrar';
+
 import { canonizarAreaEmpresa } from '@/lib/areas';
 
 import { createClient } from '@/lib/supabase/server';
@@ -30,7 +33,7 @@ export async function agregarItemInduccion(input: z.infer<typeof ItemSchema>) {
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
 
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
 
   const supabase = createClient();
 
@@ -59,7 +62,7 @@ export async function agregarItemInduccion(input: z.infer<typeof ItemSchema>) {
 /** Quita un punto del plan de inducción de un cargo (admin_th). */
 export async function eliminarItemInduccion(itemId: string, cargoId: string) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
 
   const supabase = createClient();
   const { error } = await supabase.from('induccion_items').delete().eq('id', itemId);
@@ -128,14 +131,14 @@ const EditarCargoSchema = z.object({
  */
 export async function actualizarCargo(input: z.infer<typeof EditarCargoSchema>) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
 
   const parsed = EditarCargoSchema.safeParse(input);
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
   const d = parsed.data;
 
   const supabase = createClient();
-  const { data: cargo } = await supabase.from('cargos').select('empresa_id').eq('id', d.cargoId).maybeSingle();
+  const { data: cargo } = await supabase.from('cargos').select('empresa_id, nombre, nivel_cargo, tiene_personal_a_cargo').eq('id', d.cargoId).maybeSingle();
   if (!cargo || cargo.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'Cargo no encontrado' };
 
   const numOrNull = (v: string | undefined) => (v?.trim() ? Number(v) : null);
@@ -185,6 +188,18 @@ export async function actualizarCargo(input: z.infer<typeof EditarCargoSchema>) 
 
   if (error) return { ok: false as const, error: error.message };
 
+  await registrarAuditoria(perfil, {
+    modulo: 'cargos',
+    accion: 'cargo.editar',
+    resumen: `Editó el cargo «${d.nombre}»${(cargo.nivel_cargo ?? null) !== (d.nivelCargo || null) ? ` (nivel: ${cargo.nivel_cargo ?? 'automático'} → ${d.nivelCargo || 'automático'})` : ''}`,
+    objetoTipo: 'cargo',
+    objetoId: d.cargoId,
+    detalle: diferencias(
+      { nombre: cargo.nombre, nivelCargo: cargo.nivel_cargo ?? null, tienePersonalACargo: cargo.tiene_personal_a_cargo },
+      { nombre: d.nombre, nivelCargo: d.nivelCargo || null, tienePersonalACargo: d.tienePersonalACargo }
+    ),
+  });
+
   // El cargo se lee en vivo (join por cargo_id) desde la ficha del
   // colaborador, la lista de Colaboradores y el organigrama — no hay datos
   // copiados que sincronizar, pero sí páginas cacheadas que refrescar.
@@ -204,7 +219,7 @@ export async function actualizarCargo(input: z.infer<typeof EditarCargoSchema>) 
 
 async function cargoDeEstaEmpresa(cargoId: string) {
   const perfil = await getPerfilActual();
-  if (!perfil || perfil.rol !== 'admin_th') return null;
+  if (!perfil || !puedeAdministrar(perfil)) return null;
   const supabase = createClient();
   const { data: cargo } = await supabase.from('cargos').select('empresa_id').eq('id', cargoId).maybeSingle();
   if (!cargo || cargo.empresa_id !== perfil.empresa_id) return null;
