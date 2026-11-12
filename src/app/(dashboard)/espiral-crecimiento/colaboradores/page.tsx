@@ -53,6 +53,12 @@ export default async function ColaboradoresPage() {
         {perfil.rol === 'admin_th' && (
           <>
           <Link
+            href="/espiral-crecimiento/colaboradores/importar"
+            className="text-xs text-marmol-500 hover:text-flow-600 underline"
+          >
+            Importar desde Excel
+          </Link>
+          <Link
             href="/espiral-crecimiento/colaboradores/historico"
             className="text-xs text-marmol-500 hover:text-flow-600 underline"
           >
