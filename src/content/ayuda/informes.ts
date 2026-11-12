@@ -54,6 +54,27 @@ export const moduloInformes: ModuloAyuda = {
       notas: ['Visible para admin_th, líder y gerencia.', 'El Ser se describe, no se califica: la columna solo cuenta cuántas personas tienen Guía del Flow.', 'Por privacidad, un grupo con menos personas con dato que el umbral de anonimato (5 por defecto, se cambia en Administración → Configuración) muestra «Menos de N personas» en lugar del promedio.'],
     },
     {
+      slug: 'equidad',
+      ruta: '/informes/equidad',
+      titulo: 'Equidad de la valoración',
+      resumen: 'Señales para calibrar la valoración: qué líderes califican sistemáticamente más alto o más bajo que el resto y en qué grupos la autoevaluación se aleja de lo que ve el líder.',
+      camposYBotones: [
+        { nombre: 'Ciclo', explicacion: 'Elige un ciclo o «Todos los ciclos» y pulsa Ver.' },
+        { nombre: 'Severidad por líder', explicacion: 'Promedio de las valoraciones que da cada líder frente al promedio de todos los líderes. Positivo = más benevolente, negativo = más exigente. Si la diferencia llega a 0,5 o más se marca «conversar». La dispersión baja indica que califica a casi todos igual.' },
+        { nombre: 'Autoevaluación frente al líder', explicacion: 'Por área o por equipo: promedio de la autoevaluación menos el de la valoración del líder, solo de personas con ambas. Positivo = la gente se ve mejor de como la ve su líder.' },
+      ],
+      proceso: [
+        'Elige el ciclo y revisa las filas marcadas «conversar».',
+        'Reúne a los líderes implicados y revisa casos concretos con evidencia, no solo los promedios.',
+        'Acuerden criterios comunes y, si hace falta, ajusten las guías de valoración de las competencias.',
+      ],
+      notas: [
+        'Solo Talento Humano. Una diferencia no prueba un sesgo: puede reflejar desempeños realmente distintos; úsala para conversar.',
+        'Por privacidad, solo aparecen líderes y grupos con al menos el mínimo de personas valoradas (5 por defecto, se cambia en Administración → Configuración); el resto se cuenta como ocultos.',
+        'Solo cuentan valoraciones enviadas y no se tienen en cuenta los «No aplica».',
+      ],
+    },
+    {
       slug: 'formacion',
       ruta: '/informes/formacion',
       titulo: 'Informe de Formación',

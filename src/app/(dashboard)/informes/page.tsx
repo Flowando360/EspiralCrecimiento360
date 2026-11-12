@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
-import { Target, Users2, ShieldCheck, BarChart3, GraduationCap, Heart, TrendingUp, FileArchive, Gavel } from 'lucide-react';
+import { Target, Users2, ShieldCheck, BarChart3, GraduationCap, Heart, TrendingUp, FileArchive, Gavel, Scale } from 'lucide-react';
 import type { RolUsuario } from '@/types/colaborador';
 
 interface InformeDisponible {
@@ -41,6 +41,13 @@ const INFORMES: InformeDisponible[] = [
     descripcion: 'Comparativo de Ser, Saber, Hacer y Deber por equipo o área, para priorizar intervenciones.',
     icon: BarChart3,
     roles: ['admin_th', 'lider', 'gerencia'],
+  },
+  {
+    href: '/informes/equidad',
+    titulo: 'Equidad de la valoración',
+    descripcion: 'Severidad por líder y distancia entre autoevaluación y líder por grupo, para calibrar con ejemplos. Solo grupos con mínimo de personas.',
+    icon: Scale,
+    roles: ['admin_th'],
   },
   {
     href: '/informes/formacion',

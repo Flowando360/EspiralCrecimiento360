@@ -156,6 +156,7 @@ export const NAV: NavGroup[] = [
       { href: '/informes/pdi', label: 'Plan de Desarrollo Individual', icon: Target, roles: ['admin_th', 'lider', 'colaborador'] },
       { href: '/informes/sst', label: 'Seguimiento SST', icon: ShieldCheck, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/informes/brechas', label: 'Brechas por dimensión', icon: BarChart3, roles: ['admin_th', 'lider', 'gerencia'] },
+      { href: '/informes/equidad', label: 'Equidad de la valoración', icon: BarChart3, roles: ['admin_th'] },
       { href: '/informes/formacion', label: 'Formación', icon: GraduationCap, roles: ['admin_th', 'lider', 'gerencia', 'colaborador'] },
       { href: '/informes/cultura', label: 'Cultura y Engagement', icon: Heart, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/informes/consolidado', label: 'Consolidado Gerencial', icon: BarChart3, roles: ['admin_th', 'gerencia'] },
