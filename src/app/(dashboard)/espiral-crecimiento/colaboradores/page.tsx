@@ -59,6 +59,12 @@ export default async function ColaboradoresPage() {
             Importar desde Excel
           </Link>
           <Link
+            href="/espiral-crecimiento/importar-incapacidades"
+            className="text-xs text-marmol-500 hover:text-flow-600 underline"
+          >
+            Importar incapacidades
+          </Link>
+          <Link
             href="/espiral-crecimiento/colaboradores/historico"
             className="text-xs text-marmol-500 hover:text-flow-600 underline"
           >
