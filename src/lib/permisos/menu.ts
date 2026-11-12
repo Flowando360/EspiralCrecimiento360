@@ -55,6 +55,8 @@ export interface NavItem {
   label: string;
   icon: React.ElementType;
   roles: RolUsuario[];
+  /** Nombre convencional de Gestión Humana, mostrado en pequeño bajo el nombre propio de la plataforma. */
+  alias?: string;
   /** Módulo de permisos si difiere del grupo (ej. Dotaciones dentro de Administración). */
   modulo?: Modulo;
   /** Solo para el desplegable de Procesos y Cumplimiento: agrupa visualmente
@@ -97,7 +99,7 @@ export const NAV: NavGroup[] = [
       { href: '/espiral-crecimiento/externos', label: 'Externos', icon: UserRoundCog, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/espiral-crecimiento/movilidad', label: 'Movilidad interna', icon: TrendingUp, roles: ['admin_th'] },
       { href: '/espiral-crecimiento/dimensiones', label: 'Dimensiones', icon: LayoutGrid, roles: ['admin_th', 'lider', 'gerencia'] },
-      { href: '/espiral-crecimiento/ciclos', label: 'Ciclos de Crecimiento', icon: CalendarClock, roles: ['admin_th', 'lider'] },
+      { href: '/espiral-crecimiento/ciclos', label: 'Ciclos de Crecimiento', alias: 'Evaluación de desempeño', icon: CalendarClock, roles: ['admin_th', 'lider'] },
       { href: '/espiral-crecimiento/pdi', label: 'Planes de Desarrollo', icon: Target, roles: ['admin_th', 'lider', 'colaborador'] },
       { href: '/espiral-crecimiento/organigrama', label: 'Organigrama', icon: Network, roles: ['admin_th', 'lider', 'gerencia'] },
       { href: '/espiral-crecimiento/indicadores', label: 'Indicadores', icon: BarChart3, roles: ['admin_th', 'lider', 'gerencia'] },

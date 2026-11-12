@@ -45,7 +45,7 @@ export default async function CiclosPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-secundario">Ciclos de Crecimiento</h1>
+          <h1 className="font-display text-2xl font-semibold text-secundario">Ciclos de Crecimiento <span className="text-base font-normal text-marmol-400">(ciclos de evaluación de desempeño)</span></h1>
           <p className="text-sm text-marmol-500 mt-1">
             Hacer + Deber, semestral. Ser y Saber se verifican de forma continua.
             {perfil.rol === 'admin_th' && ' Para borrar un ciclo creado por error o de pruebas, usa el botón rojo «Eliminar ciclo» de su tarjeta.'}

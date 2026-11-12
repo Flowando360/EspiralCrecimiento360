@@ -6,6 +6,8 @@ import { formatearFecha } from '@/lib/utils';
 import { notFound, redirect } from 'next/navigation';
 import { GraduationCap, Briefcase, Sparkles, ShieldCheck, Target, Clock, History, FolderLock, CalendarHeart, HeartPulse, Shirt, Pencil } from 'lucide-react';
 
+const ACCION_TARJETA = 'inline-flex items-center gap-1 rounded-md border border-flow-200 bg-flow-50 px-2 py-0.5 text-xs font-medium text-flow-700';
+
 export default async function FichaColaboradorPage({ params }: { params: { id: string } }) {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
@@ -49,6 +51,8 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
         .eq('cargo_id', colaborador.cargo.id)
         .order('orden')
     : { data: [] as { id: string; funcion: string; proceso: string | null; periodicidad: string | null }[] };
+
+  const accionTexto = perfil.rol === 'admin_th' || perfil.rol === 'lider' ? 'Diligenciar / editar' : 'Ver';
 
   // El historial (movimientos + entrevista de salida) es de manejo exclusivo
   // de Talento Humano y del líder directo — sin policy de RLS para gerencia
@@ -186,6 +190,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
           ) : (
             <p className="text-sm text-marmol-700">Pendiente por completar</p>
           )}
+          <span className={`${ACCION_TARJETA} mt-3`}>{accionTexto} →</span>
         </Link>
         <Link href={`/espiral-crecimiento/colaboradores/${params.id}/saber`} className="card p-4 hover:border-flow-300 transition">
           <p className="text-xs font-medium text-marmol-500 mb-2 flex items-center gap-1.5">
@@ -195,6 +200,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
             {saber?.porcentaje_cumplimiento != null ? `${saber.porcentaje_cumplimiento}%` : '—'}
           </p>
           <p className="text-xs text-marmol-400">cumplimiento del perfil</p>
+          <span className={`${ACCION_TARJETA} mt-3`}>{accionTexto} →</span>
         </Link>
         <div className="card p-4">
           <p className="text-xs font-medium text-marmol-500 mb-2 flex items-center gap-1.5">
@@ -275,6 +281,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
               </p>
             </>
           )}
+        <span className={`${ACCION_TARJETA} mt-3`}>{accionTexto} →</span>
         </Link>
 
         {/* Hoja de vida / formación */}
@@ -301,6 +308,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
               ))}
             </ul>
           )}
+        <span className={`${ACCION_TARJETA} mt-3`}>{accionTexto} →</span>
         </Link>
       </div>
 
@@ -338,6 +346,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
           >
             <FolderLock size={16} className="text-flow-600" />
             <span className="text-sm font-medium text-marmol-800">Documentos y certificado laboral</span>
+            <span className={`${ACCION_TARJETA} ml-auto`}>Abrir →</span>
           </Link>
         )}
 
@@ -348,6 +357,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
           >
             <HeartPulse size={16} className="text-flow-600" />
             <span className="text-sm font-medium text-marmol-800">Incapacidades</span>
+            <span className={`${ACCION_TARJETA} ml-auto`}>Abrir →</span>
           </Link>
         )}
 
@@ -358,6 +368,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
           >
             <History size={16} className="text-flow-600" />
             <span className="text-sm font-medium text-marmol-800">Ver historial y línea de tiempo</span>
+            <span className={`${ACCION_TARJETA} ml-auto`}>Abrir →</span>
           </Link>
         )}
 
@@ -368,6 +379,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
           >
             <CalendarHeart size={16} className="text-flow-600" />
             <span className="text-sm font-medium text-marmol-800">Fechas especiales</span>
+            <span className={`${ACCION_TARJETA} ml-auto`}>Abrir →</span>
           </Link>
         )}
 
@@ -378,6 +390,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
           >
             <Shirt size={16} className="text-flow-600" />
             <span className="text-sm font-medium text-marmol-800">Dotación</span>
+            <span className={`${ACCION_TARJETA} ml-auto`}>Abrir →</span>
           </Link>
         )}
       </div>

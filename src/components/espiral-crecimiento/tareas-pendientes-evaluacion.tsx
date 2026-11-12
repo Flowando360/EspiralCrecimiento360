@@ -39,6 +39,7 @@ export function TareasPendientesEvaluacion({ tareas }: { tareas: TareaPendiente[
     <div className="card p-5">
       <h2 className="font-display text-base font-semibold text-secundario flex items-center gap-2 mb-4">
         <Bell size={16} /> Encuentros de Crecimiento pendientes ({tareas.length})
+        <span className="text-xs font-normal text-marmol-400">(evaluaciones de desempeño por responder)</span>
       </h2>
       <div className="space-y-2">
         {tareas.map((t) => (

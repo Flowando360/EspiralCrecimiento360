@@ -1,3 +1,4 @@
+import { VincularMiFicha } from '@/components/espiral-crecimiento/vincular-mi-ficha';
 import Link from 'next/link';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
@@ -25,14 +26,30 @@ export default async function MiPerfilPage() {
   if (!perfil) return null;
 
   if (!perfil.colaborador_id) {
+    // Talento Humano puede vincularse a sí misma sin depender de otro administrador.
+    let fichasLibres: { id: string; nombre: string }[] = [];
+    if (perfil.rol === 'admin_th') {
+      const { data } = await createClient()
+        .from('colaboradores')
+        .select('id, nombre_completo')
+        .eq('empresa_id', perfil.empresa_id)
+        .eq('es_externo', false)
+        .is('usuario_id', null)
+        .order('nombre_completo');
+      fichasLibres = ((data ?? []) as any[]).map((c) => ({ id: c.id, nombre: c.nombre_completo }));
+    }
     return (
       <div className="space-y-6 max-w-3xl">
         <NombrePreferidoForm nombrePreferidoInicial={perfil.nombre_preferido} />
-        <EmptyState
-          icon={User}
-          titulo="Tu usuario aún no está vinculado a una ficha de colaborador"
-          descripcion="Pide a Talento Humano que asocie tu cuenta a tu ficha en Administración → Usuarios."
-        />
+        {perfil.rol === 'admin_th' ? (
+          <VincularMiFicha fichas={fichasLibres} />
+        ) : (
+          <EmptyState
+            icon={User}
+            titulo="Tu usuario aún no está vinculado a una ficha de colaborador"
+            descripcion="Pide a Talento Humano que asocie tu cuenta a tu ficha en Administración → Usuarios."
+          />
+        )}
       </div>
     );
   }

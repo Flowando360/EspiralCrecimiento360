@@ -4,6 +4,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { registrarAuditoria } from '@/lib/auditoria/registrar';
 
 const RUTA = '/mi-perfil';
 
@@ -112,5 +113,36 @@ export async function eliminarFechaEspecialPropia(id: string) {
 
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(RUTA);
+  return { ok: true as const };
+}
+
+/**
+ * Talento Humano vincula su PROPIA cuenta a una ficha de colaborador desde Mi Perfil, sin depender de otro
+ * administrador. Solo fichas de su empresa que no tengan ya una cuenta, y solo para quien aún no tiene ficha.
+ */
+export async function vincularMiFicha(colaboradorId: string) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'Solo Talento Humano puede vincular su cuenta desde aquí' };
+  if (perfil.colaborador_id) return { ok: false as const, error: 'Tu cuenta ya está vinculada a una ficha' };
+  const id = z.string().uuid().safeParse(colaboradorId);
+  if (!id.success) return { ok: false as const, error: 'Datos inválidos' };
+
+  const admin = createAdminClient();
+  const { data: ficha } = await admin.from('colaboradores').select('id, nombre_completo, empresa_id, usuario_id, es_externo').eq('id', id.data).maybeSingle();
+  if (!ficha || ficha.empresa_id !== perfil.empresa_id || ficha.es_externo) return { ok: false as const, error: 'Ficha no encontrada' };
+  if (ficha.usuario_id) return { ok: false as const, error: 'Esa ficha ya está vinculada a otra cuenta' };
+
+  const { error } = await admin.from('colaboradores').update({ usuario_id: perfil.usuario_id }).eq('id', ficha.id).eq('empresa_id', perfil.empresa_id).is('usuario_id', null);
+  if (error) return { ok: false as const, error: error.message };
+
+  await registrarAuditoria(perfil, {
+    modulo: 'usuarios',
+    accion: 'usuario.vincular_ficha',
+    resumen: `${perfil.nombre_completo} vinculó su cuenta a la ficha de ${ficha.nombre_completo} desde Mi Perfil`,
+    objetoTipo: 'colaborador',
+    objetoId: ficha.id,
+  });
+  revalidatePath(RUTA);
+  revalidatePath('/inicio');
   return { ok: true as const };
 }

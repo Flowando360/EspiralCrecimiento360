@@ -242,7 +242,7 @@ export const moduloGeneral: ModuloAyuda = {
         { nombre: 'Mis incapacidades', explicacion: 'Solo aparece si tienes alguna registrada. Las incapacidades y licencias que Talento Humano te haya cargado (tipo, fechas, entidad que la certifica y el soporte, si lo adjuntaron) — de solo lectura, las registra Talento Humano cuando recibe tu certificado.' },
       ],
       notas: [
-        'Si ves el mensaje de que tu usuario no está vinculado a una ficha, pide a Talento Humano que te asocie desde Administración → Usuarios.',
+        'Si ves el mensaje de que tu usuario no está vinculado a una ficha: si eres de Talento Humano, verás la tarjeta «Vincula tu cuenta a tu ficha»: elige tu ficha de la lista (solo aparecen las que no tienen cuenta) y pulsa «Vincular mi ficha», sin depender de otro administrador; si todavía no tienes ficha, créala antes en Colaboradores → Nuevo colaborador. Cualquier otro rol debe pedirle a Talento Humano que lo asocie desde Administración → Usuarios.',
         'Cada quien registra sus propias fechas personales — ni siquiera admin_th puede cargarlas por otra persona todavía. Las fechas especiales sí las puede agregar también Talento Humano o tu líder directo (a diferencia de las fechas personales).',
         'Cada fecha especial genera una alerta con el próximo aniversario, visible en Alertas — igual que ya pasa con cumpleaños o aniversario de bodas.',
       ],

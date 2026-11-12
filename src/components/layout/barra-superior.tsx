@@ -240,7 +240,7 @@ export function BarraSuperior({
                             )}
                           >
                             <Icon size={16} strokeWidth={2} className="shrink-0 text-marmol-400" />
-                            <span className="min-w-0 break-words">{item.label}</span>
+                            <span className="min-w-0 break-words">{item.label}{item.alias && <span className="block text-[11px] font-normal opacity-70">{item.alias}</span>}</span>
                           </Enlace>
                         );
                       })}
@@ -331,7 +331,7 @@ export function BarraSuperior({
                               )}
                             >
                               <Icon size={15} strokeWidth={2} className="shrink-0" />
-                              <span className="min-w-0 break-words">{item.label}</span>
+                              <span className="min-w-0 break-words">{item.label}{item.alias && <span className="block text-[11px] font-normal opacity-70">{item.alias}</span>}</span>
                             </Enlace>
                           );
                         })}

@@ -15,7 +15,7 @@ interface InformeDisponible {
 const INFORMES: InformeDisponible[] = [
   {
     href: '/informes/360',
-    titulo: 'Encuentro de Crecimiento 360° Integrado',
+    titulo: 'Encuentro de Crecimiento 360° Integrado (evaluación de desempeño 360°)',
     descripcion: 'Resultado consolidado de Ser, Saber, Hacer y Deber, con detalle de cada acompañante.',
     icon: Users2,
     roles: ['admin_th', 'lider', 'colaborador'],

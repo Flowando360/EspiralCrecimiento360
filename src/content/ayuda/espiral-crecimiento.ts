@@ -174,6 +174,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       ],
       notas: [
         'Quién puede ver esta ficha: admin_th y gerencia (todas), líder (su equipo directo y él mismo), colaborador (solo la propia).',
+        'Cada tarjeta de la ficha (Ser, Saber, Inducción, Hoja de vida, Documentos, Incapacidades, Historial, Fechas especiales, Dotación) trae un botón visible: «Diligenciar / editar →» si puedes modificarla (Talento Humano o el líder directo) o «Ver →» / «Abrir →» si solo consultas. Toda la tarjeta sigue siendo clicable, pero ya no hace falta adivinarlo.',
       ],
     },
     {
