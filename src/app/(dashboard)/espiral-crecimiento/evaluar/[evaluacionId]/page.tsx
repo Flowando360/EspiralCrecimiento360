@@ -32,7 +32,7 @@ export default async function EvaluarPage({ params }: { params: { evaluacionId: 
   const { data: items } = await supabase
     .from('evaluacion_items')
     .select(
-      `id, bloque, titulo, descripcion,
+      `id, bloque, titulo, descripcion, criterios_congelados,
        competencia:competencia_id(criterios:competencia_criterios(nivel, criterio))`
     )
     .eq('evaluacion_id', params.evaluacionId)
@@ -62,7 +62,8 @@ export default async function EvaluarPage({ params }: { params: { evaluacionId: 
     bloque: i.bloque,
     titulo: i.titulo,
     descripcion: i.descripcion,
-    criterios: i.competencia?.criterios,
+    // Se prefiere la guía congelada al abrir el ciclo; el catálogo vivo solo para ítems anteriores a esa función.
+    criterios: Array.isArray(i.criterios_congelados?.criterios) ? i.criterios_congelados.criterios : i.competencia?.criterios,
   }));
 
   const etiquetaTipo: Record<string, string> = {

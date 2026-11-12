@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { competenciaAplicaAlCargo } from '@/lib/competencias/nivel-cargo';
+import { competenciaAplicaAlCargo, nivelEfectivo } from '@/lib/competencias/nivel-cargo';
+import { PESOS_POR_DEFECTO } from '@/lib/desempeno/indice-integral';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { ESTADOS_VIGENTES } from '@/lib/colaboradores/estados';
@@ -68,10 +69,30 @@ export async function POST(req: NextRequest) {
   // Catálogo de competencias: igual para todas las personas, se lee una sola vez.
   const { data: competencias } = await supabase
     .from('competencias')
-    .select('id, nombre, descripcion_que_evalua, bloque, solo_con_personal_a_cargo, nivel_minimo, orden')
+    .select('id, nombre, descripcion_que_evalua, bloque, solo_con_personal_a_cargo, nivel_minimo, orden, umbral_critico, umbral_justificacion')
     .eq('empresa_id', perfil.empresa_id)
     .eq('activo', true)
     .not('bloque', 'is', null);
+
+  // «Congelar criterios»: foto de la guía por nivel y del mínimo crítico de cada competencia al generar.
+  const ahoraCongelado = new Date().toISOString();
+  const { data: criteriosCat } = await supabase
+    .from('competencia_criterios')
+    .select('competencia_id, nivel, criterio')
+    .in('competencia_id', (competencias ?? []).map((c: any) => c.id));
+  const fotoCompetencia = new Map<string, any>();
+  for (const c of (competencias ?? []) as any[]) {
+    fotoCompetencia.set(c.id, {
+      criterios: (criteriosCat ?? []).filter((k: any) => k.competencia_id === c.id).map((k: any) => ({ nivel: k.nivel, criterio: k.criterio })).sort((a: any, b: any) => a.nivel - b.nivel),
+      umbral_critico: c.umbral_critico ?? null,
+      umbral_justificacion: c.umbral_justificacion ?? null,
+      congelado_en: ahoraCongelado,
+    });
+  }
+  const { data: filasPesos } = await supabase
+    .from('ponderacion_dimensiones_nivel')
+    .select('nivel_cargo, peso_saber, peso_hacer, peso_deber')
+    .eq('empresa_id', perfil.empresa_id);
 
   // Exclusiones y funciones por cargo: se leen una vez por cargo, no una vez por persona.
   const cacheExcluidos = new Map<string, { competencia_id: string | null; cargo_funcion_id: string | null }[]>();
@@ -149,6 +170,13 @@ export async function POST(req: NextRequest) {
     );
 
     if (competenciasAplicables.length > 0) {
+      // Al regenerar, lo ya congelado se conserva: el ciclo sigue rigiéndose por las reglas con que se abrió.
+      const { data: yaCongelados } = await supabase
+        .from('evaluacion_items')
+        .select('competencia_id, criterios_congelados')
+        .eq('evaluacion_id', evaluacion.id)
+        .not('criterios_congelados', 'is', null);
+      const congeladoPrevio = new Map((yaCongelados ?? []).map((i: any) => [i.competencia_id, i.criterios_congelados]));
       const { error } = await supabase.from('evaluacion_items').upsert(
         competenciasAplicables.map((comp: any) => ({
           evaluacion_id: evaluacion.id,
@@ -158,10 +186,25 @@ export async function POST(req: NextRequest) {
           titulo: comp.nombre,
           descripcion: comp.descripcion_que_evalua,
           orden: comp.orden ?? 0,
+          criterios_congelados: congeladoPrevio.get(comp.id) ?? fotoCompetencia.get(comp.id),
         })),
         { onConflict: 'evaluacion_id,competencia_id' }
       );
       if (!error) itemsCreados += competenciasAplicables.length;
+    }
+
+    // Pesos del índice integral del nivel de cargo: se congelan una sola vez, al primer generar.
+    {
+      const nivel = nivelEfectivo((colaborador.cargo as any)?.nivel_cargo, tenePersonalACargo);
+      const fila = (filasPesos ?? []).find((f: any) => f.nivel_cargo === nivel);
+      const pesos = fila
+        ? { saber: Number(fila.peso_saber), hacer: Number(fila.peso_hacer), deber: Number(fila.peso_deber), personalizados: true }
+        : { ...PESOS_POR_DEFECTO, personalizados: false };
+      await supabase
+        .from('evaluaciones')
+        .update({ pesos_integral_congelados: { ...pesos, nivel_cargo: nivel, congelado_en: ahoraCongelado } })
+        .eq('id', evaluacion.id)
+        .is('pesos_integral_congelados', null);
     }
 
     // ── 3. Ítems del bloque "Roles y Funciones": desde el perfil de cargo ──

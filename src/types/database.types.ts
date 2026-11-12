@@ -3513,6 +3513,7 @@ export type Database = {
           descripcion: string | null
           evaluacion_id: string
           id: string
+          criterios_congelados: Json | null
           orden: number | null
           origen: Database["public"]["Enums"]["origen_item_evaluacion"]
           titulo: string
@@ -3527,6 +3528,7 @@ export type Database = {
           descripcion?: string | null
           evaluacion_id: string
           id?: string
+          criterios_congelados?: Json | null
           orden?: number | null
           origen?: Database["public"]["Enums"]["origen_item_evaluacion"]
           titulo: string
@@ -3541,6 +3543,7 @@ export type Database = {
           descripcion?: string | null
           evaluacion_id?: string
           id?: string
+          criterios_congelados?: Json | null
           orden?: number | null
           origen?: Database["public"]["Enums"]["origen_item_evaluacion"]
           titulo?: string
@@ -3672,6 +3675,7 @@ export type Database = {
           colaborador_evaluado_id: string
           created_at: string
           id: string
+          pesos_integral_congelados: Json | null
           porcentaje_avance: number
           publicado: boolean
           tenia_personal_a_cargo: boolean
@@ -3681,6 +3685,7 @@ export type Database = {
           colaborador_evaluado_id: string
           created_at?: string
           id?: string
+          pesos_integral_congelados?: Json | null
           porcentaje_avance?: number
           publicado?: boolean
           tenia_personal_a_cargo?: boolean
@@ -3690,6 +3695,7 @@ export type Database = {
           colaborador_evaluado_id?: string
           created_at?: string
           id?: string
+          pesos_integral_congelados?: Json | null
           porcentaje_avance?: number
           publicado?: boolean
           tenia_personal_a_cargo?: boolean

@@ -42,20 +42,25 @@ export async function cargarDesempenoIntegral(params: {
 }): Promise<DesempenoIntegral> {
   const supabase = createClient();
   const nivel = nivelEfectivo(params.cargo?.nivel_cargo, Boolean(params.cargo?.tiene_personal_a_cargo));
-  const [{ pesos, personalizados }, { data: saber }, { data: evaluacion }, { data: tareas }] = await Promise.all([
+  const [vivos, { data: saber }, { data: evaluacion }, { data: tareas }] = await Promise.all([
     obtenerPesosNivel(supabase, params.empresaId, nivel),
     supabase.from('v_saber_cumplimiento').select('porcentaje_cumplimiento').eq('colaborador_id', params.colaboradorId).maybeSingle(),
     supabase
       .from('evaluaciones')
-      .select('tenia_personal_a_cargo, ciclo:ciclo_id(peso_lider_con_equipo, peso_pares_con_equipo, peso_colaboradores_con_equipo, peso_lider_sin_equipo, peso_pares_sin_equipo)')
+      .select('tenia_personal_a_cargo, pesos_integral_congelados, ciclo:ciclo_id(peso_lider_con_equipo, peso_pares_con_equipo, peso_colaboradores_con_equipo, peso_lider_sin_equipo, peso_pares_sin_equipo)')
       .eq('id', params.evaluacionId)
       .maybeSingle(),
     supabase
       .from('evaluacion_tareas')
-      .select('tipo_evaluador, respuestas:respuestas_evaluacion(nota, no_aplica, item:evaluacion_item_id(id, titulo, activo, competencia:competencia_id(umbral_critico, umbral_justificacion)))')
+      .select('tipo_evaluador, respuestas:respuestas_evaluacion(nota, no_aplica, item:evaluacion_item_id(id, titulo, activo, criterios_congelados, competencia:competencia_id(umbral_critico, umbral_justificacion)))')
       .eq('evaluacion_id', params.evaluacionId)
       .eq('completada', true),
   ]);
+
+  // Pesos congelados al generar la evaluación (si existen); si no, los vigentes del nivel de cargo.
+  const congelados = (evaluacion as any)?.pesos_integral_congelados;
+  const pesos: PesosDimensiones = congelados ? { saber: Number(congelados.saber), hacer: Number(congelados.hacer), deber: Number(congelados.deber) } : vivos.pesos;
+  const personalizados = congelados ? Boolean(congelados.personalizados) : vivos.personalizados;
 
   const saberPct = saber?.porcentaje_cumplimiento != null ? Number(saber.porcentaje_cumplimiento) : null;
   const integral = calcularIndiceIntegral({ saberPct, hacer: params.indiceHacer, deber: params.indiceDeber }, pesos);
@@ -77,7 +82,11 @@ export async function cargarDesempenoIntegral(params: {
       const item = Array.isArray(r.item) ? r.item[0] : r.item;
       if (!item || item.activo === false || r.no_aplica || r.nota == null) continue;
       const comp = Array.isArray(item.competencia) ? item.competencia[0] : item.competencia;
-      const actual: AcumItem = porItem.get(item.id) ?? { titulo: item.titulo, umbral: comp?.umbral_critico ?? null, justificacion: comp?.umbral_justificacion ?? null, notas: [] };
+      // El mínimo crítico congelado al abrir el ciclo manda sobre el catálogo vivo.
+      const foto = item.criterios_congelados;
+      const umbral = foto ? foto.umbral_critico ?? null : comp?.umbral_critico ?? null;
+      const justificacion = foto ? foto.umbral_justificacion ?? null : comp?.umbral_justificacion ?? null;
+      const actual: AcumItem = porItem.get(item.id) ?? { titulo: item.titulo, umbral, justificacion, notas: [] };
       actual.notas.push({ tipoEvaluador: t.tipo_evaluador, nota: r.nota });
       porItem.set(item.id, actual);
     }
