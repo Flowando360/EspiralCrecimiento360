@@ -415,7 +415,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       notas: [
         'Solo Talento Humano puede reabrir. Las notas ya guardadas se conservan: el evaluador cambia lo que haga falta y vuelve a enviar.',
         'Si el evaluador no reenvía, esa valoración no cuenta en el resultado.',
-        'Clientes internos: en esta misma pantalla puedes invitar a una persona que recibe el servicio de quien se evalúa (de otra área, por ejemplo). Responde solo las competencias funcionales y las funciones del cargo, puede usar «No aplica» y le aparece como pendiente en su Inicio. Cuenta como una fuente más si el ciclo le asignó un peso (Administración → Configuración → Clientes internos); con peso 0 su opinión se guarda pero no mueve el resultado. Puedes quitar la invitación mientras no haya empezado a responder. Nunca se muestra quién respondió. Por ahora solo se invita a personas de la empresa; los usuarios externos no.
+        'Clientes internos: en esta misma pantalla puedes invitar a una persona que recibe el servicio de quien se evalúa (de otra área, por ejemplo). Responde solo las competencias funcionales y las funciones del cargo, puede usar «No aplica» y le aparece como pendiente en su Inicio. Cuenta como una fuente más si el ciclo le asignó un peso (Administración → Configuración → Clientes internos); con peso 0 su opinión se guarda pero no mueve el resultado. Puedes quitar la invitación mientras no haya empezado a responder. Nunca se muestra quién respondió. Por ahora solo se invita a personas de la empresa; los usuarios externos no.',
       ],
     },
     {
