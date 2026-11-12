@@ -296,6 +296,7 @@ export const moduloProcesosGestion: ModuloAyuda = {
       resumen:
         'Normas, leyes y reglamentos aplicables por proceso (GC-MT-001), con su artículo, si se cumple, el soporte de cumplimiento y las acciones a seguir cuando no se cumple — distinta de la matriz de riesgos (que gestiona riesgos/oportunidades) y del checklist de cumplimiento (que es por marco normativo genérico, no por norma puntual).',
       camposYBotones: [
+        { nombre: 'Importar desde Excel (admin_th)', explicacion: 'Migra la matriz que ya tienes en Excel sin volver a digitarla: descargas la plantilla (o pegas tus columnas en ella; basta con que los encabezados se parezcan), la subes y revisas fila por fila antes de guardar. Solo la norma es obligatoria; «Cumple» acepta Cumple, No cumple o Sin evaluar; el proceso se enlaza por nombre o código. Si una misma norma + artículo ya está en la matriz, esa fila se omite. Máximo 500 requisitos por archivo.' },
         { nombre: 'Nuevo requisito legal (admin_th)', explicacion: 'Norma/ley/reglamento, año, entidad emisora, asunto, artículo específico y a qué proceso aplica.' },
         { nombre: 'Cumple / No cumple / Sin evaluar (admin_th)', explicacion: 'Al marcar "No cumple" aparece un campo para las acciones a seguir. El soporte de cumplimiento queda como texto libre (referencia al documento que lo demuestra).' },
         { nombre: 'Marcar revisado (admin_th)', explicacion: 'Confirma que se revisó hoy sin cambiar la calificación — para eso está "Editar".' },

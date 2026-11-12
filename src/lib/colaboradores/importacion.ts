@@ -79,7 +79,7 @@ export const norm = (t: string | null | undefined): string =>
 
 export const claveDocumento = (t: string | null | undefined): string => (t ?? '').replace(/[^0-9a-zA-Z]/g, '').toLowerCase();
 
-function texto(v: unknown): string {
+export function texto(v: unknown): string {
   if (v == null) return '';
   if (v instanceof Date) return v.toISOString().slice(0, 10);
   if (typeof v === 'object') {
@@ -93,7 +93,7 @@ function texto(v: unknown): string {
   return String(v).trim();
 }
 
-function parseFecha(v: unknown): string | null {
+export function parseFecha(v: unknown): string | null {
   const ok = (iso: string) => {
     const y = Number(iso.slice(0, 4));
     return y >= 1950 && y <= 2100 && !Number.isNaN(new Date(iso + 'T00:00:00Z').getTime()) ? iso : null;

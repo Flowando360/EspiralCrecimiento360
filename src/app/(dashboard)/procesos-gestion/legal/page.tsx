@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { ChevronLeft, Scale } from 'lucide-react';
+import { ChevronLeft, Scale, FileSpreadsheet } from 'lucide-react';
 import { ListaRequisitosLegales } from '@/components/procesos-gestion/lista-requisitos-legales';
 
 export default async function MatrizLegalPage() {
@@ -32,9 +32,19 @@ export default async function MatrizLegalPage() {
         <Link href="/procesos-gestion" className="inline-flex items-center gap-1 text-sm text-marmol-500 hover:text-flow-600 mb-2">
           <ChevronLeft size={14} /> Procesos y Sistemas de Gestión
         </Link>
-        <h1 className="font-display text-2xl font-semibold text-secundario flex items-center gap-2">
-          <Scale size={22} className="text-flow-600" /> Matriz de requisitos legales
-        </h1>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <h1 className="font-display text-2xl font-semibold text-secundario flex items-center gap-2">
+            <Scale size={22} className="text-flow-600" /> Matriz de requisitos legales
+          </h1>
+          {perfil.rol === 'admin_th' && (
+            <Link
+              href="/procesos-gestion/legal/importar"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:border-flow-300 text-marmol-600 text-sm font-medium px-3.5 py-2 transition"
+            >
+              <FileSpreadsheet size={16} /> Importar desde Excel
+            </Link>
+          )}
+        </div>
         <p className="text-sm text-marmol-500 mt-1 max-w-2xl">
           Normas, leyes y reglamentos aplicables por proceso, con su artículo, si se cumple, el soporte y las acciones a
           seguir cuando no se cumple.
