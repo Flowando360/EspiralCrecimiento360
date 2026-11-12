@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { SelectorNivelCompetencia } from '@/components/administracion/selector-nivel-competencia';
+import { UmbralCriticoCompetencia } from '@/components/administracion/umbral-critico-competencia';
 import { NIVELES_CARGO, type NivelCargo } from '@/lib/competencias/nivel-cargo';
 
 const ETIQUETA_BLOQUE: Record<string, string> = {
@@ -19,7 +20,7 @@ export default async function CompetenciasPorNivelPage() {
   const supabase = createClient();
   const { data } = await supabase
     .from('competencias')
-    .select('id, nombre, bloque, descripcion_que_evalua, nivel_minimo, solo_con_personal_a_cargo')
+    .select('id, nombre, bloque, descripcion_que_evalua, nivel_minimo, solo_con_personal_a_cargo, umbral_critico, umbral_justificacion')
     .eq('empresa_id', perfil.empresa_id)
     .eq('activo', true)
     .not('bloque', 'is', null)
@@ -35,7 +36,7 @@ export default async function CompetenciasPorNivelPage() {
       <div>
         <h1 className="font-display text-2xl font-semibold text-secundario">Competencias por nivel de cargo</h1>
         <p className="text-sm text-marmol-500 mt-1">
-          Define desde qué nivel de cargo se evalúa cada competencia, para no pedirle «Liderazgo» a un cargo operativo.
+          Define desde qué nivel de cargo se evalúa cada competencia, para no pedirle «Liderazgo» a un cargo operativo. También puedes marcar un criterio como crítico con un mínimo: si la nota consolidada queda por debajo, el resultado lo advierte aunque el índice general sea alto.
           El nivel de cada cargo se elige al editarlo (Cargos y perfiles → Editar).
         </p>
       </div>
@@ -70,6 +71,7 @@ export default async function CompetenciasPorNivelPage() {
                   {c.solo_con_personal_a_cargo && <p className="text-xs text-medio">Además exige que el cargo tenga personal a cargo.</p>}
                 </div>
                 <SelectorNivelCompetencia competenciaId={c.id} nivelInicial={(c.nivel_minimo ?? 'operativo') as NivelCargo} />
+                <UmbralCriticoCompetencia competenciaId={c.id} umbralInicial={c.umbral_critico ?? null} justificacionInicial={c.umbral_justificacion ?? null} />
               </li>
             ))}
           </ul>

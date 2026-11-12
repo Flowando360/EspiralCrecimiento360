@@ -78,11 +78,28 @@ export const moduloAdministracion: ModuloAyuda = {
       notas: ['Cada sección solo aparece si tiene datos cargados — no se muestran secciones vacías.'],
     },
     {
+      slug: 'indice-integral-pesos',
+      ruta: '/administracion/indice-integral',
+      titulo: 'Índice integral: pesos por nivel de cargo',
+      resumen: 'Define cuánto pesan Saber, Hacer y Deber en el índice de desempeño integral de cada nivel de cargo (operativo, técnico/administrativo, supervisión y directivo). Solo admin_th.',
+      camposYBotones: [
+        { nombre: 'Pesos por nivel', explicacion: 'Tres casillas (Saber, Hacer, Deber) por nivel de cargo, que deben sumar exactamente 100 %. La suma se ve en vivo y el botón Guardar solo se activa cuando es válida. Sin pesos propios se usan los de partida: 25 % · 40 % · 35 %.' },
+        { nombre: 'Restablecer', explicacion: 'Vuelve ese nivel a los pesos de partida.' },
+      ],
+      notas: [
+        'El Ser no entra en el índice: se presenta en paralelo, con sus hallazgos, y nunca se suma a las otras dimensiones.',
+        'El índice se ve en cada Encuentro de Crecimiento (Resultado). El cambio de pesos afecta a cómo se calcula de ahí en adelante; no modifica las notas de Hacer y Deber.',
+        'Cada cambio de pesos queda en Auditoría de cambios.',
+        'Los pesos de partida son un ejemplo del modelo: conviene ajustarlos tras un ciclo piloto antes de usar el índice para decisiones.',
+      ],
+    },
+    {
       slug: 'competencias-por-nivel',
       ruta: '/administracion/competencias',
       titulo: 'Competencias por nivel de cargo',
       resumen: 'Define desde qué nivel de cargo se evalúa cada competencia, para que a un cargo operativo no le pidan evaluar «Liderazgo» ni a un directivo competencias de ejecución básica.',
       camposYBotones: [
+        { nombre: 'Mínimo crítico (opcional)', explicacion: 'Debajo de cada competencia puedes definir un mínimo (menos de 2, de 3 o de 4) y debes explicar por qué es crítico y por qué ese mínimo. Si la nota consolidada de ese criterio en un Encuentro de Crecimiento queda por debajo, el resultado muestra una advertencia roja aunque el índice general sea alto. Solo advierte, no bloquea nada.' },
         { nombre: 'Selector de cada competencia', explicacion: '«Todos los cargos» deja la competencia como corporativa (aplica a todos). «Desde supervisión» o «Desde directivo» la limita a esos niveles o superiores.' },
         { nombre: 'Nivel del cargo (en Cargos y perfiles → Editar)', explicacion: 'Cada cargo tiene un nivel: Operativo, Técnico / administrativo, Supervisión / coordinación o Directivo / gestión. Si lo dejas en «Automático», se deduce de si el cargo tiene personal a cargo.' },
       ],

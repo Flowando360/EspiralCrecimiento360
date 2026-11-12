@@ -6,6 +6,8 @@ import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, FileText, HandshakeIcon, Target } from 'lucide-react';
 import { formatearFecha, cn, primero } from '@/lib/utils';
+import { TarjetaIndiceIntegral } from '@/components/espiral-crecimiento/tarjeta-indice-integral';
+import { cargarDesempenoIntegral } from '@/lib/desempeno/cargar-integral';
 
 type Bloque = 'competencias_organizacionales' | 'competencias_funcionales' | 'competencias_liderazgo' | 'roles_y_funciones' | 'cultura';
 
@@ -46,8 +48,8 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
     .from('evaluaciones')
     .select(
       `id, ciclo_id, publicado,
-       colaborador:colaborador_evaluado_id(id, nombre_completo, empresa_id, lider_id, cargo:cargos(nombre, proceso_area)),
-       resultado:resultados_evaluacion(indice_hacer, indice_deber, semaforo_hacer, semaforo_deber, brecha_hacer, brecha_deber)`
+       colaborador:colaborador_evaluado_id(id, nombre_completo, empresa_id, lider_id, cargo:cargos(nombre, proceso_area, nivel_cargo, tiene_personal_a_cargo)),
+       resultado:resultados_evaluacion(indice_hacer, indice_deber, semaforo_hacer, semaforo_deber, brecha_hacer, brecha_deber, items_evaluados, items_no_aplica)`
     )
     .eq('id', params.evaluacionId)
     .maybeSingle();
@@ -64,6 +66,15 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
   if (!puedeVer) notFound();
 
   const resultado = primero(evaluacion.resultado as any) as any;
+
+  const integral = await cargarDesempenoIntegral({
+    evaluacionId: params.evaluacionId,
+    empresaId: perfil.empresa_id,
+    colaboradorId: colaborador.id,
+    cargo: colaborador.cargo ?? null,
+    indiceHacer: resultado?.indice_hacer != null ? Number(resultado.indice_hacer) : null,
+    indiceDeber: resultado?.indice_deber != null ? Number(resultado.indice_deber) : null,
+  });
 
   const [{ data: ciclo }, { data: lider }, { data: tareas }, { data: brief }, { data: planes }] = await Promise.all([
     supabase.from('ciclos_evaluacion').select('nombre, fecha_apertura, fecha_cierre_respuestas').eq('id', evaluacion.ciclo_id).maybeSingle(),
@@ -234,6 +245,8 @@ export default async function ResultadoEvaluacionPage({ params }: { params: { ev
           );
         })}
       </div>
+
+      <TarjetaIndiceIntegral datos={integral} />
 
       {/* ── Bloques con subtotal y tabla Ítem/Auto/Líder ── */}
       {itemsPorBloque.map(({ bloque, items }) => {

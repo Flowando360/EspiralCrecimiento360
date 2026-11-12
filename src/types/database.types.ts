@@ -2008,6 +2008,8 @@ export type Database = {
       }
       competencias: {
         Row: {
+          umbral_critico: number | null
+          umbral_justificacion: string | null
           nivel_minimo: Database["public"]["Enums"]["nivel_cargo"]
           activo: boolean
           bloque: Database["public"]["Enums"]["bloque_evaluacion"] | null
@@ -2021,6 +2023,8 @@ export type Database = {
           solo_con_personal_a_cargo: boolean
         }
         Insert: {
+          umbral_critico?: number | null
+          umbral_justificacion?: string | null
           nivel_minimo?: Database["public"]["Enums"]["nivel_cargo"]
           activo?: boolean
           bloque?: Database["public"]["Enums"]["bloque_evaluacion"] | null
@@ -2034,6 +2038,8 @@ export type Database = {
           solo_con_personal_a_cargo?: boolean
         }
         Update: {
+          umbral_critico?: number | null
+          umbral_justificacion?: string | null
           nivel_minimo?: Database["public"]["Enums"]["nivel_cargo"]
           activo?: boolean
           bloque?: Database["public"]["Enums"]["bloque_evaluacion"] | null
@@ -7194,6 +7200,36 @@ export type Database = {
           usuario_id?: string | null
           usuario_nombre?: string | null
           usuario_rol?: string | null
+        }
+        Relationships: []
+      }
+      ponderacion_dimensiones_nivel: {
+        Row: {
+          actualizado_en: string
+          empresa_id: string
+          id: string
+          nivel_cargo: Database["public"]["Enums"]["nivel_cargo"]
+          peso_deber: number
+          peso_hacer: number
+          peso_saber: number
+        }
+        Insert: {
+          actualizado_en?: string
+          empresa_id: string
+          id?: string
+          nivel_cargo: Database["public"]["Enums"]["nivel_cargo"]
+          peso_deber: number
+          peso_hacer: number
+          peso_saber: number
+        }
+        Update: {
+          actualizado_en?: string
+          empresa_id?: string
+          id?: string
+          nivel_cargo?: Database["public"]["Enums"]["nivel_cargo"]
+          peso_deber?: number
+          peso_hacer?: number
+          peso_saber?: number
         }
         Relationships: []
       }
