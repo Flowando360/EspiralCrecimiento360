@@ -66,6 +66,20 @@ export const moduloAdministracion: ModuloAyuda = {
       notas: ['Cada sección solo aparece si tiene datos cargados — no se muestran secciones vacías.'],
     },
     {
+      slug: 'competencias-por-nivel',
+      ruta: '/administracion/competencias',
+      titulo: 'Competencias por nivel de cargo',
+      resumen: 'Define desde qué nivel de cargo se evalúa cada competencia, para que a un cargo operativo no le pidan evaluar «Liderazgo» ni a un directivo competencias de ejecución básica.',
+      camposYBotones: [
+        { nombre: 'Selector de cada competencia', explicacion: '«Todos los cargos» deja la competencia como corporativa (aplica a todos). «Desde supervisión» o «Desde directivo» la limita a esos niveles o superiores.' },
+        { nombre: 'Nivel del cargo (en Cargos y perfiles → Editar)', explicacion: 'Cada cargo tiene un nivel: Operativo, Técnico / administrativo, Supervisión / coordinación o Directivo / gestión. Si lo dejas en «Automático», se deduce de si el cargo tiene personal a cargo.' },
+      ],
+      notas: [
+        'El cambio aplica a los Encuentros de Crecimiento que se generen desde ese momento; los ya generados no se modifican.',
+        'En Cargos y perfiles → Ítems a evaluar solo aparecen las competencias que corresponden al nivel del cargo, y ahí puedes seguir excluyendo las que no quieras para ese cargo en particular.',
+      ],
+    },
+    {
       slug: 'organigrama-editar',
       ruta: '/administracion/organigrama',
       titulo: 'Editar organigrama',

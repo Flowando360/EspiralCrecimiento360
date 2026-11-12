@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { actualizarCargo } from '@/app/(dashboard)/administracion/cargos/[id]/actions';
+import { NIVELES_CARGO, type NivelCargo } from '@/lib/competencias/nivel-cargo';
 
 const NIVELES = [
   { value: '', label: '—' },
@@ -26,6 +27,7 @@ export interface DatosCargoIniciales {
   procesoArea: string;
   objetivoCargo: string;
   tienePersonalACargo: boolean;
+  nivelCargo: string;
   codigoDocumento: string;
   versionDocumento: string;
   fechaDocumento: string;
@@ -65,6 +67,7 @@ export function FormularioEditarCargo({ datosIniciales: d }: { datosIniciales: D
   const [procesoArea, setProcesoArea] = useState(d.procesoArea);
   const [objetivoCargo, setObjetivoCargo] = useState(d.objetivoCargo);
   const [tienePersonalACargo, setTienePersonalACargo] = useState(d.tienePersonalACargo);
+  const [nivelCargo, setNivelCargo] = useState(d.nivelCargo);
   const [codigoDocumento, setCodigoDocumento] = useState(d.codigoDocumento);
   const [versionDocumento, setVersionDocumento] = useState(d.versionDocumento);
   const [fechaDocumento, setFechaDocumento] = useState(d.fechaDocumento);
@@ -116,6 +119,7 @@ export function FormularioEditarCargo({ datosIniciales: d }: { datosIniciales: D
         procesoArea,
         objetivoCargo,
         tienePersonalACargo,
+        nivelCargo: nivelCargo as NivelCargo | '',
         codigoDocumento,
         versionDocumento,
         fechaDocumento,
@@ -183,6 +187,20 @@ export function FormularioEditarCargo({ datosIniciales: d }: { datosIniciales: D
           <div className="sm:col-span-2">
             <label className={label}>Objetivo del cargo</label>
             <textarea value={objetivoCargo} onChange={(e) => setObjetivoCargo(e.target.value)} className={campo} rows={3} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className={label}>Nivel del cargo</label>
+            <select value={nivelCargo} onChange={(e) => setNivelCargo(e.target.value)} className={campo}>
+              <option value="">Automático (según tenga o no personal a cargo)</option>
+              {NIVELES_CARGO.map((n) => (
+                <option key={n.value} value={n.value}>
+                  {n.label} — {n.ayuda}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-marmol-400 mt-1">
+              Define qué competencias se le evalúan: las corporativas aplican a todos, y las de supervisión o gestión (p. ej. Liderazgo) solo a los niveles que corresponden.
+            </p>
           </div>
           <label className="sm:col-span-2 flex items-center gap-2 text-sm text-marmol-700">
             <input type="checkbox" checked={tienePersonalACargo} onChange={(e) => setTienePersonalACargo(e.target.checked)} />

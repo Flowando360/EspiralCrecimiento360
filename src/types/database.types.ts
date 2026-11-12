@@ -997,6 +997,7 @@ export type Database = {
       }
       cargos: {
         Row: {
+          nivel_cargo: Database["public"]["Enums"]["nivel_cargo"] | null
           activo: boolean
           cambios_documentales: string | null
           cargos_a_los_que_reporta: string | null
@@ -1049,6 +1050,7 @@ export type Database = {
           version_documento: string | null
         }
         Insert: {
+          nivel_cargo?: Database["public"]["Enums"]["nivel_cargo"] | null
           activo?: boolean
           cambios_documentales?: string | null
           cargos_a_los_que_reporta?: string | null
@@ -1101,6 +1103,7 @@ export type Database = {
           version_documento?: string | null
         }
         Update: {
+          nivel_cargo?: Database["public"]["Enums"]["nivel_cargo"] | null
           activo?: boolean
           cambios_documentales?: string | null
           cargos_a_los_que_reporta?: string | null
@@ -2005,6 +2008,7 @@ export type Database = {
       }
       competencias: {
         Row: {
+          nivel_minimo: Database["public"]["Enums"]["nivel_cargo"]
           activo: boolean
           bloque: Database["public"]["Enums"]["bloque_evaluacion"] | null
           descripcion_que_evalua: string | null
@@ -2017,6 +2021,7 @@ export type Database = {
           solo_con_personal_a_cargo: boolean
         }
         Insert: {
+          nivel_minimo?: Database["public"]["Enums"]["nivel_cargo"]
           activo?: boolean
           bloque?: Database["public"]["Enums"]["bloque_evaluacion"] | null
           descripcion_que_evalua?: string | null
@@ -2029,6 +2034,7 @@ export type Database = {
           solo_con_personal_a_cargo?: boolean
         }
         Update: {
+          nivel_minimo?: Database["public"]["Enums"]["nivel_cargo"]
           activo?: boolean
           bloque?: Database["public"]["Enums"]["bloque_evaluacion"] | null
           descripcion_que_evalua?: string | null
@@ -9899,6 +9905,7 @@ export type Database = {
       flow_documento_tipo: "guia" | "carta"
       flow_pilares_estado: "generando" | "listo" | "error"
       modalidad_entrevista: "presencial" | "virtual" | "telefonica"
+      nivel_cargo: "operativo" | "tecnico_administrativo" | "supervision" | "directivo"
       nivel_esperado: "bajo" | "medio" | "alto"
       nivel_riesgo_cargo: "alto" | "medio" | "bajo"
       origen_item_evaluacion: "competencia" | "funcion_cargo"
@@ -10169,6 +10176,7 @@ export const Constants = {
       flow_documento_tipo: ["guia", "carta"],
       flow_pilares_estado: ["generando", "listo", "error"],
       modalidad_entrevista: ["presencial", "virtual", "telefonica"],
+      nivel_cargo: ["operativo", "tecnico_administrativo", "supervision", "directivo"],
       nivel_esperado: ["bajo", "medio", "alto"],
       nivel_riesgo_cargo: ["alto", "medio", "bajo"],
       origen_item_evaluacion: ["competencia", "funcion_cargo"],

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { competenciaAplicaAlCargo } from '@/lib/competencias/nivel-cargo';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { ESTADOS_VIGENTES } from '@/lib/colaboradores/estados';
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
   // ── 1. Resolver el conjunto de colaboradores dentro del alcance pedido ──
   let query = supabase
     .from('colaboradores')
-    .select('id, cargo_id, cargo:cargos(tiene_personal_a_cargo)')
+    .select('id, cargo_id, cargo:cargos(tiene_personal_a_cargo, nivel_cargo)')
     .eq('empresa_id', perfil.empresa_id)
     .in('estado', ESTADOS_VIGENTES)
     .eq('es_externo', false);
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
   // Catálogo de competencias: igual para todas las personas, se lee una sola vez.
   const { data: competencias } = await supabase
     .from('competencias')
-    .select('id, nombre, descripcion_que_evalua, bloque, solo_con_personal_a_cargo, orden')
+    .select('id, nombre, descripcion_que_evalua, bloque, solo_con_personal_a_cargo, nivel_minimo, orden')
     .eq('empresa_id', perfil.empresa_id)
     .eq('activo', true)
     .not('bloque', 'is', null);
@@ -144,7 +145,7 @@ export async function POST(req: NextRequest) {
 
     // ── 2. Ítems de evaluación: catálogo de competencias aplicables ──
     const competenciasAplicables = (competencias ?? []).filter(
-      (c: any) => (!c.solo_con_personal_a_cargo || tenePersonalACargo) && !competenciasExcluidas.has(c.id)
+      (c: any) => competenciaAplicaAlCargo(c, { nivel_cargo: (colaborador.cargo as any)?.nivel_cargo, tiene_personal_a_cargo: tenePersonalACargo }) && !competenciasExcluidas.has(c.id)
     );
 
     if (competenciasAplicables.length > 0) {

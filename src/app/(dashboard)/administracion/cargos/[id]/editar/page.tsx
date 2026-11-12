@@ -58,6 +58,7 @@ export default async function EditarCargoPage({ params }: { params: { id: string
           procesoArea: cargo.proceso_area ?? '',
           objetivoCargo: cargo.objetivo_cargo ?? '',
           tienePersonalACargo: cargo.tiene_personal_a_cargo,
+          nivelCargo: cargo.nivel_cargo ?? '',
           codigoDocumento: cargo.codigo_documento ?? '',
           versionDocumento: cargo.version_documento ?? '',
           fechaDocumento: cargo.fecha_documento ?? '',

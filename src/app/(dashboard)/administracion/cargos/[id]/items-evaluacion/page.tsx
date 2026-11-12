@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { redirect, notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
+import { competenciaAplicaAlCargo, ETIQUETA_NIVEL, nivelEfectivo } from '@/lib/competencias/nivel-cargo';
 import { SeleccionItemsEvaluacion, type GrupoItems } from '@/components/espiral-crecimiento/seleccion-items-evaluacion';
 
 const ETIQUETA_BLOQUE: Record<string, string> = {
@@ -19,13 +20,13 @@ export default async function ItemsEvaluacionCargoPage({ params }: { params: { i
 
   const supabase = createClient();
 
-  const { data: cargo } = await supabase.from('cargos').select('id, nombre, empresa_id, tiene_personal_a_cargo').eq('id', params.id).maybeSingle();
+  const { data: cargo } = await supabase.from('cargos').select('id, nombre, empresa_id, tiene_personal_a_cargo, nivel_cargo').eq('id', params.id).maybeSingle();
   if (!cargo || cargo.empresa_id !== perfil.empresa_id) notFound();
 
   const [{ data: competencias }, { data: funciones }, { data: excluidos }] = await Promise.all([
     supabase
       .from('competencias')
-      .select('id, nombre, bloque, peso_relativo, solo_con_personal_a_cargo')
+      .select('id, nombre, bloque, peso_relativo, solo_con_personal_a_cargo, nivel_minimo')
       .eq('empresa_id', perfil.empresa_id)
       .eq('activo', true)
       .not('bloque', 'is', null)
@@ -34,7 +35,7 @@ export default async function ItemsEvaluacionCargoPage({ params }: { params: { i
     supabase.from('cargo_items_evaluacion_excluidos').select('competencia_id, cargo_funcion_id').eq('cargo_id', params.id),
   ]);
 
-  const competenciasAplicables = (competencias ?? []).filter((c) => !c.solo_con_personal_a_cargo || cargo.tiene_personal_a_cargo);
+  const competenciasAplicables = (competencias ?? []).filter((c) => competenciaAplicaAlCargo(c, cargo));
   const idsExcluidosCompetencia = new Set((excluidos ?? []).map((e) => e.competencia_id).filter(Boolean));
   const idsExcluidosFuncion = new Set((excluidos ?? []).map((e) => e.cargo_funcion_id).filter(Boolean));
 
@@ -85,7 +86,8 @@ export default async function ItemsEvaluacionCargoPage({ params }: { params: { i
         <h1 className="font-display text-2xl font-semibold text-secundario">Ítems a evaluar</h1>
         <p className="text-sm text-marmol-500 mt-1">
           Marca los ítems del perfil que se incluirán al generar los Encuentros de Crecimiento de este cargo. Si
-          no cambias nada, se incluyen todos por defecto.
+          no cambias nada, se incluyen todos por defecto. Solo aparecen las competencias que corresponden al nivel de este cargo
+          (<strong>{ETIQUETA_NIVEL[nivelEfectivo(cargo.nivel_cargo, cargo.tiene_personal_a_cargo)]}</strong>); el nivel se cambia al editar el cargo.
         </p>
       </div>
 

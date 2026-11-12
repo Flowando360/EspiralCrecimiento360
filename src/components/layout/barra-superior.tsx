@@ -182,6 +182,7 @@ const NAV: NavGroup[] = [
     modulo: 'administracion',
     items: [
       { href: '/administracion/cargos', label: 'Cargos y perfiles', icon: Sparkles, roles: ['admin_th'] },
+      { href: '/administracion/competencias', label: 'Competencias por nivel', icon: Sparkles, roles: ['admin_th'] },
       { href: '/administracion/organigrama', label: 'Organigrama (editar)', icon: Network, roles: ['admin_th'] },
       { href: '/administracion/identidad', label: 'Identidad Organizacional', icon: Compass, roles: ['admin_th'] },
       { href: '/administracion/dotaciones', label: 'Dotaciones', icon: Shirt, roles: ['admin_th'], modulo: 'dotaciones' },
