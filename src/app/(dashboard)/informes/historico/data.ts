@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { coincideEquipo, hayFiltrosEquipo, type FiltrosEquipo } from '@/lib/informes/filtros-equipo';
 
 export interface FilaHistorico {
   cicloId: string;
@@ -15,7 +16,7 @@ export interface FilaHistorico {
  * ciclo de evaluación al siguiente. admin_th/gerencia ven toda la empresa,
  * líder solo el histórico de su equipo.
  */
-export async function obtenerInformeHistorico() {
+export async function obtenerInformeHistorico(filtros: FiltrosEquipo = {}) {
   const perfil = await getPerfilActual();
   if (!perfil || !['admin_th', 'lider', 'gerencia'].includes(perfil.rol)) {
     return { perfil: null, filas: [] as FilaHistorico[] };
@@ -27,6 +28,16 @@ export async function obtenerInformeHistorico() {
   if (perfil.rol === 'lider' && perfil.colaborador_id) {
     const { data: equipo } = await supabase.from('colaboradores').select('id').eq('lider_id', perfil.colaborador_id);
     colaboradorIds = (equipo ?? []).map((c) => c.id).concat(perfil.colaborador_id);
+  }
+
+  if (hayFiltrosEquipo(filtros)) {
+    const { data: todos } = await supabase
+      .from('colaboradores')
+      .select('id, lider_id, cargo:cargo_id(proceso_area)')
+      .eq('empresa_id', perfil.empresa_id)
+      .eq('es_externo', false);
+    const coinciden = ((todos ?? []) as any[]).filter((c) => coincideEquipo(c, filtros)).map((c) => c.id as string);
+    colaboradorIds = colaboradorIds ? coinciden.filter((id) => colaboradorIds!.includes(id)) : coinciden;
   }
 
   const { data: ciclos } = await supabase

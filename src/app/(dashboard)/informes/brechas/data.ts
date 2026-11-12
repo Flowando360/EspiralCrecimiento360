@@ -1,6 +1,7 @@
 import { crearNormalizadorAreas } from '@/lib/areas';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { coincideEquipo, type FiltrosEquipo } from '@/lib/informes/filtros-equipo';
 
 export type Agrupacion = 'equipo' | 'area';
 export type SemaforoDimension = 'alto' | 'medio' | 'bajo' | null;
@@ -43,7 +44,7 @@ function semaforoPorcentaje(valor: number | null): SemaforoDimension {
  * informes, sin colaborador porque el comparativo no tiene sentido a
  * nivel individual.
  */
-export async function obtenerInformeBrechas(agrupacion: Agrupacion) {
+export async function obtenerInformeBrechas(agrupacion: Agrupacion, filtros: FiltrosEquipo = {}) {
   const perfil = await getPerfilActual();
   if (!perfil || !['admin_th', 'lider', 'gerencia'].includes(perfil.rol)) {
     return { perfil: null, filas: [] as FilaBrecha[] };
@@ -66,7 +67,7 @@ export async function obtenerInformeBrechas(agrupacion: Agrupacion) {
   }
 
   const { data: colaboradoresRaw } = await colaboradoresQuery;
-  const colaboradores = (colaboradoresRaw ?? []) as any[];
+  const colaboradores = ((colaboradoresRaw ?? []) as any[]).filter((c) => coincideEquipo(c, filtros));
   const colaboradorIds = colaboradores.map((c) => c.id);
 
   if (colaboradorIds.length === 0) return { perfil, filas: [] };

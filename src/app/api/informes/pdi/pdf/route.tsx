@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { leerFiltrosEquipo } from '@/lib/informes/filtros-equipo';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { obtenerPlanesInforme } from '@/app/(dashboard)/informes/pdi/data';
 import { PdiDocument } from '@/app/(dashboard)/informes/pdi/pdf-document';
@@ -8,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   const colaboradorId = req.nextUrl.searchParams.get('colaboradorId') ?? undefined;
-  const { perfil, planes } = await obtenerPlanesInforme(colaboradorId);
+  const { perfil, planes } = await obtenerPlanesInforme(colaboradorId, leerFiltrosEquipo(req.nextUrl.searchParams));
 
   if (!perfil) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 });

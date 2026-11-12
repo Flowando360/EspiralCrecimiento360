@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { leerFiltrosEquipo } from '@/lib/informes/filtros-equipo';
 import ExcelJS from 'exceljs';
 import { obtenerInformeFormacion } from '@/app/(dashboard)/informes/formacion/data';
 import { formatearFecha } from '@/lib/utils';
@@ -17,8 +18,8 @@ const CATEGORIA_LABEL: Record<string, string> = {
   otro: 'Otro',
 };
 
-export async function GET() {
-  const { perfil, filas } = await obtenerInformeFormacion();
+export async function GET(req: NextRequest) {
+  const { perfil, filas } = await obtenerInformeFormacion(undefined, leerFiltrosEquipo(req.nextUrl.searchParams));
 
   if (!perfil) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 });

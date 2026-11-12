@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { leerFiltrosEquipo } from '@/lib/informes/filtros-equipo';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { obtenerInformeBrechas, type Agrupacion } from '@/app/(dashboard)/informes/brechas/data';
 import { BrechasDocument } from '@/app/(dashboard)/informes/brechas/pdf-document';
@@ -8,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   const agrupacion: Agrupacion = req.nextUrl.searchParams.get('agrupacion') === 'area' ? 'area' : 'equipo';
-  const { perfil, filas } = await obtenerInformeBrechas(agrupacion);
+  const { perfil, filas } = await obtenerInformeBrechas(agrupacion, leerFiltrosEquipo(req.nextUrl.searchParams));
 
   if (!perfil) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 });

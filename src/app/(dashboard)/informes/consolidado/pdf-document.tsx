@@ -42,8 +42,8 @@ export function InformeConsolidadoDocument({ informe }: { informe: InformeConsol
             etiqueta="Alineación talento-rol"
             valor={informe.pctAlineacionTalentoRol != null ? `${informe.pctAlineacionTalentoRol}%` : '—'}
           />
-          <Indicador etiqueta="Alertas críticas abiertas" valor={informe.alertasCriticas} />
-          <Indicador etiqueta="Alertas abiertas (total)" valor={informe.alertasAbiertas} />
+          <Indicador etiqueta="Alertas críticas abiertas" valor={informe.alertasCriticas ?? '—'} />
+          <Indicador etiqueta="Alertas abiertas (total)" valor={informe.alertasAbiertas ?? '—'} />
           <Indicador etiqueta="Índice de Hacer (promedio)" valor={informe.promedioHacerEmpresa ?? '—'} />
           <Indicador etiqueta="Índice de Deber (promedio)" valor={informe.promedioDeberEmpresa ?? '—'} />
           <Indicador

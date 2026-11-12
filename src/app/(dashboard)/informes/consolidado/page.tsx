@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation';
+import { leerFiltrosEquipo, queryFiltrosEquipo, opcionesFiltroEquipo } from '@/lib/informes/filtros-equipo';
+import { FiltroEquipo } from '@/components/informes/filtro-equipo';
 import { obtenerInformeConsolidado } from './data';
 import { BarChart3, FileDown, FileSpreadsheet } from 'lucide-react';
 
@@ -11,9 +13,12 @@ function Dato({ etiqueta, valor }: { etiqueta: string; valor: string | number })
   );
 }
 
-export default async function InformeConsolidadoPage() {
-  const { perfil, informe } = await obtenerInformeConsolidado();
+export default async function InformeConsolidadoPage({ searchParams }: { searchParams: { area?: string; liderId?: string } }) {
+  const filtros = leerFiltrosEquipo(searchParams);
+  const { perfil, informe } = await obtenerInformeConsolidado(filtros);
   if (!perfil || !informe) redirect('/inicio');
+  const opcionesEquipo = await opcionesFiltroEquipo(perfil);
+  const qs = queryFiltrosEquipo(filtros);
 
   return (
     <div className="space-y-6">
@@ -27,13 +32,13 @@ export default async function InformeConsolidadoPage() {
 
         <div className="flex items-center gap-2">
           <a
-            href="/api/informes/consolidado/pdf"
+            href={`/api/informes/consolidado/pdf${qs}`}
             className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:border-flow-300 text-marmol-600 text-sm font-medium px-3.5 py-2 transition"
           >
             <FileDown size={16} /> PDF
           </a>
           <a
-            href="/api/informes/consolidado/excel"
+            href={`/api/informes/consolidado/excel${qs}`}
             className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:border-flow-300 text-marmol-600 text-sm font-medium px-3.5 py-2 transition"
           >
             <FileSpreadsheet size={16} /> Excel
@@ -41,11 +46,26 @@ export default async function InformeConsolidadoPage() {
         </div>
       </div>
 
+      <FiltroEquipo
+        rutaBase="/informes/consolidado"
+        areas={opcionesEquipo.areas}
+        lideres={opcionesEquipo.lideres}
+        actuales={filtros}
+        conservar={{}}
+        mostrarLider={perfil.rol !== 'lider'}
+      />
+
+      {informe.filtroDescripcion && (
+        <p className="text-xs text-medio bg-medio/10 border border-medio/20 rounded-lg px-3 py-2">
+          Mostrando solo: {informe.filtroDescripcion}. Saber, alineación talento-rol y alertas se calculan para toda la empresa, por eso no se muestran con filtro.
+        </p>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Dato etiqueta="Colaboradores activos" valor={informe.totalActivos} />
         <Dato etiqueta="En proceso de salida" valor={informe.enProcesoSalida} />
         <Dato etiqueta="Alineación talento-rol" valor={informe.pctAlineacionTalentoRol != null ? `${informe.pctAlineacionTalentoRol}%` : '—'} />
-        <Dato etiqueta="Alertas críticas abiertas" valor={informe.alertasCriticas} />
+        <Dato etiqueta="Alertas críticas abiertas" valor={informe.alertasCriticas ?? '—'} />
       </div>
 
       <div className="grid grid-cols-3 gap-4">

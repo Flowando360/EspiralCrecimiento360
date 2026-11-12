@@ -30,6 +30,7 @@ export const moduloInformes: ModuloAyuda = {
       titulo: 'Informe de Plan de Desarrollo Individual',
       resumen: 'Brechas detectadas, el plan de acción definido para cada una, y su estado de cumplimiento.',
       camposYBotones: [
+        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
         { nombre: 'Filtro por persona', explicacion: 'Igual que en los demás informes: según tu rol.' },
         { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' },
       ],
@@ -47,7 +48,9 @@ export const moduloInformes: ModuloAyuda = {
       ruta: '/informes/brechas',
       titulo: 'Informe de Brechas por dimensión',
       resumen: 'Comparativo de Ser, Saber, Hacer y Deber por equipo o área, para priorizar dónde intervenir con formación.',
-      camposYBotones: [{ nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
+      camposYBotones: [
+        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
+        { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
       notas: ['Visible para admin_th, líder y gerencia.'],
     },
     {
@@ -56,6 +59,7 @@ export const moduloInformes: ModuloAyuda = {
       titulo: 'Informe de Formación',
       resumen: 'Cursos y rutas de aprendizaje asignados en Nexa, con su estado y % de avance, persona por persona.',
       camposYBotones: [
+        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
         { nombre: 'Tarjetas de resumen', explicacion: 'Total de asignaciones, cuántas están completadas y el % de cumplimiento general.' },
         { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' },
       ],
@@ -74,15 +78,19 @@ export const moduloInformes: ModuloAyuda = {
       ruta: '/informes/consolidado',
       titulo: 'Informe Consolidado Gerencial',
       resumen: 'Los mismos indicadores del dashboard de Inicio, con un desglose por área — pensado para presentar o imprimir en una reunión de junta, no para navegar el día a día.',
-      camposYBotones: [{ nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
-      notas: ['Visible solo para admin_th y gerencia.'],
+      camposYBotones: [
+        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
+        { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
+      notas: ['Visible solo para admin_th y gerencia.', 'Con un filtro activo, Saber, alineación talento-rol y alertas no se muestran: solo existen a nivel empresa.'],
     },
     {
       slug: 'historico',
       ruta: '/informes/historico',
       titulo: 'Histórico Comparativo entre Ciclos',
       resumen: 'Evolución del promedio de Hacer y Deber de un Ciclo de Crecimiento al siguiente, con la variación marcada (↑/↓) contra el ciclo anterior.',
-      camposYBotones: [{ nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
+      camposYBotones: [
+        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
+        { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
       notas: [
         'Visible para admin_th, líder (su equipo) y gerencia.',
         'Un resumen de los dos ciclos más recientes también aparece como widget en el dashboard de Inicio.',

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { leerFiltrosEquipo } from '@/lib/informes/filtros-equipo';
 import ExcelJS from 'exceljs';
 import { obtenerInformeBrechas, type Agrupacion } from '@/app/(dashboard)/informes/brechas/data';
 
@@ -7,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   const agrupacion: Agrupacion = req.nextUrl.searchParams.get('agrupacion') === 'area' ? 'area' : 'equipo';
-  const { perfil, filas } = await obtenerInformeBrechas(agrupacion);
+  const { perfil, filas } = await obtenerInformeBrechas(agrupacion, leerFiltrosEquipo(req.nextUrl.searchParams));
 
   if (!perfil) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 });

@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { leerFiltrosEquipo } from '@/lib/informes/filtros-equipo';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { obtenerInformeHistorico } from '@/app/(dashboard)/informes/historico/data';
 import { InformeHistoricoDocument } from '@/app/(dashboard)/informes/historico/pdf-document';
@@ -6,8 +7,8 @@ import { InformeHistoricoDocument } from '@/app/(dashboard)/informes/historico/p
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  const { perfil, filas } = await obtenerInformeHistorico();
+export async function GET(req: NextRequest) {
+  const { perfil, filas } = await obtenerInformeHistorico(leerFiltrosEquipo(req.nextUrl.searchParams));
 
   if (!perfil) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 });

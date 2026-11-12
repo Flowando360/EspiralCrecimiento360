@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
+import { leerFiltrosEquipo, queryFiltrosEquipo, opcionesFiltroEquipo } from '@/lib/informes/filtros-equipo';
+import { FiltroEquipo } from '@/components/informes/filtro-equipo';
 import { redirect } from 'next/navigation';
 import { FiltroTabla } from '@/components/ui/filtro-tabla';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -17,10 +19,11 @@ const ESTADO_COLOR: Record<string, string> = {
 export default async function InformePdiPage({
   searchParams,
 }: {
-  searchParams: { colaboradorId?: string };
+  searchParams: { colaboradorId?: string; area?: string; liderId?: string };
 }) {
   const colaboradorIdFiltro = searchParams.colaboradorId || undefined;
-  const { perfil, planes } = await obtenerPlanesInforme(colaboradorIdFiltro);
+  const filtros = leerFiltrosEquipo(searchParams);
+  const { perfil, planes } = await obtenerPlanesInforme(colaboradorIdFiltro, filtros);
 
   if (!perfil) redirect('/inicio');
 
@@ -44,7 +47,8 @@ export default async function InformePdiPage({
     colaboradoresFiltrables = data ?? [];
   }
 
-  const queryString = colaboradorIdFiltro ? `?colaboradorId=${colaboradorIdFiltro}` : '';
+  const opcionesEquipo = puedeFiltrar ? await opcionesFiltroEquipo(perfil) : { areas: [], lideres: [] };
+  const queryString = queryFiltrosEquipo(filtros, colaboradorIdFiltro ? `colaboradorId=${colaboradorIdFiltro}` : '');
 
   return (
     <div className="space-y-6">
@@ -75,6 +79,17 @@ export default async function InformePdiPage({
       </div>
 
       <IdentidadReferencia empresaId={perfil.empresa_id} />
+
+      {puedeFiltrar && (
+      <FiltroEquipo
+        rutaBase="/informes/pdi"
+        areas={opcionesEquipo.areas}
+        lideres={opcionesEquipo.lideres}
+        actuales={filtros}
+        conservar={{ colaboradorId: colaboradorIdFiltro }}
+        mostrarLider={perfil.rol !== 'lider'}
+      />
+      )}
 
       {puedeFiltrar && colaboradoresFiltrables.length > 0 && (
         <form className="card p-3 flex items-center gap-3">

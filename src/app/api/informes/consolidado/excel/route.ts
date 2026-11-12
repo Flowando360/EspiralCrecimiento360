@@ -1,12 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { leerFiltrosEquipo } from '@/lib/informes/filtros-equipo';
 import ExcelJS from 'exceljs';
 import { obtenerInformeConsolidado } from '@/app/(dashboard)/informes/consolidado/data';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  const { perfil, informe } = await obtenerInformeConsolidado();
+export async function GET(req: NextRequest) {
+  const { perfil, informe } = await obtenerInformeConsolidado(leerFiltrosEquipo(req.nextUrl.searchParams));
 
   if (!perfil || !informe) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
@@ -26,8 +27,8 @@ export async function GET() {
     { indicador: 'Colaboradores activos', valor: informe.totalActivos },
     { indicador: 'En proceso de salida', valor: informe.enProcesoSalida },
     { indicador: 'Alineación talento-rol', valor: informe.pctAlineacionTalentoRol != null ? `${informe.pctAlineacionTalentoRol}%` : '' },
-    { indicador: 'Alertas críticas abiertas', valor: informe.alertasCriticas },
-    { indicador: 'Alertas abiertas (total)', valor: informe.alertasAbiertas },
+    { indicador: 'Alertas críticas abiertas', valor: informe.alertasCriticas ?? '' },
+    { indicador: 'Alertas abiertas (total)', valor: informe.alertasAbiertas ?? '' },
     { indicador: 'Índice de Hacer (promedio)', valor: informe.promedioHacerEmpresa ?? '' },
     { indicador: 'Índice de Deber (promedio)', valor: informe.promedioDeberEmpresa ?? '' },
     { indicador: 'Cumplimiento de Saber', valor: informe.promedioSaberEmpresa != null ? `${informe.promedioSaberEmpresa}%` : '' },

@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { leerFiltrosEquipo } from '@/lib/informes/filtros-equipo';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { obtenerInformeFormacion } from '@/app/(dashboard)/informes/formacion/data';
 import { InformeFormacionDocument } from '@/app/(dashboard)/informes/formacion/pdf-document';
@@ -6,8 +7,8 @@ import { InformeFormacionDocument } from '@/app/(dashboard)/informes/formacion/p
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  const { perfil, filas } = await obtenerInformeFormacion();
+export async function GET(req: NextRequest) {
+  const { perfil, filas } = await obtenerInformeFormacion(undefined, leerFiltrosEquipo(req.nextUrl.searchParams));
 
   if (!perfil) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 });

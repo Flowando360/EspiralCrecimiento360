@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { coincideEquipo, type FiltrosEquipo } from '@/lib/informes/filtros-equipo';
 
 export interface FilaFormacion {
   id: string;
@@ -18,7 +19,7 @@ export interface FilaFormacion {
  * estado y avance. admin_th/gerencia ven toda la empresa, líder su equipo,
  * colaborador solo lo propio.
  */
-export async function obtenerInformeFormacion(colaboradorIdFiltro?: string) {
+export async function obtenerInformeFormacion(colaboradorIdFiltro?: string, filtros: FiltrosEquipo = {}) {
   const perfil = await getPerfilActual();
   if (!perfil) return { perfil: null, filas: [] as FilaFormacion[] };
 
@@ -27,7 +28,7 @@ export async function obtenerInformeFormacion(colaboradorIdFiltro?: string) {
     .from('nexa_rutas_formacion')
     .select(
       `id, estado, progreso_pct, fecha_limite, completado_en,
-       colaborador:colaborador_id(id, nombre_completo, empresa_id, lider_id),
+       colaborador:colaborador_id(id, nombre_completo, empresa_id, lider_id, cargo:cargo_id(proceso_area)),
        curso:curso_id(titulo, categoria)`
     )
     .order('asignado_en', { ascending: false });
@@ -41,6 +42,7 @@ export async function obtenerInformeFormacion(colaboradorIdFiltro?: string) {
       return true;
     })
     .filter((r) => !colaboradorIdFiltro || r.colaborador.id === colaboradorIdFiltro)
+    .filter((r) => coincideEquipo(r.colaborador, filtros))
     .map((r) => ({
       id: r.id,
       colaborador_id: r.colaborador.id,

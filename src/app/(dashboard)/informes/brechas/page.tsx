@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation';
+import { leerFiltrosEquipo, queryFiltrosEquipo, opcionesFiltroEquipo } from '@/lib/informes/filtros-equipo';
+import { FiltroEquipo } from '@/components/informes/filtro-equipo';
 import { EmptyState } from '@/components/ui/empty-state';
 import { BarChart3, FileDown, FileSpreadsheet } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -28,12 +30,15 @@ function Celda({ promedio, conDato, tamano, semaforo, sufijo = '' }: { promedio:
 export default async function InformeBrechasPage({
   searchParams,
 }: {
-  searchParams: { agrupacion?: string };
+  searchParams: { agrupacion?: string; area?: string; liderId?: string };
 }) {
   const agrupacion: Agrupacion = searchParams.agrupacion === 'area' ? 'area' : 'equipo';
-  const { perfil, filas } = await obtenerInformeBrechas(agrupacion);
+  const filtros = leerFiltrosEquipo(searchParams);
+  const { perfil, filas } = await obtenerInformeBrechas(agrupacion, filtros);
 
   if (!perfil) redirect('/informes');
+  const opcionesEquipo = await opcionesFiltroEquipo(perfil);
+  const qs = queryFiltrosEquipo(filtros, `agrupacion=${agrupacion}`);
 
   return (
     <div className="space-y-6">
@@ -47,13 +52,13 @@ export default async function InformeBrechasPage({
 
         <div className="flex items-center gap-2">
           <a
-            href={`/api/informes/brechas/pdf?agrupacion=${agrupacion}`}
+            href={`/api/informes/brechas/pdf${qs}`}
             className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:border-flow-300 text-marmol-600 text-sm font-medium px-3.5 py-2 transition"
           >
             <FileDown size={16} /> PDF
           </a>
           <a
-            href={`/api/informes/brechas/excel?agrupacion=${agrupacion}`}
+            href={`/api/informes/brechas/excel${qs}`}
             className="inline-flex items-center gap-1.5 rounded-lg border border-marmol-200 hover:border-flow-300 text-marmol-600 text-sm font-medium px-3.5 py-2 transition"
           >
             <FileSpreadsheet size={16} /> Excel
@@ -61,9 +66,18 @@ export default async function InformeBrechasPage({
         </div>
       </div>
 
+      <FiltroEquipo
+        rutaBase="/informes/brechas"
+        areas={opcionesEquipo.areas}
+        lideres={opcionesEquipo.lideres}
+        actuales={filtros}
+        conservar={{ agrupacion }}
+        mostrarLider={perfil.rol !== 'lider'}
+      />
+
       <div className="card p-3 flex items-center gap-2 w-fit">
         <a
-          href="?agrupacion=equipo"
+          href={queryFiltrosEquipo(filtros, 'agrupacion=equipo')}
           className={cn(
             'rounded-lg px-3 py-1.5 text-sm font-medium transition',
             agrupacion === 'equipo' ? 'bg-flow-500 text-white' : 'text-marmol-600 hover:bg-marmol-100'
@@ -72,7 +86,7 @@ export default async function InformeBrechasPage({
           Por equipo
         </a>
         <a
-          href="?agrupacion=area"
+          href={queryFiltrosEquipo(filtros, 'agrupacion=area')}
           className={cn(
             'rounded-lg px-3 py-1.5 text-sm font-medium transition',
             agrupacion === 'area' ? 'bg-flow-500 text-white' : 'text-marmol-600 hover:bg-marmol-100'

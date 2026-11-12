@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
+import { coincideEquipo, type FiltrosEquipo } from '@/lib/informes/filtros-equipo';
 
 export interface PlanInforme {
   id: string;
@@ -20,7 +21,7 @@ export interface PlanInforme {
  * La comparten la pantalla del informe y los dos endpoints de descarga,
  * para no repetir la regla de permisos en tres lugares distintos.
  */
-export async function obtenerPlanesInforme(colaboradorIdFiltro?: string) {
+export async function obtenerPlanesInforme(colaboradorIdFiltro?: string, filtros: FiltrosEquipo = {}) {
   const perfil = await getPerfilActual();
   if (!perfil || perfil.rol === 'gerencia') return { perfil: null, planes: [] as PlanInforme[] };
 
@@ -30,7 +31,7 @@ export async function obtenerPlanesInforme(colaboradorIdFiltro?: string) {
     .select(
       `id, colaborador_id, origen, brecha_detectada, accion, estado, fecha_compromiso,
        fecha_cumplimiento, notas,
-       colaborador:colaborador_id(nombre_completo, empresa_id, lider_id)`
+       colaborador:colaborador_id(nombre_completo, empresa_id, lider_id, cargo:cargo_id(proceso_area))`
     )
     .order('fecha_compromiso', { ascending: true });
 
@@ -43,6 +44,7 @@ export async function obtenerPlanesInforme(colaboradorIdFiltro?: string) {
       return true; // admin_th: toda la empresa
     })
     .filter((p) => !colaboradorIdFiltro || p.colaborador_id === colaboradorIdFiltro)
+    .filter((p) => coincideEquipo(p.colaborador, filtros))
     .map((p) => ({
       id: p.id,
       colaborador_nombre: p.colaborador.nombre_completo,

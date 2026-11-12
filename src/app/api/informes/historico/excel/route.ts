@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { leerFiltrosEquipo } from '@/lib/informes/filtros-equipo';
 import ExcelJS from 'exceljs';
 import { obtenerInformeHistorico } from '@/app/(dashboard)/informes/historico/data';
 import { formatearFecha } from '@/lib/utils';
@@ -14,8 +15,8 @@ function tendencia(actual: number | null, anterior: number | null | undefined): 
   return 'sin cambio';
 }
 
-export async function GET() {
-  const { perfil, filas } = await obtenerInformeHistorico();
+export async function GET(req: NextRequest) {
+  const { perfil, filas } = await obtenerInformeHistorico(leerFiltrosEquipo(req.nextUrl.searchParams));
 
   if (!perfil) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
