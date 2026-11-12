@@ -321,6 +321,65 @@ export const moduloProcesosGestion: ModuloAyuda = {
       ],
     },
     {
+      slug: 'matriz-comunicaciones',
+      ruta: '/procesos-gestion/comunicaciones',
+      titulo: 'Matriz de comunicaciones',
+      resumen:
+        'Qué se comunica, a quién, por qué canal, con qué frecuencia y quién responde. Hace parte de la planeación (ISO 9001, requisito 7.4). La ven admin_th, líder y gerencia; solo admin_th edita.',
+      camposYBotones: [
+        { nombre: 'Agregar comunicación (admin_th)', explicacion: 'Qué se comunica (ej. Política de calidad), a quién (ej. todo el personal, clientes), canal (correo, cartelera, reunión, WhatsApp…), frecuencia (ej. mensual), proceso (opcional) y responsable (opcional).' },
+        { nombre: 'Eliminar', explicacion: 'Quita una fila de la matriz.' },
+      ],
+    },
+    {
+      slug: 'detalle-auditoria',
+      ruta: '/procesos-gestion/auditorias/*',
+      titulo: 'Detalle de una auditoría interna',
+      resumen:
+        'Una auditoría con su código (AI-001…), estado, marco normativo, procesos cubiertos, auditor, fecha planeada y alcance, más el tablero de sus hallazgos.',
+      camposYBotones: [
+        { nombre: 'Tablero de hallazgos', explicacion: 'Cinco columnas: Abierto → Análisis de causa → Plan de acción → Seguimiento → Cerrado. Arrastra una tarjeta para cambiar su estado (admin_th).' },
+        { nombre: 'Nuevo hallazgo (admin_th)', explicacion: 'Proceso (opcional), tipo (NC Mayor, NC Menor, Observación u Oportunidad de mejora), descripción y requisito o numeral incumplido (opcional).' },
+        { nombre: 'Crear ACPM desde un hallazgo', explicacion: 'Cada hallazgo puede originar una acción en Procesos → ACPM ya vinculada a él.' },
+      ],
+    },
+    {
+      slug: 'detalle-documento',
+      ruta: '/procesos-gestion/documentos/*',
+      titulo: 'Detalle de un documento',
+      resumen:
+        'Un documento del sistema de gestión con su código, tipo, versión vigente y proceso, la difusión (quién confirmó la lectura) y el historial de versiones.',
+      camposYBotones: [
+        { nombre: 'Difusión', explicacion: 'Cuántas personas con acceso confirmaron la lectura frente al umbral que fijó admin_th en Configuración. Cuando se llega al umbral la difusión se considera completa.' },
+        { nombre: 'Confirmar lectura', explicacion: 'Cualquier persona con ficha de colaborador puede confirmar que leyó el documento, con un comentario o pregunta opcional. Solo aparece si el documento exige confirmación y aún no la has hecho. Suma puntos en Nexa.' },
+        { nombre: 'Historial de versiones', explicacion: 'Las versiones anteriores del documento; si no hay, esta es la primera.' },
+      ],
+    },
+    {
+      slug: 'detalle-contexto',
+      ruta: '/procesos-gestion/contexto/*',
+      titulo: 'Detalle de un análisis FODA',
+      resumen:
+        'El análisis de una fecha: sus cuatro columnas de factores (debilidades, oportunidades, fortalezas y amenazas), la priorización y las estrategias cruzadas. Ver también la página «Contexto (análisis FODA)».',
+      camposYBotones: [
+        { nombre: 'Factores y prioridad', explicacion: 'Cada factor tiene impacto y probabilidad (Bajo, Medio, Alto) y una prioridad de 1 a 9; se ordenan de mayor a menor. «Priorizar con IA» propone esos valores y una sugerencia; tú decides.' },
+        { nombre: 'Crear acción, gestión de cambio, convertir en riesgo', explicacion: 'Cada factor se puede llevar a una ACPM, a Gestión de cambio o (debilidades, amenazas y oportunidades) a Riesgos y oportunidades.' },
+        { nombre: 'Estrategias FO · FA · DO · DA', explicacion: 'Cuatro cuadrantes con las estrategias que cruzan los factores. «Proponer estrategias con IA» las genera como propuesta para que las apruebes o descartes; también puedes escribirlas y llevarlas al Plan de trabajo anual con una fecha.' },
+      ],
+    },
+    {
+      slug: 'importar-matriz-legal',
+      ruta: '/procesos-gestion/legal/importar',
+      titulo: 'Importar la matriz legal desde Excel',
+      resumen:
+        'Migra la matriz de requisitos legales que ya tienes en Excel (hasta 500 por archivo), con revisión fila por fila antes de guardar. Solo admin_th. Ver también la página «Matriz de requisitos legales».',
+      camposYBotones: [
+        { nombre: 'Plantilla y encabezados', explicacion: 'Solo la norma es obligatoria. Acepta tus propios encabezados (Norma, Año, Descripción, Cumple, Fecha de revisión…) en cualquier orden.' },
+        { nombre: 'Cumple y proceso', explicacion: '«Cumple» acepta Cumple, No cumple o Sin evaluar. El proceso se enlaza por nombre o código; si no existe, el requisito queda sin proceso.' },
+        { nombre: 'Duplicados', explicacion: 'Si la misma norma y artículo ya están en la matriz, esa fila se omite.' },
+      ],
+    },
+    {
       slug: 'matriz-legal',
       ruta: '/procesos-gestion/legal',
       titulo: 'Matriz de requisitos legales',

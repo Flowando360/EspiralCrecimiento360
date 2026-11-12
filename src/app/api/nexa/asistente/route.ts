@@ -2,11 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { glosario } from '@/content/ayuda/glosario';
+import { MODULOS } from '@/content/ayuda';
+import { recuperarParaIA } from '@/content/ayuda/buscador';
 
 /** Conocimiento base de la metodología y la plataforma (informe de pruebas, hallazgo 4.21). */
 const INTRO_PLATAFORMA =
   'Metodología de la plataforma: se acompaña a cada persona en cuatro dimensiones — Ser (talentos y propósito, con la Guía del Flow), Saber (cumplimiento de los requisitos del cargo), Hacer (desempeño en comportamientos observables) y Deber (cumplimiento cultural y de responsabilidades). Hacer y Deber se valoran por ciclo en el Encuentro de Crecimiento (equivale a la evaluación de desempeño 360°) con escala de 1 a 5. Glosario de la plataforma:';
 const CONOCIMIENTO_PLATAFORMA = [INTRO_PLATAFORMA, ...glosario.map((t) => `- ${t.termino}: ${t.definicion}`)].join('\n');
+
+/** Mapa de todas las pantallas del aplicativo con su ruta, para que Gino sepa dónde se hace cada cosa. */
+const MAPA_APLICATIVO = MODULOS.filter((m) => m.slug !== 'proveedor')
+  .map((m) => `${m.titulo}:\n` + m.paginas.map((p) => `  - ${p.titulo} (${p.ruta})`).join('\n'))
+  .join('\n');
+
+/** Fragmentos del manual, FAQ y glosario más relacionados con la pregunta (el manual completo no cabe en cada consulta). */
+function fragmentosDelManual(pregunta: string): string {
+  const hallazgos = recuperarParaIA(pregunta, 8);
+  if (hallazgos.length === 0) return '';
+  return hallazgos.map((h) => `--- ${h.titulo} (${h.tipo === 'manual' ? 'manual' : h.tipo === 'faq' ? 'pregunta frecuente' : 'glosario'}) ---\n${h.texto.slice(0, 3000)}`).join('\n\n');
+}
 
 type SupabaseServerClient = ReturnType<typeof createClient>;
 
@@ -107,6 +121,7 @@ export async function POST(req: NextRequest) {
             documentosRelevantes.map((d) => `--- ${d.titulo} ---\n${d.contenido.slice(0, 4000)}`).join('\n\n')
           : '';
 
+      const fragmentosManual = fragmentosDelManual(pregunta);
       const r = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -115,11 +130,14 @@ export async function POST(req: NextRequest) {
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-5',
-          max_tokens: 700,
+          model: process.env.ANTHROPIC_MODEL_GINO || 'claude-sonnet-5-5',
+          max_tokens: 900,
           system:
             `Eres Gino, el asistente y amigo de las personas de ${nombreEmpresa} dentro de Espiral de Crecimiento 360° (la plataforma de Talento Humano para acompañar el crecimiento de cada persona en cuatro dimensiones: Ser, Saber, Hacer y Deber). Hablas en español, con tuteo, cercano, cálido y sin tecnicismos, como un compañero que apoya; presentas tu nombre solo si te lo preguntan. Si alguien pregunta cómo usar una pantalla de la plataforma, oriéntalo con pasos simples y recuérdale que tu botón flotante (esquina inferior derecha) abre la ayuda de la pantalla donde está. Respondes dudas sobre SST, políticas internas y procedimientos de forma breve, clara y práctica, basándote en los fragmentos de documentos propios que se te den como contexto cuando existan. Si la pregunta es normativa/de procedimiento y NO tienes ningún fragmento relevante en el contexto, dilo explícitamente (no inventes la política) y sugiere contactar a Talento Humano o al líder SST.` +
+            ` Cuando te pregunten por la plataforma (qué hace una pantalla, cómo se hace algo, qué significa un término), responde con base en el MAPA DEL APLICATIVO y en los FRAGMENTOS DEL MANUAL que siguen: di en qué parte del menú se hace (con el nombre de la pantalla), da los pasos y cuenta lo importante. Si algo no aparece ahí, dilo con honestidad y sugiere buscarlo en el Centro de Ayuda o dejar un requerimiento desde el botón de Gino; nunca inventes botones, pantallas ni funciones.` +
             `\n\n${CONOCIMIENTO_PLATAFORMA}` +
+            `\n\nMAPA DEL APLICATIVO (todas las pantallas y su ruta):\n${MAPA_APLICATIVO}` +
+            (fragmentosManual ? `\n\nFRAGMENTOS DEL MANUAL relacionados con esta pregunta:\n${fragmentosManual}` : '') +
             contextoIdentidad +
             contextoDocumentos,
           messages: [{ role: 'user', content: pregunta }],

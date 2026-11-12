@@ -175,6 +175,56 @@ export const moduloGeneral: ModuloAyuda = {
       ],
     },
     {
+      slug: 'centro-ayuda',
+      ruta: '/ayuda',
+      titulo: 'Centro de Ayuda',
+      resumen:
+        'La pantalla de inicio de la ayuda: buscador, el manual por módulo, las preguntas frecuentes, el glosario, el plan de pruebas y el tutorial en video con capturas reales. Está presentado por Gino.',
+      camposYBotones: [
+        { nombre: 'Buscador', explicacion: 'Escribe lo que necesitas («cómo creo un colaborador») y busca a la vez en el manual, las preguntas frecuentes y el glosario, entendiendo variantes de la palabra.' },
+        { nombre: 'Módulos del manual', explicacion: 'Una tarjeta por módulo con cuántas pantallas documentadas tiene.' },
+      ],
+    },
+    {
+      slug: 'ayuda-modulo',
+      ruta: '/ayuda/modulo/*',
+      titulo: 'Manual de un módulo',
+      resumen:
+        'Lista las pantallas documentadas de un módulo (Espiral 360°, Reclutamiento, Dotación, Nexa, Procesos, Informes, Administración…). Elige una para ver su detalle.',
+    },
+    {
+      slug: 'ayuda-modulo-pagina',
+      ruta: '/ayuda/modulo/*/*',
+      titulo: 'Manual de una pantalla',
+      resumen:
+        'La explicación de una pantalla: qué es, sus campos y botones uno por uno, el proceso paso a paso y las notas importantes.',
+      camposYBotones: [
+        { nombre: 'Campos y botones', explicacion: 'Cada elemento de la pantalla con su explicación.' },
+        { nombre: 'Proceso paso a paso', explicacion: 'Los pasos para completar la tarea principal de esa pantalla, cuando aplica.' },
+      ],
+    },
+    {
+      slug: 'ayuda-faq',
+      ruta: '/ayuda/faq',
+      titulo: 'Preguntas frecuentes',
+      resumen:
+        'Respuestas cortas a las dudas más comunes sobre la plataforma, la metodología y el día a día.',
+    },
+    {
+      slug: 'ayuda-glosario',
+      ruta: '/ayuda/glosario',
+      titulo: 'Glosario',
+      resumen:
+        'Los términos propios de la plataforma (Ser, Saber, Hacer, Deber, Guía del Flow, Encuentro de Crecimiento, PDI, ACPM…) con su definición, en orden alfabético.',
+    },
+    {
+      slug: 'ayuda-plan-pruebas',
+      ruta: '/ayuda/plan-pruebas',
+      titulo: 'Plan de pruebas',
+      resumen:
+        'Una guía para recorrer la plataforma pantalla por pantalla como lo haría cada rol, útil para probar una instalación nueva o capacitar a alguien.',
+    },
+    {
       slug: 'mi-perfil',
       ruta: '/mi-perfil',
       titulo: 'Mi Perfil',

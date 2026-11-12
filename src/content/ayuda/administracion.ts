@@ -56,6 +56,18 @@ export const moduloAdministracion: ModuloAyuda = {
       ],
     },
     {
+      slug: 'items-evaluacion-cargo',
+      ruta: '/administracion/cargos/*/items-evaluacion',
+      titulo: 'Ítems a evaluar de un cargo',
+      resumen:
+        'Elige qué competencias y funciones principales del perfil se incluyen al generar los Encuentros de Crecimiento de este cargo. Si no cambias nada se incluyen todos. Solo admin_th.',
+      camposYBotones: [
+        { nombre: 'Competencias por bloque', explicacion: 'Competencias organizacionales, funcionales del cargo, de liderazgo y de cultura. Solo aparecen las que corresponden al nivel del cargo (Operativo, Técnico/administrativo, Supervisión o Directivo); el nivel se cambia al editar el cargo y el nivel mínimo de cada competencia en Administración → Competencias por nivel.' },
+        { nombre: 'Roles y funciones (del perfil de cargo)', explicacion: 'Las funciones principales del cargo, que forman el bloque «Roles y Funciones» de la evaluación.' },
+        { nombre: 'Casillas incluir / excluir', explicacion: 'Desmarca lo que no quieras evaluar para este cargo. El cambio aplica a los Encuentros que se generen de ahora en adelante.' },
+      ],
+    },
+    {
       slug: 'detalle-cargo',
       ruta: '/administracion/cargos/*',
       titulo: 'Detalle de un cargo',

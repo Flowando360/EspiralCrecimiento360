@@ -26,6 +26,118 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       ],
     },
     {
+      slug: 'colaborador-nuevo',
+      ruta: '/espiral-crecimiento/colaboradores/nuevo',
+      titulo: 'Nuevo colaborador',
+      resumen:
+        'Crea la ficha de una persona con sus datos personales, cargo, líder, contrato y afiliaciones. Desde la ficha creada se cargan después la hoja de vida y certificaciones, la inducción, los documentos, las incapacidades y las fechas especiales. Solo admin_th.',
+      camposYBotones: [
+        { nombre: 'Vincular a una cuenta de acceso existente (opcional)', explicacion: 'Si ya creaste la cuenta de login en Usuarios y roles pero la persona no tiene ficha, elígela aquí para que cuenta y ficha queden unidas. Un aviso amarillo te dice cuántas cuentas hay sin ficha.' },
+        { nombre: 'Datos personales', explicacion: 'Nombre completo (obligatorio), número de documento, teléfono y correo. Hay una carga de hoja de vida en PDF que lee con IA el nombre, documento, correo y teléfono para prellenar estos campos.' },
+        { nombre: 'Cargo y organigrama', explicacion: 'El cargo es obligatorio (sale de Administración → Cargos; si no hay ninguno, primero crea uno). El líder directo es obligatorio salvo para gerencia («Sin líder asignado»). También puedes marcar a quienes pasan a reportarle a esta persona.' },
+        { nombre: 'Contrato', explicacion: 'Fecha de ingreso (obligatoria), estado (período de prueba, activo, inactivo o en proceso de salida), tipo de contrato (indefinido, término fijo, obra o labor, prestación de servicios, empleado en misión, aprendizaje en sus etapas, pasantía o externo) y salario. Debajo del tipo de contrato te muestra hasta qué fecha llega el período de prueba (2 meses en indefinido; en término fijo, la quinta parte de la duración con máximo 2 meses).' },
+        { nombre: 'Afiliaciones (SG-SST)', explicacion: 'EPS, ARL, AFP (pensión) y caja de compensación. Son datos de referencia para el certificado laboral; el sistema no los valida contra ninguna entidad.' },
+      ],
+      notas: [
+        'Si llegas desde Reclutamiento con un candidato seleccionado, los datos del candidato vienen ya prellenados y su hoja de vida pasa a los documentos del colaborador.',
+        'Al crear la ficha se deja el ingreso en el historial y se asigna el plan de inducción (puntos comunes de la empresa más los del cargo).',
+        'Para cargar a toda la planta de una vez usa «Importar desde Excel» en la lista de Colaboradores.',
+      ],
+    },
+    {
+      slug: 'colaborador-editar',
+      ruta: '/espiral-crecimiento/colaboradores/*/editar',
+      titulo: 'Editar colaborador',
+      resumen:
+        'Cambia los datos de una ficha existente: datos personales, cargo, líder, contrato y afiliaciones. Solo admin_th. Los campos son los mismos de «Nuevo colaborador».',
+      camposYBotones: [
+        { nombre: 'Datos personales, cargo y líder', explicacion: 'Nombre, documento, teléfono, correo, cargo y líder directo. El cambio se refleja de inmediato en la ficha, el organigrama y los informes, porque todos leen la ficha en vivo.' },
+        { nombre: 'Contrato y estado', explicacion: 'Fecha de ingreso, estado, tipo de contrato (con el cálculo del fin del período de prueba) y salario. Para registrar la salida de una persona usa «Salida» en su Historial, no el estado.' },
+        { nombre: 'Afiliaciones (SG-SST)', explicacion: 'EPS, ARL, AFP y caja de compensación.' },
+        { nombre: 'Carga de hoja de vida con IA', explicacion: 'Sube un PDF para que la IA lea nombre, documento, correo y teléfono y los proponga; revisa antes de guardar.' },
+      ],
+    },
+    {
+      slug: 'colaboradores-historico',
+      ruta: '/espiral-crecimiento/colaboradores/historico',
+      titulo: 'Histórico de colaboradores eliminados',
+      resumen:
+        'Constancia de las fichas que se eliminaron: quién pasó por la empresa, con qué cargo y por qué se eliminó. La lista no se borra sola. Solo admin_th.',
+      camposYBotones: [
+        { nombre: 'Buscador y filtro por cargo', explicacion: 'Busca por nombre o documento y filtra por cargo.' },
+        { nombre: 'Datos de cada registro', explicacion: 'Nombre, documento, cargo, líder que tenía y el motivo de la eliminación.' },
+      ],
+      notas: [
+        'Eliminar una ficha es definitivo y está pensado para corregir errores (por ejemplo una ficha duplicada). Si la persona simplemente dejó la empresa, usa «Salida» en su Historial: queda inactiva y sigue en Colaboradores.',
+      ],
+    },
+    {
+      slug: 'colaboradores-importar',
+      ruta: '/espiral-crecimiento/colaboradores/importar',
+      titulo: 'Importar colaboradores desde Excel',
+      resumen:
+        'Carga masiva de la planta de personal (hasta 200 personas por archivo), por ejemplo desde el ERP de nómina. Antes de guardar ves una revisión fila por fila. Solo admin_th.',
+      camposYBotones: [
+        { nombre: '1. Descargar plantilla', explicacion: 'Un .xlsx con los cargos de tu empresa en lista desplegable, listas de tipos de contrato y estados, y una hoja de instrucciones.' },
+        { nombre: '2. Subir y revisar', explicacion: 'Obligatorios: nombre completo, cargo (ya creado) y fecha de ingreso (día/mes/año). Opcionales: documento, correo, teléfono, líder (nombre o documento), tipo de contrato, estado, salario, EPS, ARL, AFP y caja. Ves qué filas están listas, cuáles tienen errores (con el motivo) y cuáles se omiten porque su documento ya existe.' },
+        { nombre: '3. Importar', explicacion: 'Guarda solo las filas correctas, con su historial de ingreso y su plan de inducción. Los líderes se enlazan al final, por nombre o documento.' },
+      ],
+      notas: [
+        'No crea cuentas de acceso, solo fichas. Las cuentas se crean aparte en Usuarios y roles.',
+        'Si el cargo del Excel no existe, la fila queda con error: no se crean cargos nuevos a escondidas.',
+        'Puedes volver a subir el archivo corregido: las personas ya importadas se omiten solas por su documento.',
+      ],
+    },
+    {
+      slug: 'importar-incapacidades',
+      ruta: '/espiral-crecimiento/importar-incapacidades',
+      titulo: 'Importar incapacidades desde Excel',
+      resumen:
+        'Carga masiva de incapacidades y licencias (hasta 500 por archivo), por ejemplo desde el archivo de nómina. Solo admin_th.',
+      camposYBotones: [
+        { nombre: 'Plantilla', explicacion: 'Documento del colaborador, tipo (enfermedad general, accidente laboral, enfermedad laboral, licencia de maternidad o paternidad, otra), fecha de inicio, fecha de fin y entidad emisora (EPS o ARL). Entiende encabezados de nómina como Cédula, Desde, Hasta o EPS, y las siglas EG, AT y EL.' },
+        { nombre: 'Revisión fila por fila', explicacion: 'Los días se calculan solos. Marca error si el colaborador no existe, el tipo no se reconoce o la fecha de fin es anterior a la de inicio; omite las que ya están registradas y avisa si una se cruza con otra de la misma persona.' },
+      ],
+      notas: [
+        'No hay columna de diagnóstico a propósito: es un dato de salud sensible (Ley 1581). El soporte PDF se adjunta después en la ficha de cada persona.',
+        'Solo Talento Humano y la propia persona ven las incapacidades; el líder no.',
+      ],
+    },
+    {
+      slug: 'externo-nuevo',
+      ruta: '/espiral-crecimiento/externos/nuevo',
+      titulo: 'Nuevo externo',
+      resumen:
+        'Registra a un contratista, transportador, asesor, freelance o proveedor. Solo admin_th. Hay dos pestañas: una persona o varias a la vez.',
+      camposYBotones: [
+        { nombre: 'Una persona', explicacion: 'Nombre completo (obligatorio), documento, teléfono y correo, más el vínculo: tipo de vínculo, servicio o cargo que presta (obligatorios), empresa o firma, responsable interno, inicio del vínculo, fin del contrato o servicio, estado y notas.' },
+        { nombre: 'Varias a la vez', explicacion: 'Pega una persona por línea con el formato «Nombre ; documento ; correo ; teléfono» y comparten el mismo vínculo.' },
+      ],
+      notas: [
+        'Si llenas el fin del contrato, el sistema crea una alerta 30 días antes del vencimiento.',
+      ],
+    },
+    {
+      slug: 'externo-detalle',
+      ruta: '/espiral-crecimiento/externos/*',
+      titulo: 'Detalle de un externo',
+      resumen:
+        'Ficha de un externo: datos del vínculo, vigencia, documentos y seguimiento del servicio.',
+      camposYBotones: [
+        { nombre: 'Datos del vínculo', explicacion: 'Responsable interno, documento, correo, teléfono, inicio del vínculo, fin del contrato o servicio (avisa si vence en 30 días o ya venció) y notas.' },
+        { nombre: 'Documentos (contrato, RUT, ARL…) y Guía del Flow', explicacion: 'Accesos de admin_th a sus documentos y a su Guía del Flow.' },
+        { nombre: 'Seguimiento del servicio', explicacion: 'Registro de seguimientos con fecha y una calificación opcional.' },
+        { nombre: 'Editar / Pasar a colaborador vinculado', explicacion: 'Solo admin_th. Si la persona pasa a ser empleada, queda en período de prueba y con su historial.' },
+      ],
+    },
+    {
+      slug: 'externo-editar',
+      ruta: '/espiral-crecimiento/externos/*/editar',
+      titulo: 'Editar externo',
+      resumen:
+        'Cambia los datos personales y el vínculo de un externo (tipo, servicio, empresa, responsable, fechas, estado y notas). Solo admin_th.',
+    },
+    {
       slug: 'dimensiones',
       ruta: '/espiral-crecimiento/dimensiones',
       titulo: 'Dimensiones por colaborador',
