@@ -9,7 +9,7 @@ export type SemaforoDimension = 'alto' | 'medio' | 'bajo' | null;
 export interface FilaBrecha {
   grupo: string;
   tamano: number;
-  ser: { promedio: number | null; conDato: number; semaforo: SemaforoDimension };
+  ser: { conDato: number };
   saber: { promedio: number | null; conDato: number; semaforo: SemaforoDimension };
   hacer: { promedio: number | null; conDato: number; semaforo: SemaforoDimension };
   deber: { promedio: number | null; conDato: number; semaforo: SemaforoDimension };
@@ -121,7 +121,6 @@ export async function obtenerInformeBrechas(agrupacion: Agrupacion, filtros: Fil
         .map((id) => resultadoPorColaborador.get(id)?.indice_deber)
         .filter((v): v is number => v != null);
 
-      const promSer = promedio(serValores);
       const promSaber = promedio(saberValores);
       const promHacer = promedio(hacerValores);
       const promDeber = promedio(deberValores);
@@ -129,7 +128,8 @@ export async function obtenerInformeBrechas(agrupacion: Agrupacion, filtros: Fil
       return {
         grupo,
         tamano: ids.length,
-        ser: { promedio: promSer, conDato: serValores.length, semaforo: semaforo1a5(promSer) },
+        // El Ser se describe, no se califica: solo se informa cuántas personas ya tienen Guía del Flow.
+        ser: { conDato: serValores.length },
         saber: { promedio: promSaber, conDato: saberValores.length, semaforo: semaforoPorcentaje(promSaber) },
         hacer: { promedio: promHacer, conDato: hacerValores.length, semaforo: semaforo1a5(promHacer) },
         deber: { promedio: promDeber, conDato: deberValores.length, semaforo: semaforo1a5(promDeber) },

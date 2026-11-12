@@ -117,7 +117,7 @@ export default async function InformeBrechasPage({
                   <td className="px-4 py-3 font-medium text-marmol-900">{f.grupo}</td>
                   <td className="px-4 py-3 text-marmol-500">{f.tamano}</td>
                   <td className="px-4 py-3">
-                    <Celda promedio={f.ser.promedio} conDato={f.ser.conDato} tamano={f.tamano} semaforo={f.ser.semaforo} />
+                    <span className="text-xs text-marmol-500">{f.ser.conDato} de {f.tamano} con Guía</span>
                   </td>
                   <td className="px-4 py-3">
                     <Celda promedio={f.saber.promedio} conDato={f.saber.conDato} tamano={f.tamano} semaforo={f.saber.semaforo} sufijo="%" />
@@ -136,7 +136,7 @@ export default async function InformeBrechasPage({
       )}
 
       <p className="text-xs text-marmol-400">
-        Ser y Saber usan escalas distintas (Ser 1-5, Saber % de cumplimiento) — cada semáforo usa su propio
+        El Ser se describe, no se califica: solo se indica cuántas personas ya tienen Guía del Flow. Saber es un % de cumplimiento y Hacer/Deber van de 1 a 5, cada semáforo con su propio
         umbral. "(x/y)" indica cuántas personas del grupo tienen dato registrado para esa dimensión.
       </p>
     </div>

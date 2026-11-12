@@ -130,7 +130,8 @@ export default async function DimensionesPage() {
                     </td>
                     <td className="px-4 py-3 text-marmol-600">{cargo?.nombre ?? '—'}</td>
                     <td className="px-4 py-3">
-                      <SemaforoBadge nivel={semaforo1a5(serProm)} />
+                      {/* El Ser se describe, no se califica: solo se indica si ya tiene Guía del Flow. */}
+                      <span className="text-xs text-marmol-500">{serProm != null ? 'Guía aplicada' : 'Pendiente'}</span>
                     </td>
                     <td className="px-4 py-3">
                       <SemaforoBadge nivel={semaforoPorcentaje(saberPct)} />

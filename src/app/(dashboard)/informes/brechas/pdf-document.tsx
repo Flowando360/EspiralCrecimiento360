@@ -36,7 +36,7 @@ export function BrechasDocument({ filas, agrupacion }: { filas: FilaBrecha[]; ag
           <View key={f.grupo} style={styles.fila} wrap={false}>
             <Text style={styles.celdaGrupo}>{f.grupo}</Text>
             <Text style={styles.celdaN}>{f.tamano}</Text>
-            <Text style={styles.celdaDim}>{f.ser.promedio ?? 'Sin dato'}</Text>
+            <Text style={styles.celdaDim}>{f.ser.conDato} de {f.tamano} con Guía</Text>
             <Text style={styles.celdaDim}>{f.saber.promedio != null ? `${f.saber.promedio}%` : 'Sin dato'}</Text>
             <Text style={styles.celdaDim}>{f.hacer.promedio ?? 'Sin dato'}</Text>
             <Text style={styles.celdaDim}>{f.deber.promedio ?? 'Sin dato'}</Text>
@@ -44,7 +44,7 @@ export function BrechasDocument({ filas, agrupacion }: { filas: FilaBrecha[]; ag
         ))}
 
         <Text style={styles.nota}>
-          Ser y Saber usan escalas distintas (Ser 1-5, Saber % de cumplimiento).
+          El Ser se describe, no se califica: solo se cuenta cuántas personas tienen Guía del Flow.
         </Text>
       </Page>
     </Document>

@@ -169,15 +169,18 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
           <p className="text-xs font-medium text-marmol-500 mb-2 flex items-center gap-1.5">
             <Sparkles size={14} className="text-ser" /> SER
           </p>
-          {serPromedio?.promedio_ser != null ? (
+          {/* El Ser se describe, no se califica: sin promedio ni semáforo. */}
+          {ser ? (
             <>
-              <p className="text-2xl font-display font-semibold text-secundario">{serPromedio.promedio_ser} / 5</p>
+              <p className="text-lg font-display font-semibold text-secundario">Guía del Flow aplicada</p>
               <p className="text-xs text-marmol-400">
-                promedio de {serPromedio.total_aspectos_calificados} aspecto{serPromedio.total_aspectos_calificados === 1 ? '' : 's'}
+                {serPromedio?.total_aspectos_calificados
+                  ? `${serPromedio.total_aspectos_calificados} aspectos descritos · lectura sin nota`
+                  : 'Lectura descriptiva, sin nota'}
               </p>
             </>
           ) : (
-            <p className="text-sm text-marmol-700">{ser ? 'Guía del Flow completada, cargando puntajes…' : 'Pendiente por completar'}</p>
+            <p className="text-sm text-marmol-700">Pendiente por completar</p>
           )}
         </Link>
         <Link href={`/espiral-crecimiento/colaboradores/${params.id}/saber`} className="card p-4 hover:border-flow-300 transition">

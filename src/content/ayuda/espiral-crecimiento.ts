@@ -159,7 +159,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       resumen:
         'La vista 360° de una persona: sus cuatro dimensiones de un vistazo (Ser, Saber, Hacer, Deber), su perfil de cargo, su hoja de vida y su Plan de Desarrollo.',
       camposYBotones: [
-        { nombre: 'Tarjeta SER', explicacion: 'Promedio de 1 a 5 de los 18 aspectos de la Guía del Flow con relevancia laboral, o "Pendiente por completar" si la persona aún no la ha completado. Lleva a la pantalla de Guía del Flow.' },
+        { nombre: 'Tarjeta SER', explicacion: 'Indica si la persona ya aplicó la Guía del Flow («Guía del Flow aplicada») o si está «Pendiente por completar». El Ser se describe, no se califica: no hay promedio, nota ni semáforo, ni en la ficha, ni en Mi Perfil, ni en los informes 360, de brechas o de dimensiones (allí solo se cuenta cuántas personas tienen Guía). Lleva a la pantalla de Guía del Flow, donde está la lectura descriptiva.' },
         { nombre: 'Tarjeta SABER', explicacion: '% de cumplimiento del perfil de cargo (formación, habilidades, certificaciones, experiencia). Lleva a Verificación de Saber.' },
         { nombre: 'Tarjetas HACER / DEBER', explicacion: 'Último índice calculado y su semáforo (Alto/Medio/Bajo), según el Encuentro de Crecimiento más reciente.' },
         { nombre: 'Perfil de cargo', explicacion: 'Objetivo del cargo, si tiene personal a cargo y su manual de funciones: la lista de funciones principales que se le asignaron, con su proceso y su periodicidad. Todo se define en Administración → Cargos y perfiles y se ve aquí en vivo.' },

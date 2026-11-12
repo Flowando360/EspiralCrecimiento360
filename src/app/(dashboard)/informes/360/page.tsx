@@ -132,15 +132,13 @@ export default async function Informe360Page({
               <p className="text-xs font-medium text-marmol-500 mb-2 flex items-center gap-1.5">
                 <Sparkles size={14} className="text-ser" /> SER
               </p>
-              {informe.ser?.promedio_ser != null ? (
+              {informe.ser ? (
                 <>
-                  <p className="text-2xl font-display font-semibold text-secundario">{informe.ser.promedio_ser} / 5</p>
-                  <p className="text-xs text-marmol-400">
-                    promedio de {informe.ser.total_aspectos_calificados} aspecto{informe.ser.total_aspectos_calificados === 1 ? '' : 's'}
-                  </p>
+                  <p className="text-lg font-display font-semibold text-secundario">Guía del Flow aplicada</p>
+                  <p className="text-xs text-marmol-400">Lectura descriptiva, sin nota (ver narrativa abajo)</p>
                 </>
               ) : (
-                <p className="text-sm text-marmol-700">{informe.ser ? 'Guía del Flow completada, cargando puntajes…' : 'Pendiente'}</p>
+                <p className="text-sm text-marmol-700">Pendiente</p>
               )}
             </div>
             <div className="card p-4">

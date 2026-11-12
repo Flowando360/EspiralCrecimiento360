@@ -134,11 +134,8 @@ export default async function MiPerfilPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="card p-4">
           <p className="text-xs text-marmol-500 mb-1">SER</p>
-          {serPromedio?.promedio_ser != null ? (
-            <p className="text-lg font-display font-semibold">{serPromedio.promedio_ser} / 5</p>
-          ) : (
-            <p className="text-sm text-marmol-700">{ser ? 'Completada' : 'Pendiente'}</p>
-          )}
+          <p className="text-sm text-marmol-700">{ser ? 'Guía del Flow completada' : 'Pendiente'}</p>
+          {ser && <p className="text-xs text-marmol-400">Se describe, no se califica</p>}
         </div>
         <div className="card p-4">
           <p className="text-xs text-marmol-500 mb-1">SABER</p>

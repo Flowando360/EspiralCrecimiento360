@@ -40,11 +40,7 @@ export function Informe360Document({ informe }: { informe: Informe360 }) {
           <View style={styles.filaKpi}>
             <Text style={styles.label}>Ser</Text>
             <Text style={styles.valor}>
-              {informe.ser?.promedio_ser != null
-                ? `${informe.ser.promedio_ser} / 5 (${informe.ser.total_aspectos_calificados} aspectos)`
-                : informe.ser
-                  ? 'Guía del Flow completada, cargando puntajes'
-                  : 'Pendiente'}
+              {informe.ser ? 'Guía del Flow aplicada (lectura descriptiva, sin nota)' : 'Pendiente'}
             </Text>
           </View>
           <View style={styles.filaKpi}>

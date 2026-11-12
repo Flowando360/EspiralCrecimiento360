@@ -35,12 +35,7 @@ export async function GET(req: NextRequest) {
   resumen.getRow(1).font = { bold: true };
   resumen.addRow({
     dimension: 'Ser',
-    resultado:
-      informe.ser?.promedio_ser != null
-        ? `${informe.ser.promedio_ser} / 5 (${informe.ser.total_aspectos_calificados} aspectos)`
-        : informe.ser
-          ? 'Guía del Flow completada, cargando puntajes'
-          : 'Pendiente',
+    resultado: informe.ser ? 'Guía del Flow aplicada (lectura descriptiva, sin nota)' : 'Pendiente',
   });
   resumen.addRow({
     dimension: 'Saber',

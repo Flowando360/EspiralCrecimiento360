@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   hoja.columns = [
     { header: agrupacion === 'equipo' ? 'Equipo (líder)' : 'Área', key: 'grupo', width: 28 },
     { header: 'Personas', key: 'tamano', width: 10 },
-    { header: 'Ser (1-5)', key: 'ser', width: 14 },
+    { header: 'Ser (personas con Guía del Flow, sin nota)', key: 'ser', width: 14 },
     { header: 'Saber (%)', key: 'saber', width: 14 },
     { header: 'Hacer (1-5)', key: 'hacer', width: 14 },
     { header: 'Deber (1-5)', key: 'deber', width: 14 },
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     hoja.addRow({
       grupo: f.grupo,
       tamano: f.tamano,
-      ser: f.ser.promedio ?? 'Sin dato',
+      ser: `${f.ser.conDato} de ${f.tamano}`,
       saber: f.saber.promedio ?? 'Sin dato',
       hacer: f.hacer.promedio ?? 'Sin dato',
       deber: f.deber.promedio ?? 'Sin dato',
