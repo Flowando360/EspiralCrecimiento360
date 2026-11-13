@@ -227,8 +227,9 @@ export const moduloNexa: ModuloAyuda = {
       camposYBotones: [
         { nombre: 'Abrir nueva ronda de clima (admin_th)', explicacion: 'Le pone nombre a la medición (ej. "Clima 2do semestre 2026") y la deja abierta para que todos respondan. Solo puede haber una ronda abierta a la vez.' },
         { nombre: 'Cerrar ronda (admin_th)', explicacion: 'Fija los resultados de la ronda abierta. Después de cerrarla ya nadie puede responderla.' },
-        { nombre: 'Tu opinión', explicacion: 'El formulario que responde cualquier persona con ficha de colaborador (incluidos líderes y gerencia): eNPS (0-10) más 6 afirmaciones de acuerdo/desacuerdo (1-5) sobre reconocimiento, liderazgo, desarrollo, comunicación, condiciones de trabajo y pertenencia, y un comentario libre opcional. Solo se puede responder una vez por ronda.' },
+        { nombre: 'Tu opinión', explicacion: 'El formulario que responde cualquier persona con ficha de colaborador (incluidos líderes y gerencia): eNPS (0-10) más 9 afirmaciones de acuerdo/desacuerdo (1-5) sobre reconocimiento, liderazgo, desarrollo, comunicación, condiciones de trabajo, pertenencia, relaciones entre pares, compensación y equidad, y un comentario libre opcional. Solo se puede responder una vez por ronda.' },
         { nombre: 'Resultados por ronda (admin_th y gerencia)', explicacion: 'Tabla con el eNPS y el índice de clima general de cada ronda, a nivel de toda la empresa.' },
+        { nombre: 'Detalle por dimensión (admin_th y gerencia)', explicacion: 'Elige la ronda y escoge «Ver por» Área, Líder o Sede: la tabla muestra, para toda la empresa y para cada grupo, el número de respuestas, el eNPS, el índice y el promedio de cada una de las 9 dimensiones. Un grupo con menos respuestas que el mínimo de anonimato aparece sin números. Las tres dimensiones más nuevas (relaciones entre pares, compensación y equidad) solo existen en las rondas abiertas después de esta mejora.' },
         { nombre: 'Clima de tu equipo (líder)', explicacion: 'La misma idea que "Resultados por ronda", pero calculada solo con las respuestas del equipo de ese líder.' },
         { nombre: 'Comentarios (admin_th)', explicacion: 'Los comentarios de texto libre que la gente fue dejando, sin ningún dato de quién los escribió.' },
       ],
@@ -237,6 +238,7 @@ export const moduloNexa: ModuloAyuda = {
         'Los resultados de una empresa o de un equipo se ocultan (aparecen como "—") mientras haya menos de 5 respuestas en ese grupo — así nunca se puede deducir la respuesta de una sola persona en un equipo chico.',
         'Los comentarios de texto libre —lo más fácil de reconocer a simple vista— solo los puede leer Talento Humano; ni el líder directo ni gerencia tienen acceso a ellos, aunque sí ven los números agregados.',
         'El enunciado de las 7 preguntas (eNPS + 6 dimensiones) se puede adaptar al lenguaje de la empresa desde Administración → Configuración — las preguntas en sí (cuántas y cuáles) se mantienen fijas para poder comparar el índice de clima de una ronda a otra.',
+        'El clima NO se liga a la persona: no hay una columna de eNPS por colaborador en la tabla de colaboradores, a propósito, porque eso rompería el anonimato. Lo que sí se puede es cruzar por área, líder y sede, porque al responder solo se guarda una copia del área, el líder y la sede de quien respondió, sin su nombre.',
         'El umbral de 5 respuestas también es configurable por admin_th (Administración → Configuración): se puede dejar como una cantidad fija distinta, o cambiar a un % de la planta activa de cada grupo, para que el mínimo escale con el tamaño de la empresa.',
       ],
     },

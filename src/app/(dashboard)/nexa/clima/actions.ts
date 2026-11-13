@@ -58,6 +58,9 @@ const RespuestaSchema = z.object({
   comunicacion: z.number().int().min(1).max(5),
   condiciones: z.number().int().min(1).max(5),
   pertenencia: z.number().int().min(1).max(5),
+  relaciones_pares: z.number().int().min(1).max(5),
+  compensacion: z.number().int().min(1).max(5),
+  equidad: z.number().int().min(1).max(5),
   comentario: z.string().trim().max(2000).optional(),
 });
 
@@ -89,13 +92,17 @@ export async function responderClima(input: z.infer<typeof RespuestaSchema>) {
 
   const { data: colaborador } = await supabase
     .from('colaboradores')
-    .select('lider_id')
+    .select('lider_id, sede_id, cargo:cargo_id(proceso_area)')
     .eq('id', perfil.colaborador_id)
     .maybeSingle();
+  const cargoDe = (colaborador as any)?.cargo as { proceso_area?: string | null } | { proceso_area?: string | null }[] | null | undefined;
+  const areaDe = (Array.isArray(cargoDe) ? cargoDe[0]?.proceso_area : cargoDe?.proceso_area) ?? null;
 
   const { error: errorRespuesta } = await supabase.from('clima_respuestas').insert({
     ronda_id: parsed.data.rondaId,
     equipo_lider_id: (colaborador?.lider_id as string | null) ?? null,
+    area: areaDe,
+    sede_id: ((colaborador as any)?.sede_id as string | null) ?? null,
     enps: parsed.data.enps,
     reconocimiento: parsed.data.reconocimiento,
     liderazgo: parsed.data.liderazgo,
@@ -103,6 +110,9 @@ export async function responderClima(input: z.infer<typeof RespuestaSchema>) {
     comunicacion: parsed.data.comunicacion,
     condiciones: parsed.data.condiciones,
     pertenencia: parsed.data.pertenencia,
+    relaciones_pares: parsed.data.relaciones_pares,
+    compensacion: parsed.data.compensacion,
+    equidad: parsed.data.equidad,
     comentario: parsed.data.comentario || null,
   });
 

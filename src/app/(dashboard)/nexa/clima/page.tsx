@@ -5,8 +5,11 @@ import { FormularioClima } from '@/components/espiral-crecimiento/formulario-cli
 import { AdminRondaClima } from '@/components/espiral-crecimiento/admin-ronda-clima';
 import { formatearFecha } from '@/lib/utils';
 import { HeartHandshake, MessageSquareText } from 'lucide-react';
+import Link from 'next/link';
+import { claveArea, crearNormalizadorAreas } from '@/lib/areas';
+import { DIMENSIONES_CLIMA, resumirClima, umbralClima, type RespuestaClima } from '@/lib/clima/segmentos';
 
-export default async function ClimaPage() {
+export default async function ClimaPage({ searchParams }: { searchParams?: { ronda?: string; por?: string } }) {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
 
@@ -51,6 +54,66 @@ export default async function ClimaPage() {
             .order('fecha_apertura', { ascending: false })
         ).data
       : null;
+
+  // ── Detalle por dimensión y por segmento (área, líder o sede) para TH y gerencia ──
+  const rondaDetalleId = searchParams?.ronda ?? ((resumenEmpresa?.[0] as any)?.ronda_id as string | undefined);
+  const por = searchParams?.por === 'lider' || searchParams?.por === 'sede' ? searchParams.por : 'area';
+  let detalle: {
+    general: ReturnType<typeof resumirClima>;
+    filas: { nombre: string; resumen: ReturnType<typeof resumirClima> }[];
+  } | null = null;
+  if ((esAdminTh || esGerencia) && rondaDetalleId) {
+    const [{ data: resps }, { data: cfg }, { data: personas }, { data: sedes }] = await Promise.all([
+      supabase.from('clima_respuestas').select('*').eq('ronda_id', rondaDetalleId),
+      supabase.from('empresas').select('clima_umbral_tipo, clima_umbral_cantidad, clima_umbral_porcentaje').eq('id', perfil.empresa_id).maybeSingle(),
+      supabase
+        .from('colaboradores')
+        .select('id, nombre_completo, lider_id, sede_id, cargo:cargo_id(proceso_area)')
+        .eq('empresa_id', perfil.empresa_id)
+        .eq('es_externo', false)
+        .eq('estado', 'activo'),
+      supabase.from('sedes').select('id, nombre').eq('empresa_id', perfil.empresa_id),
+    ]);
+    const umbralCfg = { tipo: cfg?.clima_umbral_tipo, cantidad: cfg?.clima_umbral_cantidad, porcentaje: cfg?.clima_umbral_porcentaje };
+    const filasP = (personas ?? []) as any[];
+    const cargoArea = (p: any) => (Array.isArray(p.cargo) ? p.cargo[0]?.proceso_area : p.cargo?.proceso_area) ?? null;
+    const normalizar = crearNormalizadorAreas([...filasP.map(cargoArea), ...((resps ?? []) as any[]).map((r) => r.area)]);
+    const todas = (resps ?? []) as unknown as RespuestaClima[];
+    const grupos = new Map<string, { nombre: string; resps: RespuestaClima[]; poblacion: number }>();
+    const asegurar = (k: string, nombre: string) => {
+      if (!grupos.has(k)) grupos.set(k, { nombre, resps: [], poblacion: 0 });
+      return grupos.get(k)!;
+    };
+    const nombreSede = new Map(((sedes ?? []) as any[]).map((x) => [x.id as string, x.nombre as string]));
+    const nombrePersona = new Map(filasP.map((p) => [p.id as string, p.nombre_completo as string]));
+    for (const p of filasP) {
+      if (por === 'area') {
+        const a = normalizar(cargoArea(p));
+        asegurar(a ? claveArea(a) : '_', a ?? 'Sin área').poblacion++;
+      } else if (por === 'sede') {
+        asegurar(p.sede_id ?? '_', p.sede_id ? nombreSede.get(p.sede_id) ?? 'Sede' : 'Sin sede').poblacion++;
+      } else if (p.lider_id) {
+        asegurar(p.lider_id, `Equipo de ${nombrePersona.get(p.lider_id) ?? 'líder'}`).poblacion++;
+      }
+    }
+    for (const r of todas) {
+      if (por === 'area') {
+        const a = normalizar(r.area);
+        asegurar(a ? claveArea(a) : '_', a ?? 'Sin área').resps.push(r);
+      } else if (por === 'sede') {
+        asegurar(r.sede_id ?? '_', r.sede_id ? nombreSede.get(r.sede_id) ?? 'Sede' : 'Sin sede').resps.push(r);
+      } else if (r.equipo_lider_id) {
+        asegurar(r.equipo_lider_id, `Equipo de ${nombrePersona.get(r.equipo_lider_id) ?? 'líder'}`).resps.push(r);
+      }
+    }
+    detalle = {
+      general: resumirClima(todas, umbralClima(umbralCfg, filasP.length)),
+      filas: Array.from(grupos.values())
+        .filter((g) => g.resps.length > 0)
+        .map((g) => ({ nombre: g.nombre, resumen: resumirClima(g.resps, umbralClima(umbralCfg, g.poblacion)) }))
+        .sort((x, y) => x.nombre.localeCompare(y.nombre, 'es')),
+    };
+  }
 
   let resumenEquipo:
     | { ronda_id: string; num_respuestas: number; enps: number | null; indice_clima_general: number | null; umbral_respuestas: number; ronda_nombre: string; ronda_fecha: string }[]
@@ -168,6 +231,77 @@ export default async function ClimaPage() {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {detalle && (
+        <div>
+          <h2 className="font-display text-lg font-semibold text-secundario mb-1">Detalle por dimensión</h2>
+          <p className="text-xs text-marmol-400 mb-3">
+            Escala 1 a 5. Un grupo solo muestra números si tiene al menos el mínimo de respuestas definido en Configuración
+            (así nadie queda identificado). Relaciones entre pares, compensación y equidad aparecen en las rondas que se
+            abran desde ahora.
+          </p>
+          <div className="flex flex-wrap items-center gap-2 mb-3 text-sm">
+            <span className="text-marmol-500">Ronda:</span>
+            {((resumenEmpresa ?? []) as any[]).map((r) => (
+              <Link
+                key={r.ronda_id}
+                href={`/nexa/clima?ronda=${r.ronda_id}&por=${por}`}
+                className={`rounded-full border px-3 py-1 ${r.ronda_id === rondaDetalleId ? 'bg-flow-500 border-flow-500 text-white' : 'border-marmol-200 text-marmol-600'}`}
+              >
+                {r.nombre}
+              </Link>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 mb-3 text-sm">
+            <span className="text-marmol-500">Ver por:</span>
+            {([['area', 'Área'], ['lider', 'Líder'], ['sede', 'Sede']] as const).map(([k, l]) => (
+              <Link
+                key={k}
+                href={`/nexa/clima?ronda=${rondaDetalleId}&por=${k}`}
+                className={`rounded-full border px-3 py-1 ${por === k ? 'bg-flow-500 border-flow-500 text-white' : 'border-marmol-200 text-marmol-600'}`}
+              >
+                {l}
+              </Link>
+            ))}
+          </div>
+          <div className="card overflow-hidden overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
+                  <th className="px-3 py-3 font-medium">Grupo</th>
+                  <th className="px-3 py-3 font-medium">Resp.</th>
+                  <th className="px-3 py-3 font-medium">eNPS</th>
+                  <th className="px-3 py-3 font-medium">Índice</th>
+                  {DIMENSIONES_CLIMA.map((d) => (
+                    <th key={d.clave} className="px-3 py-3 font-medium">{d.label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[{ nombre: 'Toda la empresa', resumen: detalle.general }, ...detalle.filas].map((f) => (
+                  <tr key={f.nombre} className="border-b border-marmol-100 last:border-0">
+                    <td className="px-3 py-3 text-marmol-800 font-medium">{f.nombre}</td>
+                    <td className="px-3 py-3 text-marmol-600">{f.resumen.n}</td>
+                    {f.resumen.oculto ? (
+                      <td colSpan={2 + DIMENSIONES_CLIMA.length} className="px-3 py-3 text-marmol-400">
+                        Menos respuestas que el mínimo para proteger el anonimato
+                      </td>
+                    ) : (
+                      <>
+                        <td className="px-3 py-3 text-marmol-600">{f.resumen.enps}</td>
+                        <td className="px-3 py-3 text-marmol-600">{f.resumen.indice ?? '—'}</td>
+                        {DIMENSIONES_CLIMA.map((d) => (
+                          <td key={d.clave} className="px-3 py-3 text-marmol-600">{f.resumen.dimensiones[d.clave] ?? '—'}</td>
+                        ))}
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

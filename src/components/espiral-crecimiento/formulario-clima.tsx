@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { responderClima } from '@/app/(dashboard)/nexa/clima/actions';
 import { cn } from '@/lib/utils';
 
-type ClaveDimension = 'reconocimiento' | 'liderazgo' | 'desarrollo' | 'comunicacion' | 'condiciones' | 'pertenencia';
+type ClaveDimension = 'reconocimiento' | 'liderazgo' | 'desarrollo' | 'comunicacion' | 'condiciones' | 'pertenencia' | 'relaciones_pares' | 'compensacion' | 'equidad';
 
 const DIMENSIONES_DEFECTO: { clave: ClaveDimension; label: string }[] = [
   { clave: 'reconocimiento', label: 'Me siento reconocido/a por mi trabajo' },
@@ -14,6 +14,9 @@ const DIMENSIONES_DEFECTO: { clave: ClaveDimension; label: string }[] = [
   { clave: 'comunicacion', label: 'La comunicación en la empresa es clara y oportuna' },
   { clave: 'condiciones', label: 'Mis condiciones de trabajo son adecuadas' },
   { clave: 'pertenencia', label: 'Siento que pertenezco a esta empresa' },
+  { clave: 'relaciones_pares', label: 'Tengo buenas relaciones de trabajo con mis compañeros' },
+  { clave: 'compensacion', label: 'Mi compensación es justa frente a mi trabajo' },
+  { clave: 'equidad', label: 'En mi equipo se trata a todas las personas con equidad' },
 ];
 
 export const ENPS_PREGUNTA_DEFECTO =
@@ -29,6 +32,9 @@ export interface PreguntasClimaPersonalizadas {
   comunicacion?: string | null;
   condiciones?: string | null;
   pertenencia?: string | null;
+  relaciones_pares?: string | null;
+  compensacion?: string | null;
+  equidad?: string | null;
 }
 
 export function FormularioClima({
@@ -52,6 +58,9 @@ export function FormularioClima({
     comunicacion: null,
     condiciones: null,
     pertenencia: null,
+    relaciones_pares: null,
+    compensacion: null,
+    equidad: null,
   });
   const [comentario, setComentario] = useState('');
   const [pending, startTransition] = useTransition();
@@ -73,6 +82,9 @@ export function FormularioClima({
         comunicacion: respuestas.comunicacion!,
         condiciones: respuestas.condiciones!,
         pertenencia: respuestas.pertenencia!,
+        relaciones_pares: respuestas.relaciones_pares!,
+        compensacion: respuestas.compensacion!,
+        equidad: respuestas.equidad!,
         comentario: comentario || undefined,
       });
       if (res.ok) {

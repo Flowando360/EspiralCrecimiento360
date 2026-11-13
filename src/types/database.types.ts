@@ -1547,6 +1547,11 @@ export type Database = {
           id: string
           liderazgo: number
           pertenencia: number
+          area: string | null
+          sede_id: string | null
+          relaciones_pares: number | null
+          compensacion: number | null
+          equidad: number | null
           reconocimiento: number
           ronda_id: string
         }
@@ -1561,6 +1566,11 @@ export type Database = {
           id?: string
           liderazgo: number
           pertenencia: number
+          area: string | null
+          sede_id: string | null
+          relaciones_pares: number | null
+          compensacion: number | null
+          equidad: number | null
           reconocimiento: number
           ronda_id: string
         }
@@ -1575,6 +1585,11 @@ export type Database = {
           id?: string
           liderazgo?: number
           pertenencia?: number
+          area?: string | null
+          sede_id?: string | null
+          relaciones_pares?: number | null
+          compensacion?: number | null
+          equidad?: number | null
           reconocimiento?: number
           ronda_id?: string
         }
