@@ -59,7 +59,7 @@ export async function confirmarItemInduccion(colaboradorId: string, itemAsignado
   const admin = createAdminClient();
   const { data: fila } = await admin
     .from('colaborador_induccion_items')
-    .select('id, colaborador_id, confirmado_colaborador_en, item:item_id(id, empresa_id, categoria, pregunta, opciones)')
+    .select('id, colaborador_id, confirmado_colaborador_en, intentos_quiz, item:item_id(id, empresa_id, categoria, pregunta, opciones)')
     .eq('id', itemAsignadoId)
     .maybeSingle();
   const item = (fila as any)?.item;
