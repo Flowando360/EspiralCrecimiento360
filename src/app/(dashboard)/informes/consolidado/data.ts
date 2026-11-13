@@ -2,6 +2,7 @@ import { crearNormalizadorAreas } from '@/lib/areas';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { obtenerUmbralAnonimato } from '@/lib/informes/anonimato';
+import { calcularTalento, type TalentoResumen } from '@/lib/informes/talento';
 import { coincideEquipo, hayFiltrosEquipo, describirFiltrosEquipo, type FiltrosEquipo } from '@/lib/informes/filtros-equipo';
 
 export interface FilaArea {
@@ -29,6 +30,10 @@ export interface InformeConsolidado {
   umbralAnonimato: number;
   /** El filtro activo tiene menos personas que el umbral: sus promedios se ocultan. */
   filtroProtegido: boolean;
+  /** Rotación, ausentismo, selección y headcount del período. */
+  talento: TalentoResumen;
+  periodoDesde: string;
+  periodoHasta: string;
 }
 
 /**
@@ -37,11 +42,19 @@ export interface InformeConsolidado {
  * por área — pensado para imprimir/exportar como reporte de junta, no para
  * navegar el día a día.
  */
-export async function obtenerInformeConsolidado(filtros: FiltrosEquipo = {}): Promise<{ perfil: any; informe: InformeConsolidado | null }> {
+export async function obtenerInformeConsolidado(filtros: FiltrosEquipo = {}, periodo: { desde?: string; hasta?: string } = {}): Promise<{ perfil: any; informe: InformeConsolidado | null }> {
   const perfil = await getPerfilActual();
   if (!perfil || !['admin_th', 'gerencia'].includes(perfil.rol)) return { perfil: null, informe: null };
 
   const supabase = createClient();
+  const hastaP = periodo.hasta || new Date().toISOString().slice(0, 10);
+  const desdeP =
+    periodo.desde ||
+    (() => {
+      const d = new Date(hastaP);
+      d.setFullYear(d.getFullYear() - 1);
+      return d.toISOString().slice(0, 10);
+    })();
   const umbral = await obtenerUmbralAnonimato(perfil.empresa_id);
 
   const [{ data: indicadores }, { data: colaboradoresRaw }, { data: resultadosRaw }] = await Promise.all([
@@ -98,6 +111,34 @@ export async function obtenerInformeConsolidado(filtros: FiltrosEquipo = {}): Pr
   const deberFiltrado = valoresDeberFiltrado.length >= umbral ? promedio(valoresDeberFiltrado) : null;
   const filtroProtegido = filtrado && ((valoresHacerFiltrado.length > 0 && valoresHacerFiltrado.length < umbral) || (valoresDeberFiltrado.length > 0 && valoresDeberFiltrado.length < umbral));
 
+  // Indicadores de talento del período (rotación, ausentismo, selección, headcount) con los mismos filtros de equipo.
+  const [{ data: personasRaw }, { data: vacantesRaw }, { data: incapRaw }] = await Promise.all([
+    supabase
+      .from('colaboradores')
+      .select('estado, fecha_ingreso, fecha_salida, motivo_salida, lider_id, cargo:cargo_id(proceso_area)')
+      .eq('empresa_id', perfil.empresa_id)
+      .eq('es_externo', false),
+    supabase.from('vacantes').select('estado, fecha_apertura, fecha_cierre').eq('empresa_id', perfil.empresa_id),
+    perfil.rol === 'admin_th' && !filtrado
+      ? supabase.from('incapacidades_colaborador').select('tipo, dias, fecha_inicio')
+      : Promise.resolve({ data: null as any }),
+  ]);
+  const talento = calcularTalento({
+    personas: ((personasRaw ?? []) as any[])
+      .filter((c) => coincideEquipo(c, filtros))
+      .map((c) => ({
+        estado: c.estado,
+        fecha_ingreso: c.fecha_ingreso,
+        fecha_salida: c.fecha_salida,
+        motivo_salida: c.motivo_salida,
+        area: (Array.isArray(c.cargo) ? c.cargo[0]?.proceso_area : c.cargo?.proceso_area) ?? null,
+      })),
+    vacantes: filtrado ? [] : ((vacantesRaw ?? []) as any[]),
+    incapacidades: incapRaw ? (incapRaw as any[]) : null,
+    desde: desdeP,
+    hasta: hastaP,
+  });
+
   return {
     perfil,
     informe: {
@@ -114,6 +155,9 @@ export async function obtenerInformeConsolidado(filtros: FiltrosEquipo = {}): Pr
       porArea,
       umbralAnonimato: umbral,
       filtroProtegido,
+      talento,
+      periodoDesde: desdeP,
+      periodoHasta: hastaP,
     },
   };
 }

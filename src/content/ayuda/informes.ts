@@ -101,8 +101,10 @@ export const moduloInformes: ModuloAyuda = {
       resumen: 'Los mismos indicadores del dashboard de Inicio, con un desglose por área — pensado para presentar o imprimir en una reunión de junta, no para navegar el día a día.',
       camposYBotones: [
         { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
-        { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
-      notas: ['Visible solo para admin_th y gerencia.', 'Con un filtro activo, Saber, «con Guía y desempeño sin alerta» y alertas no se muestran: solo existen a nivel empresa.', 'Las áreas (o el filtro) con menos personas con dato que el umbral de anonimato no muestran promedios de Hacer y Deber: aparece «Menos de N personas».'],
+        { nombre: 'Indicadores de talento', explicacion: 'Bloque con rotación (salidas por causa y tasa del período), ausentismo por tipo (días de incapacidades y licencias), selección (vacantes cerradas, tiempo promedio de cierre y % que supera los primeros 90 días) y headcount por área con las personas en período de prueba aparte. Elige Desde/Hasta y pulsa Recalcular (por defecto, el último año).' },
+        { nombre: 'Gráficos de barras', explicacion: 'Headcount, salidas, ausentismo y desempeño (Hacer y Deber) por área, para llevar a una reunión sin armarlos a mano.' },
+        { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe (los indicadores de talento y los gráficos se ven en pantalla).' }],
+      notas: ['El ausentismo solo lo ve Talento Humano y sin filtros de equipo, porque son datos de salud; permisos y calamidades aún no se registran. La rotación y el % que supera 90 días son aproximaciones calculadas con las fechas de ingreso y salida de las fichas.', 'Visible solo para admin_th y gerencia.', 'Con un filtro activo, Saber, «con Guía y desempeño sin alerta» y alertas no se muestran: solo existen a nivel empresa.', 'Las áreas (o el filtro) con menos personas con dato que el umbral de anonimato no muestran promedios de Hacer y Deber: aparece «Menos de N personas».'],
     },
     {
       slug: 'historico',
@@ -113,6 +115,7 @@ export const moduloInformes: ModuloAyuda = {
         { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
         { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
       notas: [
+        'Arriba hay una gráfica de líneas con la evolución de Hacer y Deber por ciclo, con los mismos filtros de área y líder. Ser y Saber no se grafican: el Ser es descriptivo y el Saber no se mide por ciclo.',
         'Visible para admin_th, líder (su equipo) y gerencia.',
         'Un resumen de los dos ciclos más recientes también aparece como widget en el dashboard de Inicio.',
         'Por privacidad, si en un ciclo hay menos personas con resultado que el umbral de anonimato (5 por defecto, se cambia en Administración → Configuración), ese ciclo muestra «Menos de N personas» en lugar del promedio.',
