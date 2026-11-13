@@ -145,6 +145,8 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         'Tabla comparativa con el estado vigente de Ser, Saber, Hacer y Deber de cada persona de un vistazo — siempre el dato más reciente disponible, sin importar de qué Ciclo de Crecimiento vino ni si ya cerró.',
       camposYBotones: [
         { nombre: 'Columnas Ser / Saber / Hacer / Deber', explicacion: 'Un semáforo (Alto/Medio/Bajo) por dimensión y por persona. Ser y Saber se derivan del mismo criterio que usa el Informe de brechas por dimensión; Hacer y Deber vienen del Encuentro de Crecimiento más reciente.' },
+        { nombre: 'Resumen por área', explicacion: 'Tabla arriba de la lista con, por área, el número de personas, el Saber promedio (%), el Hacer y el Deber promedio (1 a 5) y cuántas personas tienen alguna dimensión en rojo. Un área con menos personas con dato que el mínimo de anonimato no muestra promedios. El Ser es descriptivo y no se promedia.' },
+        { nombre: 'Filtro «Con alguna dimensión en rojo»', explicacion: 'Muestra solo a quienes tienen Saber, Hacer o Deber en rojo, para priorizar los casos críticos. «Todas las personas» vuelve a la lista completa.' },
         { nombre: 'Ver PDI', explicacion: 'Acceso directo al Plan de Desarrollo Individual de esa persona.' },
       ],
       notas: [
@@ -575,6 +577,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       resumen:
         'El entregable central del Encuentro de Crecimiento, en forma de tablero kanban: cada acción de desarrollo indica si la brecha viene de Hacer, Deber, Saber, Ser, o es mixta, y se arrastra entre columnas según su estado.',
       camposYBotones: [
+        { nombre: 'Filtros y vista de lista', explicacion: 'Arriba del tablero: filtro por área y líder directo (Aplicar / Quitar filtros), y un buscador por persona, brecha o acción con selectores de dimensión y estado. El botón Tarjetas/Lista cambia entre el tablero y una tabla, pensada para cuando hay muchas personas (con más de 40 planes abre en lista). En la lista no se arrastra: para cambiar el estado vuelve a Tarjetas.' },
         { nombre: 'Columnas del tablero', explicacion: 'Pendiente, En curso, Cumplido y Vencido — son fijas (no configurables, a diferencia del tablero de Procesos y Sistemas de Gestión).' },
         { nombre: 'Arrastrar tarjeta', explicacion: 'Mueve el PDI a otra columna para cambiar su estado. Al soltarlo en "Cumplido" se guarda automáticamente la fecha de cumplimiento.' },
         { nombre: 'Origen (badge de color)', explicacion: 'De qué dimensión viene la brecha detectada (Hacer/Deber/Saber/Ser/Mixto).' },
