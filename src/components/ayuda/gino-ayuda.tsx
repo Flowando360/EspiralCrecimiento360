@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { EVENTO_ABRIR_TOUR } from '@/components/ayuda/tour-bienvenida';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { buscarPaginaPorRuta } from '@/content/ayuda';
@@ -146,6 +147,16 @@ export function GinoAyuda({ nombre, rol }: { nombre: string; rol: string }) {
                   className="w-full rounded-lg border border-marmol-200 pl-8 pr-2.5 py-2 text-sm"
                 />
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  cerrar();
+                  window.dispatchEvent(new Event(EVENTO_ABRIR_TOUR));
+                }}
+                className="mt-2 text-xs text-flow-600 hover:underline"
+              >
+                Ver el recorrido de bienvenida
+              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-5 space-y-5">

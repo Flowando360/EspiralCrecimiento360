@@ -40,6 +40,7 @@ export const moduloGeneral: ModuloAyuda = {
       resumen:
         'Gino es el robot sonriente de la esquina inferior derecha. Está en todas las pantallas para acompañarte como un amigo: te explica lo que ves, te dice cómo hacer algo paso a paso y recibe tus ideas para mejorar la plataforma.',
       camposYBotones: [
+        { nombre: 'Recorrido de bienvenida', explicacion: 'La primera vez que entras desde un navegador se abre solo un recorrido de pocos pasos (el menú, las alertas y Gino), adaptado a tu rol. Puedes saltarlo, y repetirlo cuando quieras con «Ver el recorrido de bienvenida» dentro del panel de Gino.' },
         { nombre: 'El botón de Gino', explicacion: 'Círculo con el robot, siempre a la vista abajo a la derecha. Al entrar te saluda por tu nombre (o por cómo te gusta que te llamen) una sola vez por sesión. Púlsalo para abrirlo; con Esc o la X lo cierras.' },
         { nombre: 'Esta pantalla', explicacion: 'Lo primero que te muestra Gino es la explicación de la pantalla donde estás: para qué sirve, qué hace cada botón y el proceso paso a paso.' },
         { nombre: 'Pregúntale a Gino', explicacion: 'Escribe lo que quieres hacer («¿cómo evalúo a mi equipo?») y Gino busca en el manual, las preguntas frecuentes y el glosario, y te da los pasos.' },
