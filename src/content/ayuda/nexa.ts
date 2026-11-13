@@ -269,6 +269,7 @@ export const moduloNexa: ModuloAyuda = {
       titulo: 'Directorio de aliados',
       resumen: 'Libreta de contactos de ARL, asesores SST y proveedores de formación certificada, para toda la empresa.',
       camposYBotones: [
+        { nombre: 'Desempeño por aliado (admin_th)', explicacion: 'Tabla debajo del directorio con, por aliado: actividades del Plan de trabajo anual que ejecuta (y cuántas ya se ejecutaron), cumplimiento, cobertura (personas alcanzadas frente a las esperadas), calificación promedio, dinero invertido y costo por persona alcanzada. Se alimenta sola al vincular el aliado en cada actividad del plan; es la base para decidir si renovar o cambiar una alianza. Solo la ve Talento Humano porque incluye presupuesto.' },
         { nombre: 'Nuevo aliado (admin_th)', explicacion: 'Nombre, tipo (ARL/asesor SST/proveedor de formación/otro), contacto y notas.' },
         { nombre: 'Ícono de basura (admin_th)', explicacion: 'Elimina el aliado del directorio, con confirmación.' },
       ],

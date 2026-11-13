@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { FormularioCrearAliado } from '@/components/espiral-crecimiento/formulario-crear-aliado';
 import { FilaAliado } from '@/components/espiral-crecimiento/fila-aliado';
 import { Handshake } from 'lucide-react';
+import { calcularDesempenoAliados, type ActividadAliado, type DesempenoAliado } from '@/lib/nexa/desempeno-aliados';
 
 export default async function NexaDirectorioPage() {
   const perfil = await getPerfilActual();
@@ -18,6 +19,18 @@ export default async function NexaDirectorioPage() {
     .order('nombre');
 
   const esAdminTh = perfil.rol === 'admin_th';
+
+  // Desempeño por aliado (presupuesto y calificaciones: solo Talento Humano).
+  let desempeno = new Map<string, DesempenoAliado>();
+  if (esAdminTh) {
+    const { data: acts } = await supabase
+      .from('plan_trabajo_actividades')
+      .select('aliado_id, estado, horas, personas_objetivo, personas_alcanzadas, presupuesto_estimado, presupuesto_ejecutado, calificacion')
+      .eq('empresa_id', perfil.empresa_id)
+      .not('aliado_id', 'is', null);
+    desempeno = calcularDesempenoAliados((acts ?? []) as unknown as ActividadAliado[]);
+  }
+  const pesos = (n: number) => `$${n.toLocaleString('es-CO')}`;
 
   return (
     <div className="space-y-6">
@@ -54,6 +67,53 @@ export default async function NexaDirectorioPage() {
           </table>
         </div>
         </FiltroTabla>
+      )}
+
+      {esAdminTh && aliados && aliados.length > 0 && (
+        <div className="card overflow-hidden overflow-x-auto">
+          <div className="px-4 py-3 border-b border-marmol-200">
+            <h2 className="font-display font-semibold text-secundario">Desempeño por aliado</h2>
+            <p className="text-xs text-marmol-400">
+              Sale de las actividades del Plan de trabajo anual que cada aliado ejecuta (Procesos → Plan de trabajo anual → campo «Aliado»). Sirve para decidir si
+              renovar o cambiar una alianza. La calificación es la que se registra al ejecutar cada actividad.
+            </p>
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-marmol-200 text-left text-xs uppercase tracking-wide text-marmol-400">
+                <th className="px-4 py-2 font-medium">Aliado</th>
+                <th className="px-4 py-2 font-medium">Actividades (ejecutadas)</th>
+                <th className="px-4 py-2 font-medium">Cumplimiento</th>
+                <th className="px-4 py-2 font-medium">Cobertura</th>
+                <th className="px-4 py-2 font-medium">Calificación</th>
+                <th className="px-4 py-2 font-medium">Invertido</th>
+                <th className="px-4 py-2 font-medium">Costo por persona</th>
+              </tr>
+            </thead>
+            <tbody>
+              {aliados.map((a) => {
+                const d = desempeno.get(a.id);
+                return (
+                  <tr key={a.id} className="border-b border-marmol-100 last:border-0">
+                    <td className="px-4 py-2 font-medium text-marmol-900">{a.nombre}</td>
+                    {d ? (
+                      <>
+                        <td className="px-4 py-2 text-marmol-600">{d.actividades} ({d.ejecutadas})</td>
+                        <td className="px-4 py-2 text-marmol-600">{d.cumplimientoPct != null ? `${d.cumplimientoPct}%` : '—'}</td>
+                        <td className="px-4 py-2 text-marmol-600">{d.coberturaPct != null ? `${d.coberturaPct}%` : '—'}</td>
+                        <td className="px-4 py-2 text-marmol-600">{d.calificacionPromedio ?? '—'}</td>
+                        <td className="px-4 py-2 text-marmol-600">{d.presupuestoEjecutado > 0 ? pesos(d.presupuestoEjecutado) : '—'}</td>
+                        <td className="px-4 py-2 text-marmol-600">{d.costoPorPersona != null ? pesos(d.costoPorPersona) : '—'}</td>
+                      </>
+                    ) : (
+                      <td colSpan={6} className="px-4 py-2 text-marmol-400">Aún sin actividades del plan vinculadas</td>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
