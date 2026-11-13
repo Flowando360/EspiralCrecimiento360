@@ -70,7 +70,10 @@ export default async function InformeConsolidadoPage({ searchParams }: { searchP
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Dato etiqueta="Colaboradores activos" valor={informe.totalActivos} />
+        <Dato
+          etiqueta={`Colaboradores activos (confirmados) · ${informe.talento.totalEnPrueba} más en período de prueba`}
+          valor={informe.totalActivos}
+        />
         <Dato etiqueta="En proceso de salida" valor={informe.enProcesoSalida} />
         <Dato etiqueta="Con Guía y desempeño sin alerta" valor={informe.pctAlineacionTalentoRol != null ? `${informe.pctAlineacionTalentoRol}%` : '—'} />
         <Dato etiqueta="Alertas críticas abiertas" valor={informe.alertasCriticas ?? '—'} />
