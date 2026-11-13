@@ -12,7 +12,7 @@ export default async function EditarColaboradorPage({ params }: { params: { id: 
 
   const supabase = createClient();
 
-  const [{ data: colaborador }, { data: cargos }, { data: colaboradores }] = await Promise.all([
+  const [{ data: colaborador }, { data: cargos }, { data: colaboradores }, { data: sedes }] = await Promise.all([
     supabase
       .from('colaboradores')
       .select(
@@ -31,6 +31,8 @@ export default async function EditarColaboradorPage({ params }: { params: { id: 
       .in('estado', ['activo', 'periodo_prueba'])
       .neq('id', params.id)
       .order('nombre_completo'),
+    // Sedes activas: sin esto el formulario no ofrece el campo «Sede» y no se puede asignar a quien ya existe.
+    supabase.from('sedes').select('id, nombre').eq('empresa_id', perfil.empresa_id).eq('activa', true).order('nombre'),
   ]);
 
   if (!colaborador || colaborador.empresa_id !== perfil.empresa_id) notFound();
@@ -55,6 +57,7 @@ export default async function EditarColaboradorPage({ params }: { params: { id: 
       <FormularioEditarColaborador
         cargos={cargos ?? []}
         posiblesLideres={colaboradores ?? []}
+        sedes={(sedes ?? []) as any}
         datosIniciales={{
           id: colaborador.id,
           nombreCompleto: colaborador.nombre_completo,
