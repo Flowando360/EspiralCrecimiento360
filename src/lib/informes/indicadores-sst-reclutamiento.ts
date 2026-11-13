@@ -66,6 +66,29 @@ export async function calcularIndicadoresSst(empresaId: string): Promise<Indicad
 
   const activos = (activosRaw ?? []).length;
 
+  // Cobertura de exámenes con el registro real (módulo Exámenes médicos de la ficha). Si la empresa aún no ha registrado ninguno,
+  // se mantiene el cálculo anterior, basado en alertas.
+  const idsActivos = (activosRaw ?? []).map((c: any) => c.id as string);
+  let coberturaReal: number | null = null;
+  if (idsActivos.length > 0) {
+    const { data: examenesRaw } = await (supabase as any)
+      .from('examenes_medicos_colaborador')
+      .select('colaborador_id, tipo, fecha_realizado, proxima_fecha')
+      .in('colaborador_id', idsActivos)
+      .in('tipo', ['preingreso', 'periodico']);
+    const examenes = (examenesRaw ?? []) as { colaborador_id: string; tipo: string; fecha_realizado: string; proxima_fecha: string | null }[];
+    if (examenes.length > 0) {
+      const hoyIso = new Date().toISOString().slice(0, 10);
+      const cubiertos = idsActivos.filter((id) => {
+        const suyos = examenes.filter((e) => e.colaborador_id === id).sort((a, b) => (a.fecha_realizado < b.fecha_realizado ? 1 : -1));
+        if (suyos.length === 0) return false;
+        const ultimoPeriodico = suyos.find((e) => e.tipo === 'periodico');
+        return !(ultimoPeriodico?.proxima_fecha && ultimoPeriodico.proxima_fecha < hoyIso);
+      }).length;
+      coberturaReal = Math.round((cubiertos / idsActivos.length) * 1000) / 10;
+    }
+  }
+
   const porOrigen = new Map<string, { dias: number; casos: number }>();
   for (const i of (incapacidades ?? []) as any[]) {
     const k = i.tipo as string;
@@ -92,7 +115,7 @@ export async function calcularIndicadoresSst(empresaId: string): Promise<Indicad
     totalDiasIncapacidad,
     accidentesLaborales,
     tasaAccidentalidad: pct(accidentesLaborales, activos),
-    coberturaExamenes: activos > 0 ? Math.max(0, Math.round(((activos - conAlertaExamen) / activos) * 1000) / 10) : null,
+    coberturaExamenes: coberturaReal ?? (activos > 0 ? Math.max(0, Math.round(((activos - conAlertaExamen) / activos) * 1000) / 10) : null),
     conAlertaExamen,
     formacionSst: { asignadas: sst.length, completadas, pct: pct(completadas, sst.length) },
     noDisponible: [

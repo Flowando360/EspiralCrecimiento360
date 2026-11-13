@@ -242,6 +242,22 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       ],
     },
     {
+      slug: 'examenes-medicos',
+      ruta: '/espiral-crecimiento/colaboradores/*/examenes',
+      titulo: 'Exámenes médicos',
+      resumen:
+        'Registro de los exámenes médicos ocupacionales de una persona, separados por tipo: preingreso (antes de vincularla), periódicos y de egreso. Los periódicos llevan fecha de vencimiento y generan una alerta de renovación.',
+      camposYBotones: [
+        { nombre: 'Registrar un examen (admin_th)', explicacion: 'Tipo, fecha del examen, concepto general (apto, apto con restricciones, no apto o pendiente) y la IPS o médico. En los periódicos también la fecha en que vence: 30 días antes aparece la alerta «Renovar examen médico periódico», y al registrar el siguiente la anterior se cierra sola.' },
+        { nombre: 'Estado de vigencia', explicacion: 'Cada examen periódico muestra si está vigente, por vencer (30 días o menos) o vencido.' },
+        { nombre: 'Papelera (admin_th)', explicacion: 'Elimina un examen registrado por error.' },
+      ],
+      notas: [
+        'Dato sensible de salud: solo lo ven Talento Humano y la propia persona; el líder directo no. Solo se guarda el concepto general, nunca el diagnóstico.',
+        'La «Cobertura de exámenes» del informe de SST se calcula con estos registros: cuenta a quien tiene un examen de preingreso o periódico y no tiene el periódico vencido. Mientras la empresa no registre ninguno, el informe usa el cálculo anterior, basado en alertas.',
+      ],
+    },
+    {
       slug: 'incapacidades',
       ruta: '/espiral-crecimiento/colaboradores/*/incapacidades',
       titulo: 'Incapacidades',

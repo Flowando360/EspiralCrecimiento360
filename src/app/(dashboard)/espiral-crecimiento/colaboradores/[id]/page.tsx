@@ -4,7 +4,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { SemaforoBadge } from '@/components/espiral-crecimiento/semaforo-badge';
 import { formatearFecha } from '@/lib/utils';
 import { notFound, redirect } from 'next/navigation';
-import { GraduationCap, Briefcase, Sparkles, ShieldCheck, Target, Clock, History, FolderLock, CalendarHeart, HeartPulse, Shirt, Pencil } from 'lucide-react';
+import { GraduationCap, Briefcase, Sparkles, ShieldCheck, Target, Clock, History, FolderLock, CalendarHeart, HeartPulse, Shirt, Pencil, Stethoscope } from 'lucide-react';
 
 const ACCION_TARJETA = 'inline-flex items-center gap-1 rounded-md border border-flow-200 bg-flow-50 px-2 py-0.5 text-xs font-medium text-flow-700';
 
@@ -357,6 +357,17 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
           >
             <HeartPulse size={16} className="text-flow-600" />
             <span className="text-sm font-medium text-marmol-800">Incapacidades</span>
+            <span className={`${ACCION_TARJETA} ml-auto`}>Abrir →</span>
+          </Link>
+        )}
+
+        {puedeVerIncapacidades && (
+          <Link
+            href={`/espiral-crecimiento/colaboradores/${params.id}/examenes`}
+            className="card p-5 flex items-center gap-2 hover:border-flow-300 transition"
+          >
+            <Stethoscope size={16} className="text-flow-600" />
+            <span className="text-sm font-medium text-marmol-800">Exámenes médicos</span>
             <span className={`${ACCION_TARJETA} ml-auto`}>Abrir →</span>
           </Link>
         )}
