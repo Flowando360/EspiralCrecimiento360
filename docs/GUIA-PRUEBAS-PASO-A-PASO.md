@@ -17,12 +17,12 @@ Sin claves ni datos reales (el repositorio es público). Se prueba solo en **CON
 6. **Avatar y gamificación.** ➖ Aplazado (Luisa 3.2).
 
 ## 2. Espiral 360° › Colaboradores
-1. **Lista.** Filtra por nombre, cargo y «Solo líderes de área». ✅ (Luisa 4.1; la columna de documento y la exportación a Excel: ⏳ confirmar al probar)
+1. **Lista.** Filtra por nombre, cargo y «Solo líderes de área». ✅ La exportación a Excel funciona (`/api/colaboradores/exportar`). (Luisa 4.1)
 2. **Ficha.** Abre una persona. Las tarjetas traen botón visible («Diligenciar / editar», «Abrir →»). ✅ (Luisa 4.6)
 3. **Editar.** Editar → debe ofrecer el campo **Sede**. ✅ (se corrigió el 13-nov)
 4. **Hoja de vida.** Diligenciar / editar → agrega estudio y experiencia. «Leer con IA» con un PDF ficticio. ✅ lo manual · ⏳ «Leer con IA» (falta PDF de prueba) (Luisa 4.2: lo cargado en selección ya viaja a la ficha; los **certificados de selección** siguen pendientes)
 5. **Periodo de prueba.** Un ingreso reciente debe mostrar la alerta «Evaluar período de prueba antes de confirmar» (la genera el cron diario). ⏳ En Mármoles puede crear varias alertas la primera vez: probar antes solo en CONVERGIA. (Luisa 4.4)
-6. **Cargue masivo, tipos de contrato (misión, aprendizaje), ADRES/FOSYGA y ASEC.** Cargue masivo y tipos: ⏳ confirmar al probar; ADRES/ASEC ➖ aplazados (Luisa 4.3, 4.4, 4.5).
+6. **Cargue masivo, tipos de contrato y afiliaciones.** ✅ Las plantillas Excel de colaboradores y de incapacidades descargan; el formulario ofrece «Empleado en misión», «Contrato de aprendizaje», etapas lectiva y productiva y «Pasantía». ADRES/FOSYGA y ASEC ➖ aplazados. (Luisa 4.3, 4.4, 4.5, 4.11)
 7. **Dotación desde la ficha.** Abrir → no debe rebotar al Inicio. ✅ (Luisa 4.12)
 8. **Exámenes médicos.** Ficha → Exámenes médicos → registra uno periódico. *Debe pasar:* aparece en la lista y se genera la alerta «Renovar examen médico periódico». ✅ El soporte adjunto: ⏳. El líder **no** debe verlos: ⏳ (sesión líder). (Luisa 4.10.3)
 9. **Sede y organigrama matricial.** Administración → Organigrama → agrega un líder funcional. *Debe pasar:* la ficha muestra «También reporta a». ✅ (Luisa 4.16)
@@ -40,7 +40,7 @@ TH y el líder **nunca** ven la Guía ni la carta: ven un **esquema** sin nota.
 ## 4. Evaluación (Hacer y Deber)
 1. **Ciclos.** Crear ciclo, generar encuentros por equipo, valoración con «Guardar avance» y «Enviar». ✅
 2. **Escala 1–5.** Cada nivel trae su descriptor. ✅ (Luisa 4.7)
-3. **Competencias por nivel del cargo.** Un cargo operativo no debe recibir liderazgo. ⏳ confirmar al probar (Luisa 4.9)
+3. **Competencias por nivel del cargo.** ❌ **Sigue pasando:** el cargo «Auxiliar de Servicios Generales» exige Liderazgo y Capacidad de supervisión, y salen en la oferta, el Saber y la evaluación. Hay que corregir los datos del cargo o filtrar por nivel. (Luisa 4.9)
 4. **Cliente interno.** Valoraciones → «Invitar a un cliente interno». *Debe pasar:* queda en el registro de envíos. ✅ (el botón tarda ~10 s sin aviso)
 5. **Reabrir valoración** (con motivo) tras un envío. ⏳ (falta una valoración enviada)
 6. **Brief.** Abre el Brief: tarjetas, borrador automático, «Mejorar con IA» (10–40 s). ✅
@@ -64,7 +64,7 @@ TH y el líder **nunca** ven la Guía ni la carta: ven un **esquema** sin nota.
 ## 7. Informes
 Abre cada uno y prueba los filtros de **área, líder, cargo y antigüedad** (el de ciclo no se hizo a propósito). ✅ (Luisa 6.1)
 - **PDI**, **Brechas** (lista «7 de 8 con Guía»), **Formación**, **SST** («Seguimiento…» con cadena de evidencias), **Cultura** (brecha cultural), **Consolidado** (rotación, ausentismo, headcount con período de prueba, barras, PDF y Excel), **Histórico** (línea), **Revisión por la Dirección** (fuente y enlace de cada bloque; eficacia ACPM con denominadores), **Equidad** (mínimo de 5 personas) e **Índice integral**. ✅ (Luisa 6.2–6.9)
-- **Áreas duplicadas** («administrativo / Administrativo / ADMINISTRATIVO»): ⏳ verificar al probar (Luisa 6.4).
+- **Áreas duplicadas:** ✅ el selector de área ya no trae variantes de mayúsculas (viene del cargo). Queda una cercana: «Talento Humano» y «Talento Humano y SG-SST». (Luisa 6.4)
 
 ## 8. Clima y Cultura
 1. **Clima.** Ronda abierta → responde → resultados por dimensión y por área, líder o sede. *Debe pasar:* con menos de 5 respuestas dice «menos de 5 respuestas»; los comentarios los ve solo TH. ✅ (Luisa 4.20)
@@ -84,10 +84,24 @@ Abre cada uno y prueba los filtros de **área, líder, cargo y antigüedad** (el
 ## 11. Nexa, Procesos y Gino
 1. **Feed.** Publica un anuncio con «Avisar por correo»; el correo debe llegar. ⏳ (cuidado con el tope diario de Resend gratuito) (Luisa 8.1)
 2. **Ludo, Mi cuaderno, Directorio de aliados** (con calificación por aliado). Abrir y revisar. ✅ abren sin error (Luisa 8.2–8.4)
-3. **Procesos y Cumplimiento.** Simulacros (campos del acta y «Crear acción en ACPM»), FODA cruzado con IA, Matriz legal (importar desde Excel o generar con IA): ⏳ **no constan como hechos en las notas; verifica y decide** (Luisa 9.1–9.4).
+3. **Procesos y Cumplimiento.** ✅ Simulacro con acta, hallazgos y evidencias; «Crear acción en ACPM» creó ACPM-007 vinculado. FODA con «Priorizar con IA» y estrategias FO/FA/DO/DA. Plan de trabajo, Matriz legal e importar desde Excel abren sin error. (Luisa 9.1–9.4)
 
 ## 12. Lo que sigue pendiente de decidir
 Roles de Luisa · si las 18 afirmaciones del clima se quedan · el Ser en movilidad interna · clientes internos externos con enlace · «Talento único» visible · dónde guardar `CLAUDE.local.md` · borrar `_t.ts` de la raíz · limpieza de los registros PRU (sede, líder funcional, examen, inducción de PRU Laura, curso, encuesta de cultura, objetivo, aspecto «PRU Constancia y criterio propio», invitación de cliente interno).
 
 ## 13. Orden recomendado para la próxima sesión
 1. Sesión **líder** (punto 3.5, exámenes médicos, objetivos). 2. Sesión **colaborador** (3.6, inducción, curso, aceptar objetivo). 3. Registro real en la Guía con un correo con bandeja. 4. Ronda de clima completa con varios usuarios. 5. Procesos (punto 11.3). 6. Pasada final de ayuda y de la guía pública `/guia-lider-th`.
+
+## 14. Recorrido completo como Talento Humano (2026-11-13, noche)
+Secuencia que sigue un líder de TH, hecha de punta a punta en CONVERGIA con una persona PRU:
+1. **Vacante** con «Redactar desde el perfil del cargo» → creada (con modalidad, ciudad, horario y contrato). ⚠️ El borrador copia el manual de funciones tal cual al aviso público, incluida una frase que no debería publicarse («debe solicitar ayuda de un hombre de la planta…») y las competencias de liderazgo. Conviene resumir el objetivo del cargo en la oferta.
+2. **Postulación pública** (formulario con autorizaciones) → la candidata aparece en «Postulados».
+3. **Tablero:** Postulados → Filtrados → «Enviar al líder» (queda «En evaluación del líder») → En entrevista → Contratar. El panel «Evaluación por el líder» se actualiza a los pocos segundos.
+4. **Contratación** crea el colaborador con los datos del candidato y le asigna 77 puntos de inducción.
+5. **Ficha:** hoja de vida (formación y certificación), Saber (un título profesional frente a «Bachillerato» sale como «supera el requisito», no incumplimiento ✅ Luisa 4.8), incapacidad, fecha especial, examen médico, salario, afiliaciones y certificado laboral PDF (200) ✅.
+6. **Guía del Flow:** invitación generada ✅ (el registro real sigue pendiente de un correo con bandeja).
+7. **Ciclo:** «Un colaborador» generó el Encuentro de Crecimiento ✅. El resultado muestra «Resultado incompleto» y un índice de 1.33 «Bajo» solo con el Saber: confunde para alguien recién contratado; conviene no etiquetarlo «Bajo» sin Hacer ni Deber.
+8. **Informes:** Brechas, Consolidado (corregido: el total de activos ahora dice cuántos más están en período de prueba ✅ Luisa 4.13 y 6.7.2) y los 14 Excel responden.
+9. **Salida:** entrevista de salida guardada ✅.
+10. **Procesos:** simulacro → hallazgo → ACPM-007 ✅; FODA con IA ✅.
+Esta tanda no incluye lo que solo hacen otras personas (autoevaluación, valoración de líder y pares, aceptar objetivos, quiz de inducción) ni las vistas de líder y colaborador.
