@@ -102,14 +102,17 @@ export function FormularioCrearCurso() {
           className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
         />
       </div>
-      <input
-        type="number"
-        min={0}
-        placeholder="Puntos otorgados"
-        value={puntos}
-        onChange={(e) => setPuntos(e.target.value)}
-        className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
-      />
+      <label className="block text-xs text-marmol-500">
+        Puntos que otorga al completarlo
+        <input
+          type="number"
+          min={0}
+          placeholder="Puntos otorgados"
+          value={puntos}
+          onChange={(e) => setPuntos(e.target.value)}
+          className="mt-0.5 w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
+        />
+      </label>
       {error && <p className="text-sm text-bajo">{error}</p>}
       <div className="flex gap-2">
         <button

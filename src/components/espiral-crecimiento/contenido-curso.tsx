@@ -24,16 +24,20 @@ export function EditorContenidoCurso({
   const [pending, start] = useTransition();
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
   const [enlace, setEnlace] = useState(enlaceInicial ?? '');
   const [archivoNombre, setArchivoNombre] = useState(archivoNombreInicial);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function guardarEnlace() {
     setError(null);
+    setAviso(null);
     start(async () => {
       const res = await guardarContenidoCurso({ cursoId, enlace: enlace.trim() || null });
-      if (res.ok) router.refresh();
-      else setError(res.error);
+      if (res.ok) {
+        setAviso(enlace.trim() ? 'Enlace guardado.' : 'Enlace retirado.');
+        router.refresh();
+      } else setError(res.error);
     });
   }
 
@@ -90,7 +94,7 @@ export function EditorContenidoCurso({
         <div className="flex gap-2 mt-1">
           <input value={enlace} onChange={(e) => setEnlace(e.target.value)} placeholder="https://…" className={campo + ' flex-1'} />
           <button type="button" disabled={pending} onClick={guardarEnlace} className="rounded-lg bg-flow-500 hover:bg-flow-600 disabled:opacity-40 text-white text-sm font-medium px-3 py-1.5">
-            Guardar
+            {pending ? 'Guardando…' : 'Guardar'}
           </button>
         </div>
       </label>
@@ -109,6 +113,7 @@ export function EditorContenidoCurso({
         {subiendo && <p className="mt-1 text-flow-700">Subiendo… no cierres la página.</p>}
       </div>
       {error && <p className="text-sm text-bajo">{error}</p>}
+      {aviso && !error && <p className="text-sm text-alto">{aviso}</p>}
     </div>
   );
 }
