@@ -139,12 +139,13 @@ export async function recopilarContextoBrief(supabase: Cliente, evaluacionId: st
   if (guia) {
     const [{ data: aspectos }, { data: puntajes }] = await Promise.all([
       supabase.from('ser_aspectos').select('id, nombre').eq('sensible', false).in('nombre', ASPECTOS_DEL_ESQUEMA),
-      supabase.from('ser_puntajes').select('aspecto_id, nota, enfoque').eq('guia_del_flow_id', guia.id),
+      supabase.from('ser_puntajes').select('aspecto_id, nota, descripcion, enfoque').eq('guia_del_flow_id', guia.id),
     ]);
     const nombre = new Map(((aspectos ?? []) as any[]).map((a) => [a.id, a.nombre as string]));
     // Orden del esquema (talento, motivación, liderazgo…) para que el resumen sea estable.
     const lista = ((puntajes ?? []) as any[])
-      .filter((p) => nombre.has(p.aspecto_id))
+      // Sin título ni descripción no es un aspecto descrito (restos de cuando el Ser tenía puntaje).
+      .filter((p) => nombre.has(p.aspecto_id) && (p.nota || p.descripcion))
       .map((p) => ({ nombre: nombre.get(p.aspecto_id)!, titulo: (p.nota as string | null) ?? null, enfoque: p.enfoque as string | null }))
       .sort((x, y) => ASPECTOS_DEL_ESQUEMA.indexOf(x.nombre) - ASPECTOS_DEL_ESQUEMA.indexOf(y.nombre));
     // Las inteligencias son muchas y no hablan de desempeño: no se listan como fortaleza del resumen.

@@ -12,6 +12,7 @@ import {
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Sparkles, Lock } from 'lucide-react';
 import { formatearFecha } from '@/lib/utils';
+import { TextoInforme } from '@/components/ui/texto-informe';
 import { SeguimientoSer } from '@/components/espiral-crecimiento/seguimiento-ser';
 
 export default async function GuiaDelFlowPage({ params }: { params: { id: string } }) {
@@ -179,9 +180,10 @@ export default async function GuiaDelFlowPage({ params }: { params: { id: string
                 )}
               </div>
               {(esElPropioColaborador ? guia.informe_colaborador : guia.informe_lider) ? (
-                <div className="rounded-lg border border-marmol-200 p-3 text-sm text-marmol-700 whitespace-pre-wrap">
-                  {esElPropioColaborador ? guia.informe_colaborador : guia.informe_lider}
-                </div>
+                <TextoInforme
+                  texto={(esElPropioColaborador ? guia.informe_colaborador : guia.informe_lider) ?? ''}
+                  className="rounded-lg border border-marmol-200 p-3 text-sm text-marmol-700"
+                />
               ) : (
                 <p className="text-xs text-marmol-400">
                   Aún no se ha generado. {puedeGestionar ? 'Presiona «Generar informes con IA» cuando el esquema esté completo.' : 'Talento Humano la generará.'}

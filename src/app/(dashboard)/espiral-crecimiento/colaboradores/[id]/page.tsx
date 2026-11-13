@@ -194,15 +194,15 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
             <>
               <p className="text-lg font-display font-semibold text-secundario">Guía del Flow aplicada</p>
               <p className="text-xs text-marmol-400">
-                {serPromedio?.total_aspectos_calificados
-                  ? `${serPromedio.total_aspectos_calificados} aspectos descritos · lectura sin nota`
-                  : 'Lectura descriptiva, sin nota'}
+                {Number(serPromedio?.total_aspectos_calificados ?? 0) > 0
+                  ? `Esquema con ${serPromedio!.total_aspectos_calificados} aspectos descritos · sin nota`
+                  : 'Esquema por completar · sin nota'}
               </p>
             </>
           ) : (
             <p className="text-sm text-marmol-700">Pendiente por completar</p>
           )}
-          <span className={`${ACCION_TARJETA} mt-3`}>{accionTexto} →</span>
+          <span className={`${ACCION_TARJETA} mt-3`}>{perfil.rol === 'admin_th' ? 'Ver / completar' : 'Ver'} →</span>
         </Link>
         <Link href={`/espiral-crecimiento/colaboradores/${params.id}/saber`} className="card p-4 hover:border-flow-300 transition">
           <p className="text-xs font-medium text-marmol-500 mb-2 flex items-center gap-1.5">

@@ -11,13 +11,17 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 const SYSTEM_INFORME_LIDER = `Eres un asistente de Talento Humano. A partir de un esquema de aspectos con relevancia laboral (talentos, propósito, liderazgo, comunicación, trabajo en equipo, compromiso, adaptación al cambio, negociación, recursividad, inteligencias), cada uno con título, descripción y una lectura descriptiva (para aprovechar, en equilibrio o para acompañar; no es una nota), escribe en español un informe breve (200-300 palabras) dirigido al LÍDER de esa persona, para que enfoque su Plan de Desarrollo Individual.
 
-Estructura: (1) talentos a aprovechar, (2) qué la/lo motiva, (3) cómo comunicarse y liderarla/o, (4) 2-3 sugerencias concretas para el PDI. Tono profesional, cálido y orientado a la acción.
+Estructura: (1) talentos a aprovechar, (2) qué motiva a la persona, (3) cómo comunicarse con ella y liderarla, (4) 2-3 sugerencias concretas para el PDI. Tono profesional, cálido y orientado a la acción.
+
+Formato y estilo: usa títulos cortos con ## y, si ayuda, viñetas con guion; sin tablas. No uses números, notas, puntajes ni escalas (el Ser se describe, no se califica). Lenguaje neutro en género: di "la persona" o "esta persona", nunca "la/lo", "ella" o "él".
 
 IMPORTANTE: solo tienes los aspectos de la lista. No tienes ni debes mencionar infancia, pasado, estabilidad emocional, felicidad, dependencia, sanación, frustración, sentido de pertenencia ni ningún tema psicológico o de vida personal — esa información existe pero es privada y nunca te fue entregada. No la inventes ni sugieras que existe.`;
 
 const SYSTEM_INFORME_COLABORADOR = `Eres un asistente de desarrollo profesional. A partir de un esquema de aspectos con relevancia laboral (talentos, propósito, liderazgo, comunicación, trabajo en equipo, compromiso, adaptación al cambio, negociación, recursividad, inteligencias), cada uno con título, descripción y una lectura descriptiva (para aprovechar, en equilibrio o para acompañar; no es una nota), escribe en español un informe breve (200-300 palabras) dirigido DIRECTAMENTE a esa persona (en segunda persona, tono cercano y alentador), que le ayude a recordar en qué es fuerte profesionalmente y en qué puede seguir trabajando.
 
 Aclara que esto es un complemento breve, no un reemplazo de su Guía del Flow completa (que ya recibió por su cuenta). Cierra con una invitación a seguir explorando esa Guía si quiere profundizar en su autoconocimiento.
+
+Formato y estilo: párrafos cortos, con uno o dos títulos con ## si ayuda; sin tablas. No uses números, notas, puntajes ni escalas. No asumas el género de la persona: evita adjetivos con género (di "tienes una gran capacidad", no "eres muy bueno/buena").
 
 IMPORTANTE: solo tienes los aspectos de la lista. No tienes ni debes mencionar infancia, pasado, estabilidad emocional, felicidad, dependencia, sanación, frustración, sentido de pertenencia ni ningún tema psicológico o de vida personal — esa información existe pero es privada y nunca te fue entregada. No la inventes ni sugieras que existe.`;
 
@@ -27,7 +31,7 @@ async function pedirInformeAClaude(apiKey: string, system: string, listaAspectos
     headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
     body: JSON.stringify({
       model: 'claude-sonnet-5',
-      max_tokens: 900,
+      max_tokens: 1500,
       system,
       messages: [{ role: 'user', content: `Esquema del Ser (descriptivo, sin nota):\n${listaAspectos}` }],
     }),
@@ -37,7 +41,9 @@ async function pedirInformeAClaude(apiKey: string, system: string, listaAspectos
     console.error('Error de la API de Anthropic (informe Ser):', r.status, JSON.stringify(data));
     throw new Error('Hubo un problema consultando la IA. Ya quedó registrado para revisión.');
   }
-  return data?.content?.[0]?.text ?? '';
+  // La respuesta puede traer otros bloques antes del texto (p. ej. de razonamiento): se toma el de tipo texto.
+  const bloque = ((data?.content ?? []) as any[]).find((b) => b?.type === 'text');
+  return (bloque?.text as string | undefined)?.trim() ?? '';
 }
 
 /**
@@ -65,6 +71,8 @@ export async function generarInformesParaGuia(
     // Defensa en profundidad: con el cliente admin (sin sesión) RLS no
     // filtra los aspectos sensibles, así que se excluyen acá explícitamente.
     .filter((p) => p.ser_aspectos?.nombre && p.ser_aspectos?.sensible === false)
+    // Un aspecto sin título ni descripción no dice nada (son restos de cuando el Ser tenía puntaje): no entra.
+    .filter((p) => p.nota || p.descripcion)
     .map((p) => {
       const lectura =
         p.enfoque === 'aprovechar' ? 'para aprovechar' : p.enfoque === 'acompanar' ? 'para acompañar' : p.enfoque === 'equilibrado' ? 'en equilibrio' : null;
@@ -79,7 +87,7 @@ export async function generarInformesParaGuia(
     });
 
   if (aspectos.length === 0) {
-    return { ok: false, error: 'No hay puntajes de aspectos con relevancia laboral cargados todavía.' };
+    return { ok: false, error: 'El esquema del Ser está vacío. Invita a la persona a su Guía del Flow o completa al menos un aspecto (título o descripción) antes de generar la síntesis.' };
   }
 
   const listaAspectos = aspectos.join('\n');
@@ -93,6 +101,11 @@ export async function generarInformesParaGuia(
     ]);
   } catch (e: any) {
     return { ok: false, error: e.message ?? 'Error generando los informes' };
+  }
+
+  // Una respuesta vacía no debe borrar la síntesis que ya existía.
+  if (!informeLider || !informeColaborador) {
+    return { ok: false, error: 'La IA no devolvió texto. Intenta de nuevo en un momento.' };
   }
 
   const ahora = new Date().toISOString();

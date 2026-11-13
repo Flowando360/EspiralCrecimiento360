@@ -36,6 +36,13 @@ textarea {
   @apply bg-white border border-marmol-200 rounded-xl shadow-sm;
 }
 
+/* Botón principal (verde de la marca). Se usa en formularios pequeños: guardar, confirmar, ver. */
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-flow-500 text-white font-medium px-3.5 py-2 transition;
+}
+.btn-primary:hover { @apply bg-flow-600; }
+.btn-primary:disabled { @apply opacity-50 cursor-not-allowed; }
+
 .badge-alto { @apply bg-green-100 text-alto border border-green-200; }
 .badge-medio { @apply bg-amber-100 text-medio border border-amber-200; }
 .badge-bajo { @apply bg-red-100 text-bajo border border-red-200; }
