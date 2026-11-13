@@ -37,3 +37,22 @@ export function competenciaAplicaAlCargo(
   const minimo = (competencia.nivel_minimo && competencia.nivel_minimo in RANGO ? competencia.nivel_minimo : 'operativo') as NivelCargo;
   return RANGO[nivelEfectivo(cargo.nivel_cargo, tiene)] >= RANGO[minimo];
 }
+
+/** Habilidades de mando: solo tienen sentido en cargos de supervisión o directivos. */
+const HABILIDAD_DE_MANDO = /(liderazgo|supervisi[oó]n|direcci[oó]n de equipos|estrategia)/i;
+
+export function esHabilidadDeMando(nombre: string): boolean {
+  return HABILIDAD_DE_MANDO.test(nombre);
+}
+
+/**
+ * ¿Se le exige esta habilidad al cargo? Las de mando se omiten en cargos operativos o técnico-administrativos
+ * sin personal a cargo (así no se le exige «Liderazgo» a un auxiliar de servicios generales).
+ */
+export function habilidadAplicaAlCargo(
+  nombre: string,
+  cargo: { nivel_cargo?: string | null; tiene_personal_a_cargo?: boolean | null }
+): boolean {
+  if (!esHabilidadDeMando(nombre)) return true;
+  return RANGO[nivelEfectivo(cargo.nivel_cargo, Boolean(cargo.tiene_personal_a_cargo))] >= RANGO.supervision;
+}

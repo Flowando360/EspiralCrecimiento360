@@ -5,7 +5,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { buscarCandidatoExistente } from '@/lib/reclutamiento/duplicados';
-import { borradorOferta, mejorarOfertaConIA, type PerfilCargoOferta } from '@/lib/reclutamiento/oferta';
+import { borradorOferta, limpiarPerfilParaOferta, mejorarOfertaConIA, type PerfilCargoOferta } from '@/lib/reclutamiento/oferta';
 
 const RUTA = '/reclutamiento';
 
@@ -587,7 +587,7 @@ export async function proponerOfertaVacante(input: z.infer<typeof OfertaSchema>)
   const supabase = createClient();
   const { data: cargo } = await supabase
     .from('cargos')
-    .select('id, nombre, objetivo_cargo, formacion_nivel, formacion_titulo_especifico, experiencia_minima_meses')
+    .select('id, nombre, objetivo_cargo, formacion_nivel, formacion_titulo_especifico, experiencia_minima_meses, nivel_cargo, tiene_personal_a_cargo')
     .eq('id', p.data.cargoId)
     .eq('empresa_id', perfil.empresa_id)
     .maybeSingle();
@@ -598,7 +598,7 @@ export async function proponerOfertaVacante(input: z.infer<typeof OfertaSchema>)
     supabase.from('cargo_habilidades').select('nombre').eq('cargo_id', cargo.id).order('orden'),
     supabase.from('empresas').select('nombre').eq('id', perfil.empresa_id).maybeSingle(),
   ]);
-  const perfilCargo: PerfilCargoOferta = {
+  const perfilCargo: PerfilCargoOferta = limpiarPerfilParaOferta({
     nombre: cargo.nombre,
     objetivo: cargo.objetivo_cargo ?? null,
     funciones: ((funciones ?? []) as any[]).map((f) => String(f.funcion)),
@@ -606,7 +606,7 @@ export async function proponerOfertaVacante(input: z.infer<typeof OfertaSchema>)
     formacionNivel: cargo.formacion_nivel ?? null,
     formacionTitulo: cargo.formacion_titulo_especifico ?? null,
     experienciaMeses: cargo.experiencia_minima_meses ?? null,
-  };
+  }, cargo as any);
   const borrador = borradorOferta(perfilCargo, p.data.titulo || cargo.nombre);
   if (!p.data.conIA) return { ok: true as const, ...borrador, fuente: 'automatico' as const };
 

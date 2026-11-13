@@ -223,3 +223,9 @@ Servidor local con puente a Supabase (el proxy de la nube no deja salir al servi
 - **Observación menor:** al invitar a un cliente interno, el botón queda en «Invitando…» unos 10 s sin otro aviso.
 - **Registro PRU nuevo:** invitación de cliente interno (PRU Pedro Candidato) en la valoración de Lucía Londoño.
 - **Siguen sin probar:** reabrir valoración (necesita una valoración ya enviada), alfa por dimensión con la ronda completa (necesita varias personas), vistas de líder y colaborador (inicia sesión Diana), «Leer con IA» (PDF ficticio), archivo propio de curso, soporte adjunto de examen, registro real en la Guía del Flow y relleno de Guías migradas.
+
+## Actualización (2026-11-13, noche: tres hallazgos del recorrido corregidos)
+- **Oferta de vacante:** el borrador ya no copia frases internas del manual de funciones («las demás funciones que le sean asignadas…») ni habilidades de mando en cargos sin personal a cargo (`limpiarPerfilParaOferta`).
+- **Índice integral:** con solo el Saber (sin Hacer ni Deber) ya no se da semáforo «Bajo»; la tarjeta dice «Sin semáforo todavía».
+- **Habilidades de mando** («Liderazgo», «Capacidad de supervisión», «Estrategia») ya no se exigen en el Saber ni salen en la oferta de cargos operativos o técnico-administrativos (`habilidadAplicaAlCargo` en `nivel-cargo.ts`). El dato sembrado sigue en los cargos; solo se omite donde no aplica.
+- Falta verlo en navegador (oferta de «PRU Auxiliar de servicios generales», Saber de PRU Marta, índice de PRU Camila).

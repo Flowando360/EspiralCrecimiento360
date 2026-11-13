@@ -26,7 +26,11 @@ export function TarjetaIndiceIntegral({ datos }: { datos: DesempenoIntegral }) {
         </div>
         <div className="flex items-center gap-3">
           <span className="font-display text-3xl font-bold text-secundario">{integral.indice}</span>
-          <SemaforoBadge nivel={integral.semaforo} />
+          {integral.semaforo ? (
+            <SemaforoBadge nivel={integral.semaforo} />
+          ) : (
+            <span className="text-xs text-marmol-500 max-w-[11rem]">Sin semáforo todavía: falta la valoración de Hacer y Deber.</span>
+          )}
         </div>
       </div>
 

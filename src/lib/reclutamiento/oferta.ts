@@ -34,6 +34,18 @@ const NIVEL_FORMACION: Record<string, string> = {
   universitario: 'Universitario',
 };
 
+/** Frases de cierre o de uso interno del manual de funciones que no deben salir en un aviso público. */
+const FRASE_INTERNA = /(dem[aá]s funciones|otras funciones|que (le )?(asigne|sean asignadas|designe)|lo que (el|su) (jefe|superior)|afines al cargo|cumplir con las normas|reglamento interno)/i;
+export function limpiarPerfilParaOferta(p: PerfilCargoOferta, cargo: { nivel_cargo?: string | null; tiene_personal_a_cargo?: boolean | null }): PerfilCargoOferta {
+  return {
+    ...p,
+    funciones: p.funciones.filter((f) => f.trim() && !FRASE_INTERNA.test(f)),
+    habilidades: p.habilidades.filter((h) => habilidadAplicaAlCargo(h, cargo)),
+  };
+}
+
+import { habilidadAplicaAlCargo } from '@/lib/competencias/nivel-cargo';
+
 export function borradorOferta(p: PerfilCargoOferta, titulo: string): OfertaGenerada {
   const partes: string[] = [];
   partes.push(`Buscamos a alguien para el cargo de ${titulo || p.nombre}.`);

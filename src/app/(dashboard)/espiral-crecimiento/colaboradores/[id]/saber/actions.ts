@@ -7,6 +7,7 @@ import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import type { VerificacionSaber } from '@/types/colaborador';
+import { habilidadAplicaAlCargo } from '@/lib/competencias/nivel-cargo';
 import { estadoSugerido, nivelDesdeEsperado } from '@/lib/saber/dominio';
 
 const BLOQUES = [
@@ -177,7 +178,7 @@ export async function generarChecklistSaber(colaboradorId: string) {
   const supabase = createClient();
   const { data: col } = await supabase
     .from('colaboradores')
-    .select('cargo:cargos(id, formacion_nivel, formacion_titulo_especifico, experiencia_minima_meses)')
+    .select('cargo:cargos(id, nivel_cargo, tiene_personal_a_cargo, formacion_nivel, formacion_titulo_especifico, experiencia_minima_meses)')
     .eq('id', colaboradorId)
     .maybeSingle();
   const cargo = (col as any)?.cargo;
@@ -212,7 +213,7 @@ export async function generarChecklistSaber(colaboradorId: string) {
   }
 
   // 2. Habilidades del cargo (se verifican con la evaluación o con el líder)
-  for (const h of habilidades ?? []) {
+  for (const h of (habilidades ?? []).filter((x: any) => habilidadAplicaAlCargo(String(x.nombre), cargo))) {
     nuevos.push({
       bloque: 'habilidades_funcionales_tecnicas',
       item_evaluado: `${h.nombre} (${h.tipo}, nivel ${h.nivel_esperado})`,

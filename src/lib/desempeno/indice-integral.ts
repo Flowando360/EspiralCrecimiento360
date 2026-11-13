@@ -77,7 +77,9 @@ export function calcularIndiceIntegral(
 
   const indice = sumaPesos > 0 ? Math.round(conDato.reduce((s, d) => s + (d.valor as number) * (d.peso / sumaPesos), 0) * 100) / 100 : null;
   const sinDato = dims.filter((d) => d.valor == null && d.peso > 0).map((d) => d.dimension);
-  return { indice, semaforo: semaforoIntegral(indice), aportes, incompleto: sinDato.length > 0, dimensionesSinDato: sinDato };
+  // Con solo el Saber (persona recién contratada, sin valoración) no se da semáforo: «Bajo» sería injusto.
+  const sinDesempeno = valores.hacer == null && valores.deber == null;
+  return { indice, semaforo: sinDesempeno ? null : semaforoIntegral(indice), aportes, incompleto: sinDato.length > 0, dimensionesSinDato: sinDato };
 }
 
 export function pesosValidos(p: PesosDimensiones): boolean {
