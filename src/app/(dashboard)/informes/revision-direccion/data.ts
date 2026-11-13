@@ -9,7 +9,7 @@ export interface RevisionDireccion {
   periodoFin: string;
   auditorias: { total: number; cerradas: number; hallazgosMayores: number; hallazgosMenores: number; observaciones: number; oportunidades: number };
   riesgos: { total: number; oportunidades: number; vencidos: number; residualAlto: number };
-  acpm: { registradasEnPeriodo: number; cerradasEfectivasEnPeriodo: number; reabiertasEnPeriodo: number; tasaEficaciaGlobal: number | null; abiertasVencidas: number };
+  acpm: { registradasEnPeriodo: number; cerradasEfectivasEnPeriodo: number; reabiertasEnPeriodo: number; tasaEficaciaGlobal: number | null; verificadas: number; verificadasEficaces: number; abiertas: number; abiertasVencidas: number; cumplimientoGlobal: number | null };
   indicadores: { total: number; conMedicionEnPeriodo: number; fueraDeMeta: { nombre: string; procesoNombre: string; valor: number; meta: number }[] };
   documentos: { solicitudesResueltasEnPeriodo: number; aprobadas: number; rechazadas: number; difusionIncompleta: number };
   cambios: { total: number; aprobados: number; implementados: number; rechazados: number };
@@ -109,6 +109,15 @@ export async function obtenerRevisionDireccion(periodoInicio: string, periodoFin
   const resueltasGlobal = acpm.filter((a) => a.estado === 'cerrada_efectiva' || a.estado === 'reabierta');
   const tasaEficaciaGlobal = resueltasGlobal.length > 0 ? Math.round((acpm.filter((a) => a.estado === 'cerrada_efectiva').length / resueltasGlobal.length) * 100) : null;
 
+  // La tasa de eficacia solo mira las acciones ya verificadas; por eso puede ser 100 % aunque haya acciones vencidas sin cerrar.
+  // Se entregan también los denominadores y un «cumplimiento global» que sí castiga lo vencido.
+  const verificadasEficaces = acpm.filter((a) => a.estado === 'cerrada_efectiva').length;
+  const abiertasSinCerrar = acpm.filter((a) => a.estado !== 'cerrada_efectiva').length;
+  const vencidasSinCerrar = acpm.filter((a) => a.fecha_compromiso && a.fecha_compromiso < hoy && a.estado !== 'cerrada_efectiva').length;
+  const reabiertasTotal = acpm.filter((a) => a.estado === 'reabierta').length;
+  const baseCumplimiento = verificadasEficaces + reabiertasTotal + vencidasSinCerrar;
+  const cumplimientoGlobal = baseCumplimiento > 0 ? Math.round((verificadasEficaces / baseCumplimiento) * 100) : null;
+
   // Riesgos
   const riesgos = (riesgosRaw ?? []) as any[];
   const DIAS_FRECUENCIA: Record<string, number> = { trimestral: 90, semestral: 182, anual: 365 };
@@ -165,7 +174,11 @@ export async function obtenerRevisionDireccion(periodoInicio: string, periodoFin
         cerradasEfectivasEnPeriodo: acpm.filter((a) => a.fecha_cierre && a.fecha_cierre >= periodoInicio && a.fecha_cierre <= periodoFin && a.estado === 'cerrada_efectiva').length,
         reabiertasEnPeriodo: acpm.filter((a) => a.estado === 'reabierta').length,
         tasaEficaciaGlobal,
-        abiertasVencidas: acpm.filter((a) => a.fecha_compromiso && a.fecha_compromiso < hoy && a.estado !== 'cerrada_efectiva').length,
+        verificadas: resueltasGlobal.length,
+        verificadasEficaces,
+        abiertas: abiertasSinCerrar,
+        abiertasVencidas: vencidasSinCerrar,
+        cumplimientoGlobal,
       },
       indicadores: { total: indicadores.length, conMedicionEnPeriodo, fueraDeMeta },
       documentos: {

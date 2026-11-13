@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { obtenerRevisionDireccion } from './data';
 import { SeccionesManuales } from '@/components/informes/secciones-manuales-revision';
 import { formatearFecha } from '@/lib/utils';
@@ -48,6 +49,7 @@ export default async function RevisionDireccionPage({ searchParams }: { searchPa
         <h2 className="font-display font-semibold text-secundario mb-3 inline-flex items-center gap-2">
           <ShieldCheck size={16} className="text-flow-600" /> Auditorías internas
         </h2>
+        <Fuente texto="Procesos y sistemas de gestión → Auditorías internas" href="/procesos-gestion/auditorias" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
           <Stat valor={revision.auditorias.total} etiqueta="Total registradas" />
           <Stat valor={revision.auditorias.cerradas} etiqueta="Cerradas" />
@@ -60,6 +62,7 @@ export default async function RevisionDireccionPage({ searchParams }: { searchPa
         <h2 className="font-display font-semibold text-secundario mb-3 inline-flex items-center gap-2">
           <AlertTriangle size={16} className="text-flow-600" /> Riesgos y oportunidades
         </h2>
+        <Fuente texto="Procesos y sistemas de gestión → Riesgos y oportunidades" href="/procesos-gestion/riesgos" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
           <Stat valor={revision.riesgos.total} etiqueta="Riesgos" />
           <Stat valor={revision.riesgos.oportunidades} etiqueta="Oportunidades" />
@@ -72,18 +75,28 @@ export default async function RevisionDireccionPage({ searchParams }: { searchPa
         <h2 className="font-display font-semibold text-secundario mb-3 inline-flex items-center gap-2">
           <ListChecks size={16} className="text-flow-600" /> ACPM
         </h2>
+        <Fuente texto="Procesos y sistemas de gestión → ACPM" href="/procesos-gestion/acpm" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
           <Stat valor={revision.acpm.registradasEnPeriodo} etiqueta="Registradas en el período" />
           <Stat valor={revision.acpm.cerradasEfectivasEnPeriodo} etiqueta="Cerradas efectivas" />
-          <Stat valor={revision.acpm.tasaEficaciaGlobal !== null ? `${revision.acpm.tasaEficaciaGlobal}%` : '—'} etiqueta="Tasa de eficacia global" />
+          <Stat valor={revision.acpm.tasaEficaciaGlobal !== null ? `${revision.acpm.tasaEficaciaGlobal}%` : '—'} etiqueta={`Eficacia de las verificadas (${revision.acpm.verificadasEficaces} de ${revision.acpm.verificadas})`} />
           <Stat valor={revision.acpm.abiertasVencidas} etiqueta="Vencidas sin cerrar" clase={revision.acpm.abiertasVencidas > 0 ? 'text-bajo' : undefined} />
         </div>
+        <div className="grid grid-cols-2 gap-3 text-center mt-3">
+          <Stat valor={revision.acpm.abiertas} etiqueta="Abiertas (sin cerrar)" />
+          <Stat valor={revision.acpm.cumplimientoGlobal !== null ? `${revision.acpm.cumplimientoGlobal}%` : '—'} etiqueta="Cumplimiento global (cuenta las vencidas)" />
+        </div>
+        <p className="text-xs text-marmol-500 mt-3">
+          La eficacia mide solo las acciones que ya pasaron la verificación (cerradas efectivas frente a reabiertas). Por eso puede
+          ser alta aunque haya acciones vencidas: esas todavía no se han verificado. El cumplimiento global sí las cuenta en contra.
+        </p>
       </div>
 
       <div className="card p-5">
         <h2 className="font-display font-semibold text-secundario mb-3 inline-flex items-center gap-2">
           <Target size={16} className="text-flow-600" /> Indicadores
         </h2>
+        <Fuente texto="Procesos y sistemas de gestión → cada proceso (sus indicadores y mediciones)" href="/procesos-gestion" />
         <div className="grid grid-cols-2 gap-3 text-center mb-3">
           <Stat valor={revision.indicadores.total} etiqueta="Indicadores activos" />
           <Stat valor={revision.indicadores.conMedicionEnPeriodo} etiqueta="Con medición en el período" />
@@ -106,6 +119,7 @@ export default async function RevisionDireccionPage({ searchParams }: { searchPa
         <h2 className="font-display font-semibold text-secundario mb-3 inline-flex items-center gap-2">
           <FileStack size={16} className="text-flow-600" /> Gestión documental
         </h2>
+        <Fuente texto="Procesos y sistemas de gestión → Gestión documental" href="/procesos-gestion/documentos" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
           <Stat valor={revision.documentos.solicitudesResueltasEnPeriodo} etiqueta="Solicitudes resueltas" />
           <Stat valor={revision.documentos.aprobadas} etiqueta="Aprobadas" />
@@ -118,6 +132,7 @@ export default async function RevisionDireccionPage({ searchParams }: { searchPa
         <h2 className="font-display font-semibold text-secundario mb-3 inline-flex items-center gap-2">
           <GitPullRequestArrow size={16} className="text-flow-600" /> Gestión de cambio
         </h2>
+        <Fuente texto="Procesos y sistemas de gestión → Gestión de cambio" href="/procesos-gestion/cambios" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
           <Stat valor={revision.cambios.total} etiqueta="Total" />
           <Stat valor={revision.cambios.aprobados} etiqueta="Aprobados" />
@@ -130,6 +145,7 @@ export default async function RevisionDireccionPage({ searchParams }: { searchPa
         <h2 className="font-display font-semibold text-secundario mb-3 inline-flex items-center gap-2">
           <GraduationCap size={16} className="text-flow-600" /> Formación y competencias
         </h2>
+        <Fuente texto="Espiral 360° → Formación individual y Planes de Desarrollo" href="/nexa/formacion" />
         <p className="text-sm text-marmol-600">
           <strong>{revision.formacion.cursosCompletadosEnPeriodo}</strong> cursos de Nexa completados y{' '}
           <strong>{revision.pdi.cerradosEnPeriodo}</strong> Planes de Desarrollo Individual cerrados en el período — cruce con
@@ -145,6 +161,17 @@ export default async function RevisionDireccionPage({ searchParams }: { searchPa
         puedeEditar={perfil.rol === 'admin_th'}
       />
     </div>
+  );
+}
+
+function Fuente({ texto, href }: { texto: string; href: string }) {
+  return (
+    <p className="text-xs text-marmol-400 -mt-2 mb-3">
+      Fuente: {texto}.{' '}
+      <Link href={href} className="text-flow-600 hover:underline">
+        Gestionar en el módulo →
+      </Link>
+    </p>
   );
 }
 

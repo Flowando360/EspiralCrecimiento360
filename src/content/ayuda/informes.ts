@@ -153,6 +153,8 @@ export const moduloInformes: ModuloAyuda = {
         },
       ],
       notas: [
+        'Cada bloque dice de dónde sale su dato («Fuente») y tiene un enlace «Gestionar en el módulo» para ir a actualizarlo (registrar un riesgo, cerrar una ACPM, medir un indicador). Si tu usuario no tiene acceso a ese módulo, pídeselo a Talento Humano.',
+        'ACPM: «Eficacia de las verificadas» solo cuenta las acciones que ya pasaron la verificación (cerradas efectivas frente a reabiertas), por eso puede ser 100 % aunque haya acciones vencidas sin cerrar. El «Cumplimiento global» sí cuenta las vencidas y las reabiertas en contra; mírelo junto con «Vencidas sin cerrar».',
         'Visible para admin_th y gerencia.',
         'La sección de indicadores "fuera de meta" compara la última medición registrada contra la meta, sin importar cuándo se hizo esa medición.',
       ],
