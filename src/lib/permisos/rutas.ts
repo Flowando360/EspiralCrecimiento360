@@ -26,6 +26,7 @@ const REGLAS: { prefijo: string; modulo: ModuloRuta | null; exacta?: boolean }[]
   { prefijo: '/nexa/formacion', modulo: 'espiral_360' },
   { prefijo: '/nexa/reconocimientos', modulo: 'espiral_360' },
   { prefijo: '/nexa/clima', modulo: 'espiral_360' },
+  { prefijo: '/nexa/cultura', modulo: 'espiral_360' },
   { prefijo: '/nexa/simulacros', modulo: 'procesos' },
   { prefijo: '/administracion/guias-flow', modulo: 'espiral_360' },
   { prefijo: '/administracion/sincronizaciones-guia-flow', modulo: 'espiral_360' },

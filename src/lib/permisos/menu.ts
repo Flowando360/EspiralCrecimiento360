@@ -106,6 +106,7 @@ export const NAV: NavGroup[] = [
       { href: '/nexa/formacion', label: 'Formación individual', icon: GraduationCap, roles: ['admin_th', 'lider', 'colaborador'] },
       { href: '/nexa/reconocimientos', label: 'Reconocimientos', icon: Award, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },
       { href: '/nexa/clima', label: 'Clima Organizacional', icon: HeartHandshake, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },
+      { href: '/nexa/cultura', label: 'Brecha cultural', icon: Scale, roles: ['admin_th', 'lider', 'colaborador', 'gerencia'] },
       { href: '/administracion/guias-flow', label: 'Guías del Flow', icon: Send, roles: ['admin_th'] },
       { href: '/administracion/sincronizaciones-guia-flow', label: 'Sincronizaciones Guía del Flow', icon: RefreshCw, roles: ['admin_th'] },
     ],

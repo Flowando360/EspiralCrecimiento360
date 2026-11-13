@@ -243,6 +243,23 @@ export const moduloNexa: ModuloAyuda = {
       ],
     },
     {
+      slug: 'brecha-cultural',
+      ruta: '/nexa/cultura',
+      titulo: 'Brecha cultural',
+      resumen:
+        'Encuesta anónima que mide qué tan alineados están los comportamientos reales con la cultura que la empresa quiere construir. Para cada comportamiento, cada persona responde con qué frecuencia ocurre hoy y con qué frecuencia debería ocurrir (1 a 5). La diferencia es la brecha.',
+      camposYBotones: [
+        { nombre: 'Comportamientos a medir (admin_th)', explicacion: 'Lista de comportamientos deseables, cada uno dentro de una dimensión cultural (por ejemplo un valor de la empresa). Puedes agregar, desactivar o eliminar. Empieza vacía: cada empresa define los suyos.' },
+        { nombre: 'Abrir / Cerrar encuesta de cultura (admin_th)', explicacion: 'Abre la encuesta con un nombre (necesita al menos un comportamiento activo). Solo puede haber una abierta a la vez; al cerrarla quedan fijos los resultados.' },
+        { nombre: 'Tu opinión', explicacion: 'Cada persona con ficha responde, por comportamiento, «¿con qué frecuencia ocurre hoy?» y «¿con qué frecuencia debería ocurrir?». Solo una vez por encuesta.' },
+        { nombre: 'Resultados (admin_th y gerencia)', explicacion: 'Brecha por dimensión cultural y por comportamiento, de mayor a menor. Filtra por encuesta, área, líder y sede con el botón Filtrar.' },
+      ],
+      notas: [
+        'Anonimato: quién respondió se guarda aparte de qué respondió, y solo se guarda una copia del área, la sede y el líder de la persona (sin su nombre). Un grupo con menos personas que el mínimo de Administración → Configuración no muestra números.',
+        'Brecha = «debería ocurrir» menos «ocurre hoy». Una brecha alta marca dónde conviene dirigir la formación y el liderazgo; al repetir la encuesta puedes verificar si la brecha se cerró.',
+      ],
+    },
+    {
       slug: 'directorio-aliados',
       ruta: '/nexa/directorio',
       titulo: 'Directorio de aliados',
