@@ -70,3 +70,32 @@ export function resumirClima(resps: RespuestaClima[], umbral: number): ResumenCl
     dimensiones,
   };
 }
+
+/**
+ * Alfa de Cronbach del instrumento (consistencia interna de las afirmaciones de 1 a 5), informe de Luisa 11.1.
+ * Solo usa respuestas que contestaron TODAS las afirmaciones. Devuelve null si no hay datos suficientes
+ * (menos de 2 afirmaciones, menos de 3 personas o varianza total cero).
+ */
+export function alfaCronbach(resps: RespuestaClima[]): { alfa: number; personas: number; items: number } | null {
+  const claves = DIMENSIONES_CLIMA.map((d) => d.clave);
+  const completas = resps.filter((r) => claves.every((c) => typeof r[c] === 'number'));
+  const n = completas.length;
+  const k = claves.length;
+  if (n < 3 || k < 2) return null;
+  const varianza = (v: number[]) => {
+    const m = v.reduce((a, b) => a + b, 0) / v.length;
+    return v.reduce((a, b) => a + (b - m) ** 2, 0) / (v.length - 1);
+  };
+  const sumaVarItems = claves.reduce((acc, c) => acc + varianza(completas.map((r) => r[c] as number)), 0);
+  const varTotal = varianza(completas.map((r) => claves.reduce((a, c) => a + (r[c] as number), 0)));
+  if (varTotal === 0) return null;
+  return { alfa: Math.round(((k / (k - 1)) * (1 - sumaVarItems / varTotal)) * 100) / 100, personas: n, items: k };
+}
+
+export function interpretarAlfa(alfa: number): string {
+  if (alfa >= 0.9) return 'excelente';
+  if (alfa >= 0.8) return 'buena';
+  if (alfa >= 0.7) return 'aceptable';
+  if (alfa >= 0.6) return 'débil';
+  return 'insuficiente';
+}

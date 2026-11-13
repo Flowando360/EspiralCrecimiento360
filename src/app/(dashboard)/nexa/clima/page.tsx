@@ -7,7 +7,7 @@ import { formatearFecha } from '@/lib/utils';
 import { HeartHandshake, MessageSquareText } from 'lucide-react';
 import Link from 'next/link';
 import { claveArea, crearNormalizadorAreas } from '@/lib/areas';
-import { DIMENSIONES_CLIMA, resumirClima, umbralClima, type RespuestaClima } from '@/lib/clima/segmentos';
+import { DIMENSIONES_CLIMA, alfaCronbach, interpretarAlfa, resumirClima, umbralClima, type RespuestaClima } from '@/lib/clima/segmentos';
 
 export default async function ClimaPage({ searchParams }: { searchParams?: { ronda?: string; por?: string } }) {
   const perfil = await getPerfilActual();
@@ -60,6 +60,7 @@ export default async function ClimaPage({ searchParams }: { searchParams?: { ron
   const por = searchParams?.por === 'lider' || searchParams?.por === 'sede' ? searchParams.por : 'area';
   let detalle: {
     general: ReturnType<typeof resumirClima>;
+    confiabilidad: ReturnType<typeof alfaCronbach>;
     filas: { nombre: string; resumen: ReturnType<typeof resumirClima> }[];
   } | null = null;
   if ((esAdminTh || esGerencia) && rondaDetalleId) {
@@ -108,6 +109,8 @@ export default async function ClimaPage({ searchParams }: { searchParams?: { ron
     }
     detalle = {
       general: resumirClima(todas, umbralClima(umbralCfg, filasP.length)),
+      // Solo se muestra si hay suficientes respuestas completas (mismo mínimo de anonimato).
+      confiabilidad: todas.length >= umbralClima(umbralCfg, filasP.length) ? alfaCronbach(todas) : null,
       filas: Array.from(grupos.values())
         .filter((g) => g.resps.length > 0)
         .map((g) => ({ nombre: g.nombre, resumen: resumirClima(g.resps, umbralClima(umbralCfg, g.poblacion)) }))
@@ -242,6 +245,14 @@ export default async function ClimaPage({ searchParams }: { searchParams?: { ron
             (así nadie queda identificado). Relaciones entre pares, compensación y equidad aparecen en las rondas que se
             abran desde ahora.
           </p>
+          {detalle.confiabilidad && (
+            <p className="text-xs text-marmol-600 bg-marmol-50 border border-marmol-200 rounded-lg px-3 py-2 mb-3">
+              <strong>Confiabilidad del instrumento (alfa de Cronbach): {detalle.confiabilidad.alfa}</strong> — {interpretarAlfa(detalle.confiabilidad.alfa)}, calculada con{' '}
+              {detalle.confiabilidad.personas} personas que respondieron las {detalle.confiabilidad.items} afirmaciones. Con 0,7 o más se considera aceptable. Cada dimensión
+              se mide hoy con una sola afirmación, así que las comparaciones finas entre dimensiones o grupos pequeños son orientativas; con pocas respuestas el alfa
+              es inestable. Una ronda con menos de 30 personas debe leerse con cautela.
+            </p>
+          )}
           <div className="flex flex-wrap items-center gap-2 mb-3 text-sm">
             <span className="text-marmol-500">Ronda:</span>
             {((resumenEmpresa ?? []) as any[]).map((r) => (
