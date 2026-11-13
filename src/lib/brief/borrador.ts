@@ -1,4 +1,5 @@
 import type { ContextoBrief, ItemEval } from './contexto';
+import { formatearFecha } from '@/lib/utils';
 
 export interface CamposBrief {
   talento_central: string;
@@ -71,7 +72,7 @@ export function redactarBorrador(ctx: ContextoBrief): CamposBrief {
   if (!ser.disponible) {
     resumen_ser = 'Esta persona todavía no tiene Guía del Flow. Puedes invitarla desde su ficha → Guía del Flow para completar su Ser antes de la próxima retroalimentación.';
   } else {
-    const p: string[] = [`Esquema del Ser a partir de la Guía del Flow aplicada el ${ser.fecha}.`];
+    const p: string[] = [`Esquema del Ser a partir de la Guía del Flow aplicada el ${ser.fecha ? formatearFecha(ser.fecha) : 'sin fecha'}.`];
     if (ser.fortalezas.length) p.push(`Rasgos para aprovechar: ${lista(ser.fortalezas.map((f) => (f.titulo ? `${f.nombre} (${f.titulo})` : f.nombre)))}.`);
     if (ser.aAcompanar.length) p.push(`Rasgos para acompañar: ${lista(ser.aAcompanar.map((f) => (f.titulo ? `${f.nombre} (${f.titulo})` : f.nombre)))}.`);
     if (ser.informeLider) {

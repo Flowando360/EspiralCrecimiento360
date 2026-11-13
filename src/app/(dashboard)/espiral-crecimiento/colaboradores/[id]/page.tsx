@@ -195,7 +195,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
               <p className="text-lg font-display font-semibold text-secundario">Guía del Flow aplicada</p>
               <p className="text-xs text-marmol-400">
                 {Number(serPromedio?.total_aspectos_calificados ?? 0) > 0
-                  ? `Esquema con ${serPromedio!.total_aspectos_calificados} aspectos descritos · sin nota`
+                  ? `Esquema con ${serPromedio!.total_aspectos_calificados} ${Number(serPromedio!.total_aspectos_calificados) === 1 ? 'aspecto descrito' : 'aspectos descritos'} · sin nota`
                   : 'Esquema por completar · sin nota'}
               </p>
             </>
