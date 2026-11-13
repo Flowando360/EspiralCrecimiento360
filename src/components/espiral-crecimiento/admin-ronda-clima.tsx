@@ -4,9 +4,10 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { abrirRondaClima, cerrarRondaClima } from '@/app/(dashboard)/nexa/clima/actions';
 
-export function AdminRondaClima({ rondaAbierta }: { rondaAbierta: { id: string; nombre: string } | null }) {
+export function AdminRondaClima({ rondaAbierta }: { rondaAbierta: { id: string; nombre: string; modalidad?: string } | null }) {
   const router = useRouter();
   const [nombre, setNombre] = useState('');
+  const [modalidad, setModalidad] = useState<'pulso' | 'completo'>('pulso');
   const [mostrarForm, setMostrarForm] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -14,7 +15,7 @@ export function AdminRondaClima({ rondaAbierta }: { rondaAbierta: { id: string; 
   function abrir() {
     setError(null);
     startTransition(async () => {
-      const res = await abrirRondaClima({ nombre });
+      const res = await abrirRondaClima({ nombre, modalidad });
       if (res.ok) {
         setNombre('');
         setMostrarForm(false);
@@ -42,7 +43,10 @@ export function AdminRondaClima({ rondaAbierta }: { rondaAbierta: { id: string; 
     return (
       <div className="card p-4 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-sm font-medium text-marmol-800">Ronda abierta: {rondaAbierta.nombre}</p>
+          <p className="text-sm font-medium text-marmol-800">
+            Ronda abierta: {rondaAbierta.nombre}{' '}
+            <span className="text-xs font-normal text-marmol-500">({rondaAbierta.modalidad === 'completo' ? 'diagnóstico completo' : 'pulso'})</span>
+          </p>
           <p className="text-xs text-marmol-500">Ciérrala cuando quieras fijar los resultados de esta medición.</p>
         </div>
         <button
@@ -79,6 +83,20 @@ export function AdminRondaClima({ rondaAbierta }: { rondaAbierta: { id: string; 
         onChange={(e) => setNombre(e.target.value)}
         className="w-full rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm"
       />
+      <div className="space-y-1.5 text-sm">
+        <label className="flex items-start gap-2">
+          <input type="radio" name="modalidad-clima" checked={modalidad === 'pulso'} onChange={() => setModalidad('pulso')} className="mt-1" />
+          <span>
+            <strong>Pulso</strong> — 1 afirmación por dimensión (unas 10 preguntas, 2 minutos). Para medir tendencias cada trimestre sin cansar a la gente.
+          </span>
+        </label>
+        <label className="flex items-start gap-2">
+          <input type="radio" name="modalidad-clima" checked={modalidad === 'completo'} onChange={() => setModalidad('completo')} className="mt-1" />
+          <span>
+            <strong>Diagnóstico completo</strong> — 3 afirmaciones por dimensión (unas 28 preguntas, 6 a 8 minutos). Da confiabilidad estadística por dimensión; recomendado una vez al año o por semestre.
+          </span>
+        </label>
+      </div>
       {error && <p className="text-sm text-bajo">{error}</p>}
       <div className="flex gap-2">
         <button

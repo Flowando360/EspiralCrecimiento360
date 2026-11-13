@@ -99,3 +99,33 @@ export function interpretarAlfa(alfa: number): string {
   if (alfa >= 0.6) return 'débil';
   return 'insuficiente';
 }
+
+function alfaDeColumnas(filas: number[][]): number | null {
+  const n = filas.length;
+  const k = filas[0]?.length ?? 0;
+  if (n < 3 || k < 2) return null;
+  const varianza = (v: number[]) => {
+    const m = v.reduce((a, b) => a + b, 0) / v.length;
+    return v.reduce((a, b) => a + (b - m) ** 2, 0) / (v.length - 1);
+  };
+  const sumaVarItems = Array.from({ length: k }, (_, j) => varianza(filas.map((f) => f[j]!))).reduce((a, b) => a + b, 0);
+  const varTotal = varianza(filas.map((f) => f.reduce((a, b) => a + b, 0)));
+  if (varTotal === 0) return null;
+  return Math.round(((k / (k - 1)) * (1 - sumaVarItems / varTotal)) * 100) / 100;
+}
+
+/**
+ * Confiabilidad de una ronda COMPLETA (3 afirmaciones por dimensión): alfa de cada dimensión (3 ítems) y alfa global (27
+ * ítems), usando solo a quienes respondieron todos los ítems. Con menos de 3 personas completas devuelve null.
+ */
+export function alfaPorItems(resps: RespuestaClima[]): { global: number | null; personas: number; porDimension: { clave: ClaveDimensionClima; titulo: string; alfa: number | null }[] } | null {
+  const completas = resps
+    .map((r) => (r as any).respuestas_items as Record<string, number[]> | null | undefined)
+    .filter((it): it is Record<string, number[]> => !!it && DIMENSIONES_CLIMA.every((d) => Array.isArray(it[d.clave]) && it[d.clave]!.length === 3));
+  if (completas.length < 3) return null;
+  return {
+    personas: completas.length,
+    global: alfaDeColumnas(completas.map((it) => DIMENSIONES_CLIMA.flatMap((d) => it[d.clave]!))),
+    porDimension: DIMENSIONES_CLIMA.map((d) => ({ clave: d.clave, titulo: d.label, alfa: alfaDeColumnas(completas.map((it) => it[d.clave]!)) })),
+  };
+}

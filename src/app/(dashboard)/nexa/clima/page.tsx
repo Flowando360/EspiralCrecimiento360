@@ -7,7 +7,7 @@ import { formatearFecha } from '@/lib/utils';
 import { HeartHandshake, MessageSquareText } from 'lucide-react';
 import Link from 'next/link';
 import { claveArea, crearNormalizadorAreas } from '@/lib/areas';
-import { DIMENSIONES_CLIMA, alfaCronbach, interpretarAlfa, resumirClima, umbralClima, type RespuestaClima } from '@/lib/clima/segmentos';
+import { DIMENSIONES_CLIMA, alfaCronbach, alfaPorItems, interpretarAlfa, resumirClima, umbralClima, type RespuestaClima } from '@/lib/clima/segmentos';
 
 export default async function ClimaPage({ searchParams }: { searchParams?: { ronda?: string; por?: string } }) {
   const perfil = await getPerfilActual();
@@ -21,7 +21,7 @@ export default async function ClimaPage({ searchParams }: { searchParams?: { ron
   const [{ data: rondaAbierta }, { data: empresa }] = await Promise.all([
     supabase
       .from('clima_rondas')
-      .select('id, nombre, estado, fecha_apertura')
+      .select('id, nombre, estado, fecha_apertura, modalidad')
       .eq('empresa_id', perfil.empresa_id)
       .eq('estado', 'abierta')
       .maybeSingle(),
@@ -61,9 +61,16 @@ export default async function ClimaPage({ searchParams }: { searchParams?: { ron
   let detalle: {
     general: ReturnType<typeof resumirClima>;
     confiabilidad: ReturnType<typeof alfaCronbach>;
+    confiabilidadItems: ReturnType<typeof alfaPorItems>;
+    modalidadDetalle: string;
     filas: { nombre: string; resumen: ReturnType<typeof resumirClima> }[];
   } | null = null;
+  let modalidadRondaDetalle = 'pulso';
   if ((esAdminTh || esGerencia) && rondaDetalleId) {
+    {
+      const { data: rondaMod } = await supabase.from('clima_rondas').select('modalidad').eq('id', rondaDetalleId).maybeSingle();
+      modalidadRondaDetalle = (rondaMod as any)?.modalidad ?? 'pulso';
+    }
     const [{ data: resps }, { data: cfg }, { data: personas }, { data: sedes }] = await Promise.all([
       supabase.from('clima_respuestas').select('*').eq('ronda_id', rondaDetalleId),
       supabase.from('empresas').select('clima_umbral_tipo, clima_umbral_cantidad, clima_umbral_porcentaje').eq('id', perfil.empresa_id).maybeSingle(),
@@ -111,6 +118,8 @@ export default async function ClimaPage({ searchParams }: { searchParams?: { ron
       general: resumirClima(todas, umbralClima(umbralCfg, filasP.length)),
       // Solo se muestra si hay suficientes respuestas completas (mismo mínimo de anonimato).
       confiabilidad: todas.length >= umbralClima(umbralCfg, filasP.length) ? alfaCronbach(todas) : null,
+      confiabilidadItems: todas.length >= umbralClima(umbralCfg, filasP.length) ? alfaPorItems(todas) : null,
+      modalidadDetalle: modalidadRondaDetalle,
       filas: Array.from(grupos.values())
         .filter((g) => g.resps.length > 0)
         .map((g) => ({ nombre: g.nombre, resumen: resumirClima(g.resps, umbralClima(umbralCfg, g.poblacion)) }))
@@ -167,7 +176,7 @@ export default async function ClimaPage({ searchParams }: { searchParams?: { ron
       </div>
 
       {esAdminTh && (
-        <AdminRondaClima rondaAbierta={rondaAbierta ? { id: rondaAbierta.id, nombre: rondaAbierta.nombre } : null} />
+        <AdminRondaClima rondaAbierta={rondaAbierta ? { id: rondaAbierta.id, nombre: rondaAbierta.nombre, modalidad: (rondaAbierta as any).modalidad } : null} />
       )}
 
       {perfil.colaborador_id && (
@@ -186,6 +195,7 @@ export default async function ClimaPage({ searchParams }: { searchParams?: { ron
           ) : (
             <FormularioClima
               rondaId={rondaAbierta.id}
+              modalidad={(rondaAbierta as any).modalidad === 'completo' ? 'completo' : 'pulso'}
               preguntas={{
                 enps: empresa?.clima_pregunta_enps,
                 reconocimiento: empresa?.clima_pregunta_reconocimiento,
@@ -245,7 +255,28 @@ export default async function ClimaPage({ searchParams }: { searchParams?: { ron
             (así nadie queda identificado). Relaciones entre pares, compensación y equidad aparecen en las rondas que se
             abran desde ahora.
           </p>
-          {detalle.confiabilidad && (
+          {detalle.confiabilidadItems && (
+            <div className="text-xs text-marmol-600 bg-marmol-50 border border-marmol-200 rounded-lg px-3 py-2 mb-3 space-y-1.5">
+              <p>
+                <strong>Confiabilidad del diagnóstico completo (alfa de Cronbach)</strong>
+                {detalle.confiabilidadItems.global != null && (
+                  <>
+                    : <strong>{detalle.confiabilidadItems.global}</strong> ({interpretarAlfa(detalle.confiabilidadItems.global)}) con las 27 afirmaciones
+                  </>
+                )}
+                , calculada con {detalle.confiabilidadItems.personas} personas que respondieron todo. Cada dimensión tiene 3 afirmaciones; con 0,7 o más es aceptable.
+              </p>
+              <ul className="grid sm:grid-cols-3 gap-x-4">
+                {detalle.confiabilidadItems.porDimension.map((d) => (
+                  <li key={d.clave}>
+                    {d.titulo}: <strong>{d.alfa ?? '—'}</strong> {d.alfa != null && <span className="text-marmol-400">({interpretarAlfa(d.alfa)})</span>}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-marmol-400">Una dimensión con alfa bajo no es confiable por sí sola: sus afirmaciones no miden lo mismo; revisa su redacción antes de decidir con ella.</p>
+            </div>
+          )}
+          {detalle.confiabilidad && !detalle.confiabilidadItems && (
             <p className="text-xs text-marmol-600 bg-marmol-50 border border-marmol-200 rounded-lg px-3 py-2 mb-3">
               <strong>Confiabilidad del instrumento (alfa de Cronbach): {detalle.confiabilidad.alfa}</strong> — {interpretarAlfa(detalle.confiabilidad.alfa)}, calculada con{' '}
               {detalle.confiabilidad.personas} personas que respondieron las {detalle.confiabilidad.items} afirmaciones. Con 0,7 o más se considera aceptable. Cada dimensión

@@ -1553,6 +1553,7 @@ export type Database = {
           compensacion: number | null
           equidad: number | null
           reconocimiento: number
+          respuestas_items: Json | null
           ronda_id: string
         }
         Insert: {
@@ -1572,6 +1573,7 @@ export type Database = {
           compensacion: number | null
           equidad: number | null
           reconocimiento: number
+          respuestas_items?: Json | null
           ronda_id: string
         }
         Update: {
@@ -1591,6 +1593,7 @@ export type Database = {
           compensacion?: number | null
           equidad?: number | null
           reconocimiento?: number
+          respuestas_items?: Json | null
           ronda_id?: string
         }
         Relationships: [
@@ -1675,6 +1678,7 @@ export type Database = {
           fecha_apertura: string
           fecha_cierre: string | null
           id: string
+          modalidad: string
           nombre: string
         }
         Insert: {
@@ -1685,6 +1689,7 @@ export type Database = {
           fecha_apertura?: string
           fecha_cierre?: string | null
           id?: string
+          modalidad?: string
           nombre: string
         }
         Update: {
@@ -1695,6 +1700,7 @@ export type Database = {
           fecha_apertura?: string
           fecha_cierre?: string | null
           id?: string
+          modalidad?: string
           nombre?: string
         }
         Relationships: [
