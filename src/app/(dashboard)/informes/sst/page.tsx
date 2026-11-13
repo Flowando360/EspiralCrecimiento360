@@ -5,6 +5,8 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ShieldCheck, FileDown, FileSpreadsheet } from 'lucide-react';
 import { formatearFecha, cn } from '@/lib/utils';
 import { obtenerInformeSST, type EstadoCertificacion } from './data';
+import Link from 'next/link';
+import { calcularCadenaSst } from '@/lib/informes/cadena-sst';
 
 const ETIQUETA_ESTADO: Record<EstadoCertificacion, string> = {
   vigente: 'Vigente',
@@ -45,6 +47,7 @@ export default async function InformeSSTPage({
   const { data: colaboradoresFiltrables } = await colaboradoresQuery;
 
   const queryString = colaboradorId ? `?colaboradorId=${colaboradorId}` : '';
+  const cadena = ['admin_th', 'gerencia'].includes(perfil.rol) ? await calcularCadenaSst(perfil.empresa_id) : null;
 
   return (
     <div className="space-y-6">
@@ -73,6 +76,82 @@ export default async function InformeSSTPage({
           </a>
         </div>
       </div>
+
+      {cadena && (
+        <div className="card p-5">
+          <h2 className="font-display font-semibold text-secundario">Cadena de evidencias del SG-SST</h2>
+          <p className="text-xs text-marmol-500 mt-1 mb-4">
+            La Resolución 0312 no audita cada módulo por separado sino el encadenamiento: peligros y controles, capacitación, ejecución, hallazgos, acciones y
+            indicadores. Cada eslabón enlaza al módulo donde se gestiona.
+          </p>
+          <ol className="grid gap-3 md:grid-cols-3">
+            {[
+              {
+                n: 1,
+                titulo: 'Peligros y controles',
+                href: '/procesos-gestion/riesgos',
+                lineas: [`${cadena.riesgos.total} riesgos registrados`, `${cadena.riesgos.conControl} con control evaluado`, `${cadena.riesgos.residualAlto} con riesgo residual alto`],
+                alerta: cadena.riesgos.residualAlto > 0,
+              },
+              {
+                n: 2,
+                titulo: 'Capacitación SST',
+                href: '/nexa/formacion',
+                lineas: [`${cadena.capacitacion.completadas} de ${cadena.capacitacion.asignadas} cursos completados`, `Cobertura: ${cadena.capacitacion.pct != null ? `${cadena.capacitacion.pct}%` : '—'}`],
+                alerta: cadena.capacitacion.pct != null && cadena.capacitacion.pct < 70,
+              },
+              {
+                n: 3,
+                titulo: 'Ejecución del plan',
+                href: '/procesos-gestion/plan-trabajo',
+                lineas: [`${cadena.ejecucion.ejecutadas} de ${cadena.ejecucion.programadas} actividades SST ejecutadas`, `${cadena.ejecucion.atrasadas} atrasadas`, `Cumplimiento: ${cadena.ejecucion.cumplimientoPct != null ? `${cadena.ejecucion.cumplimientoPct}%` : '—'}`],
+                alerta: cadena.ejecucion.atrasadas > 0,
+              },
+              {
+                n: 4,
+                titulo: 'Simulacros y hallazgos',
+                href: '/nexa/simulacros',
+                lineas: [`${cadena.simulacros.total} simulacros`, `${cadena.simulacros.hallazgos} hallazgos (${cadena.simulacros.criticos} altos o críticos)`, `${cadena.simulacros.sinAcpm} no conformidades sin acción ACPM`],
+                alerta: cadena.simulacros.sinAcpm > 0,
+              },
+              {
+                n: 5,
+                titulo: 'Acciones (ACPM)',
+                href: '/procesos-gestion/acpm',
+                lineas: [`${cadena.acpm.total} acciones nacidas de riesgos, simulacros o el plan`, `${cadena.acpm.cerradasEfectivas} cerradas efectivas · ${cadena.acpm.abiertas} abiertas`, `${cadena.acpm.vencidas} vencidas`],
+                alerta: cadena.acpm.vencidas > 0,
+              },
+              {
+                n: 6,
+                titulo: 'Indicadores y revisión',
+                href: '/informes/revision-direccion',
+                lineas: [
+                  `Tasa de accidentalidad: ${cadena.indicadores.tasaAccidentalidad != null ? `${cadena.indicadores.tasaAccidentalidad}%` : '—'}`,
+                  `Cobertura de exámenes: ${cadena.indicadores.coberturaExamenes != null ? `${cadena.indicadores.coberturaExamenes}%` : '—'}`,
+                  `${cadena.indicadores.diasIncapacidad} días de incapacidad (12 meses)`,
+                ],
+                alerta: false,
+              },
+            ].map((e) => (
+              <li key={e.n} className={cn('rounded-lg border p-3', e.alerta ? 'border-medio/40 bg-medio/5' : 'border-marmol-200')}>
+                <p className="text-xs font-semibold text-marmol-500">Paso {e.n}</p>
+                <p className="text-sm font-medium text-marmol-900">{e.titulo}</p>
+                <ul className="mt-1 text-xs text-marmol-600 space-y-0.5">
+                  {e.lineas.map((l) => (
+                    <li key={l}>{l}</li>
+                  ))}
+                </ul>
+                <Link href={e.href} className="mt-2 inline-block text-xs text-flow-600 hover:underline">
+                  Gestionar en el módulo →
+                </Link>
+              </li>
+            ))}
+          </ol>
+          <p className="text-xs text-marmol-400 mt-3">
+            Todo son conteos de la empresa. Hoy no se registran las investigaciones de accidentes ni el ausentismo por permisos; cuando existan, entran en los pasos 4 y 6.
+          </p>
+        </div>
+      )}
 
       <form className="card p-3 flex items-center gap-3">
         <label className="text-xs text-marmol-500 shrink-0">Filtrar por persona</label>

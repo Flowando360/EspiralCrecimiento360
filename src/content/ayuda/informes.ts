@@ -40,8 +40,11 @@ export const moduloInformes: ModuloAyuda = {
       ruta: '/informes/sst',
       titulo: 'Informe de Seguimiento SST',
       resumen: 'Certificaciones, vencimientos y alertas SST abiertas, con la evidencia documental disponible.',
-      camposYBotones: [{ nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
-      notas: ['Visible para admin_th, líder y gerencia.'],
+      camposYBotones: [
+        { nombre: 'Cadena de evidencias del SG-SST (admin_th y gerencia)', explicacion: 'Seis tarjetas encadenadas arriba del informe: 1 peligros y controles, 2 capacitación SST, 3 ejecución del plan, 4 simulacros y hallazgos, 5 acciones ACPM y 6 indicadores y revisión. Cada una muestra sus conteos, se resalta cuando hay algo que atender (riesgo residual alto, actividades atrasadas, no conformidades sin ACPM, acciones vencidas) y enlaza al módulo donde se gestiona. Es la vista que pide la Resolución 0312: el encadenamiento de evidencias, no cada módulo aislado.' },
+        { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' },
+      ],
+      notas: ['Visible para admin_th, líder y gerencia; la cadena de evidencias solo para admin_th y gerencia.'],
     },
     {
       slug: 'brechas',
