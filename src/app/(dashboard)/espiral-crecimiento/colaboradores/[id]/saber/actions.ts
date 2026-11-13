@@ -1,5 +1,7 @@
 'use server';
 
+import { compararFormacion } from '@/lib/saber/formacion';
+
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
@@ -196,15 +198,16 @@ export async function generarChecklistSaber(colaboradorId: string) {
   // 1. Formación académica mínima
   if (cargo.formacion_nivel && ETIQUETA_FORMACION[cargo.formacion_nivel]) {
     const academicas = registros.filter((r) => r.tipo === 'academica');
+    const comparacion = compararFormacion(cargo.formacion_nivel, academicas.map((x) => String(x.titulo ?? '')));
     nuevos.push({
       bloque: 'formacion_academica',
       item_evaluado:
         `Formación requerida: ${ETIQUETA_FORMACION[cargo.formacion_nivel]}` +
         (cargo.formacion_titulo_especifico ? ` — ${cargo.formacion_titulo_especifico}` : ''),
-      estado: academicas.length > 0 ? 'cumple' : 'no_cumple_pendiente',
+      estado: comparacion.estado,
       evidencia_url: academicas.find((a) => a.documento_url)?.documento_url ?? null,
       fuente_evidencia: academicas.length > 0 ? 'documento' : null,
-      observaciones: academicas.length > 0 ? `${origen} Acredita: ${academicas.map((a) => a.titulo).join('; ')}.` : `${origen} Sin formación académica en la hoja de vida.`,
+      observaciones: `${origen} ${academicas.length > 0 ? `Acredita: ${academicas.map((a) => a.titulo).join('; ')}. ` : ''}${comparacion.detalle} (Se compara con la hoja de vida actual, no con evaluaciones de desempeño.)`,
     });
   }
 

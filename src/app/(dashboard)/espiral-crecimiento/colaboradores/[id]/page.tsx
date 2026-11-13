@@ -385,7 +385,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
 
         {puedeVerDotacion && (
           <Link
-            href={`/dotacion?colaborador_id=${params.id}`}
+            href={`/espiral-crecimiento/colaboradores/${params.id}/dotacion`}
             className="card p-5 flex items-center gap-2 hover:border-flow-300 transition"
           >
             <Shirt size={16} className="text-flow-600" />
