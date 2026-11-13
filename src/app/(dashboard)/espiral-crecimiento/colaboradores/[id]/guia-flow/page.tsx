@@ -149,6 +149,14 @@ export default async function GuiaDelFlowPage({ params }: { params: { id: string
           <Sparkles size={22} className="text-ser" /> Guía del Flow
         </h1>
         <p className="text-sm text-marmol-500 mt-1">{colaborador.nombre_completo}</p>
+        <details className="mt-3 rounded-lg border border-marmol-200 bg-marmol-50 px-3 py-2 text-xs text-marmol-600 max-w-md">
+          <summary className="cursor-pointer font-medium text-marmol-700">¿Qué es la Guía del Flow?</summary>
+          <p className="mt-2">
+            Es la herramienta con la que se describe el <strong>Ser</strong> de una persona: sus fortalezas, lo que la motiva y cómo trabaja mejor. No es una
+            prueba ni lleva nota. La persona la responde por su cuenta y es un regalo íntimo: este sistema solo muestra un informe con los aspectos que
+            tienen relevancia laboral, y su líder lo ve únicamente si la persona decide compartirlo. Sirve para conversar y acompañar, no para evaluar.
+          </p>
+        </details>
         {!esElPropioColaborador && (
           <p className="text-xs text-marmol-400 mt-2 flex items-start gap-1.5 max-w-md">
             <Lock size={12} className="mt-0.5 shrink-0" />

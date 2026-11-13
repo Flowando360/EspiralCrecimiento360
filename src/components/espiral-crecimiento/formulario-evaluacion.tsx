@@ -7,6 +7,14 @@ import { Check, Lock, Save, Send } from 'lucide-react';
 import { EvidenciasItem } from '@/components/espiral-crecimiento/evidencias-item';
 import type { EvidenciaVista } from '@/app/(dashboard)/espiral-crecimiento/evaluar/evidencias-actions';
 
+const DESCRIPTORES_ESCALA = [
+  { nota: 1, nombre: 'No cumple' },
+  { nota: 2, nombre: 'En desarrollo' },
+  { nota: 3, nombre: 'Cumple' },
+  { nota: 4, nombre: 'Supera' },
+  { nota: 5, nombre: 'Referente' },
+];
+
 interface Criterio {
   nivel: number;
   criterio: string;
@@ -304,6 +312,16 @@ export function FormularioEvaluacion({
         )}
       </div>
 
+      <div className="rounded-lg border border-marmol-200 bg-marmol-50 px-3 py-2 text-xs text-marmol-600">
+        <span className="font-medium text-marmol-700">Cómo leer la escala: </span>
+        {DESCRIPTORES_ESCALA.map((d) => (
+          <span key={d.nota} className="mr-3 inline-block">
+            <strong>{d.nota}</strong> {d.nombre}
+          </span>
+        ))}
+        <span className="block mt-0.5 text-marmol-400">1 = no cumple lo esperado · 3 = cumple lo esperado para el cargo · 5 = es referente para los demás.</span>
+      </div>
+
       {itemsPorBloque.map(({ bloque, items: itemsBloque }) => (
         <div key={bloque}>
           <div className="flex items-center justify-between mb-3">
@@ -340,6 +358,7 @@ export function FormularioEvaluacion({
                         <button
                           key={n}
                           type="button"
+                          title={`${n} · ${DESCRIPTORES_ESCALA[n - 1]?.nombre}`}
                           disabled={enviada}
                           onClick={() => {
                             guardar(item.id, n);
