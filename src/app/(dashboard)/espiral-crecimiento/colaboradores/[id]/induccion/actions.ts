@@ -3,6 +3,7 @@
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
+import { asignarItemsInduccion } from '@/lib/induccion/asignar';
 
 async function puedeEditarInduccion(colaboradorId: string) {
   const perfil = await getPerfilActual();
@@ -22,6 +23,29 @@ async function puedeEditarInduccion(colaboradorId: string) {
   if (!autorizado) return null;
 
   return perfil;
+}
+
+/**
+ * Asigna a una persona ya existente los puntos de inducción que le aplican (los comunes de la empresa y los de su cargo),
+ * sin duplicar los que ya tenga. Sirve para quien se importó o se migró y nunca recibió su plan. Solo Talento Humano.
+ */
+export async function asignarInduccionDelCargo(colaboradorId: string) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'Solo Talento Humano puede asignar la inducción' };
+
+  const supabase = createClient();
+  const { data: colaborador } = await supabase.from('colaboradores').select('id, empresa_id, cargo_id').eq('id', colaboradorId).maybeSingle();
+  if (!colaborador || colaborador.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'No se encontró a la persona' };
+  if (!colaborador.cargo_id) return { ok: false as const, error: 'La persona no tiene cargo asignado: asígnalo en Editar' };
+
+  try {
+    const nuevos = await asignarItemsInduccion(supabase, colaboradorId, perfil.empresa_id, colaborador.cargo_id, true);
+    revalidatePath(`/espiral-crecimiento/colaboradores/${colaboradorId}/induccion`);
+    revalidatePath(`/espiral-crecimiento/colaboradores/${colaboradorId}`);
+    return { ok: true as const, nuevos };
+  } catch (e) {
+    return { ok: false as const, error: (e as Error).message };
+  }
 }
 
 /** Marca (o desmarca) un punto de inducción como cumplido — admin_th o líder directo. */

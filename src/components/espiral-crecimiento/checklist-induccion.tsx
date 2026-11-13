@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { confirmarItemInduccion, marcarItemInduccion } from '@/app/(dashboard)/espiral-crecimiento/colaboradores/[id]/induccion/actions';
+import { asignarInduccionDelCargo, confirmarItemInduccion, marcarItemInduccion } from '@/app/(dashboard)/espiral-crecimiento/colaboradores/[id]/induccion/actions';
 import { formatearFecha } from '@/lib/utils';
 import { Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 type Categoria = 'proposito_organizacional' | 'funciones' | 'riesgos_sst' | 'epp' | 'examenes_medicos' | 'formacion' | 'otro';
 
@@ -39,16 +40,34 @@ export function ChecklistInduccion({
   itemsIniciales,
   puedeEditar,
   esPropia = false,
+  puedeAsignar = false,
 }: {
   colaboradorId: string;
   itemsIniciales: ItemAsignado[];
   puedeEditar: boolean;
   esPropia?: boolean;
+  /** Solo Talento Humano: asignar los puntos de inducción del cargo a quien no los tiene. */
+  puedeAsignar?: boolean;
 }) {
+  const router = useRouter();
+  const [asignando, setAsignando] = useState(false);
+  const [avisoAsignar, setAvisoAsignar] = useState<string | null>(null);
   const [items, setItems] = useState(itemsIniciales);
   const [, startTransition] = useTransition();
   const [errores, setErrores] = useState<Record<string, string>>({});
   const [elegidas, setElegidas] = useState<Record<string, number>>({});
+
+  function asignar() {
+    setAvisoAsignar(null);
+    setAsignando(true);
+    startTransition(async () => {
+      const res = await asignarInduccionDelCargo(colaboradorId);
+      setAsignando(false);
+      if (!res.ok) return setAvisoAsignar(res.error);
+      setAvisoAsignar(res.nuevos > 0 ? `Se asignaron ${res.nuevos} puntos de inducción.` : 'No hay puntos nuevos por asignar: la persona ya tiene los de su cargo y los comunes.');
+      router.refresh();
+    });
+  }
 
   function toggle(item: ItemAsignado) {
     const nuevoEstado = !item.completado;
@@ -94,7 +113,15 @@ export function ChecklistInduccion({
       </div>
 
       {total === 0 ? (
-        <p className="text-sm text-marmol-400">Sin plan de inducción asignado todavía.</p>
+        <div className="card p-4 space-y-2">
+          <p className="text-sm text-marmol-400">Sin plan de inducción asignado todavía.</p>
+          {puedeAsignar && (
+            <button type="button" onClick={asignar} disabled={asignando} className="btn-primary text-xs">
+              {asignando ? 'Asignando…' : 'Asignar la inducción de su cargo'}
+            </button>
+          )}
+          {avisoAsignar && <p className="text-xs text-marmol-500">{avisoAsignar}</p>}
+        </div>
       ) : (
         grupos.map(({ cat, items: itemsGrupo }) => (
           <div key={cat} className="card p-4">

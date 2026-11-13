@@ -72,7 +72,7 @@ export default async function InduccionColaboradorPage({ params }: { params: { i
         )}
       </div>
 
-      <ChecklistInduccion colaboradorId={params.id} itemsIniciales={items} puedeEditar={puedeEditar} esPropia={perfil.rol === 'colaborador' && perfil.colaborador_id === colaborador.id} />
+      <ChecklistInduccion colaboradorId={params.id} itemsIniciales={items} puedeEditar={puedeEditar} puedeAsignar={perfil.rol === 'admin_th'} esPropia={perfil.rol === 'colaborador' && perfil.colaborador_id === colaborador.id} />
     </div>
   );
 }
