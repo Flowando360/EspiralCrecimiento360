@@ -147,3 +147,22 @@ Servidor local con puente a Supabase (el proxy de la nube no deja salir al servi
 - **Sigue (plan acordado con Diana):** (1) del informe de Luisa: Clima (filtros por área, líder y sede; dimensiones desagregadas), informe de Cultura con brecha cultural, Revisión por la Dirección (fuente de cada bloque y corregir la eficacia de ACPM), Consolidado y Cuadro histórico con rotación, ausentismo, headcount y gráficas, Inducción, Dotación, Formación y los puntos parciales; (2) pasada final de ayuda y Gino, y agregar las pantallas nuevas al capítulo 9 de la guía pública `/guia-lider-th` y a «Mapa del menú»; (3) evaluar la app completa y decidir por dónde seguir.
 - **Decisión a validar con Diana:** mientras una persona no decide sobre su Guía del Flow, su líder la ve (como antes); la alternativa estricta es que no la vea hasta que acepte.
 - **Aplazado a propósito:** WhatsApp, ADRES/FOSYGA, ASEC, ERP de nómina, matriz legal generada por IA, avatar/gamificación, canje de puntos, clientes externos con enlace público.
+
+## Actualización (2026-11-12, tarde: informe de Luisa, segunda tanda)
+- **Migraciones aplicadas hasta la 0136:** 0133 clima (área, sede y 3 dimensiones nuevas en `clima_respuestas`) · 0134 brecha cultural (4 tablas `cultura_*`) · 0135 inducción (quiz con respuesta oculta en `induccion_item_clave`, confirmación de la persona) · 0136 categorías de cursos ampliadas.
+- **Hecho y publicado en `main`:**
+  - Clima: detalle por dimensión y por área, líder o sede con anonimato; alfa de Cronbach (`src/lib/clima/segmentos.ts`).
+  - Brecha cultural (`/nexa/cultura`, `src/lib/cultura/brecha.ts`): encuesta «ocurre hoy / debería ocurrir» anónima, filtros área, líder y sede.
+  - Revisión por la Dirección: fuente y enlace de cada bloque; eficacia de ACPM con denominadores y «cumplimiento global» (la incoherencia era de definición, no de cálculo).
+  - Consolidado: indicadores de talento (rotación por causa, ausentismo, selección, headcount con período de prueba) y barras; Histórico: gráfica de línea.
+  - Dotación abre desde la ficha en `/espiral-crecimiento/colaboradores/[id]/dotacion` (el rebote al Inicio era el bloqueo de módulo del middleware). Saber compara niveles de formación y distingue «supera el requisito» (`src/lib/saber/formacion.ts`).
+  - Inducción: la persona confirma propósito, funciones y riesgos SST; preguntas de comprensión; exámenes de preingreso al inicio.
+  - Feed: aviso por correo opcional a toda la empresa (solo admin_th).
+  - Alertas por categoría; alerta «Evaluar período de prueba antes de confirmar» en el cron diario; filtros de área y líder en Indicadores; PDI con filtros y lista; Dimensiones con resumen por área y filtro de críticos; descriptores de la escala 1-5; explicación de la Guía del Flow.
+  - Formación: categorías nuevas y certificado PDF (`/api/nexa/formacion/[rutaId]/certificado`); recorrido de bienvenida (`tour-bienvenida.tsx`); desempeño por aliado; cadena de evidencias SG-SST en el informe SST.
+- **TODO LO ANTERIOR SOLO SE VERIFICÓ CON `tsc` Y PRUEBAS DE LÓGICA PURA; NADA SE VIO EN NAVEGADOR.** Siguiente paso acordado con Diana: prueba exhaustiva con Playwright en CONVERGIA (ella entrega las credenciales; no se pegan en el chat ni en archivos).
+- **Riesgos a mirar en la prueba:** la alerta de período de prueba puede crear varias alertas la primera vez en Mármoles (ingresos de los últimos 3 meses); aviso por correo del Feed (tope diario de Resend gratuito); «Ver todas» y botones de catálogo dentro de Dotación abierta desde la ficha siguen pidiendo el módulo Dotaciones.
+- **Falta de desarrollo:** inducción convertida en cursos, rutas de aprendizaje encadenadas, video en cursos (4.18.2-4.18.3); módulo de exámenes médicos preingreso/periódicos/egreso (4.10.3); unir Dotación y EPP (4.12); filtros de cargo, antigüedad y ciclo en informes (6.1); organigrama matricial (4.16); jerarquía visual del Inicio (2.1); certificados de selección (4.2, hoy solo viaja la hoja de vida).
+- **Decisiones de Diana pendientes:** ¿3 afirmaciones por dimensión de clima (11.1)? · consentimiento de la Guía (líder la ve mientras no decide, o no) · el Ser en movilidad interna · clientes internos externos con enlace · roles de Luisa (Informes y Administración) · dónde guardar su `CLAUDE.local.md`.
+- **Pasada final pendiente (obligatoria):** agregar todas las pantallas nuevas al capítulo 9 y 10 de `public/guia-lider-th/index.html` y a «Mapa del menú»; re-correr la auditoría de ayuda y la prueba de Gino.
+- Archivo temporal `_t.ts` en la raíz del repo (no versionado): borrarlo.
