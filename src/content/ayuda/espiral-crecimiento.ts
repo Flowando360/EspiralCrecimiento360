@@ -210,21 +210,24 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
     {
       slug: 'guia-del-flow',
       ruta: '/espiral-crecimiento/colaboradores/*/guia-flow',
-      titulo: 'Guía del Flow (dimensión Ser)',
+      titulo: 'Ser · Esquema de la Guía del Flow',
       resumen:
-        'La Guía del Flow (diseñada por FlowAndo, se genera en la app hermana guiadelflow) es un regalo íntimo del colaborador y le llega por fuera de este sistema — Espiral de Crecimiento nunca guarda el PDF ni los aspectos psicológicos/emocionales, para ningún rol. Lo que sí vive aquí son dos informes cortos generados por IA, a partir solo de los 18 aspectos con relevancia laboral (talentos, propósito, liderazgo, comunicación, trabajo en equipo, compromiso, adaptación al cambio, negociación, recursividad).',
+        'La Guía del Flow (diseñada por FlowAndo, se responde en la app hermana guiadelflow) es un ejercicio de autoconocimiento: la persona la recibe por correo, con su carta, y es solo suya. La empresa NO la ve. Lo que llega a Espiral de Crecimiento es un esquema del Ser: aspecto por aspecto, lo que tiene relevancia laboral, con una descripción formal, cómo aprovecharlo y cómo acompañarlo. Es descriptivo, sin nota. Los aspectos íntimos (infancia, pasado, emociones, sanación…) nunca llegan ni se guardan aquí.',
       camposYBotones: [
-        { nombre: '¿Qué es la Guía del Flow? (desplegable)', explicacion: 'Al inicio de la pantalla hay un desplegable que explica en pocas líneas qué es la Guía del Flow, que no lleva nota y que el líder solo ve lo que la persona decida compartir.' },
-        { nombre: 'Generar invitación', explicacion: 'admin_th, o el líder directo de esta persona. Crea un link único (con un token, no con su correo ni su nombre) y lo muestra con botón de copiar. Cuando la persona lo abre, completa el cuestionario en guiadelflow y genera su Guía, sus 18 aspectos y los dos informes se cargan aquí solos — este es el camino recomendado.' },
-        { nombre: 'Crear / Nueva aplicación', explicacion: 'admin_th, o el líder directo. Abre un nuevo registro de Guía del Flow para la persona a mano — respaldo para cuando no se usó una invitación (por ejemplo, aplicaciones anteriores a esta integración). No lo uses si ya existe una aplicación cargada: cada clic crea una nueva y la más reciente es la que se muestra, así que puede tapar una que ya tenía datos.' },
-        { nombre: 'Puntaje por aspecto (1-5)', explicacion: 'admin_th o el líder directo, y solo de los 18 aspectos con relevancia laboral — los 12 aspectos psicológicos/íntimos ni siquiera aparecen aquí. Se llena solo si la persona usó una invitación; si no, se carga a mano.' },
-        { nombre: 'Generar informes con IA', explicacion: 'admin_th o el líder directo. A partir de esos puntajes genera dos textos distintos: uno para el líder (enfoque de PDI) y otro para el propio colaborador (recordatorio de fortalezas y áreas de desarrollo). Con invitación, esto también queda automático.' },
-        { nombre: 'Tu decisión sobre tu Guía del Flow (para la persona)', explicacion: 'Cada colaborador ve en su Guía una tarjeta con la finalidad (acompañar su desarrollo, nada de notas ni evaluación) y elige quién puede ver el informe además de Talento Humano: su líder directo, o solo ella y Talento Humano. Puede cambiarla cuando quiera. Mientras no decida, su líder la ve como antes. Si elige no compartir, el líder deja de ver el informe y los puntajes (también lo impide la base de datos). Los aspectos sensibles nunca los ve nadie más que la persona. Talento Humano ve en la cabecera cuál fue su decisión.' },
-        { nombre: 'Seguimiento del Ser', explicacion: 'Al final de la pantalla. Talento Humano o el líder directo registran, conversación a conversación, cómo la persona pone en práctica sus fortalezas, qué la motiva en ese momento y qué se acordó, con fecha y, si quieres, la próxima revisión. Es descriptivo, sin nota, y lo ven la propia persona, su líder directo y Talento Humano. No escribas ahí aspectos íntimos o sensibles de la Guía del Flow.' },
+        { nombre: '¿Qué es esto y qué se ve aquí? (desplegable)', explicacion: 'Explica en pocas líneas qué es la Guía, que la empresa solo ve el esquema, que no lleva nota y que la persona autorizó compartirlo.' },
+        { nombre: 'Generar invitación', explicacion: 'admin_th, o el líder directo de esta persona. Crea un link único (con un token, no con su correo ni su nombre) y lo muestra con botón de copiar. La persona se registra, responde, recibe su Guía y su carta, y —solo si en el registro marcó la casilla que autoriza compartir con su empresa— el esquema llega aquí solo. Este es el camino recomendado.' },
+        { nombre: 'Síntesis (para acompañar / tu síntesis)', explicacion: 'Un texto corto generado con IA a partir del esquema: para el líder y Talento Humano, enfocado en acompañar y en el plan de desarrollo; para la propia persona, un recordatorio cercano de sus fortalezas. «Generar informes con IA» lo rehace (Talento Humano o el líder directo).' },
+        { nombre: 'Grupos del esquema', explicacion: 'Los aspectos se agrupan por la pregunta que se hace un líder: Talento y esencia (¿qué le sale natural?), Propósito y motivación, Liderazgo y comunicación, Trabajo con otros, Cambio, negociación y recursividad, e Inteligencias y formas de aprender (las nueve).' },
+        { nombre: 'Tarjeta de un aspecto', explicacion: 'Muestra el nombre del aspecto, un título, la descripción laboral, «Cómo aprovecharlo» y «Cómo acompañarle», y una etiqueta descriptiva: «Para aprovechar», «En equilibrio» o «Para acompañar». La etiqueta NO es una nota ni un semáforo: solo orienta la conversación.' },
+        { nombre: 'Editar un aspecto / Completar (solo admin_th)', explicacion: 'El lápiz de cada tarjeta (o «Completar» si el aspecto llegó vacío) permite corregir el texto o escribirlo a mano. Sirve para quien no usa invitación o para afinar una redacción. El líder solo lee.' },
+        { nombre: 'Crear esquema vacío (solo admin_th)', explicacion: 'Respaldo para una persona sin Guía en la app: crea el registro y se completa a mano. No lo uses si ya existe uno cargado: cada clic crea uno nuevo y el más reciente es el que se muestra.' },
+        { nombre: 'Seguimiento del Ser', explicacion: 'Al final de la pantalla. Talento Humano o el líder directo registran, conversación a conversación, cómo la persona pone en práctica sus fortalezas, qué la motiva en ese momento y qué se acordó, con fecha y, si quieres, la próxima revisión. Es descriptivo, sin nota, y lo ven la propia persona, su líder directo y Talento Humano. No escribas ahí aspectos íntimos de la Guía.' },
       ],
       notas: [
-        'admin_th y el líder directo ven y hacen exactamente lo mismo en esta pantalla (invitar, cargar puntajes, generar informes) — la única diferencia es que el líder solo puede hacerlo con su propio equipo. El colaborador ve una pantalla distinta: solo su propio informe (nunca el del líder, ni el PDF, ni el desglose de aspectos) — su Guía del Flow completa la recibió aparte.',
-        'Si alguien completó el cuestionario pero no aparece nada acá, revisa Administración → Sincronizaciones Guía del Flow: ahí queda registrado incluso cuando no hubo invitación y el correo no coincidió con ningún colaborador.',
+        'Quién ve qué: Talento Humano, el líder directo y la propia persona ven el esquema. Nadie ve la Guía ni la carta (son solo de la persona). El colaborador ve exactamente lo que ve su empresa de él o ella, y además su propia síntesis.',
+        'No hay una segunda decisión dentro de Espiral: la autorización se da en la Guía del Flow, al registrarse (casilla «autorizo compartir con mi empresa»), y la persona puede retirarla allí en su resultado. Si no autoriza, no llega nada.',
+        'El esquema no entra en ninguna nota ni afecta la evaluación de desempeño: el Ser se describe, no se califica.',
+        'Si alguien completó el cuestionario pero no aparece nada acá, revisa Administración → Sincronizaciones Guía del Flow: ahí queda registrado, incluso cuando la persona no autorizó o el correo no coincidió con ningún colaborador.',
       ],
     },
     {
@@ -486,7 +489,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         'Pulsa «Guardar perfil integral». Úsalo para preparar la conversación y el plan de desarrollo.',
       ],
       notas: [
-        'Solo Talento Humano y el líder directo lo ven; la persona evaluada no (como el Brief). Si la persona decidió no compartir su Guía del Flow con su líder, el líder no verá hipótesis del Ser.',
+        'Solo Talento Humano y el líder directo lo ven; la persona evaluada no (como el Brief). Las hipótesis del Ser salen del esquema de la Guía del Flow; si la persona aún no tiene esquema, no se formulan.',
         'Las hipótesis del Ser son recursos para conversar: no explican automáticamente el desempeño.',
       ],
     },
@@ -527,7 +530,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         { nombre: 'Guardar', explicacion: 'Guarda el Brief y anota si salió del borrador automático, de la IA o de tu propia edición. Te avisa si hay cambios sin guardar.' },
       ],
       notas: [
-        'Privacidad del Ser: solo se usan los 18 aspectos de relevancia laboral y el informe pensado para el líder. Nunca los aspectos íntimos de la Guía del Flow.',
+        'Privacidad del Ser: solo se usa el esquema (aspectos de relevancia laboral) y la síntesis pensada para el líder. Nunca la Guía ni los aspectos íntimos.',
         'De los pares y colaboradores a cargo solo se usa el promedio agrupado: nunca quién dijo qué.',
         'El colaborador evaluado no ve el Brief. Para conversar con él usa el Acuerdo de crecimiento.',
       ],

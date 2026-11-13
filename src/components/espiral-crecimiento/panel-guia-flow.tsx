@@ -49,9 +49,9 @@ export function InvitacionGuiaFlow({
       <div>
         <h3 className="text-sm font-medium text-marmol-800">Invitar a la Guía del Flow</h3>
         <p className="text-xs text-marmol-500 mt-1">
-          Genera un link único para esta persona. Cuando complete su cuestionario y genere su Guía en
-          guiadelflow, sus 18 aspectos con relevancia laboral y los dos informes se cargan solos aquí —
-          sin que nadie tenga que escribir su correo ni el sistema tenga que adivinar quién es.
+          Genera un link único para esta persona. Ella responde en la Guía del Flow y recibe, solo ella, su Guía y su carta.
+          Si en su registro autoriza compartir con su empresa, aquí llega únicamente el esquema de su Ser (lo que tiene
+          relevancia laboral) y su síntesis — sin que nadie tenga que escribir su correo ni el sistema tenga que adivinar quién es.
         </p>
       </div>
 

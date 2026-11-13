@@ -1,4 +1,5 @@
 import { primero } from '@/lib/utils';
+import { ASPECTOS_DEL_ESQUEMA } from '@/lib/guia-flow/esquema';
 
 type Cliente = any;
 
@@ -28,8 +29,10 @@ export interface ContextoBrief {
     disponible: boolean;
     fecha: string | null;
     informeLider: string | null;
-    fortalezas: { nombre: string; puntaje: number }[];
-    aAcompanar: { nombre: string; puntaje: number }[];
+    /** Aspectos del esquema del Ser con lectura «para aprovechar» (descriptivo, sin nota). */
+    fortalezas: { nombre: string; titulo: string | null }[];
+    /** Aspectos del esquema del Ser con lectura «para acompañar». */
+    aAcompanar: { nombre: string; titulo: string | null }[];
   };
   saber: {
     cumplimiento: number | null;
@@ -130,20 +133,23 @@ export async function recopilarContextoBrief(supabase: Cliente, evaluacionId: st
     terceros: prom(x.t),
   }));
 
-  // ── Ser: solo aspectos no sensibles (lo mismo que ya ve el líder en la ficha) ──
-  let fortalezas: { nombre: string; puntaje: number }[] = [];
-  let aAcompanar: { nombre: string; puntaje: number }[] = [];
+  // ── Ser: solo el esquema (aspectos con relevancia laboral), nunca la Guía completa ──
+  let fortalezas: { nombre: string; titulo: string | null }[] = [];
+  let aAcompanar: { nombre: string; titulo: string | null }[] = [];
   if (guia) {
     const [{ data: aspectos }, { data: puntajes }] = await Promise.all([
-      supabase.from('ser_aspectos').select('id, nombre').eq('sensible', false),
-      supabase.from('ser_puntajes').select('aspecto_id, puntaje').eq('guia_del_flow_id', guia.id),
+      supabase.from('ser_aspectos').select('id, nombre').eq('sensible', false).in('nombre', ASPECTOS_DEL_ESQUEMA),
+      supabase.from('ser_puntajes').select('aspecto_id, nota, enfoque').eq('guia_del_flow_id', guia.id),
     ]);
     const nombre = new Map(((aspectos ?? []) as any[]).map((a) => [a.id, a.nombre as string]));
+    // Orden del esquema (talento, motivación, liderazgo…) para que el resumen sea estable.
     const lista = ((puntajes ?? []) as any[])
       .filter((p) => nombre.has(p.aspecto_id))
-      .map((p) => ({ nombre: nombre.get(p.aspecto_id)!, puntaje: p.puntaje as number }));
-    fortalezas = lista.filter((p) => p.puntaje >= 4).sort((a, b) => b.puntaje - a.puntaje).slice(0, 4);
-    aAcompanar = lista.filter((p) => p.puntaje <= 2).sort((a, b) => a.puntaje - b.puntaje).slice(0, 3);
+      .map((p) => ({ nombre: nombre.get(p.aspecto_id)!, titulo: (p.nota as string | null) ?? null, enfoque: p.enfoque as string | null }))
+      .sort((x, y) => ASPECTOS_DEL_ESQUEMA.indexOf(x.nombre) - ASPECTOS_DEL_ESQUEMA.indexOf(y.nombre));
+    // Las inteligencias son muchas y no hablan de desempeño: no se listan como fortaleza del resumen.
+    fortalezas = lista.filter((p) => p.enfoque === 'aprovechar' && !p.nombre.startsWith('Inteligencia')).slice(0, 4).map(({ nombre, titulo }) => ({ nombre, titulo }));
+    aAcompanar = lista.filter((p) => p.enfoque === 'acompanar').slice(0, 3).map(({ nombre, titulo }) => ({ nombre, titulo }));
   }
 
   // ── Saber ──

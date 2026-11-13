@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
-import { ListaAspectosSer, type AspectoConDatos } from '@/components/espiral-crecimiento/lista-aspectos-ser';
+import { EsquemaSer } from '@/components/espiral-crecimiento/esquema-ser';
+import { ASPECTOS_DEL_ESQUEMA, type AspectoEsquema, type EnfoqueSer } from '@/lib/guia-flow/esquema';
 import {
   BotonCrearGuiaFlow,
   BotonGenerarInformes,
@@ -10,16 +11,8 @@ import {
 } from '@/components/espiral-crecimiento/panel-guia-flow';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Sparkles, Lock } from 'lucide-react';
-import type { BloqueSer } from '@/types/colaborador';
-import { ConsentimientoGuia } from '@/components/espiral-crecimiento/consentimiento-guia';
+import { formatearFecha } from '@/lib/utils';
 import { SeguimientoSer } from '@/components/espiral-crecimiento/seguimiento-ser';
-
-const BLOQUES: { valor: BloqueSer; titulo: string }[] = [
-  { valor: 'esencia', titulo: 'Esencia / Sello' },
-  { valor: 'emociones', titulo: 'Emociones' },
-  { valor: 'pertenencia_compromiso', titulo: 'Pertenencia y Compromiso' },
-  { valor: 'desafios', titulo: 'Desafíos' },
-];
 
 export default async function GuiaDelFlowPage({ params }: { params: { id: string } }) {
   const perfil = await getPerfilActual();
@@ -41,10 +34,9 @@ export default async function GuiaDelFlowPage({ params }: { params: { id: string
   const puedeVer = esAdminTh || esLider || esElPropioColaborador;
   if (!puedeVer) notFound();
 
-  // admin_th y el líder de este colaborador ven y hacen exactamente lo
-  // mismo acá: invitar, cargar puntajes de los 18 aspectos seguros y
-  // generar los informes. Ninguno de los dos gana acceso a los 12
-  // aspectos sensibles ni al PDF — eso sigue bloqueado por RLS aparte.
+  // admin_th y el líder de este colaborador pueden invitar y regenerar la síntesis; solo admin_th completa o corrige el
+  // esquema a mano (el líder únicamente lo lee). Nadie gana acceso a los aspectos sensibles ni a la Guía completa — eso
+  // lo bloquea RLS aparte.
   const puedeGestionar = esAdminTh || esLider;
 
   const { data: guia } = await supabase
@@ -58,40 +50,29 @@ export default async function GuiaDelFlowPage({ params }: { params: { id: string
     .limit(1)
     .maybeSingle();
 
-  // El desglose por aspecto (para cargar puntajes) solo lo necesita quien
-  // gestiona (admin_th o el líder de este colaborador), y solo de los 18
-  // aspectos con relevancia laboral — los 12 psicológicos/íntimos ni
-  // siquiera se consultan aquí. El colaborador solo ve su informe
-  // sintetizado (informe_colaborador).
-  let bloques: { titulo: string; aspectos: AspectoConDatos[] }[] = [];
+  // Esquema del Ser: solo los aspectos con relevancia laboral (los íntimos ni siquiera se consultan; además la base de
+  // datos los bloquea). Lo ven Talento Humano, el líder directo y la propia persona. Nunca la Guía completa.
+  let aspectosEsquema: AspectoEsquema[] = [];
   let comentarioGeneral: string | null = null;
 
-  if (guia && puedeGestionar) {
+  if (guia) {
     const [{ data: aspectosRaw }, { data: puntajesRaw }] = await Promise.all([
-      supabase
-        .from('ser_aspectos')
-        .select('id, bloque, nombre, orden')
-        .eq('empresa_id', perfil.empresa_id)
-        .eq('sensible', false)
-        .order('orden'),
-      supabase.from('ser_puntajes').select('aspecto_id, puntaje, nota').eq('guia_del_flow_id', guia.id),
+      supabase.from('ser_aspectos').select('id, nombre').eq('empresa_id', perfil.empresa_id).eq('sensible', false).in('nombre', ASPECTOS_DEL_ESQUEMA),
+      supabase.from('ser_puntajes').select('aspecto_id, nota, descripcion, aprovechar, acompanar, enfoque').eq('guia_del_flow_id', guia.id),
     ]);
-
-    const puntajePorAspecto = new Map(((puntajesRaw ?? []) as any[]).map((p) => [p.aspecto_id, p.puntaje as number]));
-    const notaPorAspecto = new Map(((puntajesRaw ?? []) as any[]).map((p) => [p.aspecto_id, p.nota as string | null]));
-
-    bloques = BLOQUES.map(({ valor, titulo }) => ({
-      titulo,
-      aspectos: ((aspectosRaw ?? []) as any[])
-        .filter((a) => a.bloque === valor)
-        .map((a) => ({
-          id: a.id,
-          nombre: a.nombre,
-          puntaje: puntajePorAspecto.get(a.id) ?? null,
-          nota: notaPorAspecto.get(a.id) ?? null,
-          comentario: null,
-        })),
-    })).filter((b) => b.aspectos.length > 0);
+    const porAspecto = new Map(((puntajesRaw ?? []) as any[]).map((p) => [p.aspecto_id as string, p]));
+    aspectosEsquema = ((aspectosRaw ?? []) as any[]).map((a) => {
+      const p = porAspecto.get(a.id);
+      return {
+        aspectoId: a.id,
+        nombre: a.nombre,
+        titulo: p?.nota ?? null,
+        descripcion: p?.descripcion ?? null,
+        aprovechar: p?.aprovechar ?? null,
+        acompanar: p?.acompanar ?? null,
+        enfoque: (p?.enfoque ?? null) as EnfoqueSer | null,
+      };
+    });
   }
 
   if (guia && esElPropioColaborador) {
@@ -103,10 +84,6 @@ export default async function GuiaDelFlowPage({ params }: { params: { id: string
       .maybeSingle();
     comentarioGeneral = comentariosRaw?.comentario ?? null;
   }
-
-  // Decisión de la persona sobre quién ve su Guía (sin fila = aún no decide: el líder la ve, como antes).
-  const { data: consentimiento } = await supabase.from('ser_consentimientos').select('comparte_con_lider').eq('colaborador_id', params.id).maybeSingle();
-  const liderBloqueado = esLider && consentimiento != null && !consentimiento.comparte_con_lider;
 
   const { data: seguimientos } = await supabase
     .from('ser_seguimientos')
@@ -137,7 +114,7 @@ export default async function GuiaDelFlowPage({ params }: { params: { id: string
   }
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6 max-w-3xl">
       <div>
         <Link
           href={`/espiral-crecimiento/colaboradores/${params.id}`}
@@ -146,121 +123,77 @@ export default async function GuiaDelFlowPage({ params }: { params: { id: string
           <ArrowLeft size={12} /> Volver a la ficha
         </Link>
         <h1 className="font-display text-2xl font-semibold text-secundario flex items-center gap-2">
-          <Sparkles size={22} className="text-ser" /> Guía del Flow
+          <Sparkles size={22} className="text-ser" /> Ser · Esquema de la Guía del Flow
         </h1>
         <p className="text-sm text-marmol-500 mt-1">{colaborador.nombre_completo}</p>
-        <details className="mt-3 rounded-lg border border-marmol-200 bg-marmol-50 px-3 py-2 text-xs text-marmol-600 max-w-md">
-          <summary className="cursor-pointer font-medium text-marmol-700">¿Qué es la Guía del Flow?</summary>
+        <details className="mt-3 rounded-lg border border-marmol-200 bg-marmol-50 px-3 py-2 text-xs text-marmol-600 max-w-xl">
+          <summary className="cursor-pointer font-medium text-marmol-700">¿Qué es esto y qué se ve aquí?</summary>
           <p className="mt-2">
-            Es la herramienta con la que se describe el <strong>Ser</strong> de una persona: sus fortalezas, lo que la motiva y cómo trabaja mejor. No es una
-            prueba ni lleva nota. La persona la responde por su cuenta y es un regalo íntimo: este sistema solo muestra un informe con los aspectos que
-            tienen relevancia laboral, y su líder lo ve únicamente si la persona decide compartirlo. Sirve para conversar y acompañar, no para evaluar.
+            La Guía del Flow es un ejercicio de autoconocimiento que la persona responde por su cuenta y que le llega solo a ella, con su carta.
+            Esa Guía <strong>no llega a la empresa</strong>. Lo que sí llega es un <strong>esquema</strong>: aspecto por aspecto, lo que tiene relevancia
+            laboral (talentos, motivación, liderazgo, trabajo con otros, manejo del cambio, inteligencias), con una descripción formal, cómo
+            aprovecharlo y cómo acompañar. Los aspectos íntimos no entran. Es descriptivo: <strong>no lleva nota</strong> ni afecta la evaluación de
+            desempeño. Sirve para conversar y acompañar.
+          </p>
+          <p className="mt-2">
+            La persona autorizó compartir este esquema cuando se registró en la Guía del Flow y puede retirar esa autorización allí en cualquier momento.
           </p>
         </details>
-        {!esElPropioColaborador && (
-          <p className="text-xs text-marmol-400 mt-2 flex items-start gap-1.5 max-w-md">
-            <Lock size={12} className="mt-0.5 shrink-0" />
-            La Guía del Flow completa es un regalo íntimo de {esAdminTh ? 'cada colaborador' : 'tu colaborador'} —
-            le llega por fuera de este sistema. Aquí solo se ve un informe con lo que tiene relevancia laboral.
-          </p>
-        )}
+        <p className="text-xs text-marmol-400 mt-2 flex items-start gap-1.5 max-w-xl">
+          <Lock size={12} className="mt-0.5 shrink-0" />
+          {esElPropioColaborador
+            ? 'Esto es exactamente lo que tu empresa ve de ti: Talento Humano y tu líder directo. Tu Guía completa y tu carta son solo tuyas.'
+            : 'Lo ven Talento Humano, el líder directo y la propia persona. La Guía completa y la carta son solo de la persona.'}
+        </p>
       </div>
 
-      {liderBloqueado && (
-        <div className="card p-4 text-sm text-marmol-600 flex items-start gap-2">
-          <Lock size={14} className="mt-0.5 shrink-0" />
-          <p>Esta persona decidió no compartir el informe de su Guía del Flow con su líder directo. Puedes seguir acompañándola con el seguimiento del Ser, abajo.</p>
-        </div>
-      )}
+      {puedeGestionar && <InvitacionGuiaFlow colaboradorId={params.id} invitacionInicial={invitacionInicial} />}
 
-      {esAdminTh && (
-        <p className="text-xs text-marmol-500">
-          Consentimiento de la persona: {consentimiento == null ? 'pendiente (su líder la ve mientras tanto)' : consentimiento.comparte_con_lider ? 'comparte el informe con su líder directo' : 'solo ella y Talento Humano ven el informe'}.
-        </p>
-      )}
-
-      {esElPropioColaborador && (
-        <ConsentimientoGuia inicial={{ decidido: consentimiento != null, comparteConLider: consentimiento?.comparte_con_lider ?? true }} />
-      )}
-
-      {puedeGestionar && !liderBloqueado && <InvitacionGuiaFlow colaboradorId={params.id} invitacionInicial={invitacionInicial} />}
-
-      {liderBloqueado ? null : !guia ? (
+      {!guia ? (
         <div className="card flex flex-col items-center justify-center gap-3 py-16 text-center">
           <Sparkles size={28} className="text-marmol-300" />
-          <p className="text-sm font-medium text-marmol-700">Sin Guía del Flow registrada todavía</p>
-          {puedeGestionar && (
+          <p className="text-sm font-medium text-marmol-700">Aún no hay esquema del Ser para esta persona</p>
+          {esAdminTh ? (
             <>
               <p className="text-xs text-marmol-400 max-w-sm">
-                Crea la primera aplicación para empezar a cargar los puntajes y generar los informes.
+                Lo normal es invitarla con el enlace de arriba: cuando responda y autorice, el esquema llega solo. Si prefieres, puedes crear uno vacío y completarlo a mano.
               </p>
               <BotonCrearGuiaFlow colaboradorId={params.id} />
             </>
+          ) : (
+            <p className="text-xs text-marmol-400 max-w-sm">Aparecerá aquí cuando la persona responda su Guía del Flow y autorice compartirlo.</p>
           )}
         </div>
       ) : (
         <>
-          <div className="card p-4 space-y-1">
-            <p className="text-xs text-marmol-500">Aplicación del {guia.fecha_aplicacion}</p>
+          <div className="card p-4">
+            <p className="text-xs text-marmol-500">Guía aplicada el {formatearFecha(guia.fecha_aplicacion)}</p>
           </div>
 
-          {puedeGestionar && (
-            <>
-              {bloques.map(({ titulo, aspectos }) => (
-                <div key={titulo} className="card p-5">
-                  <h2 className="font-display font-semibold text-secundario mb-3">{titulo}</h2>
-                  <ListaAspectosSer
-                    colaboradorId={params.id}
-                    guiaDelFlowId={guia.id}
-                    aspectos={aspectos}
-                    puedeEditarPuntaje
-                    puedeComentar={false}
-                  />
-                </div>
-              ))}
-
-              <div className="card p-5 space-y-3">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <h2 className="font-display font-semibold text-secundario">Informes generados por IA</h2>
-                  <BotonGenerarInformes
-                    colaboradorId={params.id}
-                    guiaDelFlowId={guia.id}
-                    yaTieneInforme={Boolean(guia.informe_lider)}
-                  />
-                </div>
-                {guia.informe_lider ? (
-                  <div className="rounded-lg border border-marmol-200 p-3 text-sm text-marmol-700 whitespace-pre-wrap">
-                    {guia.informe_lider}
-                  </div>
-                ) : (
-                  <p className="text-xs text-marmol-400">
-                    Aún no se ha generado. Carga al menos un puntaje arriba y presiona &ldquo;Generar informes con IA&rdquo;.
-                  </p>
+          {(puedeGestionar || esElPropioColaborador) && (
+            <div className="card p-5 space-y-3">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h2 className="font-display font-semibold text-secundario">{esElPropioColaborador ? 'Tu síntesis' : 'Síntesis para acompañar a la persona'}</h2>
+                {puedeGestionar && (
+                  <BotonGenerarInformes colaboradorId={params.id} guiaDelFlowId={guia.id} yaTieneInforme={Boolean(guia.informe_lider)} />
                 )}
               </div>
-            </>
+              {(esElPropioColaborador ? guia.informe_colaborador : guia.informe_lider) ? (
+                <div className="rounded-lg border border-marmol-200 p-3 text-sm text-marmol-700 whitespace-pre-wrap">
+                  {esElPropioColaborador ? guia.informe_colaborador : guia.informe_lider}
+                </div>
+              ) : (
+                <p className="text-xs text-marmol-400">
+                  Aún no se ha generado. {puedeGestionar ? 'Presiona «Generar informes con IA» cuando el esquema esté completo.' : 'Talento Humano la generará.'}
+                </p>
+              )}
+            </div>
           )}
 
-          {esElPropioColaborador && (
-            <>
-              <div className="card p-5 space-y-2">
-                <h2 className="font-display font-semibold text-secundario">Tu informe de desarrollo</h2>
-                {guia.informe_colaborador ? (
-                  <p className="text-sm text-marmol-700 whitespace-pre-wrap">{guia.informe_colaborador}</p>
-                ) : (
-                  <p className="text-sm text-marmol-400">
-                    Talento Humano todavía no ha generado este informe. Tu Guía del Flow completa te llega aparte.
-                  </p>
-                )}
-              </div>
+          <EsquemaSer colaboradorId={params.id} guiaDelFlowId={guia.id} aspectos={aspectosEsquema} puedeEditar={esAdminTh} />
 
-              <ComentarioGeneralSer
-                colaboradorId={params.id}
-                guiaDelFlowId={guia.id}
-                comentarioInicial={comentarioGeneral}
-                puedeComentar
-              />
-            </>
+          {esElPropioColaborador && (
+            <ComentarioGeneralSer colaboradorId={params.id} guiaDelFlowId={guia.id} comentarioInicial={comentarioGeneral} puedeComentar />
           )}
         </>
       )}

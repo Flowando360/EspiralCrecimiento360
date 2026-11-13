@@ -71,9 +71,9 @@ export function redactarBorrador(ctx: ContextoBrief): CamposBrief {
   if (!ser.disponible) {
     resumen_ser = 'Esta persona todavía no tiene Guía del Flow. Puedes invitarla desde su ficha → Guía del Flow para completar su Ser antes de la próxima retroalimentación.';
   } else {
-    const p: string[] = [`Guía del Flow aplicada el ${ser.fecha}.`];
-    if (ser.fortalezas.length) p.push(`Aspectos más fuertes: ${lista(ser.fortalezas.map((f) => `${f.nombre} (${f.puntaje}/5)`))}.`);
-    if (ser.aAcompanar.length) p.push(`Aspectos que conviene acompañar: ${lista(ser.aAcompanar.map((f) => `${f.nombre} (${f.puntaje}/5)`))}.`);
+    const p: string[] = [`Esquema del Ser a partir de la Guía del Flow aplicada el ${ser.fecha}.`];
+    if (ser.fortalezas.length) p.push(`Rasgos para aprovechar: ${lista(ser.fortalezas.map((f) => (f.titulo ? `${f.nombre} (${f.titulo})` : f.nombre)))}.`);
+    if (ser.aAcompanar.length) p.push(`Rasgos para acompañar: ${lista(ser.aAcompanar.map((f) => (f.titulo ? `${f.nombre} (${f.titulo})` : f.nombre)))}.`);
     if (ser.informeLider) {
       const limpio = ser.informeLider
         .replace(/^#+\s*.*$/gm, ' ')

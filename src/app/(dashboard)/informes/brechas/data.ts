@@ -23,7 +23,7 @@ function promedio(valores: number[]): number | null {
 }
 
 // Mismos umbrales que ya usa el semáforo de Hacer/Deber (alto >=4.0, medio 3.5-4.0),
-// aplicados también a Ser ahora que está en la misma escala 1-5. Saber usa un
+// aplicados a Saber, Hacer y Deber (el Ser ya no se califica). Saber usa un
 // umbral propio porque es un porcentaje de cumplimiento, no una nota 1-5.
 function semaforo1a5(valor: number | null): SemaforoDimension {
   if (valor === null) return null;
@@ -81,7 +81,7 @@ export async function obtenerInformeBrechas(agrupacion: Agrupacion, filtros: Fil
       .in('evaluacion.colaborador_evaluado_id', colaboradorIds)
       .order('actualizado_en', { ascending: false }),
     supabase.from('v_saber_cumplimiento').select('colaborador_id, porcentaje_cumplimiento').in('colaborador_id', colaboradorIds),
-    supabase.from('v_ser_promedio').select('colaborador_id, promedio_ser').in('colaborador_id', colaboradorIds),
+    supabase.from('v_ser_promedio').select('colaborador_id, total_aspectos_calificados').in('colaborador_id', colaboradorIds),
   ]);
 
   // Solo el resultado más reciente por colaborador (puede haber varios ciclos).
@@ -98,9 +98,10 @@ export async function obtenerInformeBrechas(agrupacion: Agrupacion, filtros: Fil
     ((saberRaw ?? []) as any[]).map((s) => [s.colaborador_id, s.porcentaje_cumplimiento as number | null])
   );
 
-  // v_ser_promedio ya trae un solo promedio por colaborador (su aplicación más reciente).
+  // v_ser_promedio trae una fila por colaborador (su aplicación más reciente). El Ser ya no tiene promedio: solo se cuenta
+  // cuántos aspectos del esquema tiene cargados.
   const serPorColaborador = new Map(
-    ((serRaw ?? []) as any[]).map((s) => [s.colaborador_id, s.promedio_ser as number | null])
+    ((serRaw ?? []) as any[]).map((s) => [s.colaborador_id, Number(s.total_aspectos_calificados ?? 0) > 0 ? 1 : null])
   );
 
   const normalizarArea = crearNormalizadorAreas(colaboradores.map((c: any) => c.cargo?.proceso_area));

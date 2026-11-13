@@ -187,7 +187,7 @@ export const moduloAdministracion: ModuloAyuda = {
       resumen:
         'Bitácora de cada intento automático de vincular una Guía del Flow (generada en guiadelflow) con un colaborador de aquí, por correo — incluidos los intentos que no encontraron a nadie.',
       camposYBotones: [
-        { nombre: 'Resultado', explicacion: '"Vinculado" (se cargaron sus 18 aspectos e informes), "Sin coincidencia" (ningún colaborador tiene ese correo), "Correo ambiguo" (coincide con más de uno, no se adivina) o "Error".' },
+        { nombre: 'Resultado', explicacion: '"Vinculado" (se cargó el esquema de su Ser y su síntesis), "Sin coincidencia" (ningún colaborador tiene ese correo), "Correo ambiguo" (coincide con más de uno, no se adivina) o "Error".' },
         { nombre: 'Colaborador vinculado', explicacion: 'Solo aparece cuando el resultado fue "Vinculado". Lleva directo a su Guía del Flow.' },
       ],
       notas: [

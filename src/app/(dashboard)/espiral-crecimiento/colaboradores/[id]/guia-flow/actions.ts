@@ -7,10 +7,9 @@ import { z } from 'zod';
 import { generarInformesParaGuia } from '@/lib/guia-flow/generar-informes';
 
 /**
- * admin_th puede gestionar la Guía del Flow de cualquier colaborador de su
- * empresa; el líder, solo la de su propio equipo (mismo alcance que ya
- * tiene para ver el informe). Ninguno de los dos gana acceso a los 12
- * aspectos sensibles ni al PDF — eso sigue bloqueado por RLS aparte.
+ * admin_th puede gestionar la Guía del Flow de cualquier colaborador de su empresa; el líder, solo la de su equipo
+ * (invitar y regenerar la síntesis). El esquema del Ser solo lo edita Talento Humano. Nadie gana acceso a los aspectos
+ * sensibles ni a la Guía completa: eso lo bloquea la base de datos.
  */
 async function puedeGestionarGuiaFlow(colaboradorId: string) {
   const perfil = await getPerfilActual();
@@ -91,29 +90,39 @@ export async function crearGuiaDelFlow(input: z.infer<typeof CrearGuiaSchema>) {
   return { ok: true as const, guiaDelFlowId: data.id as string };
 }
 
-const PuntajeSchema = z.object({
+const AspectoSchema = z.object({
   colaboradorId: z.string().uuid(),
   guiaDelFlowId: z.string().uuid(),
   aspectoId: z.string().uuid(),
-  puntaje: z.number().int().min(1).max(5),
-  nota: z.string().trim().max(300).optional(),
+  titulo: z.string().trim().max(200).optional(),
+  descripcion: z.string().trim().max(1200).optional(),
+  aprovechar: z.string().trim().max(600).optional(),
+  acompanar: z.string().trim().max(600).optional(),
+  enfoque: z.enum(['aprovechar', 'equilibrado', 'acompanar']).nullable().optional(),
 });
 
-/** Carga el puntaje oficial de un aspecto, y opcionalmente una nota corta que resuma el resultado (admin_th o el líder de este colaborador). */
-export async function guardarPuntajeSer(input: z.infer<typeof PuntajeSchema>) {
-  const parsed = PuntajeSchema.safeParse(input);
+/**
+ * Carga o corrige a mano un aspecto del esquema del Ser (solo Talento Humano). Es para quien no usa la aplicación de la
+ * Guía del Flow o para afinar un texto. Es descriptivo: no hay puntaje. Los aspectos sensibles los bloquea la base de datos.
+ */
+export async function guardarAspectoSer(input: z.infer<typeof AspectoSchema>) {
+  const parsed = AspectoSchema.safeParse(input);
   if (!parsed.success) return { ok: false as const, error: 'Datos inválidos' };
 
   const perfil = await puedeGestionarGuiaFlow(parsed.data.colaboradorId);
-  if (!perfil) return { ok: false as const, error: 'No autorizado' };
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'Solo Talento Humano puede editar el esquema del Ser' };
 
+  const d = parsed.data;
   const supabase = createClient();
   const { error } = await supabase.from('ser_puntajes').upsert(
     {
-      guia_del_flow_id: parsed.data.guiaDelFlowId,
-      aspecto_id: parsed.data.aspectoId,
-      puntaje: parsed.data.puntaje,
-      ...(parsed.data.nota !== undefined ? { nota: parsed.data.nota || null } : {}),
+      guia_del_flow_id: d.guiaDelFlowId,
+      aspecto_id: d.aspectoId,
+      nota: d.titulo || null,
+      descripcion: d.descripcion || null,
+      aprovechar: d.aprovechar || null,
+      acompanar: d.acompanar || null,
+      enfoque: d.enfoque ?? null,
       updated_at: new Date().toISOString(),
     },
     { onConflict: 'guia_del_flow_id,aspecto_id' }
@@ -121,7 +130,7 @@ export async function guardarPuntajeSer(input: z.infer<typeof PuntajeSchema>) {
 
   if (error) return { ok: false as const, error: error.message };
 
-  revalidar(parsed.data.colaboradorId);
+  revalidar(d.colaboradorId);
   return { ok: true as const };
 }
 

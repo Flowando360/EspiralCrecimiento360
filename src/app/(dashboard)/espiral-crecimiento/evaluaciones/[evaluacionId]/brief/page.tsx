@@ -94,10 +94,10 @@ export default async function BriefPage({ params }: { params: { evaluacionId: st
                 <>
                   <p className="text-sm text-marmol-700">Aplicada el {formatearFecha(ctx.ser.fecha as string)}</p>
                   {ctx.ser.fortalezas.length > 0 && (
-                    <p className="text-xs text-marmol-500 mt-1">Fuertes: {ctx.ser.fortalezas.map((f) => `${f.nombre} (${f.puntaje})`).join(' · ')}</p>
+                    <p className="text-xs text-marmol-500 mt-1">Para aprovechar: {ctx.ser.fortalezas.map((f) => (f.titulo ? `${f.nombre} (${f.titulo})` : f.nombre)).join(' · ')}</p>
                   )}
                   {ctx.ser.aAcompanar.length > 0 && (
-                    <p className="text-xs text-marmol-500">A acompañar: {ctx.ser.aAcompanar.map((f) => `${f.nombre} (${f.puntaje})`).join(' · ')}</p>
+                    <p className="text-xs text-marmol-500">Para acompañar: {ctx.ser.aAcompanar.map((f) => (f.titulo ? `${f.nombre} (${f.titulo})` : f.nombre)).join(' · ')}</p>
                   )}
                 </>
               ) : (

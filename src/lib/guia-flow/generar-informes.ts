@@ -9,13 +9,13 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 // mismo en código, no solo se confía en RLS (que con el cliente admin queda
 // sin efecto): ver 0051_ser_privacidad_organizacional.sql.
 
-const SYSTEM_INFORME_LIDER = `Eres un asistente de Talento Humano. A partir de una lista de aspectos profesionales evaluados en escala 1-5 (talentos, propósito, estilo de liderazgo, comunicación, trabajo en equipo, compromiso, adaptación al cambio, negociación, recursividad), escribe en español un informe breve (200-300 palabras) dirigido al LÍDER de esa persona, para que enfoque su Plan de Desarrollo Individual.
+const SYSTEM_INFORME_LIDER = `Eres un asistente de Talento Humano. A partir de un esquema de aspectos con relevancia laboral (talentos, propósito, liderazgo, comunicación, trabajo en equipo, compromiso, adaptación al cambio, negociación, recursividad, inteligencias), cada uno con título, descripción y una lectura descriptiva (para aprovechar, en equilibrio o para acompañar; no es una nota), escribe en español un informe breve (200-300 palabras) dirigido al LÍDER de esa persona, para que enfoque su Plan de Desarrollo Individual.
 
 Estructura: (1) talentos a aprovechar, (2) qué la/lo motiva, (3) cómo comunicarse y liderarla/o, (4) 2-3 sugerencias concretas para el PDI. Tono profesional, cálido y orientado a la acción.
 
 IMPORTANTE: solo tienes los aspectos de la lista. No tienes ni debes mencionar infancia, pasado, estabilidad emocional, felicidad, dependencia, sanación, frustración, sentido de pertenencia ni ningún tema psicológico o de vida personal — esa información existe pero es privada y nunca te fue entregada. No la inventes ni sugieras que existe.`;
 
-const SYSTEM_INFORME_COLABORADOR = `Eres un asistente de desarrollo profesional. A partir de una lista de aspectos profesionales evaluados en escala 1-5 (talentos, propósito, estilo de liderazgo, comunicación, trabajo en equipo, compromiso, adaptación al cambio, negociación, recursividad), escribe en español un informe breve (200-300 palabras) dirigido DIRECTAMENTE a esa persona (en segunda persona, tono cercano y alentador), que le ayude a recordar en qué es fuerte profesionalmente y en qué puede seguir trabajando.
+const SYSTEM_INFORME_COLABORADOR = `Eres un asistente de desarrollo profesional. A partir de un esquema de aspectos con relevancia laboral (talentos, propósito, liderazgo, comunicación, trabajo en equipo, compromiso, adaptación al cambio, negociación, recursividad, inteligencias), cada uno con título, descripción y una lectura descriptiva (para aprovechar, en equilibrio o para acompañar; no es una nota), escribe en español un informe breve (200-300 palabras) dirigido DIRECTAMENTE a esa persona (en segunda persona, tono cercano y alentador), que le ayude a recordar en qué es fuerte profesionalmente y en qué puede seguir trabajando.
 
 Aclara que esto es un complemento breve, no un reemplazo de su Guía del Flow completa (que ya recibió por su cuenta). Cierra con una invitación a seguir explorando esa Guía si quiere profundizar en su autoconocimiento.
 
@@ -27,9 +27,9 @@ async function pedirInformeAClaude(apiKey: string, system: string, listaAspectos
     headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
     body: JSON.stringify({
       model: 'claude-sonnet-5',
-      max_tokens: 700,
+      max_tokens: 900,
       system,
-      messages: [{ role: 'user', content: `Aspectos evaluados (escala 1-5):\n${listaAspectos}` }],
+      messages: [{ role: 'user', content: `Esquema del Ser (descriptivo, sin nota):\n${listaAspectos}` }],
     }),
   });
   const data = await r.json();
@@ -58,14 +58,25 @@ export async function generarInformesParaGuia(
 
   const { data: puntajesRaw } = await supabase
     .from('ser_puntajes')
-    .select('puntaje, nota, ser_aspectos(nombre, sensible)')
+    .select('nota, descripcion, aprovechar, acompanar, enfoque, ser_aspectos(nombre, sensible)')
     .eq('guia_del_flow_id', guiaDelFlowId);
 
   const aspectos = ((puntajesRaw ?? []) as any[])
     // Defensa en profundidad: con el cliente admin (sin sesión) RLS no
     // filtra los aspectos sensibles, así que se excluyen acá explícitamente.
     .filter((p) => p.ser_aspectos?.nombre && p.ser_aspectos?.sensible === false)
-    .map((p) => (p.nota ? `${p.ser_aspectos.nombre}: ${p.nota} (${p.puntaje}/5)` : `${p.ser_aspectos.nombre}: ${p.puntaje}/5`));
+    .map((p) => {
+      const lectura =
+        p.enfoque === 'aprovechar' ? 'para aprovechar' : p.enfoque === 'acompanar' ? 'para acompañar' : p.enfoque === 'equilibrado' ? 'en equilibrio' : null;
+      return [
+        `${p.ser_aspectos.nombre}${p.nota ? `: ${p.nota}` : ''}${lectura ? ` [${lectura}]` : ''}`,
+        p.descripcion ? `  Descripción: ${p.descripcion}` : null,
+        p.aprovechar ? `  Aprovecharlo: ${p.aprovechar}` : null,
+        p.acompanar ? `  Acompañar: ${p.acompanar}` : null,
+      ]
+        .filter(Boolean)
+        .join('\n');
+    });
 
   if (aspectos.length === 0) {
     return { ok: false, error: 'No hay puntajes de aspectos con relevancia laboral cargados todavía.' };

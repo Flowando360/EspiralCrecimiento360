@@ -239,11 +239,12 @@ export const planPruebas: SeccionPlanPruebas[] = [
       },
       {
         titulo: 'Guía del Flow',
-        rolNecesario: 'admin_th para crear/valorar; colaborador para comentar',
+        rolNecesario: 'admin_th para crear y editar el esquema; líder y colaborador para verlo',
         pasos: [
-          { paso: 'Como admin_th, crea una nueva aplicación de Guía del Flow para una persona sin registro previo.', resultadoEsperado: 'Aparecen los 4 bloques de aspectos, vacíos.' },
-          { paso: 'Sube el PDF de la guía y valora un aspecto (1-5).', resultadoEsperado: 'El PDF queda accesible con un link temporal; el puntaje se guarda.' },
-          { paso: 'Inicia sesión como esa persona y escribe un comentario en un aspecto.', resultadoEsperado: 'El comentario se guarda asociado a ese aspecto.' },
+          { paso: 'Como admin_th, abre Ser de una persona sin Guía y pulsa «Crear esquema vacío».', resultadoEsperado: 'Aparecen los grupos del esquema (Talento y esencia, Propósito, Liderazgo, Trabajo con otros, Cambio, Inteligencias) con tarjetas «sin dato».' },
+          { paso: 'Pulsa «Completar» en un aspecto, escribe título, descripción, cómo aprovecharlo y cómo acompañarlo, elige una lectura y guarda.', resultadoEsperado: 'La tarjeta muestra el texto y una etiqueta neutra («Para aprovechar», «En equilibrio» o «Para acompañar»). No hay ningún puntaje.' },
+          { paso: 'Entra como el líder directo de esa persona.', resultadoEsperado: 'Ve el esquema completo pero sin lápiz ni «Completar»: solo lo puede leer. No ve la Guía ni aspectos íntimos.' },
+          { paso: 'Entra como la propia persona.', resultadoEsperado: 'Ve el mismo esquema (lo que ve su empresa), su síntesis y puede escribir un comentario general. No existe ninguna tarjeta de consentimiento.' },
         ],
       },
       {

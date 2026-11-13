@@ -21,7 +21,7 @@ Sin claves ni datos personales: este repositorio es público. Última revisión:
 `admin_th` (Talento Humano: todo en su empresa) · `lider` (su equipo) · `colaborador` (lo propio) · `gerencia` (agregados) · `auditor_externo` (solo evidencia) · panel del **proveedor** (tabla `proveedores`, ve todas las empresas; acceso separado en `/proveedor`). Roles personalizados por empresa en Administración → Roles y permisos.
 
 ## Modelo conceptual
-Cuatro dimensiones por persona: **Ser** (Guía del Flow: 18 aspectos con relevancia laboral), **Saber** (cargo vs. hoja de vida, checklist con Cumple/Parcial/No cumple), **Hacer** y **Deber** (evaluación por ciclo, escala 1–5, índice y semáforo). Evaluadores: autoevaluación, líder, pares, colaboradores a cargo (deducidos del organigrama). Ponderación por defecto líder 40 / pares 30 / equipo 30. El bloque "Roles y funciones" sale del manual de funciones del cargo. El PDI se crea solo cuando el semáforo es bajo, o a mano desde el resultado.
+Cuatro dimensiones por persona: **Ser** (esquema descriptivo de la Guía del Flow: 25 aspectos con relevancia laboral, sin nota; la empresa nunca ve la Guía ni la carta, solo el esquema), **Saber** (cargo vs. hoja de vida, checklist con Cumple/Parcial/No cumple), **Hacer** y **Deber** (evaluación por ciclo, escala 1–5, índice y semáforo). Evaluadores: autoevaluación, líder, pares, colaboradores a cargo (deducidos del organigrama). Ponderación por defecto líder 40 / pares 30 / equipo 30. El bloque "Roles y funciones" sale del manual de funciones del cargo. El PDI se crea solo cuando el semáforo es bajo, o a mano desde el resultado.
 
 ## Módulos y estado de pruebas
 | Módulo | Estado |
@@ -34,6 +34,7 @@ Cuatro dimensiones por persona: **Ser** (Guía del Flow: 18 aspectos con relevan
 | Nexa, Procesos y Cumplimiento, Dotación, panel Proveedor, auditor externo, tareas programadas (cron) | **Sin probar a fondo** |
 
 ## Decisiones ya tomadas (no las reabras)
+- **El Ser es un esquema, no la Guía (2026-11-13):** TH y el líder nunca ven la Guía del Flow ni la carta; ven el esquema de lo que tiene relevancia laboral (título, descripción formal, cómo aprovechar, cómo acompañar). No hay consentimiento dentro de Espiral: la persona autoriza en la Guía del Flow al registrarse y puede revocar allí. Detalle y orden de publicación en `docs/PRUEBAS-PENDIENTES.md`.
 - Supresión de datos de un candidato: **manual** de Talento Humano. El histórico de candidatos **se conserva siempre**; quien vuelve a postularse se reconoce por documento o correo y no se duplica.
 - Planes gratuitos/Hobby por ahora.
 - La Guía del Flow se mueve a Espiral; Círculo se borra solo cuando Diana lo confirme y después de un último respaldo.

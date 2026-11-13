@@ -36,9 +36,9 @@ export function borradorPerfilIntegral({ ctx, integral, objetivos }: DatosPerfil
   const fuertes = ctx.ser.fortalezas.map((f) => f.nombre);
   const acompanar = ctx.ser.aAcompanar.map((f) => f.nombre);
   const hipotesis_ser = !ctx.ser.disponible
-    ? 'Aún no hay una Guía del Flow disponible para esta persona (o no está compartida contigo). Sin ella no se formulan hipótesis del Ser.'
+    ? 'Aún no hay un esquema del Ser disponible para esta persona. Sin él no se formulan hipótesis del Ser.'
     : [
-        fuertes.length ? `Su Guía del Flow apunta a recursos como ${fuertes.slice(0, 3).join(', ').toLowerCase()}.` : null,
+        fuertes.length ? `El esquema de su Ser apunta a recursos como ${fuertes.slice(0, 3).join(', ').toLowerCase()}.` : null,
         acompanar.length ? `Y a aspectos para acompañar como ${acompanar.slice(0, 2).join(', ').toLowerCase()}.` : null,
         'Son hipótesis y recursos para conversar sobre su desarrollo, no conclusiones ni una explicación de su desempeño.',
       ]
