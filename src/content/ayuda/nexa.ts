@@ -38,6 +38,7 @@ export const moduloNexa: ModuloAyuda = {
       resumen:
         'Para un colaborador: sus cursos asignados, cada uno con barra de progreso o con un quiz de verificación (según cómo lo haya armado admin_th). Para admin_th: el catálogo completo de cursos gamificados, con creación, asignación y gestión del quiz de cada curso.',
       camposYBotones: [
+        { nombre: 'Curso previo (ruta encadenada, admin_th)', explicacion: 'Al editar un curso puedes elegir otro como «curso previo». Quien reciba el curso recibe también el previo, y mientras no complete el previo ve el aviso «Primero completa…» y no puede avanzar ni completar el segundo. No se admiten círculos (A exige B y B exige A).' },
         { nombre: 'Descargar certificado (PDF)', explicacion: 'En cada curso completado aparece este enlace: genera un certificado de completitud con el nombre de la persona, el curso, la duración, la calificación de la prueba (si la hubo), la fecha y un código. Puede descargarlo la propia persona (también su líder o Talento Humano, por permisos).' },
         { nombre: 'Categorías del catálogo', explicacion: 'Además de las de SST (inducción, alturas, manejo de cargas, EPP, protocolos de emergencia), el catálogo admite Cultura, Técnico, Liderazgo, Habilidades blandas, Cumplimiento normativo y Otro, para formar más allá de la seguridad.' },
         { nombre: 'Nuevo curso (admin_th)', explicacion: 'Título, descripción, categoría (inducción SST, alturas, manejo de cargas, EPP, protocolos de emergencia, cultura, técnico, otro), duración y puntos que otorga.' },

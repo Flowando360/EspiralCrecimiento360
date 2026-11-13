@@ -5416,6 +5416,7 @@ export type Database = {
           cargo_id: string | null
           categoria: Database["public"]["Enums"]["categoria_induccion"]
           created_at: string
+          curso_id: string | null
           descripcion: string | null
           empresa_id: string
           id: string
@@ -5429,6 +5430,7 @@ export type Database = {
           cargo_id?: string | null
           categoria?: Database["public"]["Enums"]["categoria_induccion"]
           created_at?: string
+          curso_id?: string | null
           descripcion?: string | null
           empresa_id: string
           id?: string
@@ -5442,6 +5444,7 @@ export type Database = {
           cargo_id?: string | null
           categoria?: Database["public"]["Enums"]["categoria_induccion"]
           created_at?: string
+          curso_id?: string | null
           descripcion?: string | null
           empresa_id?: string
           id?: string
@@ -5882,6 +5885,7 @@ export type Database = {
           categoria: string | null
           contenido_url: string | null
           created_at: string
+          curso_previo_id: string | null
           descripcion: string | null
           duracion_minutos: number | null
           empresa_id: string
@@ -5895,6 +5899,7 @@ export type Database = {
           categoria?: string | null
           contenido_url?: string | null
           created_at?: string
+          curso_previo_id?: string | null
           descripcion?: string | null
           duracion_minutos?: number | null
           empresa_id: string
@@ -5908,6 +5913,7 @@ export type Database = {
           categoria?: string | null
           contenido_url?: string | null
           created_at?: string
+          curso_previo_id?: string | null
           descripcion?: string | null
           duracion_minutos?: number | null
           empresa_id?: string

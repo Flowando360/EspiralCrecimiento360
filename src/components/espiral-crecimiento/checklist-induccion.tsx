@@ -28,6 +28,7 @@ export interface ItemAsignado {
   confirmado_colaborador_en?: string | null;
   pregunta?: string | null;
   opciones?: string[] | null;
+  curso_titulo?: string | null;
   categoria: Categoria;
   titulo: string;
   descripcion: string | null;
@@ -140,7 +141,12 @@ export function ChecklistInduccion({
                       {auto && !confirmado && (
                         <p className="text-xs text-medio mt-0.5">Pendiente de confirmación de la persona</p>
                       )}
-                      {auto && !confirmado && esPropia && (
+                      {item.curso_titulo && (
+                        <p className="text-xs text-flow-700 mt-0.5">
+                          Se cumple completando el curso «{item.curso_titulo}»{esPropia && !confirmado ? ' — búscalo en Mi formación.' : '.'}
+                        </p>
+                      )}
+                      {auto && !confirmado && esPropia && !item.curso_titulo && (
                         <div className="mt-2 space-y-2">
                           {item.pregunta && (
                             <div className="rounded-lg bg-marmol-50 border border-marmol-100 p-2.5 space-y-1.5">

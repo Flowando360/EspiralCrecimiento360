@@ -33,7 +33,7 @@ export default async function InduccionColaboradorPage({ params }: { params: { i
     .select(
       `id, completado, completado_en, confirmado_colaborador_en,
        completado_por:completado_por(nombre_completo),
-       item:item_id(categoria, titulo, descripcion, orden, pregunta, opciones)`
+       item:item_id(categoria, titulo, descripcion, orden, pregunta, opciones, curso_id, curso:curso_id(titulo))`
     )
     .eq('colaborador_id', params.id);
 
@@ -44,6 +44,7 @@ export default async function InduccionColaboradorPage({ params }: { params: { i
       completado_en: i.completado_en,
       confirmado_colaborador_en: i.confirmado_colaborador_en ?? null,
       pregunta: i.item?.pregunta ?? null,
+      curso_titulo: (Array.isArray(i.item?.curso) ? i.item.curso[0]?.titulo : i.item?.curso?.titulo) ?? null,
       opciones: Array.isArray(i.item?.opciones) ? (i.item.opciones as string[]) : null,
       completado_por_nombre: i.completado_por?.nombre_completo ?? null,
       categoria: i.item?.categoria,

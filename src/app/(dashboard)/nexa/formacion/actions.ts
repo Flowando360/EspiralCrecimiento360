@@ -57,6 +57,8 @@ const EditarCursoSchema = z.object({
   categoria: z.enum(CATEGORIAS),
   duracionMinutos: z.number().int().positive().optional(),
   puntosOtorgados: z.number().int().min(0),
+  // Curso que hay que completar antes (ruta encadenada). null lo quita; undefined no lo toca.
+  cursoPrevioId: z.string().uuid().nullable().optional(),
 });
 
 /** Edita título, descripción, categoría, duración y puntos de un curso ya creado (admin_th). */
@@ -68,9 +70,26 @@ export async function actualizarCurso(input: z.infer<typeof EditarCursoSchema>) 
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? 'Datos inválidos' };
 
   const supabase = createClient();
+
+  // La ruta encadenada no puede ser circular (A exige B y B exige A) ni cruzar empresas.
+  if (parsed.data.cursoPrevioId) {
+    let actual: string | null = parsed.data.cursoPrevioId;
+    for (let i = 0; i < 20 && actual; i++) {
+      if (actual === parsed.data.cursoId) return { ok: false as const, error: 'Ese curso previo crearía un círculo: depende de este mismo curso.' };
+      const { data: fila }: { data: { empresa_id: string; curso_previo_id: string | null } | null } = await supabase
+        .from('nexa_cursos')
+        .select('empresa_id, curso_previo_id')
+        .eq('id', actual)
+        .maybeSingle();
+      if (!fila || fila.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'Curso previo no encontrado' };
+      actual = fila.curso_previo_id;
+    }
+  }
+
   const { error } = await supabase
     .from('nexa_cursos')
     .update({
+      ...(parsed.data.cursoPrevioId !== undefined ? { curso_previo_id: parsed.data.cursoPrevioId } : {}),
       titulo: parsed.data.titulo,
       descripcion: parsed.data.descripcion || null,
       categoria: parsed.data.categoria,

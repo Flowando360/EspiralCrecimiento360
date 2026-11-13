@@ -59,13 +59,14 @@ export async function confirmarItemInduccion(colaboradorId: string, itemAsignado
   const admin = createAdminClient();
   const { data: fila } = await admin
     .from('colaborador_induccion_items')
-    .select('id, colaborador_id, confirmado_colaborador_en, intentos_quiz, item:item_id(id, empresa_id, categoria, pregunta, opciones)')
+    .select('id, colaborador_id, confirmado_colaborador_en, intentos_quiz, item:item_id(id, empresa_id, categoria, pregunta, opciones, curso_id)')
     .eq('id', itemAsignadoId)
     .maybeSingle();
   const item = (fila as any)?.item;
   if (!fila || fila.colaborador_id !== colaboradorId || !item || item.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'Punto no encontrado' };
   if (!CATEGORIAS_AUTODILIGENCIADAS.includes(item.categoria)) return { ok: false as const, error: 'Este punto lo registra Talento Humano' };
   if (fila.confirmado_colaborador_en) return { ok: true as const };
+  if (item.curso_id) return { ok: false as const, error: 'Este punto se confirma al completar su curso en Formación.' };
 
   if (item.pregunta) {
     if (typeof respuesta !== 'number') return { ok: false as const, error: 'Elige una respuesta' };

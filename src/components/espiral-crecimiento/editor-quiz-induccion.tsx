@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { guardarQuizInduccion } from '@/app/(dashboard)/administracion/cargos/[id]/actions';
+import { guardarCursoInduccion, guardarQuizInduccion } from '@/app/(dashboard)/administracion/cargos/[id]/actions';
 
 /** Pregunta de comprensión de un punto de inducción. La respuesta correcta solo la ve Talento Humano. */
 export function EditorQuizInduccion({
@@ -9,12 +9,19 @@ export function EditorQuizInduccion({
   cargoId,
   preguntaInicial,
   opcionesIniciales,
+  cursos = [],
+  cursoInicial = null,
 }: {
   itemId: string;
   cargoId: string;
   preguntaInicial: string | null;
   opcionesIniciales: string[] | null;
+  cursos?: { id: string; titulo: string }[];
+  cursoInicial?: string | null;
 }) {
+  const [cursoId, setCursoId] = useState(cursoInicial ?? '');
+  const [errorCurso, setErrorCurso] = useState<string | null>(null);
+  const [pendingCurso, startCurso] = useTransition();
   const [abierto, setAbierto] = useState(false);
   const [pregunta, setPregunta] = useState(preguntaInicial ?? '');
   const [opciones, setOpciones] = useState<string[]>(opcionesIniciales?.length ? opcionesIniciales : ['', '', '']);
@@ -38,6 +45,31 @@ export function EditorQuizInduccion({
 
   return (
     <div className="mt-1">
+      {cursos.length > 0 && (
+        <label className="block text-xs text-marmol-500 mb-1">
+          Se cumple con el curso
+          <select
+            value={cursoId}
+            disabled={pendingCurso}
+            onChange={(e) => {
+              const nuevo = e.target.value;
+              setCursoId(nuevo);
+              setErrorCurso(null);
+              startCurso(async () => {
+                const res = await guardarCursoInduccion({ itemId, cargoId, cursoId: nuevo || null });
+                if (!res.ok) setErrorCurso(res.error);
+              });
+            }}
+            className="ml-2 rounded-lg border border-marmol-200 px-2 py-1 text-xs"
+          >
+            <option value="">Ninguno (lo confirma la persona)</option>
+            {cursos.map((c) => (
+              <option key={c.id} value={c.id}>{c.titulo}</option>
+            ))}
+          </select>
+          {errorCurso && <span className="ml-2 text-bajo">{errorCurso}</span>}
+        </label>
+      )}
       <button type="button" onClick={() => setAbierto((a) => !a)} className="text-xs text-flow-600 hover:underline">
         {tiene ? 'Editar pregunta de comprensión ✓' : 'Agregar pregunta de comprensión'}
       </button>

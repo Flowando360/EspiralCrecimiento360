@@ -15,12 +15,14 @@ export default async function QuizCursoPage({ params }: { params: { cursoId: str
 
   const { data: curso } = await supabase
     .from('nexa_cursos')
-    .select('id, titulo, descripcion, categoria, duracion_minutos, puntos_otorgados, quiz_umbral_aprobacion')
+    .select('id, titulo, descripcion, categoria, duracion_minutos, puntos_otorgados, quiz_umbral_aprobacion, curso_previo_id')
     .eq('id', params.cursoId)
     .eq('empresa_id', perfil.empresa_id)
     .maybeSingle();
 
   if (!curso) notFound();
+
+  const { data: otrosCursos } = await supabase.from('nexa_cursos').select('id, titulo').eq('empresa_id', perfil.empresa_id).eq('activo', true).order('titulo');
 
   const { data: preguntas } = await supabase
     .from('nexa_curso_preguntas')
@@ -47,6 +49,8 @@ export default async function QuizCursoPage({ params }: { params: { cursoId: str
         <div className="mt-2">
           <EditarCurso
             cursoId={curso.id}
+            cursosDisponibles={otrosCursos ?? []}
+            cursoPrevioInicial={curso.curso_previo_id}
             datosIniciales={{
               titulo: curso.titulo,
               descripcion: curso.descripcion ?? '',

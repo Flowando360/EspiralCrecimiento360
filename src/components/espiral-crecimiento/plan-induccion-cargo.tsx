@@ -14,6 +14,7 @@ interface Item {
   descripcion: string | null;
   pregunta?: string | null;
   opciones?: string[] | null;
+  curso_id?: string | null;
 }
 
 const CATEGORIA_LABEL: Record<Categoria, string> = {
@@ -26,7 +27,7 @@ const CATEGORIA_LABEL: Record<Categoria, string> = {
   otro: 'Otro',
 };
 
-export function PlanInduccionCargo({ cargoId, itemsIniciales, encabezado = 'Plan de inducción específico', ayuda = 'Generado automáticamente a partir del perfil de este cargo. Puedes ajustar los puntos antes de que se usen.', soloQuiz = false }: { cargoId: string; itemsIniciales: Item[]; encabezado?: string; ayuda?: string; soloQuiz?: boolean }) {
+export function PlanInduccionCargo({ cargoId, itemsIniciales, encabezado = 'Plan de inducción específico', ayuda = 'Generado automáticamente a partir del perfil de este cargo. Puedes ajustar los puntos antes de que se usen.', soloQuiz = false, cursos = [] }: { cursos?: { id: string; titulo: string }[]; cargoId: string; itemsIniciales: Item[]; encabezado?: string; ayuda?: string; soloQuiz?: boolean }) {
   const [items, setItems] = useState(itemsIniciales);
   const [categoria, setCategoria] = useState<Categoria>('otro');
   const [titulo, setTitulo] = useState('');
@@ -74,7 +75,7 @@ export function PlanInduccionCargo({ cargoId, itemsIniciales, encabezado = 'Plan
                     <p className="text-sm text-marmol-800">{it.titulo}</p>
                     {it.descripcion && <p className="text-xs text-marmol-500">{it.descripcion}</p>}
                     {(cat === 'proposito_organizacional' || cat === 'funciones' || cat === 'riesgos_sst') && (
-                      <EditorQuizInduccion itemId={it.id} cargoId={cargoId} preguntaInicial={it.pregunta ?? null} opcionesIniciales={it.opciones ?? null} />
+                      <EditorQuizInduccion itemId={it.id} cargoId={cargoId} preguntaInicial={it.pregunta ?? null} opcionesIniciales={it.opciones ?? null} cursos={cursos} cursoInicial={it.curso_id ?? null} />
                     )}
                   </div>
                   {!soloQuiz && <button onClick={() => eliminar(it.id)} className="text-marmol-300 hover:text-bajo shrink-0">

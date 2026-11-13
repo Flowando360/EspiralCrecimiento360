@@ -480,3 +480,20 @@ export async function guardarQuizInduccion(input: z.infer<typeof QuizSchema>) {
   revalidatePath(`/administracion/cargos/${d.cargoId}`);
   return { ok: true as const };
 }
+
+/** Liga (o desliga) un punto de inducción a un curso de Formación: se cumple al completar el curso (admin_th). */
+export async function guardarCursoInduccion(input: { itemId: string; cargoId: string; cursoId: string | null }) {
+  const perfil = await getPerfilActual();
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
+  const supabase = createClient() as any;
+  const { data: item } = await supabase.from('induccion_items').select('id, empresa_id').eq('id', input.itemId).maybeSingle();
+  if (!item || item.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'Punto no encontrado' };
+  if (input.cursoId) {
+    const { data: curso } = await supabase.from('nexa_cursos').select('id, empresa_id').eq('id', input.cursoId).maybeSingle();
+    if (!curso || curso.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'Curso no encontrado' };
+  }
+  const { error } = await supabase.from('induccion_items').update({ curso_id: input.cursoId }).eq('id', input.itemId);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`/administracion/cargos/${input.cargoId}`);
+  return { ok: true as const };
+}

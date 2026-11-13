@@ -42,9 +42,15 @@ export default async function NexaFormacionPage() {
       .from('nexa_rutas_formacion')
       .select(
         `id, curso_id, estado, progreso_pct, fecha_limite, quiz_puntaje_pct, quiz_intentos, quiz_aprobado_en,
-         curso:curso_id(titulo, categoria, duracion_minutos, puntos_otorgados, quiz_umbral_aprobacion, preguntas:nexa_curso_preguntas(id))`
+         curso:curso_id(titulo, categoria, duracion_minutos, puntos_otorgados, quiz_umbral_aprobacion, curso_previo_id, preguntas:nexa_curso_preguntas(id))`
       )
       .eq('colaborador_id', perfil.colaborador_id);
+
+    // Rutas encadenadas: un curso con previo queda bloqueado hasta completar el previo.
+    const completados = new Set(((rutas ?? []) as any[]).filter((r) => r.estado === 'completado').map((r) => r.curso_id as string));
+    const idsPrevios = Array.from(new Set(((rutas ?? []) as any[]).map((r) => r.curso?.curso_previo_id).filter(Boolean))) as string[];
+    const { data: previosRaw } = idsPrevios.length ? await supabase.from('nexa_cursos').select('id, titulo').in('id', idsPrevios) : { data: [] as any[] };
+    const tituloPrevio = new Map(((previosRaw ?? []) as any[]).map((c) => [c.id as string, c.titulo as string]));
 
     return (
       <div className="space-y-6">
@@ -61,6 +67,8 @@ export default async function NexaFormacionPage() {
           <div className="grid md:grid-cols-2 gap-4">
             {rutas.map((r: any) => {
               const tieneQuiz = (r.curso?.preguntas?.length ?? 0) > 0;
+              const previoId: string | null = (r.curso as any)?.curso_previo_id ?? null;
+              const bloqueado = !!previoId && !completados.has(previoId) && r.estado !== 'completado';
               return (
                 <div key={r.id} className="card p-4">
                   <div className="flex items-center justify-between mb-2">
@@ -90,6 +98,10 @@ export default async function NexaFormacionPage() {
                         Descargar certificado (PDF)
                       </a>
                     </div>
+                  ) : bloqueado ? (
+                    <p className="text-xs text-medio mt-2">
+                      Primero completa «{tituloPrevio.get(previoId as string) ?? 'el curso previo'}», que es la base de este.
+                    </p>
                   ) : tieneQuiz ? (
                     <QuizTomar
                       rutaId={r.id}

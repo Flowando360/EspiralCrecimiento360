@@ -21,9 +21,13 @@ const CATEGORIAS = [
 export function EditarCurso({
   cursoId,
   datosIniciales,
+  cursosDisponibles = [],
+  cursoPrevioInicial = null,
 }: {
   cursoId: string;
   datosIniciales: { titulo: string; descripcion: string; categoria: string; duracionMinutos: string; puntosOtorgados: string };
+  cursosDisponibles?: { id: string; titulo: string }[];
+  cursoPrevioInicial?: string | null;
 }) {
   const [editando, setEditando] = useState(false);
   const [titulo, setTitulo] = useState(datosIniciales.titulo);
@@ -31,6 +35,7 @@ export function EditarCurso({
   const [categoria, setCategoria] = useState(datosIniciales.categoria);
   const [duracionMinutos, setDuracionMinutos] = useState(datosIniciales.duracionMinutos);
   const [puntosOtorgados, setPuntosOtorgados] = useState(datosIniciales.puntosOtorgados);
+  const [cursoPrevio, setCursoPrevio] = useState(cursoPrevioInicial ?? '');
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -44,6 +49,7 @@ export function EditarCurso({
         categoria: categoria as any,
         duracionMinutos: duracionMinutos.trim() ? Number(duracionMinutos) : undefined,
         puntosOtorgados: Number(puntosOtorgados) || 0,
+        cursoPrevioId: cursoPrevio || null,
       });
       if (res.ok) setEditando(false);
       else setError(res.error);
@@ -56,6 +62,7 @@ export function EditarCurso({
     setCategoria(datosIniciales.categoria);
     setDuracionMinutos(datosIniciales.duracionMinutos);
     setPuntosOtorgados(datosIniciales.puntosOtorgados);
+    setCursoPrevio(cursoPrevioInicial ?? '');
     setError(null);
     setEditando(false);
   }
@@ -74,6 +81,16 @@ export function EditarCurso({
     <div className="card p-4 space-y-2 max-w-lg">
       <input value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Título" className={campo} />
       <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Descripción" rows={2} className={campo} />
+      <label className="block text-xs text-marmol-500">
+        Curso previo (ruta encadenada)
+        <select value={cursoPrevio} onChange={(e) => setCursoPrevio(e.target.value)} className={campo + ' mt-1'}>
+          <option value="">Ninguno: se puede tomar directamente</option>
+          {cursosDisponibles.filter((c) => c.id !== cursoId).map((c) => (
+            <option key={c.id} value={c.id}>{c.titulo}</option>
+          ))}
+        </select>
+        <span className="block mt-1 text-marmol-400">Quien reciba este curso recibe también el previo, y no puede avanzar en este hasta completarlo.</span>
+      </label>
       <div className="grid grid-cols-3 gap-2">
         <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className={campo}>
           {CATEGORIAS.map((c) => (
