@@ -40,6 +40,7 @@ export function borradorPerfilIntegral({ ctx, integral, objetivos }: DatosPerfil
     : [
         fuertes.length ? `El esquema de su Ser apunta a recursos como ${fuertes.slice(0, 3).join(', ').toLowerCase()}.` : null,
         acompanar.length ? `Y a aspectos para acompañar como ${acompanar.slice(0, 2).join(', ').toLowerCase()}.` : null,
+        !fuertes.length && !acompanar.length ? 'El esquema del Ser todavía no tiene rasgos marcados como «para aprovechar» o «para acompañar».' : null,
         'Son hipótesis y recursos para conversar sobre su desarrollo, no conclusiones ni una explicación de su desempeño.',
       ]
         .filter(Boolean)
