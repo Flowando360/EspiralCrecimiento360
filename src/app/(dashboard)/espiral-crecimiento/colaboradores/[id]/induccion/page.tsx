@@ -72,7 +72,8 @@ export default async function InduccionColaboradorPage({ params }: { params: { i
         )}
       </div>
 
-      <ChecklistInduccion colaboradorId={params.id} itemsIniciales={items} puedeEditar={puedeEditar} puedeAsignar={perfil.rol === 'admin_th'} esPropia={perfil.rol === 'colaborador' && perfil.colaborador_id === colaborador.id} />
+      {/* key: si cambia la cantidad de puntos (p. ej. al asignar el plan) el componente se rearma con la lista nueva. */}
+      <ChecklistInduccion key={items.length} colaboradorId={params.id} itemsIniciales={items} puedeEditar={puedeEditar} puedeAsignar={perfil.rol === 'admin_th'} esPropia={perfil.rol === 'colaborador' && perfil.colaborador_id === colaborador.id} />
     </div>
   );
 }
