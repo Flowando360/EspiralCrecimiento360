@@ -40,7 +40,7 @@ TH y el líder **nunca** ven la Guía ni la carta: ven un **esquema** sin nota.
 ## 4. Evaluación (Hacer y Deber)
 1. **Ciclos.** Crear ciclo, generar encuentros por equipo, valoración con «Guardar avance» y «Enviar». ✅
 2. **Escala 1–5.** Cada nivel trae su descriptor. ✅ (Luisa 4.7)
-3. **Competencias por nivel del cargo.** ❌ **Sigue pasando:** el cargo «Auxiliar de Servicios Generales» exige Liderazgo y Capacidad de supervisión, y salen en la oferta, el Saber y la evaluación. Hay que corregir los datos del cargo o filtrar por nivel. (Luisa 4.9)
+3. **Competencias por nivel del cargo.** ✅ en la evaluación: ni «Auxiliar de Servicios Generales» ni el cargo nuevo «PRU Auxiliar Operativo» (nivel Operativo) reciben bloque de liderazgo. ⚠️ Pero «Liderazgo» y «Capacidad de supervisión» siguen como *habilidades* del cargo de Servicios Generales y salen en la oferta y en el Saber; hay que quitarlas del cargo o fijar su nivel. Además «Estrategia» entra como competencia funcional de un cargo operativo. (Luisa 4.9)
 4. **Cliente interno.** Valoraciones → «Invitar a un cliente interno». *Debe pasar:* queda en el registro de envíos. ✅ (el botón tarda ~10 s sin aviso)
 5. **Reabrir valoración** (con motivo) tras un envío. ⏳ (falta una valoración enviada)
 6. **Brief.** Abre el Brief: tarjetas, borrador automático, «Mejorar con IA» (10–40 s). ✅
@@ -105,3 +105,9 @@ Secuencia que sigue un líder de TH, hecha de punta a punta en CONVERGIA con una
 9. **Salida:** entrevista de salida guardada ✅.
 10. **Procesos:** simulacro → hallazgo → ACPM-007 ✅; FODA con IA ✅.
 Esta tanda no incluye lo que solo hacen otras personas (autoevaluación, valoración de líder y pares, aceptar objetivos, quiz de inducción) ni las vistas de líder y colaborador.
+
+## 15. Datos de prueba creados para el recorrido con cuenta de colaborador
+- Cargo **PRU Auxiliar Operativo** (nivel Operativo, área «PRU Administrativo», 3 habilidades, 3 funciones, examen de ingreso, riesgo y EPP).
+- Rol personalizado **PRU Colaborador básico** (lee Inicio, Mi perfil, Espiral 360° y Nexa; escribe en Mi perfil, Espiral 360° y Nexa).
+- Ficha **PRU Camila Colaboradora** (cargo nuevo, líder PRU Líder Área Administrativa, sede PRU Sede Central) con su Encuentro de Crecimiento en el ciclo «PRU 2026 - Semestre 2».
+- **Falta la cuenta de acceso**: la contraseña la escribe Talento Humano, nunca se deja en el repositorio. Pasos: Administración → Usuarios y roles → nuevo usuario con el correo de la ficha, rol de sistema «colaborador», rol personalizado «PRU Colaborador básico» y vínculo con la ficha.
