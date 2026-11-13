@@ -13,6 +13,7 @@ export interface ExamenItem {
   proxima_fecha: string | null;
   concepto: 'apto' | 'apto_con_restricciones' | 'no_apto' | 'pendiente';
   entidad: string | null;
+  soporteUrl?: string | null;
 }
 
 const TIPO: Record<string, string> = { preingreso: 'Preingreso', periodico: 'Periódico', egreso: 'Egreso' };
@@ -35,17 +36,27 @@ export function ExamenesMedicos({ colaboradorId, items, puedeEditar }: { colabor
   const [proxima, setProxima] = useState('');
   const [concepto, setConcepto] = useState<ExamenItem['concepto']>('apto');
   const [entidad, setEntidad] = useState('');
+  const [archivo, setArchivo] = useState<File | null>(null);
 
   const campo = 'rounded-lg border border-marmol-200 px-2.5 py-1.5 text-sm';
 
   function guardar() {
     setError(null);
     start(async () => {
-      const res = await registrarExamenMedico({ colaboradorId, tipo, fechaRealizado: fecha, proximaFecha: tipo === 'periodico' ? proxima || undefined : undefined, concepto, entidad: entidad || undefined });
+      const fd = new FormData();
+      fd.set('colaboradorId', colaboradorId);
+      fd.set('tipo', tipo);
+      fd.set('fechaRealizado', fecha);
+      if (tipo === 'periodico' && proxima) fd.set('proximaFecha', proxima);
+      fd.set('concepto', concepto);
+      if (entidad) fd.set('entidad', entidad);
+      if (archivo) fd.set('archivo', archivo);
+      const res = await registrarExamenMedico(fd);
       if (res.ok) {
         setFecha('');
         setProxima('');
         setEntidad('');
+        setArchivo(null);
         router.refresh();
       } else setError(res.error);
     });
@@ -78,6 +89,11 @@ export function ExamenesMedicos({ colaboradorId, items, puedeEditar }: { colabor
                     {e.entidad ? ` · ${e.entidad}` : ''}
                   </p>
                   {v && <p className={`text-xs mt-0.5 ${v.clase}`}>{v.texto}</p>}
+                  {e.soporteUrl && (
+                    <a href={e.soporteUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-flow-600 hover:underline">
+                      Ver soporte
+                    </a>
+                  )}
                 </div>
                 {puedeEditar && (
                   <button type="button" disabled={pending} onClick={() => eliminar(e.id)} className="text-marmol-300 hover:text-bajo shrink-0" aria-label="Eliminar examen">
@@ -125,6 +141,10 @@ export function ExamenesMedicos({ colaboradorId, items, puedeEditar }: { colabor
               <input value={entidad} onChange={(e) => setEntidad(e.target.value)} className={campo} />
             </label>
           </div>
+          <label className="text-xs text-marmol-500 flex flex-col gap-1">
+            Soporte (opcional, PDF o imagen, hasta 4 MB)
+            <input type="file" accept="application/pdf,image/*" onChange={(e) => setArchivo(e.target.files?.[0] ?? null)} className="text-sm" />
+          </label>
           {error && <p className="text-sm text-bajo">{error}</p>}
           <button type="button" disabled={pending || !fecha} onClick={guardar} className="rounded-lg bg-flow-500 hover:bg-flow-600 disabled:opacity-40 text-white text-sm font-medium px-4 py-2">
             {pending ? 'Guardando…' : 'Registrar examen'}

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Stethoscope } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { obtenerUrlFirmadaDocumentoColaborador } from '@/lib/supabase/storage';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { ExamenesMedicos, type ExamenItem } from '@/components/espiral-crecimiento/examenes-medicos';
 
@@ -19,9 +20,13 @@ export default async function ExamenesMedicosPage({ params }: { params: { id: st
 
   const { data } = await supabase
     .from('examenes_medicos_colaborador')
-    .select('id, tipo, fecha_realizado, proxima_fecha, concepto, entidad')
+    .select('id, tipo, fecha_realizado, proxima_fecha, concepto, entidad, soporte_url')
     .eq('colaborador_id', params.id)
     .order('fecha_realizado', { ascending: false });
+
+  const items = await Promise.all(
+    ((data ?? []) as any[]).map(async (e) => ({ ...e, soporteUrl: await obtenerUrlFirmadaDocumentoColaborador(e.soporte_url) })),
+  );
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -38,7 +43,7 @@ export default async function ExamenesMedicosPage({ params }: { params: { id: st
         </p>
       </div>
       <div className="card p-5">
-        <ExamenesMedicos colaboradorId={params.id} items={(data ?? []) as ExamenItem[]} puedeEditar={perfil.rol === 'admin_th'} />
+        <ExamenesMedicos colaboradorId={params.id} items={items as ExamenItem[]} puedeEditar={perfil.rol === 'admin_th'} />
       </div>
     </div>
   );

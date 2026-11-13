@@ -28,9 +28,24 @@ function revalidar(colaboradorId: string) {
   revalidatePath('/alertas');
 }
 
-/** Registra un examen médico ocupacional (admin_th). Solo el concepto general, nunca el diagnóstico. */
-export async function registrarExamenMedico(input: z.infer<typeof Schema>) {
-  const p = Schema.safeParse(input);
+const MAX_SOPORTE_BYTES = 4 * 1024 * 1024;
+
+function extensionDe(nombre: string): string {
+  const partes = nombre.split('.');
+  return partes.length > 1 ? partes[partes.length - 1]!.toLowerCase().replace(/[^a-z0-9]/g, '') || 'pdf' : 'pdf';
+}
+
+/** Registra un examen médico ocupacional (admin_th). Solo el concepto general, nunca el diagnóstico; el soporte es opcional (PDF o imagen, hasta 4 MB). */
+export async function registrarExamenMedico(formData: FormData) {
+  const proxima = (formData.get('proximaFecha') as string) || undefined;
+  const p = Schema.safeParse({
+    colaboradorId: formData.get('colaboradorId'),
+    tipo: formData.get('tipo'),
+    fechaRealizado: formData.get('fechaRealizado'),
+    proximaFecha: proxima,
+    concepto: formData.get('concepto'),
+    entidad: (formData.get('entidad') as string) || undefined,
+  });
   if (!p.success) return { ok: false as const, error: p.error.issues[0]?.message ?? 'Datos inválidos' };
   const d = p.data;
   if (d.proximaFecha && d.proximaFecha < d.fechaRealizado) return { ok: false as const, error: 'El vencimiento no puede ser anterior a la fecha del examen' };
@@ -39,7 +54,21 @@ export async function registrarExamenMedico(input: z.infer<typeof Schema>) {
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
 
   const supabase = createClient() as any;
+
+  let soporteUrl: string | null = null;
+  const archivo = formData.get('archivo') as File | null;
+  if (archivo && archivo.size > 0) {
+    if (archivo.size > MAX_SOPORTE_BYTES) return { ok: false as const, error: 'El soporte supera 4 MB' };
+    const ruta = `${perfil.empresa_id}/${d.colaboradorId}/examen/soporte-${Date.now()}.${extensionDe(archivo.name)}`;
+    const { error: errSubida } = await supabase.storage
+      .from('documentos-colaborador')
+      .upload(ruta, archivo, { contentType: archivo.type || 'application/pdf', upsert: true });
+    if (errSubida) return { ok: false as const, error: `Error subiendo el soporte: ${errSubida.message}` };
+    soporteUrl = ruta;
+  }
+
   const { error } = await supabase.from('examenes_medicos_colaborador').insert({
+    soporte_url: soporteUrl,
     colaborador_id: d.colaboradorId,
     tipo: d.tipo,
     fecha_realizado: d.fechaRealizado,
@@ -48,7 +77,10 @@ export async function registrarExamenMedico(input: z.infer<typeof Schema>) {
     entidad: d.entidad || null,
     registrado_por: perfil.usuario_id,
   });
-  if (error) return { ok: false as const, error: error.message };
+  if (error) {
+    if (soporteUrl) await supabase.storage.from('documentos-colaborador').remove([soporteUrl]);
+    return { ok: false as const, error: error.message };
+  }
   revalidar(d.colaboradorId);
   return { ok: true as const };
 }
@@ -57,7 +89,9 @@ export async function eliminarExamenMedico(colaboradorId: string, examenId: stri
   const perfil = await adminDeEstaPersona(colaboradorId);
   if (!perfil) return { ok: false as const, error: 'No autorizado' };
   const supabase = createClient() as any;
+  const { data: previo } = await supabase.from('examenes_medicos_colaborador').select('soporte_url').eq('id', examenId).eq('colaborador_id', colaboradorId).maybeSingle();
   const { error } = await supabase.from('examenes_medicos_colaborador').delete().eq('id', examenId).eq('colaborador_id', colaboradorId);
+  if (!error && previo?.soporte_url) await supabase.storage.from('documentos-colaborador').remove([previo.soporte_url]);
   if (error) return { ok: false as const, error: error.message };
   revalidar(colaboradorId);
   return { ok: true as const };

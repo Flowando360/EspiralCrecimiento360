@@ -7,6 +7,7 @@ import { FormularioCrearCurso } from '@/components/espiral-crecimiento/formulari
 import { AsignarCurso } from '@/components/espiral-crecimiento/asignar-curso';
 import { PanelAvanceCurso } from '@/components/espiral-crecimiento/panel-avance-curso';
 import { QuizTomar } from '@/components/espiral-crecimiento/quiz-tomar';
+import { VisorContenidoCurso } from '@/components/espiral-crecimiento/visor-contenido-curso';
 import { GraduationCap, ListChecks } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -42,9 +43,20 @@ export default async function NexaFormacionPage() {
       .from('nexa_rutas_formacion')
       .select(
         `id, curso_id, estado, progreso_pct, fecha_limite, quiz_puntaje_pct, quiz_intentos, quiz_aprobado_en,
-         curso:curso_id(titulo, categoria, duracion_minutos, puntos_otorgados, quiz_umbral_aprobacion, curso_previo_id, preguntas:nexa_curso_preguntas(id))`
+         curso:curso_id(titulo, categoria, duracion_minutos, puntos_otorgados, quiz_umbral_aprobacion, curso_previo_id, contenido_url, contenido_archivo_path, contenido_archivo_nombre, preguntas:nexa_curso_preguntas(id))`
       )
       .eq('colaborador_id', perfil.colaborador_id);
+
+    // Contenido propio de los cursos: URL firmada de una hora (la lectura la limita la política de Storage a la empresa).
+    const urlsArchivo = new Map<string, string>();
+    await Promise.all(
+      ((rutas ?? []) as any[])
+        .filter((r) => r.curso?.contenido_archivo_path)
+        .map(async (r) => {
+          const { data: firmada } = await supabase.storage.from('cursos-contenido').createSignedUrl(r.curso.contenido_archivo_path, 3600);
+          if (firmada?.signedUrl) urlsArchivo.set(r.curso_id as string, firmada.signedUrl);
+        })
+    );
 
     // Rutas encadenadas: un curso con previo queda bloqueado hasta completar el previo.
     const completados = new Set(((rutas ?? []) as any[]).filter((r) => r.estado === 'completado').map((r) => r.curso_id as string));
@@ -112,6 +124,13 @@ export default async function NexaFormacionPage() {
                     />
                   ) : (
                     <PanelAvanceCurso rutaId={r.id} progresoInicial={Number(r.progreso_pct)} />
+                  )}
+                  {!bloqueado && (
+                    <VisorContenidoCurso
+                      enlace={(r.curso as any)?.contenido_url ?? null}
+                      archivoUrl={urlsArchivo.get(r.curso_id) ?? null}
+                      archivoNombre={(r.curso as any)?.contenido_archivo_nombre ?? null}
+                    />
                   )}
                 </div>
               );

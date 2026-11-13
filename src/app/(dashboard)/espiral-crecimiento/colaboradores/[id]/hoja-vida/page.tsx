@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { ListaHojaVida } from '@/components/espiral-crecimiento/lista-hoja-vida';
+import { ImportarDesdeHojaVida } from '@/components/espiral-crecimiento/importar-desde-hoja-vida';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Clock } from 'lucide-react';
 import type { HojaVidaFormacion } from '@/types/colaborador';
@@ -14,7 +15,7 @@ export default async function HojaVidaColaboradorPage({ params }: { params: { id
 
   const { data: colaborador } = await supabase
     .from('colaboradores')
-    .select('id, nombre_completo, lider_id, empresa_id')
+    .select('id, nombre_completo, lider_id, empresa_id, hoja_vida_url')
     .eq('id', params.id)
     .maybeSingle();
 
@@ -51,6 +52,8 @@ export default async function HojaVidaColaboradorPage({ params }: { params: { id
           <p className="text-xs text-marmol-400 mt-1">Solo Talento Humano puede cargar o editar estos registros.</p>
         )}
       </div>
+
+      {puedeEditar && (colaborador as any).hoja_vida_url && <ImportarDesdeHojaVida colaboradorId={params.id} />}
 
       <div className="card p-5">
         <ListaHojaVida

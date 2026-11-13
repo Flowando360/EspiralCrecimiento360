@@ -5883,6 +5883,8 @@ export type Database = {
         Row: {
           activo: boolean
           categoria: string | null
+          contenido_archivo_nombre: string | null
+          contenido_archivo_path: string | null
           contenido_url: string | null
           created_at: string
           curso_previo_id: string | null
@@ -5897,6 +5899,8 @@ export type Database = {
         Insert: {
           activo?: boolean
           categoria?: string | null
+          contenido_archivo_nombre?: string | null
+          contenido_archivo_path?: string | null
           contenido_url?: string | null
           created_at?: string
           curso_previo_id?: string | null
@@ -5911,6 +5915,8 @@ export type Database = {
         Update: {
           activo?: boolean
           categoria?: string | null
+          contenido_archivo_nombre?: string | null
+          contenido_archivo_path?: string | null
           contenido_url?: string | null
           created_at?: string
           curso_previo_id?: string | null

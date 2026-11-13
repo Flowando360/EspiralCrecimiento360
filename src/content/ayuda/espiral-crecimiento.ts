@@ -202,6 +202,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       titulo: 'Hoja de vida y certificaciones',
       resumen: 'Registro de la formación, cursos y certificaciones de una persona, con fecha de vencimiento cuando aplica.',
       camposYBotones: [
+        { nombre: 'Llenar desde la hoja de vida (admin_th, con IA)', explicacion: 'Si la persona ya tiene su hoja de vida (PDF) cargada —la misma que viaja desde Reclutamiento al contratarla—, este botón la lee con IA y propone los estudios, certificaciones, cursos y experiencia que encuentra. Tú marcas los que sirven y pulsas «Agregar»: se guardan SIN verificar y sin duplicar lo que ya estaba. La IA puede equivocarse, por eso nada se guarda hasta que confirmes. Solo funciona con PDF.' },
         { nombre: 'Agregar registro', explicacion: 'Título, tipo (formación/curso/certificación), fechas y vencimiento si corresponde.' },
       ],
       notas: ['Solo Talento Humano (admin_th) puede cargar o editar estos registros; los demás roles solo consultan.'],
@@ -248,6 +249,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       resumen:
         'Registro de los exámenes médicos ocupacionales de una persona, separados por tipo: preingreso (antes de vincularla), periódicos y de egreso. Los periódicos llevan fecha de vencimiento y generan una alerta de renovación.',
       camposYBotones: [
+        { nombre: 'Soporte del examen (opcional)', explicacion: 'Al registrar un examen puedes adjuntar el soporte (PDF o imagen, hasta 4 MB). Aparece como «Ver soporte» en cada examen, con la misma privacidad: solo Talento Humano y la propia persona. Al eliminar el examen se borra también el archivo.' },
         { nombre: 'Registrar un examen (admin_th)', explicacion: 'Tipo, fecha del examen, concepto general (apto, apto con restricciones, no apto o pendiente) y la IPS o médico. En los periódicos también la fecha en que vence: 30 días antes aparece la alerta «Renovar examen médico periódico», y al registrar el siguiente la anterior se cierra sola.' },
         { nombre: 'Estado de vigencia', explicacion: 'Cada examen periódico muestra si está vigente, por vencer (30 días o menos) o vencido.' },
         { nombre: 'Papelera (admin_th)', explicacion: 'Elimina un examen registrado por error.' },

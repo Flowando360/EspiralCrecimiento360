@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { QuizEditor } from '@/components/espiral-crecimiento/quiz-editor';
 import { EditarCurso } from '@/components/espiral-crecimiento/editar-curso';
+import { EditorContenidoCurso } from '@/components/espiral-crecimiento/contenido-curso';
 
 export default async function QuizCursoPage({ params }: { params: { cursoId: string } }) {
   const perfil = await getPerfilActual();
@@ -15,7 +16,7 @@ export default async function QuizCursoPage({ params }: { params: { cursoId: str
 
   const { data: curso } = await supabase
     .from('nexa_cursos')
-    .select('id, titulo, descripcion, categoria, duracion_minutos, puntos_otorgados, quiz_umbral_aprobacion, curso_previo_id')
+    .select('id, titulo, descripcion, categoria, duracion_minutos, puntos_otorgados, quiz_umbral_aprobacion, curso_previo_id, contenido_url, contenido_archivo_nombre')
     .eq('id', params.cursoId)
     .eq('empresa_id', perfil.empresa_id)
     .maybeSingle();
@@ -58,6 +59,14 @@ export default async function QuizCursoPage({ params }: { params: { cursoId: str
               duracionMinutos: curso.duracion_minutos != null ? String(curso.duracion_minutos) : '',
               puntosOtorgados: String(curso.puntos_otorgados),
             }}
+          />
+        </div>
+        <div className="mt-3">
+          <EditorContenidoCurso
+            empresaId={perfil.empresa_id}
+            cursoId={curso.id}
+            enlaceInicial={curso.contenido_url}
+            archivoNombreInicial={curso.contenido_archivo_nombre}
           />
         </div>
       </div>

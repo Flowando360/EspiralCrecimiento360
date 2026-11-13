@@ -333,3 +333,51 @@ export async function asignarCursoAColaborador(input: z.infer<typeof AsignarCola
   revalidatePath('/nexa/formacion');
   return { ok: true as const };
 }
+
+const ContenidoSchema = z.object({
+  cursoId: z.string().uuid(),
+  // undefined = no tocar; null = quitar
+  enlace: z.string().trim().max(500).nullable().optional(),
+  archivoPath: z.string().max(500).nullable().optional(),
+  archivoNombre: z.string().max(200).optional(),
+});
+
+/** Guarda el contenido de un curso: enlace externo y/o archivo propio ya subido a Storage (admin_th). */
+export async function guardarContenidoCurso(input: z.infer<typeof ContenidoSchema>) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  const p = ContenidoSchema.safeParse(input);
+  if (!p.success) return { ok: false as const, error: 'Datos inválidos' };
+  const d = p.data;
+
+  const supabase = createClient() as any;
+  const { data: curso } = await supabase
+    .from('nexa_cursos')
+    .select('id, empresa_id, contenido_archivo_path')
+    .eq('id', d.cursoId)
+    .maybeSingle();
+  if (!curso || curso.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'Curso no encontrado' };
+
+  const cambios: Record<string, unknown> = {};
+  if (d.enlace !== undefined) {
+    if (d.enlace && !/^https?:\/\//i.test(d.enlace)) return { ok: false as const, error: 'El enlace debe empezar por http:// o https://' };
+    cambios.contenido_url = d.enlace || null;
+  }
+  if (d.archivoPath !== undefined) {
+    if (d.archivoPath && !d.archivoPath.startsWith(`${perfil.empresa_id}/${d.cursoId}/`)) return { ok: false as const, error: 'Ruta de archivo inválida' };
+    cambios.contenido_archivo_path = d.archivoPath || null;
+    cambios.contenido_archivo_nombre = d.archivoPath ? d.archivoNombre ?? null : null;
+  }
+  if (Object.keys(cambios).length === 0) return { ok: true as const };
+
+  const { error } = await supabase.from('nexa_cursos').update(cambios).eq('id', d.cursoId).eq('empresa_id', perfil.empresa_id);
+  if (error) return { ok: false as const, error: error.message };
+
+  // Si se reemplazó o quitó el archivo, borrar el anterior para no dejar huérfanos.
+  if (d.archivoPath !== undefined && curso.contenido_archivo_path && curso.contenido_archivo_path !== d.archivoPath) {
+    await supabase.storage.from('cursos-contenido').remove([curso.contenido_archivo_path]);
+  }
+  revalidatePath('/nexa/formacion');
+  revalidatePath(`/nexa/formacion/${d.cursoId}/quiz`);
+  return { ok: true as const };
+}
