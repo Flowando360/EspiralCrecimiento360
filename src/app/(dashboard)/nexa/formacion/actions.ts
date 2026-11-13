@@ -13,6 +13,9 @@ const CATEGORIAS = [
   'protocolos_emergencia',
   'cultura',
   'tecnico',
+  'liderazgo',
+  'habilidades_blandas',
+  'cumplimiento_normativo',
   'otro',
 ] as const;
 

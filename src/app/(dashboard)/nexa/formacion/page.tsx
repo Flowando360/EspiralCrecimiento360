@@ -25,6 +25,9 @@ const CATEGORIA_LABEL: Record<string, string> = {
   protocolos_emergencia: 'Protocolos de emergencia',
   cultura: 'Cultura',
   tecnico: 'Técnico',
+  liderazgo: 'Liderazgo',
+  habilidades_blandas: 'Habilidades blandas',
+  cumplimiento_normativo: 'Cumplimiento normativo',
   otro: 'Otro',
 };
 
@@ -79,9 +82,14 @@ export default async function NexaFormacionPage() {
                     </div>
                   )}
                   {r.estado === 'completado' ? (
-                    <p className="text-xs text-alto mt-2">
-                      Completado{tieneQuiz && r.quiz_puntaje_pct != null ? ` · Quiz: ${r.quiz_puntaje_pct}%` : ''}
-                    </p>
+                    <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
+                      <p className="text-xs text-alto">
+                        Completado{tieneQuiz && r.quiz_puntaje_pct != null ? ` · Quiz: ${r.quiz_puntaje_pct}%` : ''}
+                      </p>
+                      <a href={`/api/nexa/formacion/${r.id}/certificado`} className="text-xs text-flow-600 hover:underline">
+                        Descargar certificado (PDF)
+                      </a>
+                    </div>
                   ) : tieneQuiz ? (
                     <QuizTomar
                       rutaId={r.id}

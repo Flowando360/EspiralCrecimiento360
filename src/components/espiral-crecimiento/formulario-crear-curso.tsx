@@ -13,6 +13,9 @@ const CATEGORIAS = [
   { valor: 'protocolos_emergencia', etiqueta: 'Protocolos de emergencia' },
   { valor: 'cultura', etiqueta: 'Cultura' },
   { valor: 'tecnico', etiqueta: 'Técnico' },
+  { valor: 'liderazgo', etiqueta: 'Liderazgo' },
+  { valor: 'habilidades_blandas', etiqueta: 'Habilidades blandas' },
+  { valor: 'cumplimiento_normativo', etiqueta: 'Cumplimiento normativo' },
   { valor: 'otro', etiqueta: 'Otro' },
 ] as const;
 

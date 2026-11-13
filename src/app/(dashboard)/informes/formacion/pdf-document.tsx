@@ -28,6 +28,9 @@ const CATEGORIA_LABEL: Record<string, string> = {
   protocolos_emergencia: 'Protocolos de emergencia',
   cultura: 'Cultura',
   tecnico: 'Técnico',
+  liderazgo: 'Liderazgo',
+  habilidades_blandas: 'Habilidades blandas',
+  cumplimiento_normativo: 'Cumplimiento normativo',
   otro: 'Otro',
 };
 
