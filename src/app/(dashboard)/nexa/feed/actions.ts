@@ -1,6 +1,7 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient, createClient } from '@/lib/supabase/server';
+import { enviarEmail } from '@/lib/email/resend';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -12,6 +13,8 @@ const PublicacionSchema = z.object({
   titulo: z.string().trim().min(1, 'El título es requerido'),
   contenido: z.string().trim().optional(),
   fijado: z.boolean().optional(),
+  // Solo admin_th puede avisar por correo a toda la empresa.
+  avisarPorCorreo: z.boolean().optional(),
   tipoAdjunto: z.enum(['ninguno', 'documento', 'link', 'video_imagen']).default('ninguno'),
   // documento / video_imagen: el archivo ya se subió directo desde el navegador
   // a Storage (evita el límite de tamaño de las Server Actions); acá solo
@@ -98,5 +101,31 @@ export async function publicarEnFeed(input: z.infer<typeof PublicacionSchema>) {
 
   if (error) return { ok: false as const, error: error.message };
   revalidatePath('/nexa/feed');
-  return { ok: true as const };
+
+  // Aviso por correo (informe de Luisa 8.1): el feed solo sirve si la gente se entera sin entrar a la plataforma.
+  let avisados = 0;
+  let fallidos = 0;
+  if (d.avisarPorCorreo && perfil.rol === 'admin_th') {
+    const admin = createAdminClient();
+    const { data: personas } = await admin
+      .from('colaboradores')
+      .select('email')
+      .eq('empresa_id', perfil.empresa_id)
+      .eq('es_externo', false)
+      .in('estado', ['activo', 'periodo_prueba'])
+      .not('email', 'is', null);
+    const correos = Array.from(new Set(((personas ?? []) as { email: string | null }[]).map((p) => (p.email ?? '').trim().toLowerCase()).filter((e) => e.includes('@'))));
+    const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://espiral-crecimiento-360.vercel.app';
+    const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const html = `<div style="font-family:Arial,sans-serif;max-width:560px">
+      <h2 style="margin:0 0 8px">${esc(d.titulo)}</h2>
+      ${d.contenido ? `<p style="white-space:pre-wrap">${esc(d.contenido.slice(0, 1200))}</p>` : ''}
+      <p><a href="${base}/nexa/feed">Ver la publicación en el Feed</a></p>
+      <p style="color:#888;font-size:12px">Recibes este aviso porque Talento Humano publicó un comunicado para toda la empresa.</p></div>`;
+    for (let i = 0; i < correos.length; i += 5) {
+      const lote = await Promise.all(correos.slice(i, i + 5).map((to) => enviarEmail({ to, subject: d.titulo, html })));
+      for (const r of lote) r.ok ? avisados++ : fallidos++;
+    }
+  }
+  return { ok: true as const, avisados, fallidos };
 }

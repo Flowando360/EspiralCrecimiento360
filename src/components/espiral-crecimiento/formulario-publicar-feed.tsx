@@ -34,6 +34,8 @@ export function FormularioPublicarFeed({ esAdminTh, empresaId }: { esAdminTh: bo
   const [titulo, setTitulo] = useState('');
   const [contenido, setContenido] = useState('');
   const [fijado, setFijado] = useState(false);
+  const [avisarPorCorreo, setAvisarPorCorreo] = useState(false);
+  const [resultadoAviso, setResultadoAviso] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -119,6 +121,7 @@ export function FormularioPublicarFeed({ esAdminTh, empresaId }: { esAdminTh: bo
         titulo,
         contenido: contenido || undefined,
         fijado,
+        avisarPorCorreo: esAdminTh ? avisarPorCorreo : false,
         tipoAdjunto,
         archivoUrl: archivoUrl ?? undefined,
         archivoNombre: archivoNombre ?? undefined,
@@ -132,6 +135,10 @@ export function FormularioPublicarFeed({ esAdminTh, empresaId }: { esAdminTh: bo
         setTitulo('');
         setContenido('');
         setFijado(false);
+        setAvisarPorCorreo(false);
+        if (esAdminTh && avisarPorCorreo) {
+          setResultadoAviso(`Aviso enviado a ${res.avisados ?? 0} personas${res.fallidos ? ` (${res.fallidos} no se pudieron enviar)` : ''}.`);
+        }
         setTipoAdjunto('ninguno');
         resetAdjuntos();
         setMostrar(false);
@@ -150,13 +157,19 @@ export function FormularioPublicarFeed({ esAdminTh, empresaId }: { esAdminTh: bo
 
   if (!mostrar) {
     return (
-      <button
-        type="button"
-        onClick={() => setMostrar(true)}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-sm font-medium px-3.5 py-2 transition"
-      >
-        <Plus size={16} /> Publicar
-      </button>
+      <div className="space-y-2">
+        <button
+          type="button"
+          onClick={() => {
+            setResultadoAviso(null);
+            setMostrar(true);
+          }}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-flow-500 hover:bg-flow-600 text-white text-sm font-medium px-3.5 py-2 transition"
+        >
+          <Plus size={16} /> Publicar
+        </button>
+        {resultadoAviso && <p className="text-xs text-alto">{resultadoAviso}</p>}
+      </div>
     );
   }
 
@@ -191,6 +204,12 @@ export function FormularioPublicarFeed({ esAdminTh, empresaId }: { esAdminTh: bo
         <label className="flex items-center gap-2 text-xs text-marmol-600">
           <input type="checkbox" checked={fijado} onChange={(e) => setFijado(e.target.checked)} />
           Fijar arriba del feed
+        </label>
+      )}
+      {esAdminTh && (
+        <label className="flex items-center gap-2 text-xs text-marmol-600">
+          <input type="checkbox" checked={avisarPorCorreo} onChange={(e) => setAvisarPorCorreo(e.target.checked)} />
+          Avisar por correo a todas las personas de la empresa
         </label>
       )}
 

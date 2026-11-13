@@ -15,6 +15,7 @@ export const moduloNexa: ModuloAyuda = {
       camposYBotones: [
         { nombre: 'Publicar', explicacion: 'Solo admin_th y líder. Tipo (anuncio/política SST/logro/general), título y contenido.' },
         { nombre: 'Fijar arriba del feed', explicacion: 'Solo admin_th. Mantiene la publicación siempre visible primero.' },
+        { nombre: 'Avisar por correo a todas las personas de la empresa', explicacion: 'Solo admin_th. Además de publicar, envía un correo con el título, el comienzo del contenido y un enlace al Feed a todas las personas vigentes con correo en su ficha (no a externos). Al terminar te dice a cuántas se envió. Úsalo con mesura: el plan gratuito de correos tiene tope diario, y no se reenvía si repites la publicación.' },
         { nombre: 'Adjunto: Documento', explicacion: 'Sube un PDF, Word o imagen; se muestra como tarjeta con nombre, tamaño y botón de descarga.' },
         { nombre: 'Adjunto: Link externo', explicacion: 'Pega una URL y el botón "Vista previa" trae automáticamente título, imagen y descripción del sitio (si los tiene).' },
         { nombre: 'Adjunto: Video o imagen', explicacion: 'Se sube y se muestra directamente dentro de la publicación, sin necesidad de descargar.' },
