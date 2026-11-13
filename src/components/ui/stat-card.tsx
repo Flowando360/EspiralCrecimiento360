@@ -8,6 +8,7 @@ export function StatCard({
   info,
   icon: Icon,
   tono = 'neutral',
+  destacado = false,
 }: {
   label: string;
   value: string | number;
@@ -16,6 +17,8 @@ export function StatCard({
   info?: string;
   icon?: LucideIcon;
   tono?: 'neutral' | 'alto' | 'medio' | 'bajo' | 'flow';
+  /** Resalta la tarjeta (borde de color y cifra más grande) cuando el indicador pide atención. */
+  destacado?: boolean;
 }) {
   const tonos: Record<string, string> = {
     neutral: 'text-secundario',
@@ -26,7 +29,14 @@ export function StatCard({
   };
 
   return (
-    <div className="card p-4">
+    <div
+      className={cn(
+        'card p-4',
+        destacado && 'border-l-4',
+        destacado && tono === 'bajo' && 'border-l-bajo bg-bajo/5',
+        destacado && tono === 'medio' && 'border-l-medio bg-medio/5'
+      )}
+    >
       <div className="flex items-center justify-between mb-2">
         <p className="text-xs font-medium text-marmol-500 flex items-center gap-1">
           {label}
@@ -46,7 +56,7 @@ export function StatCard({
         </p>
         {Icon && <Icon size={16} className="text-marmol-300" />}
       </div>
-      <p className={cn('text-2xl font-display font-semibold', tonos[tono])}>{value}</p>
+      <p className={cn('font-display font-semibold', destacado ? 'text-3xl' : 'text-2xl', tonos[tono])}>{value}</p>
       {hint && <p className="text-xs text-marmol-400 mt-1">{hint}</p>}
     </div>
   );

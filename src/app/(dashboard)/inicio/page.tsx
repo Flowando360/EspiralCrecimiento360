@@ -8,6 +8,13 @@ import { formatearFecha, nombreParaSaludo } from '@/lib/utils';
 import { Users, Target, ShieldAlert, TrendingUp, Bell, Compass, TrendingDown, Minus } from 'lucide-react';
 import { obtenerInformeHistorico } from '@/app/(dashboard)/informes/historico/data';
 
+/** Color de un índice de 1 a 5 con los mismos cortes que el semáforo de Dimensiones. */
+function tonoIndice(v: number | null | undefined): 'flow' | 'alto' | 'medio' | 'bajo' {
+  if (v == null || Number.isNaN(Number(v))) return 'flow';
+  const n = Number(v);
+  return n >= 4 ? 'alto' : n >= 3.5 ? 'medio' : 'bajo';
+}
+
 export default async function InicioPage() {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
@@ -107,14 +114,16 @@ export default async function InicioPage() {
             label="Índice de Hacer (promedio)"
             value={indicadores?.promedio_hacer_empresa ?? '—'}
             icon={TrendingUp}
-            tono="flow"
+            tono={tonoIndice(indicadores?.promedio_hacer_empresa)}
+            destacado={tonoIndice(indicadores?.promedio_hacer_empresa) === 'bajo'}
             info="Hacer = desempeño: qué tan bien cumple la persona sus funciones y objetivos, según el Encuentro de Crecimiento (evaluación de desempeño). Escala 1 a 5: cerca de 5 es un buen desempeño; por debajo de 3 señala brechas por atender."
           />
           <StatCard
             label="Índice de Deber (promedio)"
             value={indicadores?.promedio_deber_empresa ?? '—'}
             icon={TrendingUp}
-            tono="flow"
+            tono={tonoIndice(indicadores?.promedio_deber_empresa)}
+            destacado={tonoIndice(indicadores?.promedio_deber_empresa) === 'bajo'}
             info="Deber = cumplimiento de normas, políticas y responsabilidades (SST, procedimientos, compromisos). Escala 1 a 5: un valor alto indica buen cumplimiento; uno bajo, riesgo de incumplimientos."
           />
           <StatCard
@@ -123,6 +132,7 @@ export default async function InicioPage() {
             icon={ShieldAlert}
             info="Alertas de severidad crítica que siguen sin resolverse (vencimientos de contrato, exámenes, certificaciones, etc.). Lo esperado es 0."
             tono={((indicadores?.alertas_criticas as number) ?? 0) > 0 ? 'bajo' : 'alto'}
+            destacado={((indicadores?.alertas_criticas as number) ?? 0) > 0}
           />
         </div>
 
