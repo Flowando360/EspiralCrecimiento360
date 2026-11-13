@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { getPerfilActual } from '@/lib/supabase/get-perfil-actual';
 import { revalidatePath } from 'next/cache';
 
@@ -42,5 +42,48 @@ export async function marcarItemInduccion(colaboradorId: string, itemAsignadoId:
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(`/espiral-crecimiento/colaboradores/${colaboradorId}/induccion`);
   revalidatePath(`/espiral-crecimiento/colaboradores/${colaboradorId}`);
+  return { ok: true as const };
+}
+
+/** Categorías que confirma la propia persona (TH y el líder supervisan y aprueban). */
+const CATEGORIAS_AUTODILIGENCIADAS = ['proposito_organizacional', 'funciones', 'riesgos_sst'];
+
+/**
+ * La propia persona confirma que conoce un punto (propósito, funciones o riesgos SST). Si el punto tiene pregunta de
+ * comprensión, solo se confirma al acertar; la respuesta correcta se compara en el servidor y nunca se le envía.
+ */
+export async function confirmarItemInduccion(colaboradorId: string, itemAsignadoId: string, respuesta?: number) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.colaborador_id !== colaboradorId) return { ok: false as const, error: 'Solo la propia persona puede confirmar este punto' };
+
+  const admin = createAdminClient();
+  const { data: fila } = await admin
+    .from('colaborador_induccion_items')
+    .select('id, colaborador_id, confirmado_colaborador_en, item:item_id(id, empresa_id, categoria, pregunta, opciones)')
+    .eq('id', itemAsignadoId)
+    .maybeSingle();
+  const item = (fila as any)?.item;
+  if (!fila || fila.colaborador_id !== colaboradorId || !item || item.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'Punto no encontrado' };
+  if (!CATEGORIAS_AUTODILIGENCIADAS.includes(item.categoria)) return { ok: false as const, error: 'Este punto lo registra Talento Humano' };
+  if (fila.confirmado_colaborador_en) return { ok: true as const };
+
+  if (item.pregunta) {
+    if (typeof respuesta !== 'number') return { ok: false as const, error: 'Elige una respuesta' };
+    const { data: clave } = await (admin as any).from('induccion_item_clave').select('correcta').eq('item_id', item.id).maybeSingle();
+    if (clave && clave.correcta !== respuesta) {
+      await admin
+        .from('colaborador_induccion_items')
+        .update({ intentos_quiz: ((fila as any).intentos_quiz ?? 0) + 1 })
+        .eq('id', itemAsignadoId);
+      return { ok: false as const, error: 'Esa no es la respuesta. Relee el punto e inténtalo de nuevo.' };
+    }
+  }
+
+  const { error } = await admin
+    .from('colaborador_induccion_items')
+    .update({ confirmado_colaborador_en: new Date().toISOString() })
+    .eq('id', itemAsignadoId);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath(`/espiral-crecimiento/colaboradores/${colaboradorId}/induccion`);
   return { ok: true as const };
 }

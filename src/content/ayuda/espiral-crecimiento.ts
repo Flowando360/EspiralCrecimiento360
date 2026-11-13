@@ -279,10 +279,13 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
         'Checklist de inducción de la persona: los puntos comunes a toda la empresa (propósito, visión, principios y valores) más los específicos de su cargo (funciones, riesgos SST, EPP, exámenes de ingreso, formación mínima) — generados automáticamente a partir del perfil de cargo y de la Identidad Organizacional.',
       camposYBotones: [
         { nombre: 'Barra de avance', explicacion: 'Muestra qué porcentaje del plan de inducción ya se cumplió.' },
-        { nombre: 'Casilla de cada punto', explicacion: 'Marca un punto como cumplido — queda registrado quién lo marcó y cuándo.' },
+        { nombre: 'Casilla de cada punto', explicacion: 'Marca un punto como cumplido — queda registrado quién lo marcó y cuándo. En propósito, funciones y riesgos SST la casilla es la APROBACIÓN de Talento Humano o del líder, después de que la persona confirme.' },
+        { nombre: 'Confirmación de la persona (propósito, funciones, riesgos SST)', explicacion: 'Quien certifica que conoce su propósito, sus funciones y los riesgos de su puesto es la propia persona: entra a su Inducción y pulsa «Confirmo que lo conozco y lo entiendo». Si el punto trae una pregunta de comprensión, debe responderla bien para poder confirmar. Talento Humano y el líder ven «La persona lo confirmó el… · por aprobar» y lo aprueban con la casilla.' },
+        { nombre: 'Exámenes médicos (preingreso)', explicacion: 'Aparecen primero y con la etiqueta de preingreso, porque se hacen antes de la vinculación formal. Siguen a cargo de Talento Humano, igual que el EPP.' },
       ],
       notas: [
-        'Puede marcar puntos como cumplidos: admin_th o el líder directo de la persona. El propio colaborador y gerencia solo consultan.',
+        'Puede marcar puntos como cumplidos (o aprobar las confirmaciones): admin_th o el líder directo de la persona. La propia persona confirma solo propósito, funciones y riesgos SST; gerencia solo consulta.',
+        'Las preguntas de comprensión las define admin_th en Administración → Cargos y perfiles → (un cargo): en «Plan de inducción específico» y en «Puntos comunes a todos los cargos». La respuesta correcta solo la ve Talento Humano; quien responde nunca la ve.',
         'El plan se asigna automáticamente (puntos comunes + los del cargo) al crear la ficha del colaborador y también al registrar un ingreso en el Historial. Al registrar un cambio de cargo, solo se agregan los puntos del cargo nuevo (no se repiten los comunes).',
       ],
     },

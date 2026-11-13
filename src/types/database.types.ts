@@ -1721,6 +1721,8 @@ export type Database = {
           completado: boolean
           completado_en: string | null
           completado_por: string | null
+          confirmado_colaborador_en: string | null
+          intentos_quiz: number
           id: string
           item_id: string
           notas: string | null
@@ -1731,6 +1733,8 @@ export type Database = {
           completado?: boolean
           completado_en?: string | null
           completado_por?: string | null
+          confirmado_colaborador_en?: string | null
+          intentos_quiz?: number
           id?: string
           item_id: string
           notas?: string | null
@@ -1741,6 +1745,8 @@ export type Database = {
           completado?: boolean
           completado_en?: string | null
           completado_por?: string | null
+          confirmado_colaborador_en?: string | null
+          intentos_quiz?: number
           id?: string
           item_id?: string
           notas?: string | null
@@ -5413,7 +5419,9 @@ export type Database = {
           descripcion: string | null
           empresa_id: string
           id: string
+          opciones: Json | null
           orden: number | null
+          pregunta: string | null
           titulo: string
         }
         Insert: {
@@ -5424,7 +5432,9 @@ export type Database = {
           descripcion?: string | null
           empresa_id: string
           id?: string
+          opciones?: Json | null
           orden?: number | null
+          pregunta?: string | null
           titulo: string
         }
         Update: {
@@ -5435,7 +5445,9 @@ export type Database = {
           descripcion?: string | null
           empresa_id?: string
           id?: string
+          opciones?: Json | null
           orden?: number | null
+          pregunta?: string | null
           titulo?: string
         }
         Relationships: [

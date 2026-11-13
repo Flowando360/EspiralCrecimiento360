@@ -31,9 +31,9 @@ export default async function InduccionColaboradorPage({ params }: { params: { i
   const { data: itemsRaw } = await supabase
     .from('colaborador_induccion_items')
     .select(
-      `id, completado, completado_en,
+      `id, completado, completado_en, confirmado_colaborador_en,
        completado_por:completado_por(nombre_completo),
-       item:item_id(categoria, titulo, descripcion, orden)`
+       item:item_id(categoria, titulo, descripcion, orden, pregunta, opciones)`
     )
     .eq('colaborador_id', params.id);
 
@@ -42,6 +42,9 @@ export default async function InduccionColaboradorPage({ params }: { params: { i
       id: i.id,
       completado: i.completado,
       completado_en: i.completado_en,
+      confirmado_colaborador_en: i.confirmado_colaborador_en ?? null,
+      pregunta: i.item?.pregunta ?? null,
+      opciones: Array.isArray(i.item?.opciones) ? (i.item.opciones as string[]) : null,
       completado_por_nombre: i.completado_por?.nombre_completo ?? null,
       categoria: i.item?.categoria,
       titulo: i.item?.titulo,
@@ -64,11 +67,11 @@ export default async function InduccionColaboradorPage({ params }: { params: { i
         </h1>
         <p className="text-sm text-marmol-500 mt-1">{colaborador.nombre_completo}</p>
         {!puedeEditar && (
-          <p className="text-xs text-marmol-400 mt-1">Solo tu líder directo o Talento Humano pueden marcar puntos como cumplidos.</p>
+          <p className="text-xs text-marmol-400 mt-1">Propósito, funciones y riesgos SST los confirmas tú; tu líder o Talento Humano los aprueban. El resto lo marca tu líder o Talento Humano.</p>
         )}
       </div>
 
-      <ChecklistInduccion colaboradorId={params.id} itemsIniciales={items} puedeEditar={puedeEditar} />
+      <ChecklistInduccion colaboradorId={params.id} itemsIniciales={items} puedeEditar={puedeEditar} esPropia={perfil.rol === 'colaborador' && perfil.colaborador_id === colaborador.id} />
     </div>
   );
 }

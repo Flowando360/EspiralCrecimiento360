@@ -46,6 +46,13 @@ export default async function DetalleCargoPage({ params }: { params: { id: strin
   const { data: cargo } = await supabase.from('cargos').select('*').eq('id', params.id).maybeSingle();
   if (!cargo || cargo.empresa_id !== perfil.empresa_id) notFound();
 
+  const { data: comunes } = await supabase
+    .from('induccion_items')
+    .select('id, categoria, titulo, descripcion, pregunta, opciones')
+    .eq('empresa_id', perfil.empresa_id)
+    .is('cargo_id', null)
+    .eq('activo', true)
+    .order('orden');
   const [{ data: habilidades }, { data: funciones }, { data: decisiones }, { data: riesgos }, { data: examenes }, { data: epp }, { data: induccionItems }] =
     await Promise.all([
       supabase.from('cargo_habilidades').select('*').eq('cargo_id', params.id).order('orden'),
@@ -54,7 +61,7 @@ export default async function DetalleCargoPage({ params }: { params: { id: strin
       supabase.from('cargo_factores_riesgo').select('*').eq('cargo_id', params.id).order('orden'),
       supabase.from('cargo_examenes_medicos').select('*').eq('cargo_id', params.id).order('orden'),
       supabase.from('cargo_epp').select('*').eq('cargo_id', params.id).order('orden'),
-      supabase.from('induccion_items').select('id, categoria, titulo, descripcion').eq('cargo_id', params.id).order('orden'),
+      supabase.from('induccion_items').select('id, categoria, titulo, descripcion, pregunta, opciones').eq('cargo_id', params.id).order('orden'),
     ]);
 
   const habilidadesFuncionales = (habilidades ?? []).filter((h) => h.tipo === 'funcional');
@@ -315,6 +322,13 @@ export default async function DetalleCargoPage({ params }: { params: { id: strin
       )}
 
       <PlanInduccionCargo cargoId={params.id} itemsIniciales={(induccionItems ?? []) as any} />
+      <PlanInduccionCargo
+        cargoId={params.id}
+        itemsIniciales={(comunes ?? []) as any}
+        encabezado="Puntos comunes a todos los cargos"
+        ayuda="Vienen de la Identidad Organizacional. Aquí puedes agregarles una pregunta de comprensión para que la persona demuestre que entendió antes de confirmar."
+        soloQuiz
+      />
 
       {((epp && epp.length > 0) || cargo.recursos_seleccion) && (
         <Bloque titulo="EPP y recursos de selección">

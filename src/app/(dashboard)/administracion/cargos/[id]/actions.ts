@@ -45,18 +45,18 @@ export async function agregarItemInduccion(input: z.infer<typeof ItemSchema>) {
     .select('id', { count: 'exact', head: true })
     .eq('cargo_id', parsed.data.cargoId);
 
-  const { error } = await supabase.from('induccion_items').insert({
+  const { data: nuevo, error } = await supabase.from('induccion_items').insert({
     empresa_id: perfil.empresa_id,
     cargo_id: parsed.data.cargoId,
     categoria: parsed.data.categoria,
     titulo: parsed.data.titulo,
     descripcion: parsed.data.descripcion || null,
     orden: (count ?? 0) + 1,
-  });
+  }).select('id').single();
 
   if (error) return { ok: false as const, error: error.message };
   revalidatePath(`/administracion/cargos/${parsed.data.cargoId}`);
-  return { ok: true as const };
+  return { ok: true as const, id: (nuevo as any)?.id as string };
 }
 
 /** Quita un punto del plan de inducción de un cargo (admin_th). */
@@ -443,5 +443,40 @@ export async function eliminarEppCargo(id: string, cargoId: string) {
   const { error } = await supabase.from('cargo_epp').delete().eq('id', id);
   if (error) return { ok: false as const, error: error.message };
   revalidarCargo(cargoId);
+  return { ok: true as const };
+}
+
+const QuizSchema = z.object({
+  itemId: z.string().uuid(),
+  cargoId: z.string().uuid(),
+  pregunta: z.string().trim().max(400),
+  opciones: z.array(z.string().trim().min(1).max(200)).max(5),
+  correcta: z.number().int().min(0),
+});
+
+/** Guarda (o quita, si la pregunta viene vacía) la pregunta de comprensión de un punto de inducción (admin_th). */
+export async function guardarQuizInduccion(input: z.infer<typeof QuizSchema>) {
+  const parsed = QuizSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: 'Datos inválidos' };
+  const perfil = await getPerfilActual();
+  if (!perfil || !puedeAdministrar(perfil)) return { ok: false as const, error: 'No autorizado' };
+  const d = parsed.data;
+  const supabase = createClient() as any;
+
+  const { data: item } = await supabase.from('induccion_items').select('id, empresa_id').eq('id', d.itemId).maybeSingle();
+  if (!item || item.empresa_id !== perfil.empresa_id) return { ok: false as const, error: 'Punto no encontrado' };
+
+  if (!d.pregunta) {
+    await supabase.from('induccion_items').update({ pregunta: null, opciones: null }).eq('id', d.itemId);
+    await supabase.from('induccion_item_clave').delete().eq('item_id', d.itemId);
+  } else {
+    if (d.opciones.length < 2) return { ok: false as const, error: 'Escribe al menos dos opciones' };
+    if (d.correcta >= d.opciones.length) return { ok: false as const, error: 'Marca cuál es la respuesta correcta' };
+    const { error: e1 } = await supabase.from('induccion_items').update({ pregunta: d.pregunta, opciones: d.opciones }).eq('id', d.itemId);
+    if (e1) return { ok: false as const, error: e1.message };
+    const { error: e2 } = await supabase.from('induccion_item_clave').upsert({ item_id: d.itemId, correcta: d.correcta });
+    if (e2) return { ok: false as const, error: e2.message };
+  }
+  revalidatePath(`/administracion/cargos/${d.cargoId}`);
   return { ok: true as const };
 }

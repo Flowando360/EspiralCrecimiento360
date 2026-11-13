@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { agregarItemInduccion, eliminarItemInduccion } from '@/app/(dashboard)/administracion/cargos/[id]/actions';
 import { Trash2, Plus } from 'lucide-react';
+import { EditorQuizInduccion } from './editor-quiz-induccion';
 
 type Categoria = 'proposito_organizacional' | 'funciones' | 'riesgos_sst' | 'epp' | 'examenes_medicos' | 'formacion' | 'otro';
 
@@ -11,6 +12,8 @@ interface Item {
   categoria: Categoria;
   titulo: string;
   descripcion: string | null;
+  pregunta?: string | null;
+  opciones?: string[] | null;
 }
 
 const CATEGORIA_LABEL: Record<Categoria, string> = {
@@ -23,7 +26,7 @@ const CATEGORIA_LABEL: Record<Categoria, string> = {
   otro: 'Otro',
 };
 
-export function PlanInduccionCargo({ cargoId, itemsIniciales }: { cargoId: string; itemsIniciales: Item[] }) {
+export function PlanInduccionCargo({ cargoId, itemsIniciales, encabezado = 'Plan de inducción específico', ayuda = 'Generado automáticamente a partir del perfil de este cargo. Puedes ajustar los puntos antes de que se usen.', soloQuiz = false }: { cargoId: string; itemsIniciales: Item[]; encabezado?: string; ayuda?: string; soloQuiz?: boolean }) {
   const [items, setItems] = useState(itemsIniciales);
   const [categoria, setCategoria] = useState<Categoria>('otro');
   const [titulo, setTitulo] = useState('');
@@ -35,7 +38,7 @@ export function PlanInduccionCargo({ cargoId, itemsIniciales }: { cargoId: strin
     startTransition(async () => {
       const res = await agregarItemInduccion({ cargoId, categoria, titulo, descripcion });
       if (res.ok) {
-        setItems((prev) => [...prev, { id: crypto.randomUUID(), categoria, titulo, descripcion: descripcion || null }]);
+        setItems((prev) => [...prev, { id: res.id, categoria, titulo, descripcion: descripcion || null }]);
         setTitulo('');
         setDescripcion('');
       }
@@ -55,9 +58,9 @@ export function PlanInduccionCargo({ cargoId, itemsIniciales }: { cargoId: strin
 
   return (
     <div className="card p-5">
-      <h2 className="font-display font-semibold text-secundario mb-1">Plan de inducción específico</h2>
+      <h2 className="font-display font-semibold text-secundario mb-1">{encabezado}</h2>
       <p className="text-xs text-marmol-400 mb-3">
-        Generado automáticamente a partir del perfil de este cargo. Puedes ajustar los puntos antes de que se usen.
+        {ayuda}
       </p>
 
       <div className="space-y-4 mb-4">
@@ -70,10 +73,13 @@ export function PlanInduccionCargo({ cargoId, itemsIniciales }: { cargoId: strin
                   <div>
                     <p className="text-sm text-marmol-800">{it.titulo}</p>
                     {it.descripcion && <p className="text-xs text-marmol-500">{it.descripcion}</p>}
+                    {(cat === 'proposito_organizacional' || cat === 'funciones' || cat === 'riesgos_sst') && (
+                      <EditorQuizInduccion itemId={it.id} cargoId={cargoId} preguntaInicial={it.pregunta ?? null} opcionesIniciales={it.opciones ?? null} />
+                    )}
                   </div>
-                  <button onClick={() => eliminar(it.id)} className="text-marmol-300 hover:text-bajo shrink-0">
+                  {!soloQuiz && <button onClick={() => eliminar(it.id)} className="text-marmol-300 hover:text-bajo shrink-0">
                     <Trash2 size={14} />
-                  </button>
+                  </button>}
                 </div>
               ))}
             </div>
@@ -82,7 +88,7 @@ export function PlanInduccionCargo({ cargoId, itemsIniciales }: { cargoId: strin
         {items.length === 0 && <p className="text-sm text-marmol-400">Sin puntos de inducción todavía.</p>}
       </div>
 
-      <div className="space-y-2 pt-3 border-t border-marmol-100">
+      {!soloQuiz && <div className="space-y-2 pt-3 border-t border-marmol-100">
         <div className="flex gap-2">
           <select
             value={categoria}
@@ -113,7 +119,7 @@ export function PlanInduccionCargo({ cargoId, itemsIniciales }: { cargoId: strin
             <Plus size={16} />
           </button>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
