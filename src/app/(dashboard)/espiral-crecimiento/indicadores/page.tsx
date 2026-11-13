@@ -4,6 +4,8 @@ import { StatCard } from '@/components/ui/stat-card';
 import { IndicadoresEquipoChart } from '@/components/espiral-crecimiento/indicadores-equipo-chart';
 import { RotacionTendenciaChart } from '@/components/espiral-crecimiento/rotacion-tendencia-chart';
 import { TrendingUp, Users, ShieldAlert, GraduationCap, UserMinus, HardHat, UserPlus, CalendarCheck } from 'lucide-react';
+import { leerFiltrosEquipo, opcionesFiltroEquipo, coincideEquipo, hayFiltrosEquipo, describirFiltrosEquipo } from '@/lib/informes/filtros-equipo';
+import { FiltroEquipo } from '@/components/informes/filtro-equipo';
 import { obtenerUmbralAnonimato } from '@/lib/informes/anonimato';
 import { calcularCumplimientoObjetivos } from '@/lib/desempeno/objetivos';
 import { calcularIndicadoresSst, calcularIndicadoresReclutamiento, calcularIndicadoresPlan } from '@/lib/informes/indicadores-sst-reclutamiento';
@@ -12,7 +14,7 @@ const MESES = [
   'ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
 ];
 
-export default async function IndicadoresPage() {
+export default async function IndicadoresPage({ searchParams }: { searchParams?: { area?: string; liderId?: string } }) {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
 
@@ -24,6 +26,42 @@ export default async function IndicadoresPage() {
     supabase.from('v_indicadores_equipo').select('*').eq('empresa_id', perfil.empresa_id),
     supabase.from('v_rotacion_mensual').select('*').eq('empresa_id', perfil.empresa_id),
   ]);
+
+  // Filtro por área y líder directo (informe de Luisa 4.17.1): recalcula Hacer y Deber de ese grupo, con el mínimo de anonimato.
+  const filtros = leerFiltrosEquipo(searchParams ?? {});
+  const filtrado = hayFiltrosEquipo(filtros);
+  const opcionesEquipo = await opcionesFiltroEquipo(perfil);
+  let hacerGrupo: number | null = null;
+  let deberGrupo: number | null = null;
+  let personasGrupo = 0;
+  let idsLideresGrupo: Set<string> | null = null;
+  if (filtrado) {
+    const { data: todos } = await supabase
+      .from('colaboradores')
+      .select('id, lider_id, cargo:cargo_id(proceso_area)')
+      .eq('empresa_id', perfil.empresa_id)
+      .eq('es_externo', false)
+      .in('estado', ['activo', 'periodo_prueba']);
+    const grupo = ((todos ?? []) as any[]).filter((c) => coincideEquipo(c, filtros));
+    personasGrupo = grupo.length;
+    idsLideresGrupo = new Set(grupo.map((c) => c.lider_id).filter(Boolean) as string[]);
+    const ids = new Set(grupo.map((c) => c.id as string));
+    const { data: resultados } = await supabase
+      .from('resultados_evaluacion')
+      .select('indice_hacer, indice_deber, actualizado_en, evaluacion:evaluaciones!inner(colaborador_evaluado_id)')
+      .order('actualizado_en', { ascending: false });
+    const ultimo = new Map<string, { h: number | null; d: number | null }>();
+    for (const r of (resultados ?? []) as any[]) {
+      const cid = r.evaluacion?.colaborador_evaluado_id;
+      if (cid && ids.has(cid) && !ultimo.has(cid)) ultimo.set(cid, { h: r.indice_hacer, d: r.indice_deber });
+    }
+    const hs = Array.from(ultimo.values()).map((v) => v.h).filter((v): v is number => v != null);
+    const ds = Array.from(ultimo.values()).map((v) => v.d).filter((v): v is number => v != null);
+    const prom = (v: number[]) => (v.length >= umbralAnonimato ? Math.round((v.reduce((a, b) => a + b, 0) / v.length) * 100) / 100 : null);
+    hacerGrupo = prom(hs);
+    deberGrupo = prom(ds);
+  }
+  const equiposVisibles = (equipos ?? []).filter((e: any) => !idsLideresGrupo || idsLideresGrupo.has(e.lider_id));
 
   // Cumplimiento de objetivos concertados: solo objetivos ya cerrados; con anonimato (mínimo de personas con objetivos cerrados).
   const { data: objetivosCerrados } = await supabase.from('objetivos_ciclo').select('colaborador_id, resultado').not('resultado', 'is', null);
@@ -49,9 +87,24 @@ export default async function IndicadoresPage() {
         </p>
       </div>
 
+      <FiltroEquipo
+        rutaBase="/espiral-crecimiento/indicadores"
+        areas={opcionesEquipo.areas}
+        lideres={opcionesEquipo.lideres}
+        actuales={filtros}
+        conservar={{}}
+        mostrarLider={perfil.rol !== 'lider'}
+      />
+      {filtrado && (
+        <p className="text-xs text-medio bg-medio/10 border border-medio/20 rounded-lg px-3 py-2">
+          Mostrando Hacer y Deber de: {describirFiltrosEquipo(filtros, null)} ({personasGrupo} personas). Saber, alertas, rotación y los demás
+          indicadores de esta pantalla son de toda la empresa. Con menos de {umbralAnonimato} personas con resultado el promedio no se muestra.
+        </p>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Índice de Hacer" value={empresa?.promedio_hacer_empresa ?? '—'} icon={TrendingUp} tono="flow" />
-        <StatCard label="Índice de Deber" value={empresa?.promedio_deber_empresa ?? '—'} icon={TrendingUp} tono="flow" />
+        <StatCard label="Índice de Hacer" value={filtrado ? hacerGrupo ?? '—' : empresa?.promedio_hacer_empresa ?? '—'} icon={TrendingUp} tono="flow" />
+        <StatCard label="Índice de Deber" value={filtrado ? deberGrupo ?? '—' : empresa?.promedio_deber_empresa ?? '—'} icon={TrendingUp} tono="flow" />
         <StatCard
           label="Cumplimiento Saber"
           value={empresa?.promedio_saber_empresa ? `${empresa.promedio_saber_empresa}%` : '—'}
@@ -83,7 +136,7 @@ export default async function IndicadoresPage() {
           Mapa de equipos: Hacer vs. Deber promedio
         </h2>
         <IndicadoresEquipoChart
-          datos={(equipos ?? []).filter((e: any) => Number(e.tamano_equipo ?? 0) >= umbralAnonimato).map((e: any) => ({
+          datos={equiposVisibles.filter((e: any) => Number(e.tamano_equipo ?? 0) >= umbralAnonimato).map((e: any) => ({
             equipo: e.lider_nombre,
             hacer: e.promedio_hacer ?? 0,
             deber: e.promedio_deber ?? 0,

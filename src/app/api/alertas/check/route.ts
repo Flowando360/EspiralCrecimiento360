@@ -159,6 +159,46 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // 4. Período de prueba por terminar (informe de Luisa 4.4): quien está por cumplir (o ya cumplió) sus 2 primeros meses y
+  // sigue sin confirmarse recibe una alerta de «evaluar antes de confirmar». Una sola alerta por persona.
+  let avisosPruebaCreados = 0;
+  const desdeIngreso = new Date(hoy);
+  desdeIngreso.setMonth(desdeIngreso.getMonth() - 3);
+  const hastaIngreso = new Date(hoy);
+  hastaIngreso.setMonth(hastaIngreso.getMonth() - 2);
+  hastaIngreso.setDate(hastaIngreso.getDate() + 15);
+  const { data: enPrueba } = await supabase
+    .from('colaboradores')
+    .select('id, empresa_id, nombre_completo, fecha_ingreso')
+    .in('estado', ['activo', 'periodo_prueba'])
+    .eq('es_externo', false)
+    .gte('fecha_ingreso', desdeIngreso.toISOString().slice(0, 10))
+    .lte('fecha_ingreso', hastaIngreso.toISOString().slice(0, 10));
+  for (const c of (enPrueba ?? []) as any[]) {
+    const { data: yaHay } = await supabase
+      .from('alertas')
+      .select('id')
+      .eq('colaborador_id', c.id)
+      .eq('tipo', 'periodo_prueba_fin')
+      .like('titulo', 'Evaluar el período de prueba%')
+      .limit(1);
+    if (yaHay && yaHay.length > 0) continue;
+    const fin = new Date(c.fecha_ingreso);
+    fin.setMonth(fin.getMonth() + 2);
+    const { error: errPrueba } = await supabase.from('alertas').insert({
+      empresa_id: c.empresa_id,
+      colaborador_id: c.id,
+      tipo: 'periodo_prueba_fin',
+      severidad: 'atencion',
+      titulo: `Evaluar el período de prueba de ${c.nombre_completo} antes de confirmar`,
+      descripcion: 'Está por terminar (o ya terminó) su período de prueba: revisa su desempeño y decide la confirmación de la vinculación.',
+      fecha_objetivo: fin.toISOString().slice(0, 10),
+      dias_anticipacion: 15,
+      estado: 'pendiente',
+    });
+    if (!errPrueba) avisosPruebaCreados++;
+  }
+
   return NextResponse.json({
     ok: true,
     alertas_vencidas: vencidas?.length ?? 0,
@@ -166,5 +206,6 @@ export async function GET(req: NextRequest) {
     correos_enviados: correosEnviados,
     cursos_asignados_automaticamente: cursosAsignados,
     avisos_corte_dotacion: avisosCorteCreados,
+    avisos_periodo_prueba: avisosPruebaCreados,
   });
 }

@@ -6,8 +6,9 @@ import { AccionesAlerta } from '@/components/alertas/acciones-alerta';
 import { formatearFecha, diasHasta } from '@/lib/utils';
 import Link from 'next/link';
 import { Bell, ArrowLeft } from 'lucide-react';
+import { CATEGORIAS_ALERTA, categoriaDeTipo } from '@/lib/alertas/categorias';
 
-export default async function AlertasPage() {
+export default async function AlertasPage({ searchParams }: { searchParams?: { categoria?: string } }) {
   const perfil = await getPerfilActual();
   if (!perfil) return null;
 
@@ -23,7 +24,12 @@ export default async function AlertasPage() {
     query = query.eq('colaborador_id', perfil.colaborador_id);
   }
 
-  const { data: alertas } = await query;
+  const { data: todas } = await query;
+  const categoria = searchParams?.categoria ?? '';
+  const alertas = categoria ? (todas ?? []).filter((a: any) => categoriaDeTipo(a.tipo) === categoria) : todas;
+  const conteo = new Map<string, number>();
+  for (const a of (todas ?? []) as any[]) conteo.set(categoriaDeTipo(a.tipo), (conteo.get(categoriaDeTipo(a.tipo)) ?? 0) + 1);
+  const chips = [{ clave: '', label: 'Todas', n: todas?.length ?? 0 }, ...[...CATEGORIAS_ALERTA, { clave: 'otras', label: 'Otras' }].map((c) => ({ clave: c.clave as string, label: c.label, n: conteo.get(c.clave) ?? 0 })).filter((c) => c.n > 0)];
 
   return (
     <div className="space-y-6">
@@ -36,6 +42,18 @@ export default async function AlertasPage() {
           Contratos, SST (exámenes, certificaciones, EPP), formación, Ciclos de Crecimiento y cultura
           (cumpleaños, aniversarios de ingreso y de bodas, baby showers).
         </p>
+      </div>
+
+      <div className="flex flex-wrap gap-2 text-sm">
+        {chips.map((c) => (
+          <Link
+            key={c.clave || 'todas'}
+            href={c.clave ? `/alertas?categoria=${c.clave}` : '/alertas'}
+            className={`rounded-full border px-3 py-1 ${categoria === c.clave ? 'bg-flow-500 border-flow-500 text-white' : 'border-marmol-200 text-marmol-600 hover:border-flow-300'}`}
+          >
+            {c.label} ({c.n})
+          </Link>
+        ))}
       </div>
 
       {!alertas || alertas.length === 0 ? (
