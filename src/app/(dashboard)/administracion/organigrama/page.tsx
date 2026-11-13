@@ -11,6 +11,7 @@ import {
   type PersonaEquipo,
 } from '@/components/espiral-crecimiento/editor-equipo-lider';
 import { primero } from '@/lib/utils';
+import { EditorDependenciasFuncionales } from '@/components/espiral-crecimiento/editor-dependencias-funcionales';
 import { AlertTriangle, Network } from 'lucide-react';
 
 export default async function AdminOrganigramaPage({ searchParams }: { searchParams?: { lider?: string } }) {
@@ -40,6 +41,18 @@ export default async function AdminOrganigramaPage({ searchParams }: { searchPar
   });
 
   const nombrePor = new Map(colaboradores.map((c) => [c.id, c.nombre_completo]));
+
+  const { data: depsRaw } = await (supabase as any)
+    .from('dependencias_funcionales')
+    .select('id, colaborador_id, lider_funcional_id, tipo, detalle')
+    .eq('empresa_id', perfil.empresa_id);
+  const dependencias = ((depsRaw ?? []) as any[]).map((d) => ({
+    id: d.id as string,
+    colaboradorNombre: nombrePor.get(d.colaborador_id) ?? 'Persona',
+    liderNombre: nombrePor.get(d.lider_funcional_id) ?? 'Líder',
+    tipo: d.tipo as string,
+    detalle: (d.detalle ?? null) as string | null,
+  }));
   const conEquipo = new Set(colaboradores.filter((c) => c.lider_id).map((c) => c.lider_id as string));
 
   // Vacíos para revisar con Talento Humano
@@ -151,6 +164,21 @@ export default async function AdminOrganigramaPage({ searchParams }: { searchPar
         ) : (
           <p className="text-sm text-marmol-400">Elige un líder para ver y editar las personas que tiene a cargo.</p>
         )}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-display text-lg font-semibold text-secundario">Organigrama matricial: líderes funcionales o de proyecto</h2>
+        <p className="text-xs text-marmol-500">
+          Una persona sigue teniendo un solo líder directo (de él depende su valoración y sus acompañantes), pero puede tener además un líder funcional o de
+          proyecto. Esos vínculos salen con línea punteada en el organigrama y no cambian los pesos de la valoración. Si ese líder debe valorarla, invítalo
+          desde la ficha como cliente interno.
+        </p>
+        <div className="card p-5">
+          <EditorDependenciasFuncionales
+            personas={colaboradores.filter((c) => !c.es_externo).map((c) => ({ id: c.id, nombre: c.nombre_completo }))}
+            dependencias={dependencias}
+          />
+        </div>
       </section>
 
       <section className="space-y-3">

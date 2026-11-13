@@ -114,6 +114,18 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
     ]);
 
   const cargo = colaborador.cargo as any;
+  // Organigrama matricial: otros líderes (funcionales o de proyecto) de la persona. Solo se muestran los nombres.
+  const { data: depsFuncionales } = await (supabase as any)
+    .from('dependencias_funcionales')
+    .select('detalle, lider:lider_funcional_id(nombre_completo)')
+    .eq('colaborador_id', params.id);
+  const lideresFuncionales = ((depsFuncionales ?? []) as any[])
+    .map((d) => {
+      const nombre = Array.isArray(d.lider) ? d.lider[0]?.nombre_completo : d.lider?.nombre_completo;
+      return nombre ? (d.detalle ? `${nombre} (${d.detalle})` : nombre) : null;
+    })
+    .filter(Boolean) as string[];
+
   let lider = colaborador.lider as any;
   // El propio colaborador no puede leer la fila de su líder (privacidad), pero sí ver su nombre.
   if (!lider?.nombre_completo && colaborador.lider_id && perfil.rol === 'colaborador') {
@@ -144,7 +156,7 @@ export default async function FichaColaboradorPage({ params }: { params: { id: s
               {cargo?.nombre} · {cargo?.proceso_area}
             </p>
             <p className="text-xs text-marmol-400 mt-1">
-              Ingreso: {formatearFecha(colaborador.fecha_ingreso)} · Líder: {lider?.nombre_completo ?? '—'}{nombreSede ? ` · Sede: ${nombreSede}` : ''}
+              Ingreso: {formatearFecha(colaborador.fecha_ingreso)} · Líder: {lider?.nombre_completo ?? '—'}{lideresFuncionales.length > 0 ? ` · También reporta a: ${lideresFuncionales.join(', ')}` : ''}{nombreSede ? ` · Sede: ${nombreSede}` : ''}
             </p>
           </div>
         </div>

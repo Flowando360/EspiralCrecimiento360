@@ -122,3 +122,44 @@ export async function asignarEquipoLider(liderId: string, idsEquipo: string[]) {
   revalidatePath('/espiral-crecimiento/colaboradores');
   return { ok: true as const, agregados: aAgregar.length, quitados: aQuitar.length };
 }
+
+/**
+ * Agrega un líder funcional o de proyecto a una persona (organigrama matricial). No reemplaza al líder directo: ese sigue
+ * mandando en la valoración y los acompañantes.
+ */
+export async function agregarDependenciaFuncional(input: { colaboradorId: string; liderFuncionalId: string; tipo: 'funcional' | 'proyecto' | 'otro'; detalle?: string }) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  if (!input.colaboradorId || !input.liderFuncionalId) return { ok: false as const, error: 'Elige la persona y su líder funcional' };
+  if (input.colaboradorId === input.liderFuncionalId) return { ok: false as const, error: 'Una persona no puede ser su propio líder funcional' };
+  if (!['funcional', 'proyecto', 'otro'].includes(input.tipo)) return { ok: false as const, error: 'Tipo inválido' };
+
+  const supabase = createClient() as any;
+  const { data: dos } = await supabase.from('colaboradores').select('id, empresa_id, lider_id').in('id', [input.colaboradorId, input.liderFuncionalId]);
+  if (!dos || dos.length !== 2 || dos.some((c: any) => c.empresa_id !== perfil.empresa_id)) return { ok: false as const, error: 'Persona no encontrada' };
+  const persona = dos.find((c: any) => c.id === input.colaboradorId);
+  if (persona?.lider_id === input.liderFuncionalId) return { ok: false as const, error: 'Esa persona ya es su líder directo; el líder funcional debe ser otra' };
+
+  const { error } = await supabase.from('dependencias_funcionales').insert({
+    empresa_id: perfil.empresa_id,
+    colaborador_id: input.colaboradorId,
+    lider_funcional_id: input.liderFuncionalId,
+    tipo: input.tipo,
+    detalle: input.detalle?.trim() || null,
+  });
+  if (error) return { ok: false as const, error: error.code === '23505' ? 'Ya está registrada esa dependencia' : error.message };
+  revalidatePath('/administracion/organigrama');
+  revalidatePath('/espiral-crecimiento/organigrama');
+  return { ok: true as const };
+}
+
+export async function quitarDependenciaFuncional(id: string) {
+  const perfil = await getPerfilActual();
+  if (!perfil || perfil.rol !== 'admin_th') return { ok: false as const, error: 'No autorizado' };
+  const supabase = createClient() as any;
+  const { error } = await supabase.from('dependencias_funcionales').delete().eq('id', id).eq('empresa_id', perfil.empresa_id);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath('/administracion/organigrama');
+  revalidatePath('/espiral-crecimiento/organigrama');
+  return { ok: true as const };
+}

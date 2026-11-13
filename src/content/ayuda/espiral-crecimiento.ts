@@ -566,6 +566,7 @@ export const moduloEspiralCrecimiento: ModuloAyuda = {
       resumen: 'Vista jerárquica de la empresa, en árbol. Explica la regla automática de quién acompaña a quién.',
       notas: [
         'Para ver quiénes dependen de un líder, el camino más directo es Espiral 360° → Colaboradores → selector «Todos los líderes» (lista a sus subalternos con cargo, área y estado). En Administración → Organigrama (editar) también puedes filtrar por «Líder directo».',
+        'Organigrama matricial: bajo un líder puede aparecer un recuadro punteado «Línea funcional» con las personas que lo tienen como líder funcional o de proyecto, y en la tarjeta de cada una «↗ también reporta a…». Talento Humano los registra en Administración → Organigrama; no cambian quién valora ni los pesos de la valoración.',
         'Regla de acompañantes: el líder es quien está justo arriba en el organigrama; los pares comparten el mismo líder; los colaboradores a cargo son quienes reportan directamente al colaborador en crecimiento.',
       ],
     },

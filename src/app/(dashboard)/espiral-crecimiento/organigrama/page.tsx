@@ -15,13 +15,18 @@ export default async function OrganigramaPage() {
     .eq('empresa_id', perfil.empresa_id)
     .in('estado', ESTADOS_VIGENTES);
 
+  const { data: depsRaw } = await (supabase as any)
+    .from('dependencias_funcionales')
+    .select('colaborador_id, lider_funcional_id, tipo, detalle')
+    .eq('empresa_id', perfil.empresa_id);
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-semibold text-secundario">Organigrama</h1>
         <p className="text-sm text-marmol-500 mt-1">
           Regla automática de acompañantes: el líder es quien está justo arriba; los pares comparten
-          el mismo líder; los colaboradores a cargo son quienes reportan directamente.
+          el mismo líder; los colaboradores a cargo son quienes reportan directamente. Las líneas punteadas son líderes funcionales o de proyecto (organigrama matricial).
         </p>
         {perfil.rol === 'admin_th' && (
           <p className="text-sm mt-2">
@@ -33,7 +38,7 @@ export default async function OrganigramaPage() {
       </div>
 
       <div className="card p-6 overflow-x-auto">
-        <OrganigramaArbol colaboradores={(colaboradores ?? []) as any} />
+        <OrganigramaArbol colaboradores={(colaboradores ?? []) as any} dependencias={(depsRaw ?? []) as any} />
       </div>
     </div>
   );
