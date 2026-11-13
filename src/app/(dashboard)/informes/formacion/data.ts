@@ -28,7 +28,7 @@ export async function obtenerInformeFormacion(colaboradorIdFiltro?: string, filt
     .from('nexa_rutas_formacion')
     .select(
       `id, estado, progreso_pct, fecha_limite, completado_en,
-       colaborador:colaborador_id(id, nombre_completo, empresa_id, lider_id, cargo:cargo_id(proceso_area)),
+       colaborador:colaborador_id(id, nombre_completo, empresa_id, lider_id, cargo_id, fecha_ingreso, cargo:cargo_id(proceso_area)),
        curso:curso_id(titulo, categoria)`
     )
     .order('asignado_en', { ascending: false });

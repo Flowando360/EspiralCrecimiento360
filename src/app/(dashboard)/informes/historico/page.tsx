@@ -49,6 +49,7 @@ export default async function InformeHistoricoPage({ searchParams }: { searchPar
         rutaBase="/informes/historico"
         areas={opcionesEquipo.areas}
         lideres={opcionesEquipo.lideres}
+        cargos={opcionesEquipo.cargos}
         actuales={filtros}
         conservar={{}}
         mostrarLider={perfil.rol !== 'lider'}

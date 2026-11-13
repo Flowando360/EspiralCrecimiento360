@@ -14,7 +14,7 @@ function Dato({ etiqueta, valor }: { etiqueta: string; valor: string | number })
   );
 }
 
-export default async function InformeConsolidadoPage({ searchParams }: { searchParams: { area?: string; liderId?: string; desde?: string; hasta?: string } }) {
+export default async function InformeConsolidadoPage({ searchParams }: { searchParams: { area?: string; liderId?: string; cargoId?: string; antiguedad?: string; desde?: string; hasta?: string } }) {
   const filtros = leerFiltrosEquipo(searchParams);
   const { perfil, informe } = await obtenerInformeConsolidado(filtros, { desde: searchParams.desde, hasta: searchParams.hasta });
   if (!perfil || !informe) redirect('/inicio');
@@ -51,6 +51,7 @@ export default async function InformeConsolidadoPage({ searchParams }: { searchP
         rutaBase="/informes/consolidado"
         areas={opcionesEquipo.areas}
         lideres={opcionesEquipo.lideres}
+        cargos={opcionesEquipo.cargos}
         actuales={filtros}
         conservar={{}}
         mostrarLider={perfil.rol !== 'lider'}
@@ -90,6 +91,8 @@ export default async function InformeConsolidadoPage({ searchParams }: { searchP
           <form method="GET" className="flex items-end gap-2 text-sm">
             {filtros.area && <input type="hidden" name="area" value={filtros.area} />}
             {filtros.liderId && <input type="hidden" name="liderId" value={filtros.liderId} />}
+            {filtros.cargoId && <input type="hidden" name="cargoId" value={filtros.cargoId} />}
+            {filtros.antiguedad && <input type="hidden" name="antiguedad" value={filtros.antiguedad} />}
             <label className="flex flex-col text-xs text-marmol-500">
               Desde
               <input type="date" name="desde" defaultValue={informe.periodoDesde} className="rounded-lg border border-marmol-200 px-2 py-1 text-sm text-marmol-800" />

@@ -38,7 +38,7 @@ export default async function IndicadoresPage({ searchParams }: { searchParams?:
   if (filtrado) {
     const { data: todos } = await supabase
       .from('colaboradores')
-      .select('id, lider_id, cargo:cargo_id(proceso_area)')
+      .select('id, lider_id, cargo_id, fecha_ingreso, cargo:cargo_id(proceso_area)')
       .eq('empresa_id', perfil.empresa_id)
       .eq('es_externo', false)
       .in('estado', ['activo', 'periodo_prueba']);
@@ -91,6 +91,7 @@ export default async function IndicadoresPage({ searchParams }: { searchParams?:
         rutaBase="/espiral-crecimiento/indicadores"
         areas={opcionesEquipo.areas}
         lideres={opcionesEquipo.lideres}
+        cargos={opcionesEquipo.cargos}
         actuales={filtros}
         conservar={{}}
         mostrarLider={perfil.rol !== 'lider'}

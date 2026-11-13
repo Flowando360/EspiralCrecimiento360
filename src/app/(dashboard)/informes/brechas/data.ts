@@ -56,7 +56,7 @@ export async function obtenerInformeBrechas(agrupacion: Agrupacion, filtros: Fil
 
   let colaboradoresQuery: any = (supabase.from('colaboradores') as any)
     .select(
-      `id, lider_id, cargo:cargo_id(proceso_area),
+      `id, lider_id, cargo_id, fecha_ingreso, cargo:cargo_id(proceso_area),
        lider:lider_id(nombre_completo), sede:sede_id(nombre)`
     )
     .eq('empresa_id', perfil.empresa_id)

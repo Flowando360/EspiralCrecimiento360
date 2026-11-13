@@ -31,7 +31,7 @@ export async function obtenerPlanesInforme(colaboradorIdFiltro?: string, filtros
     .select(
       `id, colaborador_id, origen, brecha_detectada, accion, estado, fecha_compromiso,
        fecha_cumplimiento, notas,
-       colaborador:colaborador_id(nombre_completo, empresa_id, lider_id, cargo:cargo_id(proceso_area))`
+       colaborador:colaborador_id(nombre_completo, empresa_id, lider_id, cargo_id, fecha_ingreso, cargo:cargo_id(proceso_area))`
     )
     .order('fecha_compromiso', { ascending: true });
 

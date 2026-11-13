@@ -47,7 +47,7 @@ export default async function InformePdiPage({
     colaboradoresFiltrables = data ?? [];
   }
 
-  const opcionesEquipo = puedeFiltrar ? await opcionesFiltroEquipo(perfil) : { areas: [], lideres: [] };
+  const opcionesEquipo = puedeFiltrar ? await opcionesFiltroEquipo(perfil) : { areas: [] as string[], lideres: [] as { id: string; nombre: string }[], cargos: [] as { id: string; nombre: string }[] };
   const queryString = queryFiltrosEquipo(filtros, colaboradorIdFiltro ? `colaboradorId=${colaboradorIdFiltro}` : '');
 
   return (
@@ -85,6 +85,7 @@ export default async function InformePdiPage({
         rutaBase="/informes/pdi"
         areas={opcionesEquipo.areas}
         lideres={opcionesEquipo.lideres}
+        cargos={opcionesEquipo.cargos}
         actuales={filtros}
         conservar={{ colaboradorId: colaboradorIdFiltro }}
         mostrarLider={perfil.rol !== 'lider'}

@@ -35,11 +35,11 @@ export default async function PdiPage({ searchParams }: { searchParams: { colabo
 
   // Filtro por área y líder directo (informe de Luisa 4.15): solo los planes de esa gente.
   const filtrosEquipo = leerFiltrosEquipo(searchParams);
-  const opcionesEquipo = perfil.rol === 'colaborador' ? { areas: [] as string[], lideres: [] as { id: string; nombre: string }[] } : await opcionesFiltroEquipo(perfil);
+  const opcionesEquipo = perfil.rol === 'colaborador' ? { areas: [] as string[], lideres: [] as { id: string; nombre: string }[], cargos: [] as { id: string; nombre: string }[] } : await opcionesFiltroEquipo(perfil);
   if (hayFiltrosEquipo(filtrosEquipo) && perfil.rol !== 'colaborador') {
     const { data: gente } = await supabase
       .from('colaboradores')
-      .select('id, lider_id, cargo:cargo_id(proceso_area)')
+      .select('id, lider_id, cargo_id, fecha_ingreso, cargo:cargo_id(proceso_area)')
       .eq('empresa_id', perfil.empresa_id)
       .eq('es_externo', false);
     const ids = ((gente ?? []) as any[]).filter((c) => coincideEquipo(c, filtrosEquipo)).map((c) => c.id as string);
@@ -91,6 +91,7 @@ export default async function PdiPage({ searchParams }: { searchParams: { colabo
           rutaBase="/espiral-crecimiento/pdi"
           areas={opcionesEquipo.areas}
           lideres={opcionesEquipo.lideres}
+        cargos={opcionesEquipo.cargos}
           actuales={filtrosEquipo}
           conservar={{}}
           mostrarLider={perfil.rol !== 'lider'}

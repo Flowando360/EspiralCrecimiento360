@@ -37,7 +37,7 @@ export async function obtenerInformeHistorico(filtros: FiltrosEquipo = {}) {
   if (hayFiltrosEquipo(filtros)) {
     const { data: todos } = await supabase
       .from('colaboradores')
-      .select('id, lider_id, cargo:cargo_id(proceso_area)')
+      .select('id, lider_id, cargo_id, fecha_ingreso, cargo:cargo_id(proceso_area)')
       .eq('empresa_id', perfil.empresa_id)
       .eq('es_externo', false);
     const coinciden = ((todos ?? []) as any[]).filter((c) => coincideEquipo(c, filtros)).map((c) => c.id as string);

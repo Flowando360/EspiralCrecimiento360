@@ -30,7 +30,7 @@ export const moduloInformes: ModuloAyuda = {
       titulo: 'Informe de Plan de Desarrollo Individual',
       resumen: 'Brechas detectadas, el plan de acción definido para cada una, y su estado de cumplimiento.',
       camposYBotones: [
-        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
+        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso, un líder directo (su equipo), un cargo y/o un rango de antigüedad (menos de 1 año, 1 a 3, 3 a 5, más de 5) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
         { nombre: 'Filtro por persona', explicacion: 'Igual que en los demás informes: según tu rol.' },
         { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' },
       ],
@@ -52,7 +52,7 @@ export const moduloInformes: ModuloAyuda = {
       titulo: 'Informe de Brechas por dimensión',
       resumen: 'Comparativo de Ser, Saber, Hacer y Deber por equipo o área, para priorizar dónde intervenir con formación.',
       camposYBotones: [
-        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
+        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso, un líder directo (su equipo), un cargo y/o un rango de antigüedad (menos de 1 año, 1 a 3, 3 a 5, más de 5) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
         { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
       notas: ['Visible para admin_th, líder y gerencia.', 'El Ser se describe, no se califica: la columna solo cuenta cuántas personas tienen Guía del Flow.', 'Por privacidad, un grupo con menos personas con dato que el umbral de anonimato (5 por defecto, se cambia en Administración → Configuración) muestra «Menos de N personas» en lugar del promedio.'],
     },
@@ -83,7 +83,7 @@ export const moduloInformes: ModuloAyuda = {
       titulo: 'Informe de Formación',
       resumen: 'Cursos y rutas de aprendizaje asignados en Nexa, con su estado y % de avance, persona por persona.',
       camposYBotones: [
-        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
+        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso, un líder directo (su equipo), un cargo y/o un rango de antigüedad (menos de 1 año, 1 a 3, 3 a 5, más de 5) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
         { nombre: 'Tarjetas de resumen', explicacion: 'Total de asignaciones, cuántas están completadas y el % de cumplimiento general.' },
         { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' },
       ],
@@ -103,7 +103,7 @@ export const moduloInformes: ModuloAyuda = {
       titulo: 'Informe Consolidado Gerencial',
       resumen: 'Los mismos indicadores del dashboard de Inicio, con un desglose por área — pensado para presentar o imprimir en una reunión de junta, no para navegar el día a día.',
       camposYBotones: [
-        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
+        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso, un líder directo (su equipo), un cargo y/o un rango de antigüedad (menos de 1 año, 1 a 3, 3 a 5, más de 5) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
         { nombre: 'Indicadores de talento', explicacion: 'Bloque con rotación (salidas por causa y tasa del período), ausentismo por tipo (días de incapacidades y licencias), selección (vacantes cerradas, tiempo promedio de cierre y % que supera los primeros 90 días) y headcount por área con las personas en período de prueba aparte. Elige Desde/Hasta y pulsa Recalcular (por defecto, el último año).' },
         { nombre: 'Gráficos de barras', explicacion: 'Headcount, salidas, ausentismo y desempeño (Hacer y Deber) por área, para llevar a una reunión sin armarlos a mano.' },
         { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe (los indicadores de talento y los gráficos se ven en pantalla).' }],
@@ -115,7 +115,7 @@ export const moduloInformes: ModuloAyuda = {
       titulo: 'Histórico Comparativo entre Ciclos',
       resumen: 'Evolución del promedio de Hacer y Deber de un Ciclo de Crecimiento al siguiente, con la variación marcada (↑/↓) contra el ciclo anterior.',
       camposYBotones: [
-        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso y/o un líder directo (su equipo) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
+        { nombre: 'Filtro por área y líder', explicacion: 'Elige un área o proceso, un líder directo (su equipo), un cargo y/o un rango de antigüedad (menos de 1 año, 1 a 3, 3 a 5, más de 5) y pulsa Aplicar: el informe y sus descargas de PDF/Excel quedan solo con esa gente. «Quitar filtros» vuelve a la vista completa. El líder solo ve su propio equipo, así que no tiene selector de líder.' },
         { nombre: 'Exportar PDF / Exportar Excel', explicacion: 'Descarga del informe.' }],
       notas: [
         'Arriba hay una gráfica de líneas con la evolución de Hacer y Deber por ciclo, con los mismos filtros de área y líder. Ser y Saber no se grafican: el Ser es descriptivo y el Saber no se mide por ciclo.',

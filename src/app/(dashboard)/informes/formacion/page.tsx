@@ -32,7 +32,7 @@ export default async function InformeFormacionPage({ searchParams }: { searchPar
   const filtros = leerFiltrosEquipo(searchParams);
   const { perfil, filas } = await obtenerInformeFormacion(undefined, filtros);
   if (!perfil) redirect('/inicio');
-  const opcionesEquipo = ['admin_th', 'gerencia', 'lider'].includes(perfil.rol) ? await opcionesFiltroEquipo(perfil) : { areas: [], lideres: [] };
+  const opcionesEquipo = ['admin_th', 'gerencia', 'lider'].includes(perfil.rol) ? await opcionesFiltroEquipo(perfil) : { areas: [] as string[], lideres: [] as { id: string; nombre: string }[], cargos: [] as { id: string; nombre: string }[] };
   const qs = queryFiltrosEquipo(filtros);
 
   const completados = filas.filter((f) => f.estado === 'completado').length;
@@ -68,6 +68,7 @@ export default async function InformeFormacionPage({ searchParams }: { searchPar
         rutaBase="/informes/formacion"
         areas={opcionesEquipo.areas}
         lideres={opcionesEquipo.lideres}
+        cargos={opcionesEquipo.cargos}
         actuales={filtros}
         conservar={{}}
         mostrarLider={perfil.rol !== 'lider'}

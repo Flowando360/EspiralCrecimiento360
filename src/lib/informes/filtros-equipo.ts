@@ -9,6 +9,28 @@ import { createClient } from '@/lib/supabase/server';
 export interface FiltrosEquipo {
   area?: string;
   liderId?: string;
+  /** Cargo exacto (id). */
+  cargoId?: string;
+  /** Rango de antigüedad desde la fecha de ingreso: menos1, 1a3, 3a5 o mas5 (años). */
+  antiguedad?: string;
+}
+
+export const RANGOS_ANTIGUEDAD: { valor: string; etiqueta: string }[] = [
+  { valor: 'menos1', etiqueta: 'Menos de 1 año' },
+  { valor: '1a3', etiqueta: 'De 1 a 3 años' },
+  { valor: '3a5', etiqueta: 'De 3 a 5 años' },
+  { valor: 'mas5', etiqueta: 'Más de 5 años' },
+];
+
+/** ¿La fecha de ingreso cae en el rango de antigüedad? (sin fecha de ingreso no coincide con ningún rango). */
+export function enRangoAntiguedad(fechaIngreso: string | null | undefined, rango: string, hoy: Date = new Date()): boolean {
+  if (!fechaIngreso) return false;
+  const anios = (hoy.getTime() - new Date(fechaIngreso).getTime()) / (365.25 * 86400000);
+  if (rango === 'menos1') return anios < 1;
+  if (rango === '1a3') return anios >= 1 && anios < 3;
+  if (rango === '3a5') return anios >= 3 && anios < 5;
+  if (rango === 'mas5') return anios >= 5;
+  return true;
 }
 
 export function leerFiltrosEquipo(sp: { get(k: string): string | null } | Record<string, string | string[] | undefined>): FiltrosEquipo {
@@ -17,21 +39,29 @@ export function leerFiltrosEquipo(sp: { get(k: string): string | null } | Record
     const t = Array.isArray(v) ? v[0] : v;
     return t && String(t).trim() ? String(t).trim() : undefined;
   };
-  return { area: leer('area'), liderId: leer('liderId') };
+  const antiguedad = leer('antiguedad');
+  return {
+    area: leer('area'),
+    liderId: leer('liderId'),
+    cargoId: leer('cargoId'),
+    antiguedad: antiguedad && RANGOS_ANTIGUEDAD.some((r) => r.valor === antiguedad) ? antiguedad : undefined,
+  };
 }
 
 export function hayFiltrosEquipo(f: FiltrosEquipo): boolean {
-  return Boolean(f.area || f.liderId);
+  return Boolean(f.area || f.liderId || f.cargoId || f.antiguedad);
 }
 
 /** ¿La persona pertenece al área y/o al equipo del líder elegidos? */
 export function coincideEquipo(
-  co: { lider_id?: string | null; cargo?: { proceso_area?: string | null } | null } | null | undefined,
+  co: { lider_id?: string | null; cargo_id?: string | null; fecha_ingreso?: string | null; cargo?: { proceso_area?: string | null } | null } | null | undefined,
   f: FiltrosEquipo
 ): boolean {
   if (!co) return false;
   if (f.liderId && co.lider_id !== f.liderId) return false;
   if (f.area && claveArea(co.cargo?.proceso_area) !== claveArea(f.area)) return false;
+  if (f.cargoId && co.cargo_id !== f.cargoId) return false;
+  if (f.antiguedad && !enRangoAntiguedad(co.fecha_ingreso, f.antiguedad)) return false;
   return true;
 }
 
@@ -40,6 +70,8 @@ export function queryFiltrosEquipo(f: FiltrosEquipo, base = ''): string {
   const p = new URLSearchParams(base.replace(/^\?/, ''));
   if (f.area) p.set('area', f.area);
   if (f.liderId) p.set('liderId', f.liderId);
+  if (f.cargoId) p.set('cargoId', f.cargoId);
+  if (f.antiguedad) p.set('antiguedad', f.antiguedad);
   const s = p.toString();
   return s ? `?${s}` : '';
 }
@@ -49,6 +81,8 @@ export function describirFiltrosEquipo(f: FiltrosEquipo, nombreLider?: string | 
   const partes: string[] = [];
   if (f.area) partes.push(`Área: ${f.area}`);
   if (f.liderId) partes.push(`Equipo de ${nombreLider ?? 'un líder'}`);
+  if (f.cargoId) partes.push('Cargo seleccionado');
+  if (f.antiguedad) partes.push(`Antigüedad: ${RANGOS_ANTIGUEDAD.find((r) => r.valor === f.antiguedad)?.etiqueta ?? f.antiguedad}`);
   return partes.length ? partes.join(' · ') : null;
 }
 
@@ -57,7 +91,7 @@ export async function opcionesFiltroEquipo(perfil: { empresa_id: string; rol: st
   const supabase = createClient();
   let q = supabase
     .from('colaboradores')
-    .select('id, lider_id, cargo:cargo_id(proceso_area)')
+    .select('id, lider_id, cargo_id, cargo:cargo_id(nombre, proceso_area)')
     .eq('empresa_id', perfil.empresa_id)
     .eq('es_externo', false)
     .in('estado', ['activo', 'periodo_prueba', 'en_proceso_salida']);
@@ -78,5 +112,10 @@ export async function opcionesFiltroEquipo(perfil: { empresa_id: string; rol: st
       .map((l) => ({ id: l.id as string, nombre: l.nombre_completo as string }))
       .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
   }
-  return { areas, lideres };
+  const cargosMap = new Map<string, string>();
+  for (const f of filas) if (f.cargo_id && f.cargo?.nombre) cargosMap.set(f.cargo_id as string, f.cargo.nombre as string);
+  const cargos = Array.from(cargosMap.entries())
+    .map(([id, nombre]) => ({ id, nombre }))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+  return { areas, lideres, cargos };
 }

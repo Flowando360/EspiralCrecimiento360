@@ -73,6 +73,7 @@ export default async function InformeBrechasPage({
         rutaBase="/informes/brechas"
         areas={opcionesEquipo.areas}
         lideres={opcionesEquipo.lideres}
+        cargos={opcionesEquipo.cargos}
         actuales={filtros}
         conservar={{ agrupacion }}
         mostrarLider={perfil.rol !== 'lider'}

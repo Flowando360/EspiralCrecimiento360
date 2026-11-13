@@ -115,7 +115,7 @@ export async function obtenerInformeConsolidado(filtros: FiltrosEquipo = {}, per
   const [{ data: personasRaw }, { data: vacantesRaw }, { data: incapRaw }] = await Promise.all([
     supabase
       .from('colaboradores')
-      .select('estado, fecha_ingreso, fecha_salida, motivo_salida, lider_id, cargo:cargo_id(proceso_area)')
+      .select('estado, fecha_ingreso, fecha_salida, motivo_salida, lider_id, cargo_id, fecha_ingreso, cargo:cargo_id(proceso_area)')
       .eq('empresa_id', perfil.empresa_id)
       .eq('es_externo', false),
     supabase.from('vacantes').select('estado, fecha_apertura, fecha_cierre').eq('empresa_id', perfil.empresa_id),
