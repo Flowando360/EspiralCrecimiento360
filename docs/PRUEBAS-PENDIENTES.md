@@ -229,3 +229,9 @@ Servidor local con puente a Supabase (el proxy de la nube no deja salir al servi
 - **Índice integral:** con solo el Saber (sin Hacer ni Deber) ya no se da semáforo «Bajo»; la tarjeta dice «Sin semáforo todavía».
 - **Habilidades de mando** («Liderazgo», «Capacidad de supervisión», «Estrategia») ya no se exigen en el Saber ni salen en la oferta de cargos operativos o técnico-administrativos (`habilidadAplicaAlCargo` en `nivel-cargo.ts`). El dato sembrado sigue en los cargos; solo se omite donde no aplica.
 - Falta verlo en navegador (oferta de «PRU Auxiliar de servicios generales», Saber de PRU Marta, índice de PRU Camila).
+
+## Para la próxima sesión (2026-11-14)
+- Espera de Diana: crear y abrir sesión con las cuentas `pru.camila@pru.test` (rol colaborador + «PRU Colaborador básico», vinculada a la ficha PRU Camila Colaboradora) y `pru.lider@pru.test`. Con ellas: autoevaluación, objetivos, inducción, cursos, menú restringido, valoración del líder, Ser solo lectura, exámenes médicos ocultos al líder, reabrir valoración.
+- Ver en navegador los tres arreglos del 13-nov (oferta, índice sin semáforo, habilidades de mando).
+- Menores sin arreglar: tipo de examen por defecto «Periódico», error zod en inglés con nivel vacío, área del cargo como texto libre, botón «Invitando…» sin aviso, «Estrategia» en funcionales de cargos operativos.
+- Decisiones de Diana abiertas y pasada final de ayuda/guía pública: ver secciones anteriores.
