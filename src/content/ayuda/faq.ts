@@ -13,6 +13,17 @@ export const preguntasFrecuentes: PreguntaFrecuente[] = [
       'Más detalle en Centro de Ayuda → Inicio y Mi Perfil → «Cómo evalúa un líder paso a paso».',
   },
   {
+    pregunta: '¿Cómo escojo al par que me evalúa o que evalúo? ¿Es un solo par o pueden ser varios?',
+    respuesta:
+      'Los pares no se escogen: la plataforma los define sola a partir del organigrama. Los pares de una persona son todas las personas que comparten su mismo líder. No es un solo par: normalmente son varios, tantos como compañeros tenga con el mismo jefe directo. Cuando se genera el ciclo, el sistema les asigna a todos la valoración de esa persona, sin que nadie tenga que elegirlos.\n\n' +
+      'Algunas cosas que conviene saber:\n\n' +
+      '1. Las valoraciones de los pares se combinan. No cuenta la opinión de uno solo: se promedian y pesan en conjunto. Por defecto, la valoración del líder pesa 40, la de los pares 30 y la de los colaboradores a cargo 30 (Talento Humano puede ajustar esos pesos al abrir el ciclo). Así una sola mirada no define el resultado.\n\n' +
+      '2. Es anónimo. Del grupo de pares solo se ve el promedio agrupado, no lo que puso cada uno.\n\n' +
+      '3. Si falta alguien o sobra alguien, el problema casi siempre está en el organigrama. Si una persona aparece con pares que no corresponden, o no le aparece ninguno, hay que revisar quién es su líder directo. Eso lo corrige Talento Humano en Administración → Organigrama.\n\n' +
+      '4. Si necesitas la mirada de alguien que no es de su mismo equipo, por ejemplo una persona de otra área con quien trabaja mucho, se puede invitar como cliente interno desde la valoración. Ese sí lo eliges tú.\n\n' +
+      'Más detalle en Centro de Ayuda → Inicio y Mi Perfil → «Cómo se combinan varias valoraciones».',
+  },
+  {
     pregunta: '¿El Brief se llena solo?',
     respuesta:
       'Sí, como borrador. Al abrir el Brief de una persona, el sistema cruza su Guía del Flow (Ser), su hoja de vida, los cursos que ha hecho y el cumplimiento de su cargo (Saber) y la valoración del ciclo (Hacer y Deber), y te deja escritas las seis secciones. Tú lo lees, lo ajustas con lo que ves en el día a día y pulsas Guardar. Puedes rehacerlo con los datos más recientes o mejorar la redacción con IA. De la Guía del Flow solo se usan los aspectos de relevancia laboral.',
