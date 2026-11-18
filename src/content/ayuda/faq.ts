@@ -2,6 +2,17 @@ import type { PreguntaFrecuente } from '@/types/ayuda';
 
 export const preguntasFrecuentes: PreguntaFrecuente[] = [
   {
+    pregunta: 'Al evaluar a un colaborador, ¿es conveniente hacerlo de una vez con la persona o cómo debe ser el proceso?',
+    respuesta:
+      'Lo más conveniente es que la evaluación NO se haga de una vez con la persona al lado. Son dos momentos distintos:\n\n' +
+      '1. Primero, la valoración la haces tú sola, con calma. Entra a la valoración de tu colaborador y responde cada ítem con base en lo que has observado durante el periodo (puedes adjuntar evidencias por ítem si tienes ejemplos concretos). Puedes ir usando «Guardar avance» y volver otro día; mientras no la envíes, puedes cambiar lo que quieras. Cuando estés segura, pulsa «Enviar valoración». Ojo: una vez enviada queda en solo lectura.\n\n' +
+      '2. Mientras tanto, la persona hace su autoevaluación por su lado. Así llegan las dos miradas sin que una influya en la otra.\n\n' +
+      '3. Después, prepara la conversación. Con la valoración enviada, abre el Brief: ahí la plataforma cruza el Ser, el Saber, el Hacer y el Deber y te deja un borrador de lo más importante para hablar. Úsalo como guion. El Brief es solo para ti y para Talento Humano: la persona evaluada no lo ve.\n\n' +
+      '4. Por último viene el Encuentro de Crecimiento, la conversación cara a cara. Ahí sí te sientas con la persona, le muestras el resultado, escuchas cómo se vio ella, reconoces sus fortalezas, hablan de las brechas y acuerdan juntos qué sigue (si el semáforo sale bajo, se arma un plan de desarrollo, PDI).\n\n' +
+      '¿Por qué no hacerla en vivo? Porque evaluar frente a la persona suele hacer que se suavicen las notas o que se vuelva tenso, y la conversación se convierte en una defensa de cada puntaje en lugar de un diálogo para crecer. Lo ideal es llegar al encuentro con la evaluación ya lista, para dedicar el tiempo a conversar y no a calificar.\n\n' +
+      'Más detalle en Centro de Ayuda → Inicio y Mi Perfil → «Cómo evalúa un líder paso a paso».',
+  },
+  {
     pregunta: '¿El Brief se llena solo?',
     respuesta:
       'Sí, como borrador. Al abrir el Brief de una persona, el sistema cruza su Guía del Flow (Ser), su hoja de vida, los cursos que ha hecho y el cumplimiento de su cargo (Saber) y la valoración del ciclo (Hacer y Deber), y te deja escritas las seis secciones. Tú lo lees, lo ajustas con lo que ves en el día a día y pulsas Guardar. Puedes rehacerlo con los datos más recientes o mejorar la redacción con IA. De la Guía del Flow solo se usan los aspectos de relevancia laboral.',

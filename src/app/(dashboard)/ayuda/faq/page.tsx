@@ -43,7 +43,7 @@ export default function FaqPage() {
                 {p.pregunta}
                 <span className="text-marmol-400 group-open:rotate-45 transition text-lg leading-none">+</span>
               </summary>
-              <p className="text-sm text-marmol-600 mt-2">{p.respuesta}</p>
+              <p className="text-sm text-marmol-600 mt-2 whitespace-pre-line">{p.respuesta}</p>
             </details>
           ))
         )}
